@@ -8,6 +8,7 @@ import clsx from "clsx";
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import Providers from './providers';
+import ThreeWindow from '@/components/threes/ThreeWindow';
 
 export const metadata: Metadata = {
   title: {
@@ -43,6 +44,7 @@ export default function RootLayout({
       >
         <Providers >
           <div className="relative flex flex-col h-screen">
+            <ThreeWindow />
             <main className="container mx-auto max-w-7xl flex-grow">
               {children}
             </main>
