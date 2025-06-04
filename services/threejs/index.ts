@@ -1,5 +1,5 @@
 import * as THREE from "three";
-
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 export default class Sketch {
   private container: HTMLElement;
   private scene: THREE.Scene;
@@ -11,6 +11,7 @@ export default class Sketch {
   private material: THREE.MeshNormalMaterial = new THREE.MeshNormalMaterial();
   private mesh: THREE.Mesh = new THREE.Mesh(this.geometry, this.material);
   private time: number;
+  private controls: OrbitControls;
   constructor(option: { dom: any }) {
     this.time = 0;
 
@@ -33,6 +34,8 @@ export default class Sketch {
     this.renderer.setSize(this.width, this.height);
     this.renderer.setAnimationLoop(animate);
     document.body.appendChild(this.renderer.domElement);
+
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
     this.addObjects();
 
