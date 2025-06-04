@@ -43,9 +43,9 @@ export default function RootLayout({
         )}
       >
         <Providers >
-          <div className="relative bg-background flex flex-col ">
+          <div className="relative   flex flex-col ">
             <ThreeWindow />
-            <main className="container  min-h-fit  bg-b mx-auto max-w-7xl flex-grow">
+            <main className="mx-auto min-h-fit   max-w-7xl flex-grow">
               {children}
             </main>
           </div>

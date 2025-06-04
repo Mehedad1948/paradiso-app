@@ -3,11 +3,12 @@ import Image from 'next/image';
 
 
 export default function Home() {
-  return <div data-scroll>
+  return <div data-scroll className='mx-auto '>
+    
     <div className="page">
       <header>
         <h1>Paradiso</h1>
-        <img className='img' src="/john-wick-background-image.jpg" alt="" />
+        <img className='img opacity-0' src="/john-wick-background-image.jpg" alt="" />
       </header>
 
       <div className="grid">
