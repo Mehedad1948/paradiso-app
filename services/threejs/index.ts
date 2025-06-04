@@ -33,12 +33,13 @@ export default class Sketch {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setSize(this.width, this.height);
     this.renderer.setAnimationLoop(animate);
-    document.body.appendChild(this.renderer.domElement);
+    this.container.appendChild(this.renderer.domElement);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
+    this.resize();
+    this.setupResize();
     this.addObjects();
-
     this.render();
   }
 
@@ -46,12 +47,31 @@ export default class Sketch {
     this.geometry = new THREE.BoxGeometry(0.2, 0.2, 0.2);
     this.material = new THREE.MeshNormalMaterial();
 
+    this.material = new THREE.ShaderMaterial({
+      fragmentShader: `void main() {
+        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+      }`,
+      vertexShader: `void main() {
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }`,
+    });
+
     this.mesh = new THREE.Mesh(this.geometry, this.material);
     this.scene.add(this.mesh);
   }
 
+  setupResize() {
+    window.addEventListener("resize", this.resize.bind(this));
+  }
+
   resize() {
-    // Handle window resizing
+    console.log("Resize");
+
+    this.width = this.container.offsetWidth;
+    this.height = this.container.offsetHeight;
+    this.renderer.setSize(this.width, this.height);
+    this.camera.aspect = this.width / this.height;
+    this.camera.updateProjectionMatrix();
   }
 
   render() {
