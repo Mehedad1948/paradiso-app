@@ -1,4 +1,5 @@
-export const vertex = `
+//	by Stefan Gustavson
+export const noise = `
 vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
 vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
 vec3 fade(vec3 t) {return t*t*t*(t*(t*6.0-15.0)+10.0);}
@@ -70,30 +71,4 @@ float cnoise(vec3 P){
   float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x); 
   return 2.2 * n_xyz;
 }
-
-uniform float time;
-uniform vec2 hover;
-uniform float hoverState;
-varying float vNoise;
-varying vec2 vUv;
-
-
-void main() {
-    vec3 newposition = position;
-    float PI = 3.1415925;
-
-    float noise = cnoise(3.0 * vec3(position.x, position.y, position.z + time / 30.0));
-    float dist = distance(uv, hover);
-
-    // Apply noise in the direction of the surface normal
-    newposition += 0.2 * noise * normal;
-
-    // Add hover-based sine wave displacement
-    newposition.z += 1.5 * 5.0 * sin(dist * 15.0 + time/10.0);
-
-    vNoise = hoverState * sin(dist * 10.0 - time);
-    vUv = uv;
-
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(newposition, 1.0);
-}
-    `;
+  `;

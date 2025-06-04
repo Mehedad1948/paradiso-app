@@ -30,6 +30,7 @@
     "dos2unix": "^1.1.2",
     "fontfaceobserver": "^2.3.0",
     "framer-motion": "11.13.1",
+    "gsap": "^3.13.0",
     "imagesloaded": "^5.0.0",
     "intl-messageformat": "10.7.16",
     "next": "15.3.1",
