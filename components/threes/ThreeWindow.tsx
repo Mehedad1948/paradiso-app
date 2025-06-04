@@ -11,7 +11,7 @@ export default function ThreeWindow() {
     }, [])
 
     return (
-        <div className='w-screen h-screen bg-rose-50' id='three-window' >
+        <div className='w-screen h-screen fixed left-0 top-0 z-0 bg-rose-50' id='three-window' >
 
         </div>
     );

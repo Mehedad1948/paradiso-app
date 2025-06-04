@@ -38,14 +38,14 @@ export default function RootLayout({
       <head />
       <body
         className={clsx(
-          "dark min-h-screen text-foreground bg-background font-sans antialiased",
+          "dark  text-foreground bg-background min-h-screen h-fit font-sans antialiased",
           fontSans.variable,
         )}
       >
         <Providers >
-          <div className="relative flex flex-col h-screen">
+          <div className="relative bg-background flex flex-col ">
             <ThreeWindow />
-            <main className="container mx-auto max-w-7xl flex-grow">
+            <main className="container  min-h-fit  bg-b mx-auto max-w-7xl flex-grow">
               {children}
             </main>
           </div>
