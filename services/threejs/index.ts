@@ -1,9 +1,10 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import FontFaceObserver from "fontfaceobserver";
+import imagesLoaded from "imagesloaded";
 
 import { fragment } from "./shaders/fragment";
 import { vertex } from "./shaders/vertex";
-
 import img from "./john-wick-background-image.jpg";
 
 export default class Sketch {
@@ -59,12 +60,32 @@ export default class Sketch {
 
     this.images = [...document.querySelectorAll(".img")];
 
-    this.addImages();
-    this.setPosition();
-    this.resize();
-    this.setupResize();
-    this.addObjects();
-    this.render();
+    const fontOpen: Promise<void> = new Promise((resolve) => {
+      new FontFaceObserver("Montserrat").load().then(() => {
+        resolve();
+      });
+    });
+
+
+    // Preload images
+    const preloadImages: Promise<void> = new Promise((resolve, reject) => {
+      imagesLoaded(document.querySelectorAll("img"), { background: true }, () =>
+        resolve(),
+      );
+    });
+
+    Promise.all([fontOpen, preloadImages])
+      .then(() => {
+        this.addImages();
+        this.setPosition();
+        this.resize();
+        this.setupResize();
+        this.addObjects();
+        this.render();
+      })
+      .catch((error) => {
+        console.error("Error loading resources:", error);
+      });
   }
 
   addObjects() {
@@ -111,11 +132,9 @@ export default class Sketch {
   }
 
   setPosition() {
-    this.imageStore.forEach(({ img, mesh , left, top, width, height}) => {
-
-        mesh.position.y = -top + this.height /2 - height/2;
-        mesh.position.x = left - this.width /2 + width/2;
-
+    this.imageStore.forEach(({ img, mesh, left, top, width, height }) => {
+      mesh.position.y = -top + this.height / 2 - height / 2;
+      mesh.position.x = left - this.width / 2 + width / 2;
     });
   }
 
