@@ -23,3 +23,6 @@ export interface ResetPasswordInputs {
   password: string;
   code: string;
 }
+export interface RefreshTokenInputs {
+  refreshToken: string;
+}

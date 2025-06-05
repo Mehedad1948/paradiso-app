@@ -1,4 +1,6 @@
+import { refreshAccessToken } from "@/app/actions/auth/refresh-token";
 import { cookies } from "next/headers";
+import { AuthServices } from "./auth/authServices";
 
 type RequestResult<T> = {
   result: T | null;
@@ -35,14 +37,14 @@ export class WebServices {
     options: RequestOptions = {},
   ): Promise<RequestResult<T>> {
     const { params, body, headers = {}, withAuth = true, ...rest } = options;
-    const fullUrl = `${process.env.BASE_API_URL}${this.subBaseUrl ? this.subBaseUrl : ""}${url}${this.buildQueryString(params)}`;
-    console.log("Request URL: ➡️➡️➡️", fullUrl);
+    const fullUrl = `${process.env.BASE_API_URL}${this.subBaseUrl || ""}${url}${this.buildQueryString(params)}`;
 
     const normalizedHeaders = new Headers(headers);
 
     if (withAuth) {
       const cookieStore = await cookies();
       const token = cookieStore.get("token")?.value;
+
       if (token) {
         normalizedHeaders.set("Authorization", `Bearer ${token}`);
       }
@@ -68,8 +70,8 @@ export class WebServices {
       const response = await fetch(fullUrl, init);
 
       const contentType = response.headers.get("content-type");
-
       let parsed: any = null;
+
       if (contentType?.includes("application/json")) {
         parsed = await response.json();
       } else {
@@ -95,6 +97,7 @@ export class WebServices {
       };
     }
   }
+
   public get<T>(
     url: string,
     options?: RequestOptions,

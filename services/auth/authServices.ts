@@ -1,6 +1,7 @@
 import { WebServices } from "..";
 import {
   ForgotPasswordInputs,
+  RefreshTokenInputs,
   RegisterInputs,
   ResetPasswordInputs,
   SignInInputs,
@@ -11,7 +12,10 @@ export class AuthServices {
   private webService = new WebServices();
 
   async signIn(body: SignInInputs) {
-    const res = await this.webService.post(`/auth/sign-in`, {
+    const res = await this.webService.post<{
+      accessToken: string;
+      refreshToken: string;
+    }>("/auth/sign-in", {
       body,
     });
     return res;
@@ -40,6 +44,16 @@ export class AuthServices {
 
   async resetPassword(body: ResetPasswordInputs) {
     const res = await this.webService.post(`/auth/reset-password`, {
+      body,
+    });
+    return res;
+  }
+
+  async refreshToken(body: RefreshTokenInputs) {
+    const res = await this.webService.post<{
+      accessToken: string;
+      refreshToken: string;
+    }>(`/auth/refresh-tokens`, {
       body,
     });
     return res;
