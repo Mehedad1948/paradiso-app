@@ -1,4 +1,5 @@
 'use client'
+import { UserType } from '@/types';
 import { MovieWithRatings } from '@/types/ratings';
 import {
     Table,
@@ -9,13 +10,15 @@ import {
     TableRow
 } from "@heroui/table";
 
-export default function RatingTable({ ratings }: { ratings: MovieWithRatings[] }) {
+export default function RatingTable({ ratings, users }: { ratings: MovieWithRatings[], users: UserType[] }) {
     return (
         <Table aria-label="Movies with Ratings table">
             <TableHeader>
                 <TableColumn>TITLE</TableColumn>
                 <TableColumn>IMDB RATE</TableColumn>
-                <TableColumn>USER RATINGS</TableColumn>
+                {users.map(user => <TableColumn key={user.id}>
+                    {user.username}
+                </TableColumn>)}
             </TableHeader>
             <TableBody>
                 {ratings.map((movie) => (
@@ -29,7 +32,7 @@ export default function RatingTable({ ratings }: { ratings: MovieWithRatings[] }
                                 <ul className="space-y-1">
                                     {movie.ratings.map((rating, idx) => (
                                         <li key={idx}>
-                                            <strong>{rating.user.username}</strong>: {rating.rate}/10
+                                             {rating.rate}
                                         </li>
                                     ))}
                                 </ul>
