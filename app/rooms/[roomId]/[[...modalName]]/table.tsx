@@ -32,7 +32,7 @@ export default function RatingTable({ ratings, users }: { ratings: MovieWithRati
                                 <ul className="space-y-1">
                                     {movie.ratings.map((rating, idx) => (
                                         <li key={idx}>
-                                             {rating.rate}
+                                            {rating.rate}
                                         </li>
                                     ))}
                                 </ul>

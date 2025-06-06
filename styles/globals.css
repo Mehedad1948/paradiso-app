@@ -55,11 +55,7 @@ h1,h2{
 }
 
 /* grid */
-.grid{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 2em 0
-}
+
 
 .item{
     /* border: 1px solid #000; */

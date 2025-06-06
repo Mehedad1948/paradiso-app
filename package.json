@@ -9,6 +9,8 @@
     "lint": "eslint --fix"
   },
   "dependencies": {
+    "@heroui/alert": "^2.2.20",
+    "@heroui/autocomplete": "^2.3.21",
     "@heroui/button": "2.2.19",
     "@heroui/code": "2.2.14",
     "@heroui/input": "2.4.19",
@@ -19,7 +21,7 @@
     "@heroui/modal": "^2.2.17",
     "@heroui/navbar": "2.2.17",
     "@heroui/snippet": "2.2.20",
-    "@heroui/switch": "2.2.17",
+    "@heroui/switch": "^2.2.17",
     "@heroui/system": "2.4.15",
     "@heroui/table": "^2.2.19",
     "@heroui/theme": "2.4.15",

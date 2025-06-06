@@ -1,5 +1,3 @@
-import ThreeWindow from '@/components/threes/ThreeWindow';
-import Image from 'next/image';
 
 
 export default function Home() {
@@ -11,7 +9,7 @@ export default function Home() {
         <img className='img opacity-0' src="/john-wick-background-image.jpg" alt="" />
       </header>
 
-      <div className="grid">
+      <div className="grid grid-cols-2 gap-2">
 
         <a href="https://www.livescience.com/octopuses-punch-fish.html" className="item item_v">
           <div className="item__image">

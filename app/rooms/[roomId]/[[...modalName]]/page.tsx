@@ -9,8 +9,8 @@ import { Suspense } from 'react';
 
 
 
-export default async function page({ params }: { params: Promise<{ modalName: string[] | undefined }> }) {
-    const { modalName } = await params;
+export default async function page({ params }: { params: Promise<{ roomId: string, modalName: string[] | undefined }> }) {
+    const { modalName, roomId } = await params;
     const { result, response } = await new RatingServices().getAllRatings()
 
     let ratings = result?.movies.data
