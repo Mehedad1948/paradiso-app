@@ -61,7 +61,7 @@ export default function SignInPage({ children }: { children: ReactNode }) {
       </div>
       <form onSubmit={handleLogIn} className="flex mt-8 flex-col items-stretch gap-4">
         <Input defaultValue={email} name="email" label="Email" type="email" />
-        <Input  name="password" label="Password" type="password" />
+        <Input name="password" label="Password" type="password" />
         <p>{error && <span className="text-sm text-rose-500">{error}</span>}</p>
         <p className="text-sm">
           Forgot your password?
@@ -71,6 +71,9 @@ export default function SignInPage({ children }: { children: ReactNode }) {
         </p>
         <Button isLoading={isLoading || loading} type="submit" color="secondary">
           {loading ? "Refreshing session..." : "Log in"}
+        </Button>
+        <Button type="button" variant='shadow' color="primary" onClick={() => push('/auth/register')}>
+          Create Account
         </Button>
       </form>
     </div>

@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { push } = useRouter()
 
@@ -49,14 +50,15 @@ export default function RegisterPage() {
 
     if (response?.ok) {
       addToast({
-        title: "Welcome",
-        description: `Hi ${result?.user?.name || "there"}👋`,
+        title: "Account successfully created!",
+        description: `Please check your inbox to get the verification link`,
         color: 'success',
       });
       push(`/auth/verify?email=${email}`);
     } else {
       setError(result?.message || "Unknown error");
     }
+    setIsLoading(false);
   }
 
   return (
@@ -70,7 +72,7 @@ export default function RegisterPage() {
         <Input name="password" label="Password" type="password" />
         <Input name="confirmPassword" label="Confirm Password" type="password" />
         {error && <p className="text-sm text-rose-500">{error}</p>}
-        <Button type="submit" color="secondary">
+        <Button isLoading={isLoading} type="submit" color="secondary">
           Register
         </Button>
         <Button type="button" color="default" onClick={() => push('/auth/sign-in')}>
