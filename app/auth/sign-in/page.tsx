@@ -12,8 +12,9 @@ import { useRouter } from 'next/navigation';
 export default function SignInPage({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const { setSearchParam, params: { origin, refresh } } = useSetSearchParams();
+  const { setSearchParam, params: { origin, refresh, email } } = useSetSearchParams();
   const { push } = useRouter();
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export default function SignInPage({ children }: { children: ReactNode }) {
 
   async function handleLogIn(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-
+    setIsLoading(true)
     const formData = new FormData(e.currentTarget);
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
@@ -42,6 +43,7 @@ export default function SignInPage({ children }: { children: ReactNode }) {
     } else {
       setError(result?.message || "Unknown error");
     }
+    setIsLoading(false);
   }
 
   if (loading) {
@@ -58,8 +60,8 @@ export default function SignInPage({ children }: { children: ReactNode }) {
         Log in
       </div>
       <form onSubmit={handleLogIn} className="flex mt-8 flex-col items-stretch gap-4">
-        <Input defaultValue="aweewasdasd@gmail.com" name="email" label="Email" type="email" />
-        <Input defaultValue="testtest" name="password" label="Password" type="password" />
+        <Input defaultValue={email} name="email" label="Email" type="email" />
+        <Input  name="password" label="Password" type="password" />
         <p>{error && <span className="text-sm text-rose-500">{error}</span>}</p>
         <p className="text-sm">
           Forgot your password?
@@ -67,8 +69,8 @@ export default function SignInPage({ children }: { children: ReactNode }) {
             Reset here
           </Link>
         </p>
-        <Button type="submit" color="secondary">
-          Log in
+        <Button isLoading={isLoading || loading} type="submit" color="secondary">
+          {loading ? "Refreshing session..." : "Log in"}
         </Button>
       </form>
     </div>

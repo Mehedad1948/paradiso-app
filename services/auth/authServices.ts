@@ -29,7 +29,10 @@ export class AuthServices {
   }
 
   async verifyEmail(body: VerifyEmailInputs) {
-    const res = await this.webService.post(`/auth/verify-email`, {
+    const res = await this.webService.post<{
+      accessToken: string;
+      refreshToken: string;
+    }>(`/auth/verify-email`, {
       body,
     });
     return res;
