@@ -35,7 +35,7 @@ export default function RegisterPage() {
         description: `Your email is successfully verified! `,
         color: 'success',
       });
-      push(`/auth/sign-in?email=${email}`);
+      push(`/room`);
     } else {
       setError(result?.message || "Unknown error");
     }
