@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const protectedRoutes = ["/dashboard", "/profile", "/settings", "/room"];
+const protectedRoutes = ["/dashboard", "/profile", "/settings", "/rooms"];
 
 async function verifyToken(token: string): Promise<boolean> {
   try {
@@ -25,6 +25,7 @@ export async function middleware(req: NextRequest) {
 
   if (isProtected) {
     if (!token && refreshToken) {
+      console.log("➡️No token found, redirecting to sign-in...");
       const redirectUrl = new URL("/auth/sign-in", req.url);
       redirectUrl.searchParams.set("origin", pathname);
       redirectUrl.searchParams.set("refresh", "true");
@@ -33,10 +34,14 @@ export async function middleware(req: NextRequest) {
 
     if (token) {
       const isValid = await verifyToken(token);
+      console.log("➡️Token found, verifying...", { isValid });
       if (!isValid) {
         const redirectUrl = new URL("/auth/sign-in", req.url);
         redirectUrl.searchParams.set("origin", pathname);
         if (refreshToken && (await verifyToken(refreshToken))) {
+          console.log(
+            "➡️Refresh token found.❌ No Access Token , verifying...",
+          );
           redirectUrl.searchParams.set("refresh", "true");
         }
         redirectUrl.searchParams.set("invalid", "true");

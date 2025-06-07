@@ -1,6 +1,4 @@
-import { PaginatedResponse, UserType } from "@/types";
 import { WebServices } from "..";
-import { MovieWithRatings } from "@/types/ratings";
 
 export class MoviesServices {
   private webService = new WebServices();
@@ -11,7 +9,6 @@ export class MoviesServices {
   }
 
   addMovie({ query }: { query: string }) {
-
     return this.webService.post<any>(`/movies`, { body: {} });
   }
 

@@ -44,7 +44,7 @@ const useSetSearchParams = (defaultPath?: string) => {
     argArray: InputType[],
     scroll = false,
     customPath?: string,
-    replaceHistory = true,
+    replaceHistory = false,
   ): void => {
     argArray.forEach((obj) => {
       Object.entries(obj).forEach(([key, value]) => {

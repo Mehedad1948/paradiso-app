@@ -55,7 +55,6 @@ export default function AddMovieModal() {
     }, [debouncedQuery]);
 
     if (!isOpen) return null;
-    console.log('✨✨✨', selectedMovie);
 
     return (
         <Modal

@@ -9,6 +9,13 @@ const nextConfig = {
                 pathname: '/**',
                 search: '',
             },
+            {
+                protocol: 'https',
+                hostname: 'heroui.com',
+                port: '',
+                pathname: '/**',
+                search: '',
+            },
         ],
     },
 };

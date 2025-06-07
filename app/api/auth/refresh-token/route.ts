@@ -24,7 +24,7 @@ export async function GET(request: Request) {
       httpOnly: true,
       secure: true,
       path: "/",
-      maxAge: 60 * 15,
+      maxAge: 60 * 60 * 24,
     });
     console.log("🚀🚀🚀🚀", response);
 
