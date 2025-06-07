@@ -10,3 +10,10 @@ export type Room = {
   movies: DbMovie[];
   owner: UserType;
 };
+
+export type CreateRoomInputs = {
+  name: string;
+  description?: string;
+  image?: string | null;
+  isPublic?: boolean;
+};

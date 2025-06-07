@@ -16,6 +16,13 @@ const nextConfig = {
                 pathname: '/**',
                 search: '',
             },
+            {
+                protocol: 'https',
+                hostname: 'nestjsblog.storage.iran.liara.space',
+                port: '',
+                pathname: '/**',
+                search: '',
+            },
         ],
     },
 };

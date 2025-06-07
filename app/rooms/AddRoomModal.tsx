@@ -11,11 +11,73 @@ import {
 import { Button } from '@heroui/button';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { createRoom } from '../actions/rooms/createRoom';
+import { addToast } from '@heroui/toast';
+import { Input, Textarea } from '@heroui/input';
+import { Switch } from '@heroui/switch';
+
+import { useState } from 'react';
+import { uploadImage } from '../actions/storage/uploadImage';
 
 export default function AddRoomModal() {
-    const { setSearchParam, params: { addRoomModal }, getSearchParamsString, removeQuey } = useSetSearchParams()
-    const pathname = usePathname()
-    const { push } = useRouter()
+    const { setSearchParam, params: { addRoomModal }, removeQuey } = useSetSearchParams();
+    const [isPublic, setIsPublic] = useState(true);
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+
+    async function handleAddRoom(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        const formData = new FormData(e.currentTarget);
+
+        const imageFile = uploadedImage
+
+        const data = {
+            name: formData.get("name") as string,
+            description: formData.get("description") as string,
+            image: imageFile,
+            isPublic,
+        };
+
+        const res = await createRoom(data);
+        const { result, response } = JSON.parse(res);
+
+        if (response.ok) {
+            addToast({
+                title: `Room created successfully!`,
+                color: 'success'
+            });
+        } else {
+            addToast({
+                title: `Failed to create room.`,
+                color: 'danger',
+                description: result.message
+            });
+        }
+    }
+
+    async function handleUploadImage(file: File, folder: string) {
+        setIsUploading(true)
+
+        const res = await uploadImage(file, folder);
+        const { result, response } = JSON.parse(res);
+
+        if (response.ok) {
+            setUploadedImage(result.name)
+            addToast({
+                title: `Image uploaded successfully!`,
+                color: 'success'
+            });
+        } else {
+            addToast({
+                title: `Failed to upload image.`,
+                color: 'danger',
+                description: result.message
+            });
+        }
+        setIsUploading(false)
+    }
+
+
     return (
         <>
             <Button onClick={() => setSearchParam([{ addRoomModal: 'true' }])}>
@@ -31,8 +93,7 @@ export default function AddRoomModal() {
                 <ModalContent className="!p-0 overflow-hidden rounded-large">
                     {(onClose) => (
                         <>
-                            <div className='relative'>
-
+                            <div className="relative">
                                 <Image
                                     width={400}
                                     height={200}
@@ -40,31 +101,54 @@ export default function AddRoomModal() {
                                     className="w-full aspect-[2.5/1] object-cover"
                                     src="/12-angry.jpg"
                                 />
-                                <p className="flex absolute bottom-0 left-0 w-full
-                                                        bg-gradient-to-t from-black/60 to-black/0 flex-col gap-1  px-6 py-4"
-                                >
+                                <p className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/60 to-black/0 px-6 py-4">
                                     Create new Room
                                 </p>
                             </div>
 
-                            {/* Rest of the modal content */}
+                            <form onSubmit={handleAddRoom} className="flex flex-col gap-3">
+                                <ModalBody className="px-6">
+                                    <Input variant="underlined" type="text" name="name" placeholder="Room Name" required />
+                                    <Textarea variant="underlined" name="description" placeholder="Room Description (optional)" />
+                                    <Input onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            handleUploadImage(file, "rooms");
+                                        }
+                                    }}
+                                        type="file"
+                                        name="image"
+                                        accept="image/*"
+                                    />
 
-                            <ModalBody className="px-6">
-                                {/* Your form or body content */}
-                            </ModalBody>
-                            <ModalFooter className="px-6 pb-4">
-                                <Button color="danger" variant="light" onPress={() => removeQuey('addRoomModal')}>
-                                    Close
-                                </Button>
-                                <Button color="secondary" onPress={() => removeQuey('addRoomModal')}>
-                                    Add Room
-                                </Button>
-                            </ModalFooter>
+                                    <Switch
+                                        isSelected={isPublic}
+                                        onValueChange={setIsPublic}
+                                        color="secondary"
+                                        size="sm"
+                                    >
+                                        Public Room
+                                    </Switch>
+                                </ModalBody>
+
+                                <ModalFooter className="px-6 pb-4">
+                                    <Button
+                                        type="button"
+                                        color="danger"
+                                        variant="light"
+                                        onPress={() => removeQuey('addRoomModal')}
+                                    >
+                                        Close
+                                    </Button>
+                                    <Button type="submit" color="secondary">
+                                        Add Room
+                                    </Button>
+                                </ModalFooter>
+                            </form>
                         </>
                     )}
                 </ModalContent>
             </Modal>
-
         </>
     );
 }
