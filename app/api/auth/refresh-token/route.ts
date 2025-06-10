@@ -28,7 +28,12 @@ export async function GET(request: Request) {
       path: "/",
       maxAge: 60 * 60 * 24,
     });
-    console.log("🚀🚀🚀🚀", response);
+    response.cookies.set("refreshToken", res.result.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      path: "/",
+      maxAge: 60 * 60 * 24,
+    });
 
     return response;
   }
