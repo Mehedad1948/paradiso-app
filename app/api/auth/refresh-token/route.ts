@@ -10,10 +10,12 @@ export async function GET(request: Request) {
   const redirectTo = searchParams.get("redirect") || "/";
 
   if (!refreshToken) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/auth/sign-in", request.url));
   }
 
   const res = await new AuthServices().refreshToken({ refreshToken });
+
+  console.log('✨✨✨', res);
 
   if (res.response?.ok && res.result?.accessToken) {
     // ❗️Next.js doesn't let you set cookies directly in API routes like this
@@ -31,5 +33,5 @@ export async function GET(request: Request) {
     return response;
   }
 
-  return NextResponse.redirect(new URL("/login", request.url));
+  return NextResponse.redirect(new URL("/auth/sign-in", request.url));
 }

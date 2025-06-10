@@ -11,6 +11,7 @@
   "dependencies": {
     "@heroui/alert": "^2.2.20",
     "@heroui/autocomplete": "^2.3.21",
+    "@heroui/avatar": "^2.2.16",
     "@heroui/button": "2.2.19",
     "@heroui/card": "^2.2.19",
     "@heroui/code": "2.2.14",
@@ -45,7 +46,8 @@
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "three": "^0.177.0",
-    "use-debounce": "^10.0.4"
+    "use-debounce": "^10.0.4",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@eslint/compat": "1.2.8",

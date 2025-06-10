@@ -1,4 +1,4 @@
-import { CreateRoomInputs, Room } from "@/types/rooms";
+import { CreateRoomInputs, JoinRoomInputs, Room } from "@/types/rooms";
 import { WebServices } from "..";
 import { PaginatedResponse } from "@/types";
 
@@ -22,7 +22,18 @@ export class RoomsServices {
       },
     });
   }
+
+  getRoomById(roomId: number) {
+    return this.webService.get<Room>(`/rooms/${roomId}`);
+  }
+
   createRoom(data: CreateRoomInputs) {
     return this.webService.post<Room>(`/rooms`, { body: data });
+  }
+
+  joinRoom(data: JoinRoomInputs) {
+    return this.webService.post<{ message: string }>(`/rooms/join`, {
+      body: data,
+    });
   }
 }

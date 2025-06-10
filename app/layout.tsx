@@ -9,6 +9,7 @@ import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import Providers from './providers';
 import ThreeWindow from '@/components/threes/ThreeWindow';
+import Header from '@/components/ui/Header';
 
 export const metadata: Metadata = {
   title: {
@@ -44,6 +45,7 @@ export default function RootLayout({
       >
         <Providers >
           <div className="relative   flex flex-col ">
+            <Header />
             {/* <ThreeWindow /> */}
             <main className="mx-auto min-h-fit w-full  max-w-7xl flex-grow">
               {children}

@@ -4,6 +4,8 @@ import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
 import Image from 'next/image';
 import { Suspense } from 'react';
 import AddRoomModal from './AddRoomModal';
+import JoinRoomButton from './JoinRoomButton';
+import Link from 'next/link';
 
 export default async function page({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
 
@@ -72,16 +74,18 @@ async function RenderUsersRooms({ usersRoom = false }: { usersRoom?: boolean }) 
                             width={280}
                         />}
                     <CardFooter className="justify-between before:bg-white/10 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
-                        <p className="text-tiny text-white font-semibold">{room.name}</p>
-                        <Button
-                            className="text-tiny text-white bg-black/20"
-                            color="default"
-                            radius="lg"
-                            size="sm"
-                            variant="flat"
-                        >
-                            Join
-                        </Button>
+                        <p className="text-tiny text-center text-white font-semibold">{room.name}</p>
+                        {!usersRoom ? <JoinRoomButton roomId={room.id} /> :
+                            <Link href={`/rooms/${room.id}`}>
+                                <Button className="text-tiny text-white bg-black/20"
+                                    color="default"
+                                    radius="lg"
+                                    size="sm"
+                                    variant="flat">
+                                    Visit
+                                </Button>
+                            </Link>
+                        }
                     </CardFooter>
                 </Card>
             )) : (

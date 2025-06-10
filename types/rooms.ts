@@ -17,3 +17,8 @@ export type CreateRoomInputs = {
   image?: string | null;
   isPublic?: boolean;
 };
+
+export type JoinRoomInputs = {
+  userId: number;
+  roomId: number;
+};

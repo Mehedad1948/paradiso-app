@@ -28,7 +28,10 @@ export async function middleware(req: NextRequest) {
       console.log("➡️No token found, redirecting to sign-in...");
       const redirectUrl = new URL("/auth/sign-in", req.url);
       redirectUrl.searchParams.set("origin", pathname);
-      redirectUrl.searchParams.set("refresh", "true");
+      if (await verifyToken(refreshToken)) {
+        console.log("➡️Refresh token found, verifying...");
+        redirectUrl.searchParams.set("refresh", "true");
+      }
       return NextResponse.redirect(redirectUrl);
     }
 
