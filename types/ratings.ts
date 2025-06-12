@@ -1,16 +1,15 @@
 export type MovieWithRatings = {
   id: string;
+  dbId: number;
   title: string;
-  releaseDate: string; // ISO date string
-  imdbRate: number;
-  image: string;
-  isWatchedTogether: boolean;
-  isIn: boolean;
-  addedBy: {
-    id: number;
-  };
-  createdAt: string; // ISO date string
-  updatedAt: string; // ISO date string
+  poster_path: string;
+  vote_average: number | null;
+  releaseDate: string;
+  original_title: string;
+  video: string;
+  release_date: string;
+  imdbRate: string | null;
+  imdbLink: string | null; // ISO date string
   ratings: {
     rate: number;
     user: {

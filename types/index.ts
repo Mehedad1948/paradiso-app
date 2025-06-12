@@ -49,7 +49,7 @@ export type PaginatedResponse<T> = {
 };
 
 export type UserType = {
-  id: string;
+  id: number;
   username: string;
   avatar: string | null;
 };

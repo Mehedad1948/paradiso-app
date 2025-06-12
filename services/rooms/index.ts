@@ -1,6 +1,11 @@
-import { CreateRoomInputs, JoinRoomInputs, Room } from "@/types/rooms";
+import {
+  addMovieToRoomInputs,
+  CreateRoomInputs,
+  JoinRoomInputs,
+  Room,
+} from "@/types/rooms";
 import { WebServices } from "..";
-import { PaginatedResponse } from "@/types";
+import { MovieWithRatings, PaginatedResponse } from "@/types";
 
 export class RoomsServices {
   private webService = new WebServices();
@@ -27,6 +32,12 @@ export class RoomsServices {
     return this.webService.get<Room>(`/rooms/${roomId}`);
   }
 
+  getRoomRatings(roomId: number) {
+    return this.webService.get<PaginatedResponse<MovieWithRatings>>(
+      `/ratings/room/${roomId}`,
+    );
+  }
+
   createRoom(data: CreateRoomInputs) {
     return this.webService.post<Room>(`/rooms`, { body: data });
   }
@@ -35,5 +46,18 @@ export class RoomsServices {
     return this.webService.post<{ message: string }>(`/rooms/join`, {
       body: data,
     });
+  }
+
+  addMovieToRoom(data: addMovieToRoomInputs) {
+    console.log("Adding movie to room:", data);
+
+    return this.webService.post<{ message: string }>(
+      `/rooms/add-movie/${data.roomId}`,
+      {
+        body: {
+          dbId: data.dbId,
+        },
+      },
+    );
   }
 }

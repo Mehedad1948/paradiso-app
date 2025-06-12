@@ -1,4 +1,4 @@
-import { UserType } from ".";
+import { MovieWithRatings, UserType } from ".";
 import { DbMovie } from "./movies";
 
 export type Room = {
@@ -7,7 +7,7 @@ export type Room = {
   image: string | null;
   isPublic: boolean;
   users: UserType[];
-  movies: DbMovie[];
+  movies: MovieWithRatings[];
   owner: UserType;
 };
 
@@ -21,4 +21,9 @@ export type CreateRoomInputs = {
 export type JoinRoomInputs = {
   userId: number;
   roomId: number;
+};
+
+export type addMovieToRoomInputs = {
+  roomId: string | number;
+  dbId: number;
 };

@@ -22,14 +22,20 @@ import { DbMovie } from '@/types/movies';
 import { Alert } from '@heroui/alert';
 import { Input } from '@heroui/input';
 import { Switch } from "@heroui/switch";
-export default function AddMovieModal() {
+import useSetSearchParams from '@/hooks/useSetSearchParams';
+import { addMovieToRoom } from '@/app/actions/rooms/addMovieToRoom';
+import { addToast } from '@heroui/toast';
+export default function AddMovieModal({ roomId }: { roomId: string }) {
     const pathname = usePathname();
     const [query, setQuery] = useState('');
     const [selectedMovie, setSelectedMovie] = useState<DbMovie | null>(null);
     const [debouncedQuery] = useDebounce(query, 500);
     const [results, setResults] = useState<any[]>([]);
+    const { setSearchParam, removeQuey, params } = useSetSearchParams();
 
-    const isOpen = pathname.includes('add-movie-modal');
+    const [isAdding, setIsAdding] = useState(false);
+
+    const isOpen = params['add-movie-modal'] === 'true'
     const { push } = useRouter();
 
     useEffect(() => {
@@ -53,6 +59,32 @@ export default function AddMovieModal() {
 
         handleSearch();
     }, [debouncedQuery]);
+
+    async function handleAddMovieToRoom() {
+        if (!selectedMovie) {
+            return
+        }
+        setIsAdding(true)
+        console.log("Adding movie to room:", { dbId: selectedMovie.id, roomId });
+
+        const res = await addMovieToRoom({ dbId: selectedMovie.id, roomId });
+        const { result, response } = JSON.parse(res)
+        if (response.ok) {
+            addToast({
+                title: 'Movie added to room successfully',
+                description: 'You can now cast your vote!',
+                color: 'success',
+            })
+            removeQuey('add-movie-modal')
+        } else {
+            addToast({
+                title: 'Error adding movie to room',
+                description: result.message,
+                color: 'danger',
+            })
+        }
+        setIsAdding(false)
+    }
 
     if (!isOpen) return null;
 
@@ -81,7 +113,6 @@ export default function AddMovieModal() {
                                 onInputChange={setQuery}
                                 onSelectionChange={(key) => {
                                     const selected = results.find((r) => r.id.toString() === key);
-                                    console.log('Selected movie:', selected);
                                     setSelectedMovie(selected)
                                 }}
                             >
@@ -111,7 +142,7 @@ export default function AddMovieModal() {
                                     </AutocompleteItem>
                                 })}
                             </Autocomplete>
-                            {selectedMovie && <div className='  w-full'>
+                            {selectedMovie && <div className='w-full'>
                                 <div>
                                     <div className='grid grid-cols-[40px,_1fr,_auto] gap-2 p-2
                                                      rounded-lg text-left border items-center border-secondary-500 text-secondary-500'
@@ -142,10 +173,10 @@ export default function AddMovieModal() {
                             </div>}
                         </ModalBody>
                         <ModalFooter>
-                            <Button color="danger" variant="light" onPress={() => push('/room')}>
+                            <Button color="danger" variant="light" onPress={() => removeQuey('add-movie-modal')}>
                                 Close
                             </Button>
-                            <Button color="secondary" onPress={() => push('/room')}>
+                            <Button isLoading={isAdding} isDisabled={isAdding} color="secondary" onPress={() => handleAddMovieToRoom()}>
                                 Add Movie
                             </Button>
                         </ModalFooter>
