@@ -1,13 +1,12 @@
 
 
+import SearchParamsSetterWrapper from '@/components/utils/SearchParamsSetterWrapper';
 import { RoomsServices } from '@/services/rooms';
 import { Button } from '@heroui/button';
-import Link from 'next/link';
 import { Suspense } from 'react';
-import RatingTable from './table';
 import AddMovieModal from './AddMovieModal';
-import { UserType } from '@/types';
-import SearchParamsSetterWrapper from '@/components/utils/SearchParamsSetterWrapper';
+import RatingTable from './table';
+import TableOperators from './TableOperators';
 
 export default async function page({ params, searchParams }: {
     params: Promise<{ roomId: string }>,
@@ -28,12 +27,8 @@ export default async function page({ params, searchParams }: {
 
     return (
         <div>
-            <SearchParamsSetterWrapper
-                className='mb-4 block'
-                keyValue={{ 'add-movie-modal': 'true' }}
-            >
-                <Button className='' color='secondary'>Add Movie</Button>
-            </SearchParamsSetterWrapper>
+            <TableOperators />
+
             <Suspense key={Object.values(searchParamsObject).join('')}>
                 <RoomFetcher roomId={roomId} searchParams={await searchParams} />
             </Suspense>
@@ -46,13 +41,7 @@ export default async function page({ params, searchParams }: {
 }
 
 async function RoomFetcher({ searchParams, roomId, }: { searchParams: { [key: string]: string }, roomId: string, }) {
-    const { result } = await new RoomsServices().getRoomById(Number(roomId));
-    const users = result?.users || [];
-    return <RatingsFetcher roomId={roomId} searchParams={await searchParams} users={users} />;
-}
-
-async function RatingsFetcher({ searchParams, roomId, users }: { searchParams: { [key: string]: string }, roomId: string, users: UserType[] }) {
-    const { result } = await new RoomsServices().getRoomRatings(Number(roomId));
+    const { result } = await new RoomsServices().getRoomRatings(Number(roomId), { search: searchParams.search });
     const movies = result?.data || [];
-    return <RatingTable users={users} ratings={movies} />;
+    return <RatingTable ratings={movies} />;
 }

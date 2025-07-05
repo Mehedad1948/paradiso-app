@@ -65,7 +65,6 @@ export default function AddMovieModal({ roomId }: { roomId: string }) {
             return
         }
         setIsAdding(true)
-        console.log("Adding movie to room:", { dbId: selectedMovie.id, roomId });
 
         const res = await addMovieToRoom({ dbId: selectedMovie.id, roomId });
         const { result, response } = JSON.parse(res)

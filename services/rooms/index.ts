@@ -32,9 +32,9 @@ export class RoomsServices {
     return this.webService.get<Room>(`/rooms/${roomId}`);
   }
 
-  getRoomRatings(roomId: number) {
+  getRoomRatings(roomId: number, options?: { search?: string }) {
     return this.webService.get<PaginatedResponse<MovieWithRatings>>(
-      `/rooms/${roomId}/rating`,
+      `/rooms/${roomId}/rating?${options?.search ? `search=${options.search}` : ""}`,
     );
   }
 
@@ -49,7 +49,6 @@ export class RoomsServices {
   }
 
   addMovieToRoom(data: addMovieToRoomInputs) {
-    console.log("Adding movie to room:", data);
 
     return this.webService.post<{ message: string }>(
       `/rooms/add-movie/${data.roomId}`,

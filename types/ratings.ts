@@ -12,7 +12,7 @@ export type MovieWithRatings = {
   imdbRate: string | null;
   imdbLink: string | null; // ISO date string
   ratings: {
-    rate: number;
+    rate: number | null;
     user: {
       id: number;
       username: string;
