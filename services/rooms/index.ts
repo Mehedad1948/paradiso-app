@@ -34,7 +34,7 @@ export class RoomsServices {
 
   getRoomRatings(roomId: number) {
     return this.webService.get<PaginatedResponse<MovieWithRatings>>(
-      `/ratings/room/${roomId}`,
+      `/rooms/${roomId}/rating`,
     );
   }
 

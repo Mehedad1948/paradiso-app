@@ -21,6 +21,7 @@ import { uploadImage } from '../actions/storage/uploadImage';
 
 export default function AddRoomModal() {
     const { setSearchParam, params: { addRoomModal }, removeQuey } = useSetSearchParams();
+    
     const [isPublic, setIsPublic] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);

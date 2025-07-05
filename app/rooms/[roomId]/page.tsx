@@ -8,30 +8,39 @@ import { UserType } from '@/types';
 
 export default async function page({ params, searchParams }: {
     params: Promise<{ roomId: string }>,
-    searchParams: Promise<{ 'add-movie-modal': string }>
+    searchParams: Promise<{ [key: string]: string }>
 },
 ) {
-    console.log(await params);
 
     const roomId = (await params).roomId;
-    const modalName = (await searchParams)['add-movie-modal'];
-    const { result } = await new RoomsServices().getRoomById(Number(roomId));
+    const addModalParam = (await searchParams)['add-movie-modal'];
+    const voteModalParam = (await searchParams)['vote-movie-modal'];
 
-    const movies = result?.movies || [];
+    const searchParamsObject = await searchParams
+    if ('add-movie-modal' in searchParamsObject) {
+        delete searchParamsObject['add-movie-modal'];
+    }
 
     return (
         <div>
             <Link className='mb-4 block ' href={`/rooms/${roomId}?add-movie-modal=true`}>
                 <Button color='secondary'>Add Movie</Button>
             </Link>
-            <Suspense>
-                <RatingsFetcher users={result?.users || []} searchParams={await searchParams} roomId={roomId} />
+            <Suspense key={Object.values(searchParamsObject).join('')}>
+                <RoomFetcher roomId={roomId} searchParams={await searchParams} />
             </Suspense>
-            <Suspense key={modalName}>
-                {modalName === 'true' && <AddMovieModal roomId={roomId} />}
+            <Suspense key={addModalParam}>
+                {addModalParam === 'true' && <AddMovieModal roomId={roomId} />}
+                {voteModalParam === 'true' && <AddMovieModal roomId={roomId} />}
             </Suspense>
         </div>
     );
+}
+
+async function RoomFetcher({ searchParams, roomId, }: { searchParams: { [key: string]: string }, roomId: string, }) {
+    const { result } = await new RoomsServices().getRoomById(Number(roomId));
+    const users = result?.users || [];
+    return <RatingsFetcher roomId={roomId} searchParams={await searchParams} users={users} />;
 }
 
 async function RatingsFetcher({ searchParams, roomId, users }: { searchParams: { [key: string]: string }, roomId: string, users: UserType[] }) {

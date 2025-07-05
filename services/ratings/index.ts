@@ -1,6 +1,6 @@
 import { PaginatedResponse, UserType } from "@/types";
 import { WebServices } from "..";
-import { MovieWithRatings } from "@/types/ratings";
+import { MovieWithRatings, VoteType } from "@/types/ratings";
 
 export class RatingServices {
   private webService = new WebServices();
@@ -16,8 +16,8 @@ export class RatingServices {
     return this.webService.get(`/ratings/${id}`);
   }
 
-  createRating(data: any) {
-    return this.webService.post("/ratings", data);
+  castVote(roomId: string, data: VoteType) {
+    return this.webService.post(`/ratings/${roomId}`, { body: data });
   }
 
   updateRating(id: string, data: any) {

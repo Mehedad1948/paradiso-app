@@ -6,6 +6,7 @@ export type MovieWithRatings = {
   vote_average: number | null;
   releaseDate: string;
   original_title: string;
+  hasVoted: boolean;
   video: string;
   release_date: string;
   imdbRate: string | null;
@@ -18,4 +19,9 @@ export type MovieWithRatings = {
       avatar: string | null;
     };
   }[];
+};
+
+export type VoteType = {
+  rate: number;
+  movieId: string;
 };
