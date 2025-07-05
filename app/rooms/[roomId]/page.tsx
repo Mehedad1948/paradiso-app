@@ -1,3 +1,5 @@
+
+
 import { RoomsServices } from '@/services/rooms';
 import { Button } from '@heroui/button';
 import Link from 'next/link';
@@ -5,6 +7,7 @@ import { Suspense } from 'react';
 import RatingTable from './table';
 import AddMovieModal from './AddMovieModal';
 import { UserType } from '@/types';
+import SearchParamsSetterWrapper from '@/components/utils/SearchParamsSetterWrapper';
 
 export default async function page({ params, searchParams }: {
     params: Promise<{ roomId: string }>,
@@ -17,23 +20,28 @@ export default async function page({ params, searchParams }: {
     const voteModalParam = (await searchParams)['vote-movie-modal'];
 
     const searchParamsObject = await searchParams
+
     if ('add-movie-modal' in searchParamsObject) {
         delete searchParamsObject['add-movie-modal'];
     }
 
+
     return (
         <div>
-            <Link className='mb-4 block ' href={`/rooms/${roomId}?add-movie-modal=true`}>
-                <Button color='secondary'>Add Movie</Button>
-            </Link>
+            <SearchParamsSetterWrapper
+                className='mb-4 block'
+                keyValue={{ 'add-movie-modal': 'true' }}
+            >
+                <Button className='' color='secondary'>Add Movie</Button>
+            </SearchParamsSetterWrapper>
             <Suspense key={Object.values(searchParamsObject).join('')}>
                 <RoomFetcher roomId={roomId} searchParams={await searchParams} />
             </Suspense>
             <Suspense key={addModalParam}>
                 {addModalParam === 'true' && <AddMovieModal roomId={roomId} />}
-                {voteModalParam === 'true' && <AddMovieModal roomId={roomId} />}
+                {/* {voteModalParam === 'true' && <AddMovieModal roomId={roomId} />} */}
             </Suspense>
-        </div>
+        </div >
     );
 }
 
