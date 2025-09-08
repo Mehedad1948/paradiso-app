@@ -27,3 +27,15 @@ export type addMovieToRoomInputs = {
   roomId: string | number;
   dbId: number;
 };
+
+export type RoomRatingFilters = {
+  search?: string;
+  sortBy?: "rate" | "userRate";
+  sortOrder?: "asc" | "desc";
+  sortByUserId?: string;
+  startDate?: Date;
+  endDate?: Date;
+  isWatchTogether?: boolean;
+  limit?: number;
+  offset?: number;
+};

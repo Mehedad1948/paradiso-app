@@ -11,7 +11,6 @@ export default function TableOperators() {
     const { params, setSearchParam } = useSetSearchParams();
     const [search, setSearch] = useState(params.search || '');
 
-
     useEffect(() => {
         if (search.trim() === '') {
             setSearchParam([{ search: '' }]);
@@ -23,7 +22,7 @@ export default function TableOperators() {
         }, 400);
 
         return () => clearTimeout(timeout);
-    }, [search,]);
+    }, [search]);
 
     return (
         <div className='flex items-center gap-2 mb-4 justify-between'>

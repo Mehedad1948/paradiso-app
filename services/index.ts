@@ -1,6 +1,4 @@
-import { refreshAccessToken } from "@/app/actions/auth/refresh-token";
 import { cookies } from "next/headers";
-import { AuthServices } from "./auth/authServices";
 
 type RequestResult<T> = {
   result: T | null;
@@ -21,6 +19,7 @@ export class WebServices {
   constructor(subBaseUrl?: string) {
     this.subBaseUrl = subBaseUrl;
   }
+
   private buildQueryString(params?: Record<string, any>): string {
     if (!params) return "";
     const query = new URLSearchParams();
@@ -68,7 +67,7 @@ export class WebServices {
 
     try {
       const response = await fetch(fullUrl, init);
-
+      
       const contentType = response.headers.get("content-type");
       let parsed: any = null;
 
@@ -132,26 +131,4 @@ export class WebServices {
   ): Promise<RequestResult<T>> {
     return this.request<T>(url, "PATCH", options);
   }
-}
-
-function normalizeHeaders(
-  headers: HeadersInit | undefined,
-): Record<string, string> {
-  const result: Record<string, string> = {};
-
-  if (!headers) return result;
-
-  if (headers instanceof Headers) {
-    headers.forEach((value, key) => {
-      result[key] = value;
-    });
-  } else if (Array.isArray(headers)) {
-    headers.forEach(([key, value]) => {
-      result[key] = value;
-    });
-  } else {
-    Object.assign(result, headers);
-  }
-
-  return result;
 }

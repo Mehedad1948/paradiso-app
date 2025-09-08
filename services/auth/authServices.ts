@@ -9,20 +9,20 @@ import {
 } from "./types";
 
 export class AuthServices {
-  private webService = new WebServices();
+  private webService = new WebServices("/auth");
 
   async signIn(body: SignInInputs) {
     const res = await this.webService.post<{
       accessToken: string;
       refreshToken: string;
-    }>("/auth/sign-in", {
+    }>("/sign-in", {
       body,
     });
     return res;
   }
 
   async register(body: RegisterInputs) {
-    const res = await this.webService.post(`/users`, {
+    const res = await new WebServices().post(`/users`, {
       body,
     });
     return res;
@@ -32,7 +32,7 @@ export class AuthServices {
     const res = await this.webService.post<{
       accessToken: string;
       refreshToken: string;
-    }>(`/auth/verify-email`, {
+    }>(`/verify-email`, {
       body,
     });
     return res;

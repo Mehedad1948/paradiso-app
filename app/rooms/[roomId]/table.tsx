@@ -12,38 +12,58 @@ import {
 } from "@heroui/table";
 import { useState } from 'react';
 import VoteMovieModal from './VoteMovieModal';
+import { ChevronDown } from 'lucide-react';
+import useSetSearchParams from '@/hooks/useSetSearchParams';
+import { Alert } from '@heroui/alert';
 
 export default function RatingTable({ ratings, }: { ratings: MovieWithRatings[], }) {
+    console.log(ratings);
+
+
     const columns = [{
         label: 'TITLE',
-        key: 'title'
+        key: 'title',
+        isUser: false
     },
     //  {
     //     label: 'IMDB RATE',
     //     key: 'imdbRate'
     // },
-    ...ratings[0].ratings.map(({ user }) => ({
+    ...(ratings?.length ? ratings[0]?.ratings.map(({ user }) => ({
         label: user.username,
-        key: `ratings.${user.id}`
-    })),
+        key: user.id,
+        isUser: true
+    })) : []),
     {
         label: 'ACTION',
-        key: 'action'
+        key: 'action',
+        isUser: false
     }
     ];
 
+    const { setSearchParam, params } = useSetSearchParams()
 
     const [movieToVote, setMovieToVote] = useState<null | MovieWithRatings>(null)
 
-    console.log(ratings);
 
     return (
         <>
-            <Table aria-label="Movies with Ratings table">
+            {<Table aria-label="Movies with Ratings table">
                 <TableHeader columns={columns}>
-                    {(column) => <TableColumn key={column.key}>{column.label}</TableColumn>}
+                    {
+                        (column) => <TableColumn key={column.key}>
+                            {column.isUser ?
+                                <Button
+                                    onPress={() => setSearchParam([{ sortByUserId: column.key, sortBy: 'userRate' }])}
+                                    variant='light'
+                                    endContent={<ChevronDown className='w-4' />}
+                                >
+                                    {column.label}
+                                </Button> : column.label}
+                        </TableColumn>
+                    }
                 </TableHeader>
-                <TableBody items={ratings}>
+                {ratings?.length ? <TableBody items={ratings}>
                     {(item) => (
                         <TableRow key={item.title}>
                             <TableCell className=' grid grid-cols-[36px,_1fr] items-center gap-3'>
@@ -66,8 +86,19 @@ export default function RatingTable({ ratings, }: { ratings: MovieWithRatings[],
                             </TableCell>
                         </TableRow>
                     )}
-                </TableBody>
-            </Table >
+                </TableBody> :
+                    <TableBody>
+                        <TableRow>
+                            <TableCell>
+                                <Alert color='primary'> No movies has been added yet</Alert>
+
+                            </TableCell>
+                            <TableCell>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
+                }
+            </Table >}
             {movieToVote &&
                 <VoteMovieModal movie={movieToVote} onClose={() => setMovieToVote(null)} />
             }

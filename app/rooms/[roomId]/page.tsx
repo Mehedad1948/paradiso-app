@@ -41,7 +41,9 @@ export default async function page({ params, searchParams }: {
 }
 
 async function RoomFetcher({ searchParams, roomId, }: { searchParams: { [key: string]: string }, roomId: string, }) {
-    const { result } = await new RoomsServices().getRoomRatings(Number(roomId), { search: searchParams.search });
+    const { result } = await new RoomsServices().getRoomRatings(Number(roomId),
+        { ...searchParams });
+
     const movies = result?.data || [];
     return <RatingTable ratings={movies} />;
 }
