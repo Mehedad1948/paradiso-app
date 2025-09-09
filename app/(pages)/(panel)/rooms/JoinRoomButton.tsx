@@ -4,7 +4,7 @@ import { RoomsServices } from '@/services/rooms';
 import { useUserStore } from '@/store/user';
 import { Button } from '@heroui/button';
 import { addToast } from '@heroui/toast';
-import { joinRoom } from '../actions/rooms/joinRoom';
+import { joinRoom } from '../../../actions/rooms/joinRoom';
 import { useState } from 'react';
 
 export default function JoinRoomButton({ roomId }: { roomId: number }) {
