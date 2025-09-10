@@ -8,6 +8,7 @@ import {
 import { WebServices } from "..";
 import { MovieWithRatings, PaginatedResponse } from "@/types";
 import { invitation } from "@/types/invitations";
+import { NEXT_TAGS } from "@/constants/tags";
 
 class RoomsServices {
   private webService = new WebServices("/rooms");
@@ -34,9 +35,8 @@ class RoomsServices {
     return this.webService.get<Room>(`/${roomId}`);
   }
 
-  getRoomRatings(roomId: number, filters?: RoomRatingFilters) {
+  async getRoomRatings(roomId: number, filters?: RoomRatingFilters) {
     const params = new URLSearchParams();
-
     if (filters?.search) params.set("search", filters.search);
     if (filters?.sortBy) params.set("sortBy", filters.sortBy);
     if (filters?.sortOrder) params.set("sortOrder", filters.sortOrder);
@@ -49,6 +49,7 @@ class RoomsServices {
 
     return this.webService.get<PaginatedResponse<MovieWithRatings>>(
       `/${roomId}/rating?${params.toString()}`,
+      { next: { tags: [`${NEXT_TAGS.ROOM_RATINGS}-${roomId}`] } },
     );
   }
 
@@ -85,6 +86,17 @@ class RoomsServices {
       {
         body: {
           dbId: data.dbId,
+        },
+      },
+    );
+  }
+
+  deleteMovie({ roomId, movieId }: { roomId: string; movieId: string }) {
+    return this.webService.delete<{ message: string }>(
+      `/delete-movie/${roomId}`,
+      {
+        body: {
+          movieId: movieId,
         },
       },
     );

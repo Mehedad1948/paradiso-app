@@ -170,7 +170,7 @@ export default function AddMovieModal({ roomId }: { roomId: string }) {
                             </div>}
                         </ModalBody>
                         <ModalFooter>
-                            <Button color="danger" variant="light" onPress={onCloseModal}>
+                            <Button color="danger" variant="light" onPress={() => onCloseModal()}>
                                 Close
                             </Button>
                             <Button isLoading={isAdding} isDisabled={isAdding} color="secondary" onPress={() => handleAddMovieToRoom()}>

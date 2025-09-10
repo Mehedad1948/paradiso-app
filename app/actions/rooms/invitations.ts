@@ -1,5 +1,6 @@
 "use server";
 
+import { NEXT_TAGS } from "@/constants/tags";
 import roomsServices from "@/services/rooms";
 import { revalidateTag } from "next/cache";
 export async function inviteUser({
@@ -11,7 +12,7 @@ export async function inviteUser({
 }) {
   const res = await roomsServices.inviteUser(roomId, email);
   if (res.response.ok) {
-    revalidateTag(`invitations-${roomId}`);
+    revalidateTag(`${NEXT_TAGS.INVITATIONS}-${roomId}`);
   }
   return res;
 }
