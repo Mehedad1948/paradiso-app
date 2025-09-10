@@ -33,6 +33,7 @@ export default function InvitationsModal({ roomId, invitationsPromise }: { roomI
                 title: `An invitation email was sent to ${email}`,
                 color: 'success',
             })
+            setEmail('')
         }
     })
 

@@ -42,7 +42,7 @@ export default function ResetPasswordPage() {
 
 
     const res = await forgotPassword({ email });
-    const { result, response } = JSON.parse(res);
+    const { result, response } = res;
 
     if (response?.ok) {
       addToast({
@@ -53,7 +53,7 @@ export default function ResetPasswordPage() {
       setSecondsLeft(120)
       setCanResend(false)
     } else {
-      setError(result?.message || "Unknown error");
+      setError(response?.message || "Unknown error");
     }
   }
 
@@ -88,7 +88,7 @@ export default function ResetPasswordPage() {
     }
 
     const res = await resetPassword({ email, code, password })
-    const { result, response } = JSON.parse(res)
+    const { result, response } = res
 
     if (response?.ok) {
       addToast({
@@ -97,7 +97,7 @@ export default function ResetPasswordPage() {
       })
       push(`/auth/sign-in?email=${email}`)
     } else {
-      setError(result?.message || 'Unknown error')
+      setError(response?.message || 'Unknown error')
     }
 
     setIsLoading(false)

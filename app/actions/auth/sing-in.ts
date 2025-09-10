@@ -2,7 +2,7 @@
 
 import authServices from '@/services/auth/authServices';
 import { SignInInputs } from "@/services/auth/types";
-import { formatResponse } from "@/utils/formatResponse";
+;
 import { cookies } from "next/headers"; // <-- Import this
 
 export async function signIn(data: SignInInputs) {
@@ -29,5 +29,5 @@ export async function signIn(data: SignInInputs) {
     });
   }
 
-  return formatResponse(res);
+  return res;
 }

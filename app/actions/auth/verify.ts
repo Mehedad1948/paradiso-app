@@ -2,7 +2,7 @@
 
 import authServices from '@/services/auth/authServices';
 import { VerifyEmailInputs } from "@/services/auth/types";
-import { formatResponse } from "@/utils/formatResponse";
+;
 import { cookies } from "next/headers";
 
 export async function verifyEmail(data: VerifyEmailInputs) {
@@ -28,5 +28,5 @@ export async function verifyEmail(data: VerifyEmailInputs) {
     });
   }
 
-  return formatResponse(res);
+  return res;
 }

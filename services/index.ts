@@ -6,6 +6,7 @@ type RequestResult<T> = {
     ok: boolean;
     status: number;
     statusText: string;
+    message?: string;
   };
   error?: string;
 };
@@ -81,15 +82,16 @@ export class WebServices {
       }
 
       return {
-        result: response.ok ? (parsed as T) : null,
+        result: response.ok ? (parsed as T) : parsed.message || null,
         response: {
+          ...(parsed.message ? { message: parsed.message } : {}),
           ok: response.ok,
           status: response.status,
           statusText: response.statusText,
         },
         error: response.ok
           ? undefined
-          : `HTTP ${response.status}: ${response.statusText}`,
+          : parsed.message || `HTTP ${response.status}: ${response.statusText}`,
       };
     } catch (error: any) {
       return {
@@ -98,6 +100,7 @@ export class WebServices {
           ok: false,
           status: 0,
           statusText: "",
+          message: error.message || "Unknown fetch error",
         },
         error: error.message || "Unknown fetch error",
       };

@@ -46,7 +46,7 @@ export default function AddMovieModal({ roomId }: { roomId: string }) {
             try {
                 const res = await searchDbMovies(debouncedQuery);
 
-                const { result, response } = JSON.parse(res);
+                const { result, response } = res;
 
                 setResults(result?.results || []);
             } catch (err) {
@@ -65,7 +65,7 @@ export default function AddMovieModal({ roomId }: { roomId: string }) {
         setIsAdding(true)
 
         const res = await addMovieToRoom({ dbId: selectedMovie.id, roomId });
-        const { result, response } = JSON.parse(res)
+        const { result, response } = res
         if (response.ok) {
             addToast({
                 title: 'Movie added to room successfully',
@@ -76,7 +76,7 @@ export default function AddMovieModal({ roomId }: { roomId: string }) {
         } else {
             addToast({
                 title: 'Error adding movie to room',
-                description: result.message,
+                description: response.message,
                 color: 'danger',
             })
         }

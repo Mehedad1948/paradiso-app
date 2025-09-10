@@ -16,7 +16,7 @@ export default function JoinRoomButton({ roomId }: { roomId: number }) {
 
         const res = await joinRoom({ userId: user.id, roomId });
 
-        const { result, response } = JSON.parse(res);
+        const { result, response } = res;
 
         if (response.ok) {
             addToast({
@@ -26,7 +26,7 @@ export default function JoinRoomButton({ roomId }: { roomId: number }) {
         } else {
             addToast({
                 title: "Failed to join the room",
-                description: result.message,
+                description: response.message,
                 color: 'danger'
             });
         }

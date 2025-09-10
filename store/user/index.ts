@@ -15,19 +15,19 @@ export const useUserStore = create<UserState>((set) => ({
 
   fetchMe: async () => {
     try {
-      const data = await getMe();
+      const { result } = await getMe();
 
-      if (!data) return;
+      if (!result) return;
 
       // Transform the role as in your @Transform decorator
-      const roleName = data?.role?.name ?? "";
+      const roleName = result?.role ?? "";
 
       set({
         user: {
-          id: data.id,
-          email: data.email,
-          username: data.username,
-          avatar: data.avatar,
+          id: result.id,
+          email: result.email,
+          username: result.username,
+          avatar: result.avatar,
           role: roleName,
         },
       });

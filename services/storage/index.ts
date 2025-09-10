@@ -7,7 +7,10 @@ class StorageServices {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("folder", folder);
-    return this.webService.post(`/uploads/file`, { body: formData });
+    return this.webService.post<{ name: string; id: number; path: string }>(
+      `/uploads/file`,
+      { body: formData },
+    );
   }
 }
 

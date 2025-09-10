@@ -27,9 +27,9 @@ export function useAction<T extends (...args: any[]) => Promise<any>>(
     try {
       // Call the Server Action
       const res: ActionReturn<T> = await action(...args);
-      const response = JSON.parse(res);
+      const response = res
 
-      console.log("🚀🚀🚀", response, response.response.ok);
+      console.log("🚀🚀🚀🚀", response);
 
       if (response.response.ok) {
         setData(response.result);
@@ -38,13 +38,15 @@ export function useAction<T extends (...args: any[]) => Promise<any>>(
         }
       } else {
         setIsError(true);
-        // Use your toast library to show the error
+
+        console.log("errr", response.result);
+
         addToast({
-          title: response.response.message,
+          title: response.result,
           color: "danger",
         });
         if (options?.onError) {
-          options.onError(response.response.message);
+          options.onError(response);
         }
       }
       return response;
