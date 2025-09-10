@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import AddMovieModal from './AddMovieModal';
 import RatingTable from './table';
 import TableOperators from './TableOperators';
+import InvitationsModal from './InvitationsModal';
 
 export default async function page({ params, searchParams }: {
     params: Promise<{ roomId: string }>,
@@ -22,13 +23,15 @@ export default async function page({ params, searchParams }: {
 
     return (
         <div>
-            <TableOperators invitationsPromise={invitations} />
+            <TableOperators  />
 
             <Suspense key={Object.values(searchParamsObject).join('')}>
                 <RoomFetcher roomId={roomId} searchParams={await searchParams} />
             </Suspense>
 
             <AddMovieModal roomId={roomId} />
+
+            <InvitationsModal invitationsPromise={invitations} roomId={roomId}  />
 
         </div >
     );

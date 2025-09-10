@@ -2,20 +2,15 @@
 
 import SearchParamsSetterWrapper from '@/components/utils/SearchParamsSetterWrapper';
 import useSetSearchParams from '@/hooks/useSetSearchParams';
-import roomsServices from '@/services/rooms';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
 import { SearchIcon, X } from 'lucide-react';
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
-export default function TableOperators({ invitationsPromise }: {
-     invitationsPromise: ReturnType<typeof roomsServices.invitations>;
-}) {
+export default function TableOperators() {
     const { params, setSearchParam } = useSetSearchParams();
     const [search, setSearch] = useState(params.search || '');
 
-    const invitations = use(invitationsPromise)
-    console.log({ invitations });
 
     useEffect(() => {
         if (search.trim() === '') {
