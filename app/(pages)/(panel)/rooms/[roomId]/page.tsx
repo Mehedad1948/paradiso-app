@@ -13,14 +13,9 @@ export default async function page({ params, searchParams }: {
 ) {
 
     const roomId = (await params).roomId;
-    const addModalParam = (await searchParams)['add-movie-modal'];
-    const voteModalParam = (await searchParams)['vote-movie-modal'];
 
     const searchParamsObject = await searchParams
 
-    if ('add-movie-modal' in searchParamsObject) {
-        delete searchParamsObject['add-movie-modal'];
-    }
 
     const invitations = roomsServices.invitations(roomId)
 
