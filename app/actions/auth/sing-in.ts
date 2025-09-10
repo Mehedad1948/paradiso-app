@@ -1,12 +1,12 @@
 "use server";
 
-import { AuthServices } from "@/services/auth/authServices";
+import authServices from '@/services/auth/authServices';
 import { SignInInputs } from "@/services/auth/types";
-import { formatResponse } from "@/utils/formatResponse";
+;
 import { cookies } from "next/headers"; // <-- Import this
 
 export async function signIn(data: SignInInputs) {
-  const res = await new AuthServices().signIn(data);
+  const res = await authServices.signIn(data);
 
   if (res.response?.ok && res.result) {
     const { accessToken, refreshToken } = res.result;
@@ -29,5 +29,5 @@ export async function signIn(data: SignInInputs) {
     });
   }
 
-  return formatResponse(res);
+  return res;
 }

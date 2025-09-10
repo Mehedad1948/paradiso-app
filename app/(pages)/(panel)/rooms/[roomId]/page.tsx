@@ -1,12 +1,11 @@
 
 
-import SearchParamsSetterWrapper from '@/components/utils/SearchParamsSetterWrapper';
-import { RoomsServices } from '@/services/rooms';
-import { Button } from '@heroui/button';
+import roomsServices from '@/services/rooms';
 import { Suspense } from 'react';
 import AddMovieModal from './AddMovieModal';
 import RatingTable from './table';
 import TableOperators from './TableOperators';
+import InvitationsModal from './InvitationsModal';
 
 export default async function page({ params, searchParams }: {
     params: Promise<{ roomId: string }>,
@@ -15,33 +14,31 @@ export default async function page({ params, searchParams }: {
 ) {
 
     const roomId = (await params).roomId;
-    const addModalParam = (await searchParams)['add-movie-modal'];
-    const voteModalParam = (await searchParams)['vote-movie-modal'];
 
     const searchParamsObject = await searchParams
 
-    if ('add-movie-modal' in searchParamsObject) {
-        delete searchParamsObject['add-movie-modal'];
-    }
+
+    const invitations = roomsServices.invitations(roomId)
 
 
     return (
         <div>
-            <TableOperators />
+            <TableOperators  />
 
             <Suspense key={Object.values(searchParamsObject).join('')}>
                 <RoomFetcher roomId={roomId} searchParams={await searchParams} />
             </Suspense>
-            <Suspense key={addModalParam}>
-                {addModalParam === 'true' && <AddMovieModal roomId={roomId} />}
-                {/* {voteModalParam === 'true' && <AddMovieModal roomId={roomId} />} */}
-            </Suspense>
+
+            <AddMovieModal roomId={roomId} />
+
+            <InvitationsModal invitationsPromise={invitations} roomId={roomId}  />
+
         </div >
     );
 }
 
 async function RoomFetcher({ searchParams, roomId, }: { searchParams: { [key: string]: string }, roomId: string, }) {
-    const { result } = await new RoomsServices().getRoomRatings(Number(roomId),
+    const { result } = await roomsServices.getRoomRatings(Number(roomId),
         { ...searchParams });
 
     const movies = result?.data || [];

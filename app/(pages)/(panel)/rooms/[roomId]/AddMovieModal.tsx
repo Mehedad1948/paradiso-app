@@ -1,42 +1,40 @@
 'use client'
 
 import { searchDbMovies } from '@/app/actions/movies/searchDbMovies';
-import { Button } from '@heroui/button';
-import {
-    Modal,
-    ModalContent,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-} from '@heroui/modal';
+import { addMovieToRoom } from '@/app/actions/rooms/addMovieToRoom';
+import { useModalController } from '@/hooks/useModalController';
+import { DbMovie } from '@/types/movies';
 import {
     Autocomplete,
     AutocompleteItem,
 } from '@heroui/autocomplete';
-import { usePathname, useRouter } from 'next/navigation';
-import { useDebounce } from 'use-debounce';
-import { useEffect, useState } from 'react';
-import Image from 'next/image';
-import { Popcorn, SearchIcon } from 'lucide-react';
-import { DbMovie } from '@/types/movies';
-import { Alert } from '@heroui/alert';
+import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
+import {
+    Modal,
+    ModalBody,
+    ModalContent,
+    ModalFooter,
+    ModalHeader,
+} from '@heroui/modal';
 import { Switch } from "@heroui/switch";
-import useSetSearchParams from '@/hooks/useSetSearchParams';
-import { addMovieToRoom } from '@/app/actions/rooms/addMovieToRoom';
 import { addToast } from '@heroui/toast';
+import { Popcorn, SearchIcon } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useDebounce } from 'use-debounce';
+
 export default function AddMovieModal({ roomId }: { roomId: string }) {
     const pathname = usePathname();
     const [query, setQuery] = useState('');
     const [selectedMovie, setSelectedMovie] = useState<DbMovie | null>(null);
     const [debouncedQuery] = useDebounce(query, 500);
     const [results, setResults] = useState<any[]>([]);
-    const { setSearchParam, removeQuey, params } = useSetSearchParams();
 
     const [isAdding, setIsAdding] = useState(false);
 
-    const isOpen = params['add-movie-modal'] === 'true'
-    const { push } = useRouter();
+
+    const { isOpen, onCloseModal } = useModalController('add-movie-modal')
 
     useEffect(() => {
         async function handleSearch() {
@@ -48,7 +46,7 @@ export default function AddMovieModal({ roomId }: { roomId: string }) {
             try {
                 const res = await searchDbMovies(debouncedQuery);
 
-                const { result, response } = JSON.parse(res);
+                const { result, response } = res;
 
                 setResults(result?.results || []);
             } catch (err) {
@@ -67,18 +65,18 @@ export default function AddMovieModal({ roomId }: { roomId: string }) {
         setIsAdding(true)
 
         const res = await addMovieToRoom({ dbId: selectedMovie.id, roomId });
-        const { result, response } = JSON.parse(res)
+        const { result, response } = res
         if (response.ok) {
             addToast({
                 title: 'Movie added to room successfully',
                 description: 'You can now cast your vote!',
                 color: 'success',
             })
-            removeQuey('add-movie-modal')
+            onCloseModal()
         } else {
             addToast({
                 title: 'Error adding movie to room',
-                description: result.message,
+                description: response.message,
                 color: 'danger',
             })
         }
@@ -172,7 +170,7 @@ export default function AddMovieModal({ roomId }: { roomId: string }) {
                             </div>}
                         </ModalBody>
                         <ModalFooter>
-                            <Button color="danger" variant="light" onPress={() => removeQuey('add-movie-modal')}>
+                            <Button color="danger" variant="light" onPress={onCloseModal}>
                                 Close
                             </Button>
                             <Button isLoading={isAdding} isDisabled={isAdding} color="secondary" onPress={() => handleAddMovieToRoom()}>

@@ -1,6 +1,6 @@
+import authServices from '@/services/auth/authServices';
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { AuthServices } from "@/services/auth/authServices";
 
 export async function GET(request: Request) {
   const cookieStore = await cookies();
@@ -13,9 +13,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/auth/sign-in", request.url));
   }
 
-  const res = await new AuthServices().refreshToken({ refreshToken });
-
-  console.log('✨✨✨', res);
+  const res = await authServices.refreshToken({ refreshToken });
 
   if (res.response?.ok && res.result?.accessToken) {
     // ❗️Next.js doesn't let you set cookies directly in API routes like this

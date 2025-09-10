@@ -1,7 +1,7 @@
 'use client'
 
-import React, { ReactElement, MouseEvent } from 'react';
-import useSetSearchParams from '@/hooks/useSetSearchParams';
+import { useHashParams } from '@/hooks/useHashParams';
+import React, { MouseEvent, ReactElement } from 'react';
 
 type SearchParamsSetterWrapperProps = {
     keyValue: { [key: string]: string };
@@ -13,10 +13,10 @@ export default function SearchParamsSetterWrapper({
     children,
     ...props
 }: SearchParamsSetterWrapperProps) {
-    const { setSearchParam } = useSetSearchParams();
+    const { setHashParams } = useHashParams();
 
     const handleClick = () => {
-        setSearchParam([keyValue]);
+        setHashParams([keyValue]);
     };
 
     return React.cloneElement(children, {

@@ -8,7 +8,7 @@ import {
   VerifyEmailInputs,
 } from "./types";
 
-export class AuthServices {
+ class AuthServices {
   private webService = new WebServices("/auth");
 
   async signIn(body: SignInInputs) {
@@ -21,12 +21,7 @@ export class AuthServices {
     return res;
   }
 
-  async register(body: RegisterInputs) {
-    const res = await new WebServices().post(`/users`, {
-      body,
-    });
-    return res;
-  }
+
 
   async verifyEmail(body: VerifyEmailInputs) {
     const res = await this.webService.post<{
@@ -62,4 +57,9 @@ export class AuthServices {
     return res;
   }
 }
+
+ const authServices = new AuthServices();
+
+ export default authServices;
+
 // testtest@Password123.com

@@ -27,7 +27,7 @@ export default function RegisterPage() {
     const code = formData.get("code") as string;
 
     const res = await verifyEmail({ email, code });
-    const { result, response } = JSON.parse(res);
+    const { result, response } = res;
 
     if (response?.ok) {
       addToast({
@@ -37,7 +37,7 @@ export default function RegisterPage() {
       });
       push(`/room`);
     } else {
-      setError(result?.message || "Unknown error");
+      setError(response?.message || "Unknown error");
     }
     setIsLoading(false)
   }

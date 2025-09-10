@@ -1,4 +1,3 @@
-import { RoomsServices } from '@/services/rooms';
 import { Button } from '@heroui/button';
 import { Card, CardHeader, CardBody, CardFooter } from "@heroui/card";
 import Image from 'next/image';
@@ -6,6 +5,7 @@ import { Suspense } from 'react';
 import AddRoomModal from './AddRoomModal';
 import JoinRoomButton from './JoinRoomButton';
 import Link from 'next/link';
+import roomsServices from '@/services/rooms';
 
 export default async function page({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
 
@@ -31,7 +31,7 @@ export default async function page({ searchParams }: { searchParams: Promise<{ [
 }
 
 async function RenderUsersRooms({ usersRoom = false }: { usersRoom?: boolean }) {
-    const { result } = await new RoomsServices().getRooms({ page: 1, limit: 10, usersRoom });
+    const { result } = await roomsServices.getRooms({ page: 1, limit: 10, usersRoom });
 
     return <div className=''>
 

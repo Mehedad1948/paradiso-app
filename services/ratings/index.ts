@@ -2,29 +2,33 @@ import { PaginatedResponse, UserType } from "@/types";
 import { WebServices } from "..";
 import { MovieWithRatings, VoteType } from "@/types/ratings";
 
-export class RatingServices {
-  private webService = new WebServices();
+ class RatingServices {
+  private webService = new WebServices("/ratings");
 
   getAllRatings() {
     return this.webService.get<{
       movies: PaginatedResponse<MovieWithRatings>;
       users: UserType[];
-    }>("/ratings");
+    }>("");
   }
 
   getRatingById(id: string) {
-    return this.webService.get(`/ratings/${id}`);
+    return this.webService.get(`/${id}`);
   }
 
   castVote(roomId: string, data: VoteType) {
-    return this.webService.post(`/ratings/${roomId}`, { body: data });
+    return this.webService.post(`/${roomId}`, { body: data });
   }
 
   updateRating(id: string, data: any) {
-    return this.webService.put(`/ratings/${id}`, data);
+    return this.webService.put(`/${id}`, data);
   }
 
   deleteRating(id: string) {
-    return this.webService.delete(`/ratings/${id}`);
+    return this.webService.delete(`/${id}`);
   }
 }
+
+const ratingServices = new RatingServices();
+
+export default ratingServices;

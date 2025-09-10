@@ -5,7 +5,8 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import useSizeController from "./useSizeController";
 
 const useSetSearchParams = (defaultPath?: string) => {
   const router = useRouter();
@@ -19,8 +20,7 @@ const useSetSearchParams = (defaultPath?: string) => {
 
   const params: { [key: string]: string } = {};
 
-  for (const pair of Array.from(entries)) {
-    const [key, value] = pair;
+  for (const [key, value] of Array.from(entries)) {
     params[key] = value;
   }
 
@@ -166,6 +166,7 @@ const useSetSearchParams = (defaultPath?: string) => {
     addQuey,
     removeQuey,
     mainParams,
+
   };
 };
 

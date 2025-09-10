@@ -32,16 +32,16 @@ export default function SignInPage({ children }: { children: ReactNode }) {
     const password = formData.get("password") as string;
 
     const res = await signIn({ email, password });
-    const { result, response } = JSON.parse(res);
+    const { result, response } = res;
 
     if (response?.ok) {
       addToast({
         title: "Welcome",
-        description: `Hi ${result?.user?.name || "there"} 👋`,
+        description: `Hi there 👋`,
         color: 'success',
       });
     } else {
-      setError(result?.message || "Unknown error");
+      setError(response?.message || "Unknown error");
     }
     setIsLoading(false);
   }

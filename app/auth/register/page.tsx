@@ -46,7 +46,7 @@ export default function RegisterPage() {
     }
 
     const res = await register({ email, password, username });
-    const { result, response } = JSON.parse(res);
+    const { result, response } = res;
 
     if (response?.ok) {
       addToast({
@@ -56,7 +56,7 @@ export default function RegisterPage() {
       });
       push(`/auth/verify?email=${email}`);
     } else {
-      setError(result?.message || "Unknown error");
+      setError(response?.message || "Unknown error");
     }
     setIsLoading(false);
   }

@@ -7,9 +7,10 @@ import {
 } from "@/types/rooms";
 import { WebServices } from "..";
 import { MovieWithRatings, PaginatedResponse } from "@/types";
+import { invitation } from "@/types/invitations";
 
-export class RoomsServices {
-  private webService = new WebServices();
+class RoomsServices {
+  private webService = new WebServices("/rooms");
 
   getRooms({
     page,
@@ -20,7 +21,7 @@ export class RoomsServices {
     limit: number;
     usersRoom?: boolean;
   }) {
-    return this.webService.get<PaginatedResponse<Room>>(`/rooms`, {
+    return this.webService.get<PaginatedResponse<Room>>(``, {
       params: {
         page,
         limit,
@@ -30,7 +31,7 @@ export class RoomsServices {
   }
 
   getRoomById(roomId: number) {
-    return this.webService.get<Room>(`/rooms/${roomId}`);
+    return this.webService.get<Room>(`/${roomId}`);
   }
 
   getRoomRatings(roomId: number, filters?: RoomRatingFilters) {
@@ -47,23 +48,40 @@ export class RoomsServices {
       params.set("isWatchTogether", String(filters.isWatchTogether));
 
     return this.webService.get<PaginatedResponse<MovieWithRatings>>(
-      `/rooms/${roomId}/rating?${params.toString()}`,
+      `/${roomId}/rating?${params.toString()}`,
     );
   }
 
   createRoom(data: CreateRoomInputs) {
-    return this.webService.post<Room>(`/rooms`, { body: data });
+    return this.webService.post<Room>(``, { body: data });
   }
 
   joinRoom(data: JoinRoomInputs) {
-    return this.webService.post<{ message: string }>(`/rooms/join`, {
+    return this.webService.post<{ message: string }>(`/join`, {
       body: data,
     });
   }
 
+  inviteUser(roomId: string, email: string) {
+    return this.webService.post<{ message: string }>(`/${roomId}/invitations`, {
+      body: { email },
+    });
+  }
+
+  invitations(roomId: string) {
+    return this.webService.get<{ invitations: invitation[] }>(
+      `/${roomId}/invitations`,
+      {
+        next: {
+          tags: [`invitations-${roomId}`],
+        },
+      },
+    );
+  }
+
   addMovieToRoom(data: addMovieToRoomInputs) {
     return this.webService.post<{ message: string }>(
-      `/rooms/add-movie/${data.roomId}`,
+      `/add-movie/${data.roomId}`,
       {
         body: {
           dbId: data.dbId,
@@ -72,3 +90,5 @@ export class RoomsServices {
     );
   }
 }
+const roomsServices = new RoomsServices();
+export default roomsServices;

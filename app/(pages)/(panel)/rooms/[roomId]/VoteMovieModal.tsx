@@ -37,7 +37,7 @@ export default function VoteMovieModal({ movie, onClose }: { movie: MovieWithRat
 
         const res = await castVote(roomId, { movieId: movie.id, rate });
 
-        const { result, response } = JSON.parse(res)
+        const { result, response } = res
         if (response.ok) {
             addToast({
                 title: 'Rated!',
@@ -47,7 +47,7 @@ export default function VoteMovieModal({ movie, onClose }: { movie: MovieWithRat
         } else {
             addToast({
                 title: "Couldn't casting your vote!",
-                description: result.message,
+                description: response.message,
                 color: 'danger',
             })
         }

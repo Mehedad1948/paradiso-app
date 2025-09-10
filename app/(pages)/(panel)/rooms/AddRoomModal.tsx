@@ -21,7 +21,7 @@ import { uploadImage } from '../../../actions/storage/uploadImage';
 
 export default function AddRoomModal() {
     const { setSearchParam, params: { addRoomModal }, removeQuey } = useSetSearchParams();
-    
+
     const [isPublic, setIsPublic] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -40,7 +40,7 @@ export default function AddRoomModal() {
         };
 
         const res = await createRoom(data);
-        const { result, response } = JSON.parse(res);
+        const { result, response } = res;
 
         if (response.ok) {
             addToast({
@@ -51,7 +51,7 @@ export default function AddRoomModal() {
             addToast({
                 title: `Failed to create room.`,
                 color: 'danger',
-                description: result.message
+                description: response.message
             });
         }
     }
@@ -60,10 +60,13 @@ export default function AddRoomModal() {
         setIsUploading(true)
 
         const res = await uploadImage(file, folder);
-        const { result, response } = JSON.parse(res);
+        const { result, response } = res;
 
         if (response.ok) {
-            setUploadedImage(result.name)
+
+
+            setUploadedImage(result?.name || '')
+
             addToast({
                 title: `Image uploaded successfully!`,
                 color: 'success'
@@ -72,7 +75,7 @@ export default function AddRoomModal() {
             addToast({
                 title: `Failed to upload image.`,
                 color: 'danger',
-                description: result.message
+                description: response.message
             });
         }
         setIsUploading(false)

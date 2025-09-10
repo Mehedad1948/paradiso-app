@@ -2,10 +2,14 @@ import { cookies } from "next/headers";
 
 type RequestResult<T> = {
   result: T | null;
-  response?: Response;
+  response: {
+    ok: boolean;
+    status: number;
+    statusText: string;
+    message?: string;
+  };
   error?: string;
 };
-// utils/WebServices.ts
 export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 export interface RequestOptions extends Omit<RequestInit, "method" | "body"> {
@@ -67,7 +71,7 @@ export class WebServices {
 
     try {
       const response = await fetch(fullUrl, init);
-      
+
       const contentType = response.headers.get("content-type");
       let parsed: any = null;
 
@@ -77,21 +81,27 @@ export class WebServices {
         parsed = await response.text();
       }
 
-      if (!response.ok) {
-        return {
-          result: parsed,
-          response,
-          error: `HTTP ${response.status}: ${response.statusText}`,
-        };
-      }
-
       return {
-        result: parsed as T,
-        response,
+        result: response.ok ? (parsed as T) : parsed.message || null,
+        response: {
+          ...(parsed.message ? { message: parsed.message } : {}),
+          ok: response.ok,
+          status: response.status,
+          statusText: response.statusText,
+        },
+        error: response.ok
+          ? undefined
+          : parsed.message || `HTTP ${response.status}: ${response.statusText}`,
       };
     } catch (error: any) {
       return {
         result: null,
+        response: {
+          ok: false,
+          status: 0,
+          statusText: "",
+          message: error.message || "Unknown fetch error",
+        },
         error: error.message || "Unknown fetch error",
       };
     }

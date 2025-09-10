@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
     const email = formData.get("email") as string;
 
     const res = await forgotPassword({ email });
-    const { result, response } = JSON.parse(res);
+    const { result, response } = res;
 
     if (response?.ok) {
       addToast({
@@ -35,7 +35,7 @@ export default function ForgotPasswordPage() {
       });
       router.push(`/auth/reset-password?email=${email}`);
     } else {
-      setError(result?.message || "Unknown error");
+      setError(response?.message || "Unknown error");
     }
     setIsLoading(false)
   }
