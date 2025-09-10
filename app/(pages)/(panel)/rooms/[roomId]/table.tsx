@@ -42,6 +42,7 @@ export default function RatingTable({ ratings, }: { ratings: MovieWithRatings[],
 
     const { setSearchParam, params } = useSetSearchParams()
 
+
     const [movieToVote, setMovieToVote] = useState<null | MovieWithRatings>(null)
 
     const [deletingMovie, setDeletingMovie] = useState<MovieWithRatings | null>(null)
@@ -102,6 +103,9 @@ export default function RatingTable({ ratings, }: { ratings: MovieWithRatings[],
                         <TableRow>
                             <TableCell>
                                 <Alert color='primary'> No movies has been added yet</Alert>
+                            </TableCell>
+                            <TableCell>
+                                <span></span>
                             </TableCell>
                         </TableRow>
                     </TableBody>

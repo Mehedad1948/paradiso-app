@@ -1,9 +1,12 @@
 'use client'
 
-import { useModalController } from '@/hooks/useModalController'
-import roomsServices from '@/services/rooms';
+import { removeMovieFromRoom } from '@/app/actions/rooms/removeMovieFromRoom';
+import { useAction } from '@/hooks/core/useAction';
+import { useModalController } from '@/hooks/useModalController';
+import useSetSearchParams from '@/hooks/useSetSearchParams';
+import { MovieWithRatings } from '@/types/ratings';
+import { Alert } from '@heroui/alert';
 import { Button } from '@heroui/button';
-import { Input } from '@heroui/input';
 import {
     Modal,
     ModalBody,
@@ -11,16 +14,7 @@ import {
     ModalFooter,
     ModalHeader,
 } from '@heroui/modal';
-import { Fragment, use, useState } from 'react';
-import { useAction } from '@/hooks/core/useAction';
-import { inviteUser } from '@/app/actions/rooms/invitations';
 import { addToast } from '@heroui/toast';
-import { Chip } from '@heroui/chip';
-import { statusColorPicker } from '@/utils/statusColorPicker';
-import { MovieWithRatings } from '@/types/ratings';
-import { Alert } from '@heroui/alert';
-import { removeMovieFromRoom } from '@/app/actions/rooms/removeMovieFromRoom';
-import useSetSearchParams from '@/hooks/useSetSearchParams';
 
 export default function DeleteMovieFromRoomModal({ movie, onClose, }: { movie: MovieWithRatings, onClose: () => void }) {
 
@@ -89,7 +83,7 @@ export default function DeleteMovieFromRoomModal({ movie, onClose, }: { movie: M
                                 <Button color="danger" variant="light" onPress={() => onCloseModal(onClose)}>
                                     Close
                                 </Button>
-                                <Button color="danger" onPress={() => handleDelete()}>
+                                <Button isLoading={isLoading} color="danger" onPress={() => handleDelete()}>
                                     Delete
                                 </Button>
                             </div>
