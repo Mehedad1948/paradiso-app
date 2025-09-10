@@ -8,7 +8,7 @@ import {
 import { WebServices } from "..";
 import { MovieWithRatings, PaginatedResponse } from "@/types";
 
-export class RoomsServices {
+ class RoomsServices {
   private webService = new WebServices();
 
   getRooms({
@@ -72,3 +72,5 @@ export class RoomsServices {
     );
   }
 }
+const roomsServices = new RoomsServices()
+export default roomsServices

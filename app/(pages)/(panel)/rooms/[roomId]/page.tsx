@@ -1,8 +1,6 @@
 
 
-import SearchParamsSetterWrapper from '@/components/utils/SearchParamsSetterWrapper';
-import { RoomsServices } from '@/services/rooms';
-import { Button } from '@heroui/button';
+import roomsServices from '@/services/rooms';
 import { Suspense } from 'react';
 import AddMovieModal from './AddMovieModal';
 import RatingTable from './table';
@@ -41,7 +39,7 @@ export default async function page({ params, searchParams }: {
 }
 
 async function RoomFetcher({ searchParams, roomId, }: { searchParams: { [key: string]: string }, roomId: string, }) {
-    const { result } = await new RoomsServices().getRoomRatings(Number(roomId),
+    const { result } = await roomsServices.getRoomRatings(Number(roomId),
         { ...searchParams });
 
     const movies = result?.data || [];

@@ -1,7 +1,7 @@
 "use server";
 
+import authServices from '@/services/auth/authServices';
 import { cookies } from "next/headers";
-import { AuthServices } from "@/services/auth/authServices";
 
 export async function refreshAccessToken() {
   const cookieStore = await cookies();
@@ -11,9 +11,8 @@ export async function refreshAccessToken() {
   if (!refreshToken) {
       return { error: "No refresh token", status: 401 };
     }
-    
-    const res = await new AuthServices().refreshToken({ refreshToken });
-    console.log("❤️❤️❤️", res);
+
+    const res = await authServices.refreshToken({ refreshToken });
 
   if (res.response?.ok && res.result?.accessToken) {
     cookieStore.set("token", res.result.accessToken, {

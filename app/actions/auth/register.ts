@@ -1,11 +1,11 @@
 "use server";
 
-import { AuthServices } from "@/services/auth/authServices";
 import { RegisterInputs } from "@/services/auth/types";
+import usersServices from '@/services/user';
 import { formatResponse } from "@/utils/formatResponse";
 
 export async function register(data: RegisterInputs) {
-  const res = await new AuthServices().register(data);
+  const res = await usersServices.register(data);
 
   return formatResponse(res);
 }

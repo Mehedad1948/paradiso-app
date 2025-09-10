@@ -1,12 +1,12 @@
 "use server";
 
-import { AuthServices } from "@/services/auth/authServices";
+import authServices from '@/services/auth/authServices';
 import { VerifyEmailInputs } from "@/services/auth/types";
 import { formatResponse } from "@/utils/formatResponse";
 import { cookies } from "next/headers";
 
 export async function verifyEmail(data: VerifyEmailInputs) {
-  const res = await new AuthServices().verifyEmail(data);
+  const res = await authServices.verifyEmail(data);
   if (res.response?.ok && res.result) {
     const { accessToken, refreshToken } = res.result;
 

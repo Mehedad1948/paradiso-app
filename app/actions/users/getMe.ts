@@ -1,10 +1,10 @@
 "use server";
 
-import { UsersServices } from "@/services/user";
+import usersServices from "@/services/user";
 import { formatResponse } from "@/utils/formatResponse";
 
 export async function getMe() {
-  const res = await new UsersServices().getMe();
+  const res = await usersServices.getMe();
 
   return formatResponse(res);
 }

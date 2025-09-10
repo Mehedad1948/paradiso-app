@@ -1,11 +1,11 @@
 "use server";
 
-import { AuthServices } from "@/services/auth/authServices";
-import { ForgotPasswordInputs, ResetPasswordInputs } from "@/services/auth/types";
+import authServices from '@/services/auth/authServices';
+import { ResetPasswordInputs } from "@/services/auth/types";
 import { formatResponse } from "@/utils/formatResponse";
 
 export async function resetPassword(data: ResetPasswordInputs) {
-  const res = await new AuthServices().resetPassword(data);
+  const res = await authServices.resetPassword(data);
 
   return formatResponse(res);
 }

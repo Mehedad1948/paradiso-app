@@ -1,8 +1,6 @@
-import { CreateRoomInputs, Room } from "@/types/rooms";
 import { WebServices } from "..";
-import { PaginatedResponse } from "@/types";
 
-export class StorageServices {
+class StorageServices {
   private webService = new WebServices();
 
   uploadImage(file: File, folder: string) {
@@ -12,3 +10,6 @@ export class StorageServices {
     return this.webService.post(`/uploads/file`, { body: formData });
   }
 }
+
+const storageServices = new StorageServices();
+export default storageServices;

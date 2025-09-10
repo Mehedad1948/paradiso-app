@@ -44,12 +44,21 @@ export default function TableOperators() {
                 />
             </div>
 
-            <SearchParamsSetterWrapper
-                className='block'
-                keyValue={{ 'add-movie-modal': 'true' }}
-            >
-                <Button color='secondary'>Add Movie</Button>
-            </SearchParamsSetterWrapper>
+            <div className='flex items-center gap-4'>
+                <SearchParamsSetterWrapper
+                    className='block'
+                    keyValue={{ 'invite-modal': 'true' }}
+                >
+                    <Button  color='primary'>Invite </Button>
+                </SearchParamsSetterWrapper>
+
+                <SearchParamsSetterWrapper
+                    className='block'
+                    keyValue={{ 'add-movie-modal': 'true' }}
+                >
+                    <Button color='secondary'>Add Movie</Button>
+                </SearchParamsSetterWrapper>
+            </div>
         </div>
     );
 }

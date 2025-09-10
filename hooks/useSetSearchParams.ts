@@ -5,7 +5,8 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
+import useSizeController from "./useSizeController";
 
 const useSetSearchParams = (defaultPath?: string) => {
   const router = useRouter();
@@ -19,8 +20,7 @@ const useSetSearchParams = (defaultPath?: string) => {
 
   const params: { [key: string]: string } = {};
 
-  for (const pair of Array.from(entries)) {
-    const [key, value] = pair;
+  for (const [key, value] of Array.from(entries)) {
     params[key] = value;
   }
 
@@ -156,6 +156,73 @@ const useSetSearchParams = (defaultPath?: string) => {
     [setSearchParam],
   );
 
+  // ---------------------------
+  // 🔹 HASH PARAM SUPPORT
+  // ---------------------------
+  const hashParams = useMemo(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const hash = window.location.hash.replace(/^#/, "");
+    const result: Record<string, string> = {};
+    if (hash) {
+      hash.split("&").forEach((pair) => {
+        const [key, value] = pair.split("=");
+        if (key) result[key] = value || "";
+      });
+    }
+    return result;
+  }, [typeof window !== "undefined" ? window.location.hash : ""]);
+
+  const { isSmall } = useSizeController();
+
+  const setHashParams = (
+    argArray: InputType[],
+    options?: { noDesktopHistory?: boolean; noMobileHistory?: boolean },
+  ): void => {
+    const updated = { ...hashParams };
+
+    argArray.forEach((obj) => {
+      Object.entries(obj).forEach(([key, value]) => {
+        updated[key] = value.toString();
+      });
+    });
+
+    const newHash = Object.entries(updated)
+      .map(([k, v]) => `${k}=${v}`)
+      .join("&");
+
+    if (
+      (!isSmall && options?.noDesktopHistory) ||
+      (isSmall && options?.noMobileHistory)
+    ) {
+      // Replace current URL without adding history
+      history.replaceState(
+        null,
+        "",
+        `${window.location.pathname}${window.location.search}#${newHash}`,
+      );
+    } else {
+      // Default behavior: add to history
+      window.location.hash = newHash;
+    }
+  };
+
+  const deleteHashParams = (keys: string[]): void => {
+    const updated = { ...hashParams };
+    keys.forEach((key) => {
+      delete updated[key];
+    });
+    const newHash = Object.entries(updated)
+      .map(([k, v]) => `${k}=${v}`)
+      .join("&");
+    history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${window.location.search}#${newHash}`,
+    );
+  };
+
   return {
     setSearchParamShallow,
     setSearchParam,
@@ -166,6 +233,11 @@ const useSetSearchParams = (defaultPath?: string) => {
     addQuey,
     removeQuey,
     mainParams,
+
+    // new exports
+    hashParams,
+    setHashParams,
+    deleteHashParams,
   };
 };
 

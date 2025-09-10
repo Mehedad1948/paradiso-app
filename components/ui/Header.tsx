@@ -1,9 +1,9 @@
-import { UsersServices } from '@/services/user';
 import { Avatar, AvatarGroup, AvatarIcon } from "@heroui/avatar";
 import ClientDataSetter from '../utils/ClientDataSetter';
+import usersServices from '@/services/user';
 
 export default async function Header() {
-    const { result: user } = await new UsersServices().getMe();
+    const { result: user } = await usersServices.getMe();
 
     return (
         <div className='w-full py-4  flex justify-between mx-auto  max-w-7xl items-center'>
