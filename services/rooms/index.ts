@@ -8,6 +8,7 @@ import {
 import { WebServices } from "..";
 import { MovieWithRatings, PaginatedResponse } from "@/types";
 import { invitation } from "@/types/invitations";
+import { NEXT_TAGS } from "@/constatnts/tags";
 
 class RoomsServices {
   private webService = new WebServices("/rooms");
@@ -49,6 +50,7 @@ class RoomsServices {
 
     return this.webService.get<PaginatedResponse<MovieWithRatings>>(
       `/${roomId}/rating?${params.toString()}`,
+      { next: { tags: [`${NEXT_TAGS.ROOM_RATINGS}-${roomId}`] } },
     );
   }
 
