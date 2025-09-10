@@ -5,7 +5,7 @@ import {
   useRouter,
   useSearchParams,
 } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useSizeController from "./useSizeController";
 
 const useSetSearchParams = (defaultPath?: string) => {
@@ -159,10 +159,9 @@ const useSetSearchParams = (defaultPath?: string) => {
   // ---------------------------
   // 🔹 HASH PARAM SUPPORT
   // ---------------------------
-  const hashParams = useMemo(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
+  const [hashParams, setHashParamsState] = useState<Record<string, string>>({});
+
+  const parseHash = (): Record<string, string> => {
     const hash = window.location.hash.replace(/^#/, "");
     const result: Record<string, string> = {};
     if (hash) {
@@ -172,9 +171,20 @@ const useSetSearchParams = (defaultPath?: string) => {
       });
     }
     return result;
-  }, [typeof window !== "undefined" ? window.location.hash : ""]);
+  };
+
+  // initialize on mount
+  useEffect(() => {
+    setHashParamsState(parseHash());
+  }, []);
 
   const { isSmall } = useSizeController();
+
+  useEffect(() => {
+    const update = () => setHashParamsState(parseHash());
+    window.addEventListener("hashchange", update);
+    return () => window.removeEventListener("hashchange", update);
+  }, []);
 
   const setHashParams = (
     argArray: InputType[],
@@ -206,6 +216,7 @@ const useSetSearchParams = (defaultPath?: string) => {
       // Default behavior: add to history
       window.location.hash = newHash;
     }
+    setHashParamsState(updated);
   };
 
   const deleteHashParams = (keys: string[]): void => {
@@ -221,6 +232,8 @@ const useSetSearchParams = (defaultPath?: string) => {
       "",
       `${window.location.pathname}${window.location.search}#${newHash}`,
     );
+
+    setHashParamsState(updated);
   };
 
   return {

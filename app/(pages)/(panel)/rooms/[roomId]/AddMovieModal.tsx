@@ -25,18 +25,19 @@ import { Switch } from "@heroui/switch";
 import useSetSearchParams from '@/hooks/useSetSearchParams';
 import { addMovieToRoom } from '@/app/actions/rooms/addMovieToRoom';
 import { addToast } from '@heroui/toast';
+
 export default function AddMovieModal({ roomId }: { roomId: string }) {
     const pathname = usePathname();
     const [query, setQuery] = useState('');
     const [selectedMovie, setSelectedMovie] = useState<DbMovie | null>(null);
     const [debouncedQuery] = useDebounce(query, 500);
     const [results, setResults] = useState<any[]>([]);
-    const { setSearchParam, removeQuey, params } = useSetSearchParams();
+    const {  deleteHashParams, setHashParams, hashParams,  } = useSetSearchParams();
 
     const [isAdding, setIsAdding] = useState(false);
 
-    const isOpen = params['add-movie-modal'] === 'true'
-    const { push } = useRouter();
+
+    const isOpen = hashParams['add-movie-modal'] === 'true'
 
     useEffect(() => {
         async function handleSearch() {
@@ -74,7 +75,7 @@ export default function AddMovieModal({ roomId }: { roomId: string }) {
                 description: 'You can now cast your vote!',
                 color: 'success',
             })
-            removeQuey('add-movie-modal')
+            deleteHashParams(['add-movie-modal'])
         } else {
             addToast({
                 title: 'Error adding movie to room',
@@ -172,7 +173,7 @@ export default function AddMovieModal({ roomId }: { roomId: string }) {
                             </div>}
                         </ModalBody>
                         <ModalFooter>
-                            <Button color="danger" variant="light" onPress={() => removeQuey('add-movie-modal')}>
+                            <Button color="danger" variant="light" onPress={() => deleteHashParams(['add-movie-modal'])}>
                                 Close
                             </Button>
                             <Button isLoading={isAdding} isDisabled={isAdding} color="secondary" onPress={() => handleAddMovieToRoom()}>

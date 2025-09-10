@@ -30,10 +30,9 @@ export default async function page({ params, searchParams }: {
             <Suspense key={Object.values(searchParamsObject).join('')}>
                 <RoomFetcher roomId={roomId} searchParams={await searchParams} />
             </Suspense>
-            <Suspense key={addModalParam}>
-                {addModalParam === 'true' && <AddMovieModal roomId={roomId} />}
-                {/* {voteModalParam === 'true' && <AddMovieModal roomId={roomId} />} */}
-            </Suspense>
+   
+                 <AddMovieModal roomId={roomId} />
+           
         </div >
     );
 }

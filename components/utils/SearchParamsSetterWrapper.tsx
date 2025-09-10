@@ -13,10 +13,10 @@ export default function SearchParamsSetterWrapper({
     children,
     ...props
 }: SearchParamsSetterWrapperProps) {
-    const { setSearchParam } = useSetSearchParams();
+    const { setHashParams } = useSetSearchParams();
 
     const handleClick = () => {
-        setSearchParam([keyValue]);
+        setHashParams([keyValue]);
     };
 
     return React.cloneElement(children, {
