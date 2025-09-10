@@ -11,13 +11,13 @@ import {
 import { Button } from '@heroui/button';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { createRoom } from '../actions/rooms/createRoom';
+import { createRoom } from '../../../actions/rooms/createRoom';
 import { addToast } from '@heroui/toast';
 import { Input, Textarea } from '@heroui/input';
 import { Switch } from '@heroui/switch';
 
 import { useState } from 'react';
-import { uploadImage } from '../actions/storage/uploadImage';
+import { uploadImage } from '../../../actions/storage/uploadImage';
 
 export default function AddRoomModal() {
     const { setSearchParam, params: { addRoomModal }, removeQuey } = useSetSearchParams();
