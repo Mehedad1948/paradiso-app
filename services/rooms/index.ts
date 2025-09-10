@@ -8,7 +8,7 @@ import {
 import { WebServices } from "..";
 import { MovieWithRatings, PaginatedResponse } from "@/types";
 import { invitation } from "@/types/invitations";
-import { NEXT_TAGS } from "@/constatnts/tags";
+import { NEXT_TAGS } from "@/constants/tags";
 
 class RoomsServices {
   private webService = new WebServices("/rooms");

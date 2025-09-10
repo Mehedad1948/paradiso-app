@@ -1,6 +1,6 @@
 "use server";
 
-import { NEXT_TAGS } from "@/constatnts/tags";
+import { NEXT_TAGS } from "@/constants/tags";
 import ratingServices from "@/services/ratings";
 import { VoteType } from "@/types/ratings";
 import { revalidateTag } from "next/cache";

@@ -1,6 +1,6 @@
 "use server";
 
-import { NEXT_TAGS } from "@/constatnts/tags";
+import { NEXT_TAGS } from "@/constants/tags";
 import roomsServices from "@/services/rooms";
 import { revalidateTag } from "next/cache";
 export async function inviteUser({
