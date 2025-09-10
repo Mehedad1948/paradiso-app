@@ -156,86 +156,6 @@ const useSetSearchParams = (defaultPath?: string) => {
     [setSearchParam],
   );
 
-  // ---------------------------
-  // 🔹 HASH PARAM SUPPORT
-  // ---------------------------
-  const [hashParams, setHashParamsState] = useState<Record<string, string>>({});
-
-  const parseHash = (): Record<string, string> => {
-    const hash = window.location.hash.replace(/^#/, "");
-    const result: Record<string, string> = {};
-    if (hash) {
-      hash.split("&").forEach((pair) => {
-        const [key, value] = pair.split("=");
-        if (key) result[key] = value || "";
-      });
-    }
-    return result;
-  };
-
-  // initialize on mount
-  useEffect(() => {
-    setHashParamsState(parseHash());
-  }, []);
-
-  const { isSmall } = useSizeController();
-
-  useEffect(() => {
-    const update = () => setHashParamsState(parseHash());
-    window.addEventListener("hashchange", update);
-    return () => window.removeEventListener("hashchange", update);
-  }, []);
-
-  const setHashParams = (
-    argArray: InputType[],
-    options?: { noDesktopHistory?: boolean; noMobileHistory?: boolean },
-  ): void => {
-    const updated = { ...hashParams };
-
-    argArray.forEach((obj) => {
-      Object.entries(obj).forEach(([key, value]) => {
-        updated[key] = value.toString();
-      });
-    });
-
-    const newHash = Object.entries(updated)
-      .map(([k, v]) => `${k}=${v}`)
-      .join("&");
-
-    if (
-      (!isSmall && options?.noDesktopHistory) ||
-      (isSmall && options?.noMobileHistory)
-    ) {
-      // Replace current URL without adding history
-      history.replaceState(
-        null,
-        "",
-        `${window.location.pathname}${window.location.search}#${newHash}`,
-      );
-    } else {
-      // Default behavior: add to history
-      window.location.hash = newHash;
-    }
-    setHashParamsState(updated);
-  };
-
-  const deleteHashParams = (keys: string[]): void => {
-    const updated = { ...hashParams };
-    keys.forEach((key) => {
-      delete updated[key];
-    });
-    const newHash = Object.entries(updated)
-      .map(([k, v]) => `${k}=${v}`)
-      .join("&");
-    history.replaceState(
-      null,
-      "",
-      `${window.location.pathname}${window.location.search}#${newHash}`,
-    );
-
-    setHashParamsState(updated);
-  };
-
   return {
     setSearchParamShallow,
     setSearchParam,
@@ -247,10 +167,6 @@ const useSetSearchParams = (defaultPath?: string) => {
     removeQuey,
     mainParams,
 
-    // new exports
-    hashParams,
-    setHashParams,
-    deleteHashParams,
   };
 };
 

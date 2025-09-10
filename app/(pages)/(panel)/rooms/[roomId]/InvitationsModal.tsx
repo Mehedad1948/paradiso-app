@@ -19,7 +19,6 @@ import { Chip } from '@heroui/chip';
 import { statusColorPicker } from '@/utils/statusColorPicker';
 
 export default function InvitationsModal({ roomId, invitationsPromise }: { roomId: string, invitationsPromise: ReturnType<typeof roomsServices.invitations>; }) {
-    const [isAdding, setIsAdding] = useState(false);
 
     const { isOpen, onCloseModal } = useModalController('invite-modal')
 
@@ -86,9 +85,6 @@ export default function InvitationsModal({ roomId, invitationsPromise }: { roomI
                         <ModalFooter>
                             <Button color="danger" variant="light" onPress={onCloseModal}>
                                 Close
-                            </Button>
-                            <Button isLoading={isAdding} isDisabled={isAdding} color="secondary" onPress={() => handleAddMovieToRoom()}>
-                                Invite
                             </Button>
                         </ModalFooter>
                     </>

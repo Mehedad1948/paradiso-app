@@ -1,8 +1,7 @@
 "use server";
 
 import roomsServices from "@/services/rooms";
-;
-
+import { revalidateTag } from "next/cache";
 export async function inviteUser({
   email,
   roomId,
@@ -11,5 +10,8 @@ export async function inviteUser({
   roomId: string;
 }) {
   const res = await roomsServices.inviteUser(roomId, email);
+  if (res.response.ok) {
+    revalidateTag(`invitations-${roomId}`);
+  }
   return res;
 }

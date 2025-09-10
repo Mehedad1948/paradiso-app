@@ -71,6 +71,11 @@ class RoomsServices {
   invitations(roomId: string) {
     return this.webService.get<{ invitations: invitation[] }>(
       `/${roomId}/invitations`,
+      {
+        next: {
+          tags: [`invitations-${roomId}`],
+        },
+      },
     );
   }
 
