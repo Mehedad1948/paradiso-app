@@ -4,7 +4,6 @@ import { useModalController } from '@/hooks/useModalController'
 import roomsServices from '@/services/rooms';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
-import { Chip } from "@heroui/chip";
 import {
     Modal,
     ModalBody,
@@ -16,6 +15,8 @@ import { Fragment, use, useState } from 'react';
 import { useAction } from '@/hooks/core/useAction';
 import { inviteUser } from '@/app/actions/rooms/invitations';
 import { addToast } from '@heroui/toast';
+import { Chip } from '@heroui/chip';
+import { statusColorPicker } from '@/utils/statusColorPicker';
 
 export default function InvitationsModal({ roomId, invitationsPromise }: { roomId: string, invitationsPromise: ReturnType<typeof roomsServices.invitations>; }) {
     const [isAdding, setIsAdding] = useState(false);
@@ -70,11 +71,11 @@ export default function InvitationsModal({ roomId, invitationsPromise }: { roomI
                                         Invite
                                     </Button>
                                 </div>
-                                <p>Invitations</p>
-                                <div className='grid grid-cols-[1fr,_auto]'>
+                                <p className='font-semibold'>Invitations</p>
+                                <div className='grid grid-cols-[1fr,_auto] mt-2 gap-y-3 items-center'>
                                     {result?.invitations.map(item => <Fragment key={item.id}>
-                                        <span>{item.email}</span>
-                                        <Chip >
+                                        <span className='text-sm'>{item.email}</span>
+                                        <Chip className='capitalize' size='sm' color={statusColorPicker(item.status)} >
                                             {item.status}
                                         </Chip>
                                     </Fragment>)}
