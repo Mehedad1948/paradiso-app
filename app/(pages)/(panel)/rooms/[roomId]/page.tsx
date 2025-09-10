@@ -21,12 +21,16 @@ export default async function page({ params, searchParams }: {
     const ratingsPromise = roomsServices.getRoomRatings(Number(roomId),
         { ...searchParamsObject })
 
+    const roomDetailsPromise = roomsServices.getRoomById(Number(roomId))
+
+    const roomPromises = Promise.all([ratingsPromise, roomDetailsPromise])
+
     return (
         <div>
             <TableOperators />
 
             <Suspense key={Object.values(searchParamsObject).join('')}>
-                <RatingTable ratingsPromise={ratingsPromise} />
+                <RatingTable roomPromises={roomPromises} />
             </Suspense>
 
             <AddMovieModal roomId={roomId} />

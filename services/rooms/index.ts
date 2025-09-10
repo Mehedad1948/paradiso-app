@@ -35,9 +35,8 @@ class RoomsServices {
     return this.webService.get<Room>(`/${roomId}`);
   }
 
-  getRoomRatings(roomId: number, filters?: RoomRatingFilters) {
+  async getRoomRatings(roomId: number, filters?: RoomRatingFilters) {
     const params = new URLSearchParams();
-
     if (filters?.search) params.set("search", filters.search);
     if (filters?.sortBy) params.set("sortBy", filters.sortBy);
     if (filters?.sortOrder) params.set("sortOrder", filters.sortOrder);

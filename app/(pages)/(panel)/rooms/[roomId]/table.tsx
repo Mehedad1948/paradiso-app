@@ -17,9 +17,22 @@ import VoteMovieModal from './VoteMovieModal';
 import SearchParamsSetterWrapper from '@/components/utils/SearchParamsSetterWrapper';
 import DeleteMovieFromRoomModal from './DeleteMovieFromRoomModal';
 import roomsServices from '@/services/rooms';
+import { useUserStore } from '@/store/user';
 
-export default function RatingTable({ ratingsPromise, }: { ratingsPromise: ReturnType<typeof roomsServices.getRoomRatings> }) {
-    const { result } = use(ratingsPromise)
+export default function RatingTable({ roomPromises }:
+    {
+        roomPromises:
+        Promise<[
+            Awaited<ReturnType<typeof roomsServices.getRoomRatings>>,
+            Awaited<ReturnType<typeof roomsServices.getRoomById>>
+        ]>,
+
+
+    }) {
+    const [{ result }, { result: roomDetails }] = use(roomPromises)
+
+
+    const { user } = useUserStore()
     const ratings = result?.data
     const columns = [{
         label: 'TITLE',
@@ -48,6 +61,8 @@ export default function RatingTable({ ratingsPromise, }: { ratingsPromise: Retur
     const [movieToVote, setMovieToVote] = useState<null | MovieWithRatings>(null)
 
     const [deletingMovie, setDeletingMovie] = useState<MovieWithRatings | null>(null)
+
+    console.log({ user, ratings });
 
 
     return (
@@ -88,14 +103,16 @@ export default function RatingTable({ ratingsPromise, }: { ratingsPromise: Retur
                                     {<Button onPress={() => setMovieToVote(item)} color='secondary' size='sm'>
                                         Vote
                                     </Button>}
-                                    <SearchParamsSetterWrapper
-                                        className='block'
-                                        keyValue={{ 'delete-movie-modal': 'true', 'movie-id': item.id }}
-                                    >
-                                        <Button onPress={() => setDeletingMovie(item)} size='sm' className='w-fit' color='danger'>
-                                            Delete
-                                        </Button>
-                                    </SearchParamsSetterWrapper>
+
+                                    {(user?.role === 'admin' || roomDetails?.owner.id === user?.id || item.addedBy.id === user?.id)
+                                        && <SearchParamsSetterWrapper
+                                            className='block'
+                                            keyValue={{ 'delete-movie-modal': 'true', 'movie-id': item.id }}
+                                        >
+                                            <Button onPress={() => setDeletingMovie(item)} size='sm' className='w-fit' color='danger'>
+                                                Delete
+                                            </Button>
+                                        </SearchParamsSetterWrapper>}
                                 </div>
                             </TableCell>
                         </TableRow>
