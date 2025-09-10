@@ -22,17 +22,19 @@ export default async function page({ params, searchParams }: {
         delete searchParamsObject['add-movie-modal'];
     }
 
+    const invitations = roomsServices.invitations(roomId)
+
 
     return (
         <div>
-            <TableOperators />
+            <TableOperators invitationsPromise={invitations} />
 
             <Suspense key={Object.values(searchParamsObject).join('')}>
                 <RoomFetcher roomId={roomId} searchParams={await searchParams} />
             </Suspense>
-   
-                 <AddMovieModal roomId={roomId} />
-           
+
+            <AddMovieModal roomId={roomId} />
+
         </div >
     );
 }
