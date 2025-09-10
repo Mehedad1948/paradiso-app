@@ -12,13 +12,15 @@ import {
     TableRow
 } from "@heroui/table";
 import { ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { use, useState } from 'react';
 import VoteMovieModal from './VoteMovieModal';
 import SearchParamsSetterWrapper from '@/components/utils/SearchParamsSetterWrapper';
 import DeleteMovieFromRoomModal from './DeleteMovieFromRoomModal';
+import roomsServices from '@/services/rooms';
 
-export default function RatingTable({ ratings, }: { ratings: MovieWithRatings[], }) {
-
+export default function RatingTable({ ratingsPromise, }: { ratingsPromise: ReturnType<typeof roomsServices.getRoomRatings> }) {
+    const { result } = use(ratingsPromise)
+    const ratings = result?.data
     const columns = [{
         label: 'TITLE',
         key: 'title',
