@@ -1,6 +1,7 @@
 'use client'
-import { UserType } from '@/types';
+import useSetSearchParams from '@/hooks/useSetSearchParams';
 import { MovieWithRatings } from '@/types/ratings';
+import { Alert } from '@heroui/alert';
 import { Button } from '@heroui/button';
 import {
     Table,
@@ -10,15 +11,13 @@ import {
     TableHeader,
     TableRow
 } from "@heroui/table";
+import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import VoteMovieModal from './VoteMovieModal';
-import { ChevronDown } from 'lucide-react';
-import useSetSearchParams from '@/hooks/useSetSearchParams';
-import { Alert } from '@heroui/alert';
+import SearchParamsSetterWrapper from '@/components/utils/SearchParamsSetterWrapper';
+import DeleteMovieFromRoomModal from './DeleteMovieFromRoomModal';
 
 export default function RatingTable({ ratings, }: { ratings: MovieWithRatings[], }) {
-    console.log(ratings);
-
 
     const columns = [{
         label: 'TITLE',
@@ -45,6 +44,8 @@ export default function RatingTable({ ratings, }: { ratings: MovieWithRatings[],
 
     const [movieToVote, setMovieToVote] = useState<null | MovieWithRatings>(null)
 
+    const [deletingMovie, setDeletingMovie] = useState<MovieWithRatings | null>(null)
+
 
     return (
         <>
@@ -65,7 +66,7 @@ export default function RatingTable({ ratings, }: { ratings: MovieWithRatings[],
                 </TableHeader>
                 {ratings?.length ? <TableBody items={ratings}>
                     {(item) => (
-                        <TableRow key={item.title}>
+                        <TableRow className='items-center' key={item.title}>
                             <TableCell className=' grid grid-cols-[36px,_1fr] items-center gap-3'>
                                 <img
                                     src={process.env.NEXT_PUBLIC_BASE_TMDB_IMAGE_URL + 'w500' + item.poster_path}
@@ -79,10 +80,20 @@ export default function RatingTable({ ratings, }: { ratings: MovieWithRatings[],
                                     {rate || 'Not Voted'}
                                 </TableCell>
                             ))}
-                            <TableCell className=' grid grid-cols-[36px,_1fr]'>
-                                {<Button onPress={() => setMovieToVote(item)} color='secondary' size='sm'>
-                                    Vote
-                                </Button>}
+                            <TableCell className=' '>
+                                <div className='flex items-center gap-4'>
+                                    {<Button onPress={() => setMovieToVote(item)} color='secondary' size='sm'>
+                                        Vote
+                                    </Button>}
+                                    <SearchParamsSetterWrapper
+                                        className='block'
+                                        keyValue={{ 'delete-movie-modal': 'true', 'movie-id': item.id }}
+                                    >
+                                        <Button onPress={() => setDeletingMovie(item)} size='sm' className='w-fit' color='danger'>
+                                            Delete
+                                        </Button>
+                                    </SearchParamsSetterWrapper>
+                                </div>
                             </TableCell>
                         </TableRow>
                     )}
@@ -91,9 +102,6 @@ export default function RatingTable({ ratings, }: { ratings: MovieWithRatings[],
                         <TableRow>
                             <TableCell>
                                 <Alert color='primary'> No movies has been added yet</Alert>
-
-                            </TableCell>
-                            <TableCell>
                             </TableCell>
                         </TableRow>
                     </TableBody>
@@ -102,6 +110,8 @@ export default function RatingTable({ ratings, }: { ratings: MovieWithRatings[],
             {movieToVote &&
                 <VoteMovieModal movie={movieToVote} onClose={() => setMovieToVote(null)} />
             }
+            {deletingMovie && <DeleteMovieFromRoomModal movie={deletingMovie}
+                onClose={() => setDeletingMovie(null)} />}
         </>
     );
 }

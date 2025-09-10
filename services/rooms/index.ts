@@ -89,6 +89,17 @@ class RoomsServices {
       },
     );
   }
+
+  deleteMovie({ roomId, movieId }: { roomId: string; movieId: string }) {
+    return this.webService.delete<{ message: string }>(
+      `/delete-movie/${roomId}`,
+      {
+        body: {
+          movieId: movieId,
+        },
+      },
+    );
+  }
 }
 const roomsServices = new RoomsServices();
 export default roomsServices;
