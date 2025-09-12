@@ -40,6 +40,7 @@ export default function SignInPage({ children }: { children: ReactNode }) {
         description: `Hi there 👋`,
         color: 'success',
       });
+      push(origin || '/rooms')
     } else {
       setError(response?.message || "Unknown error");
     }

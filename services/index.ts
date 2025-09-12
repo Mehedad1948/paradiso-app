@@ -1,15 +1,6 @@
+import { RequestResult } from "@/types/request";
 import { cookies } from "next/headers";
 
-type RequestResult<T> = {
-  result: T | null;
-  response: {
-    ok: boolean;
-    status: number;
-    statusText: string;
-    message?: string;
-  };
-  error?: string;
-};
 export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 export interface RequestOptions extends Omit<RequestInit, "method" | "body"> {

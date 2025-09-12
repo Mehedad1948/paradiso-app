@@ -18,6 +18,8 @@ import SearchParamsSetterWrapper from '@/components/utils/SearchParamsSetterWrap
 import DeleteMovieFromRoomModal from './DeleteMovieFromRoomModal';
 import roomsServices from '@/services/rooms';
 import { useUserStore } from '@/store/user';
+import TableBottomContent from './components/TableBottomCotnent';
+import { format } from 'date-fns';
 
 export default function RatingTable({ roomPromises }:
     {
@@ -35,7 +37,7 @@ export default function RatingTable({ roomPromises }:
     const { user } = useUserStore()
     const ratings = result?.data
     const columns = [{
-        label: 'TITLE',
+        label: `TITLE (${result?.meta.totalItems})`,
         key: 'title',
         isUser: false
     },
@@ -62,12 +64,12 @@ export default function RatingTable({ roomPromises }:
 
     const [deletingMovie, setDeletingMovie] = useState<MovieWithRatings | null>(null)
 
-    console.log({ user, ratings });
+
 
 
     return (
         <>
-            {<Table aria-label="Movies with Ratings table">
+            {<Table bottomContentPlacement="outside" aria-label="Movies with Ratings table">
                 <TableHeader columns={columns}>
                     {
                         (column) => <TableColumn key={column.key}>
@@ -91,7 +93,7 @@ export default function RatingTable({ roomPromises }:
                                     alt={item.title}
                                     className='rounded-lg'
                                 />
-                                <span className=' text-base'>{item.title}</span>
+                                <span className=' text-base'>{item.title} <span className='text-primary-500 text-sm'> - {format(item.release_date, 'yyyy')}</span></span>
                             </TableCell>
                             {item.ratings.map(({ user, rate }) => (
                                 <TableCell key={user.id}>

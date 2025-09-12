@@ -1,36 +1,33 @@
 // hooks/use-server-query.ts
 import { getErrorMessage } from "@/lib/functions/getErrorMessage";
+import { RequestResult } from "@/types/request";
 import { addToast } from "@heroui/toast";
 import { useState, useEffect, useCallback } from "react";
 
-type ActionReturn<T extends (...args: any[]) => Promise<any>> = Awaited<
-  ReturnType<T>
->;
-
-export function useServerQuery<T extends (...args: any[]) => Promise<any>>(
-  action: T,
-  dependencies: any[] = [],
+export function useServerQuery<T, Args extends any[] = any[]>(
+  action: (...args: Args) => Promise<RequestResult<T>>,
+  dependencies: Args = [] as unknown as Args,
 ) {
-  const [data, setData] = useState<ActionReturn<T>["data"] | null>(null);
+  const [data, setData] = useState<T | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
 
   const [refetchCounter, setRefetchCounter] = useState(0);
 
   const fetchData = useCallback(
-    async (...args: Parameters<T>) => {
+    async (...args: Args) => {
       setIsLoading(true);
       setIsError(false);
 
       try {
-        const res: ActionReturn<T> = await action(...args);
+        const res = await action(...args);
 
-        if (res.success) {
-          setData(res.data);
+        if (res.response.ok) {
+          setData(res.result);
         } else {
           setIsError(true);
           addToast({
-            title: res.message || "An unexpected error occurred.",
+            title: res.response.message || "An unexpected error occurred.",
             color: "danger",
           });
         }
@@ -48,8 +45,8 @@ export function useServerQuery<T extends (...args: any[]) => Promise<any>>(
   );
 
   useEffect(() => {
-    fetchData(...(dependencies as Parameters<T>));
-  }, [fetchData, refetchCounter, ...dependencies]);
+    fetchData(...dependencies);
+  }, [refetchCounter, ...dependencies]);
 
   const refetch = useCallback(() => {
     setRefetchCounter((prev) => prev + 1);

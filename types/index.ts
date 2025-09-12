@@ -7,7 +7,7 @@ export type IconSvgProps = SVGProps<SVGSVGElement> & {
 export type MovieWithRatings = {
   id: string;
   title: string;
-  releaseDate: string;
+  release_date: string;
   imdbRate: number;
   image: string;
   isWatchedTogether: boolean;
@@ -27,26 +27,7 @@ export type MovieWithRatings = {
   }[];
 };
 
-export type PaginationMeta = {
-  totalItems: number;
-  itemsPerPage: number;
-  totalPages: number;
-  currentPage: number;
-};
 
-export type PaginationLinks = {
-  first: string;
-  current: string;
-  next: string;
-  previous: string;
-  last: string;
-};
-
-export type PaginatedResponse<T> = {
-  data: T[];
-  meta: PaginationMeta;
-  links: PaginationLinks;
-};
 
 export type UserType = {
   id: number;

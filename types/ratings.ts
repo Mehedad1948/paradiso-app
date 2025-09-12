@@ -4,11 +4,10 @@ export type MovieWithRatings = {
   title: string;
   poster_path: string;
   vote_average: number | null;
-  releaseDate: string;
+  release_date: string;
   original_title: string;
   hasVoted: boolean;
   video: string;
-  release_date: string;
   imdbRate: string | null;
   imdbLink: string | null; // ISO date string
   ratings: {

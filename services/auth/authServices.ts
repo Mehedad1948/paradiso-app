@@ -34,14 +34,14 @@ import {
   }
 
   async forgotPassword(body: ForgotPasswordInputs) {
-    const res = await this.webService.post(`/auth/forget-password`, {
+    const res = await this.webService.post(`/forget-password`, {
       body,
     });
     return res;
   }
 
   async resetPassword(body: ResetPasswordInputs) {
-    const res = await this.webService.post(`/auth/reset-password`, {
+    const res = await this.webService.post(`/reset-password`, {
       body,
     });
     return res;
@@ -51,7 +51,7 @@ import {
     const res = await this.webService.post<{
       accessToken: string;
       refreshToken: string;
-    }>(`/auth/refresh-tokens`, {
+    }>(`/refresh-tokens`, {
       body,
     });
     return res;
