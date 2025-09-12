@@ -1,3 +1,7 @@
+import { NEXT_TAGS } from "@/constants/tags";
+import { MovieWithRatings } from "@/types";
+import { Invitation } from "@/types/invitations";
+import { PaginatedResponse } from "@/types/request";
 import {
   addMovieToRoomInputs,
   CreateRoomInputs,
@@ -6,10 +10,6 @@ import {
   RoomRatingFilters,
 } from "@/types/rooms";
 import { WebServices } from "..";
-import { MovieWithRatings } from "@/types";
-import { invitation } from "@/types/invitations";
-import { NEXT_TAGS } from "@/constants/tags";
-import { PaginatedResponse } from "@/types/request";
 
 class RoomsServices {
   private webService = new WebServices("/rooms");
@@ -73,7 +73,7 @@ class RoomsServices {
   }
 
   invitations(roomId: string) {
-    return this.webService.get<{ invitations: invitation[] }>(
+    return this.webService.get<PaginatedResponse<Invitation>>(
       `/${roomId}/invitations`,
       {
         next: {

@@ -7,7 +7,7 @@ export type IconSvgProps = SVGProps<SVGSVGElement> & {
 export type MovieWithRatings = {
   id: string;
   title: string;
-  releaseDate: string;
+  release_date: string;
   imdbRate: number;
   image: string;
   isWatchedTogether: boolean;

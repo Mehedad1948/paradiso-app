@@ -73,17 +73,18 @@ export default function InvitationsModal({ roomId, invitationsPromise }: { roomI
                                 </div>
                                 <p className='font-semibold'>Invitations</p>
                                 <div className='grid grid-cols-[1fr,_auto] mt-2 gap-y-3 items-center'>
-                                    {result?.invitations.map(item => <Fragment key={item.id}>
-                                        <span className='text-sm'>{item.email}</span>
-                                        <Chip className='capitalize' size='sm' color={statusColorPicker(item.status)} >
-                                            {item.status}
-                                        </Chip>
-                                    </Fragment>)}
+                                    {result?.data.map(item =>
+                                        <Fragment key={item.id}>
+                                            <span className='text-sm'>{item.email}</span>
+                                            <Chip className='capitalize' size='sm' color={statusColorPicker(item.status)} >
+                                                {item.status}
+                                            </Chip>
+                                        </Fragment>)}
                                 </div>
                             </div>
                         </ModalBody>
                         <ModalFooter>
-                            <Button color="danger" variant="light" onPress={onCloseModal}>
+                            <Button color="danger" variant="light" onPress={() => onCloseModal()}>
                                 Close
                             </Button>
                         </ModalFooter>
