@@ -39,6 +39,8 @@ class RoomsServices {
     const params = new URLSearchParams();
     if (filters?.search) params.set("search", filters.search);
     if (filters?.sortBy) params.set("sortBy", filters.sortBy);
+    if (filters?.limit) params.set("limit", String(filters.limit));
+    if (filters?.page) params.set("page", String(filters.page));
     if (filters?.sortOrder) params.set("sortOrder", filters.sortOrder);
     if (filters?.sortByUserId) params.set("sortByUserId", filters.sortByUserId);
     if (filters?.startDate)

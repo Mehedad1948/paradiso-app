@@ -26,7 +26,7 @@ export default async function page({ params, searchParams }: {
     const roomPromises = Promise.all([ratingsPromise, roomDetailsPromise])
 
     return (
-        <div>
+        <div className='min-h-fit overflow-hidden'>
             <TableOperators />
 
             <Suspense key={Object.values(searchParamsObject).join('')}>
@@ -37,6 +37,6 @@ export default async function page({ params, searchParams }: {
 
             <InvitationsModal invitationsPromise={invitations} roomId={roomId} />
 
-        </div >
+        </div>
     );
 }

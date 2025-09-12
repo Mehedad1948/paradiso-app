@@ -38,4 +38,5 @@ export type RoomRatingFilters = {
   isWatchTogether?: boolean;
   limit?: number;
   offset?: number;
+  page?: number
 };

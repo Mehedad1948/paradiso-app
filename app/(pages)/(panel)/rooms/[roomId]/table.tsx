@@ -18,6 +18,7 @@ import SearchParamsSetterWrapper from '@/components/utils/SearchParamsSetterWrap
 import DeleteMovieFromRoomModal from './DeleteMovieFromRoomModal';
 import roomsServices from '@/services/rooms';
 import { useUserStore } from '@/store/user';
+import TableBottomContent from './components/TableBottomCotnent';
 
 export default function RatingTable({ roomPromises }:
     {
@@ -62,12 +63,12 @@ export default function RatingTable({ roomPromises }:
 
     const [deletingMovie, setDeletingMovie] = useState<MovieWithRatings | null>(null)
 
-    console.log({ user, ratings });
+   
 
 
     return (
         <>
-            {<Table aria-label="Movies with Ratings table">
+            {<Table bottomContent={<TableBottomContent  pages={result?.meta.totalPages || 0} />} bottomContentPlacement="outside" aria-label="Movies with Ratings table">
                 <TableHeader columns={columns}>
                     {
                         (column) => <TableColumn key={column.key}>
