@@ -36,7 +36,7 @@ export default function RatingTable({ roomPromises }:
     const { user } = useUserStore()
     const ratings = result?.data
     const columns = [{
-        label: 'TITLE',
+        label: `TITLE (${result?.meta.totalItems})`,
         key: 'title',
         isUser: false
     },
