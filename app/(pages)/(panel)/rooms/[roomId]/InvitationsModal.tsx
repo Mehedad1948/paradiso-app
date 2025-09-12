@@ -17,6 +17,10 @@ import { inviteUser } from '@/app/actions/rooms/invitations';
 import { addToast } from '@heroui/toast';
 import { Chip } from '@heroui/chip';
 import { statusColorPicker } from '@/utils/statusColorPicker';
+import { Tabs, Tab } from "@heroui/tabs";
+import { Link, Mailbox, MailsIcon } from 'lucide-react';
+import InviteByEmail from './components/InviteByEmail';
+import InviteByLink from './components/InviteByLink';
 
 export default function InvitationsModal({ roomId, invitationsPromise }: { roomId: string, invitationsPromise: ReturnType<typeof roomsServices.invitations>; }) {
 
@@ -42,6 +46,8 @@ export default function InvitationsModal({ roomId, invitationsPromise }: { roomI
 
     }
 
+    const [selected, setSelected] = useState("link");
+
     return (
         <Modal
             placement="bottom-center"
@@ -55,33 +61,38 @@ export default function InvitationsModal({ roomId, invitationsPromise }: { roomI
             <ModalContent>
                 {(onClose) => (
                     <>
-                        <ModalHeader className="flex flex-col gap-1 mb-4">
+                        <ModalHeader className="flex flex-col gap-1 mb-0">
                             Invite Roommate
                         </ModalHeader>
                         <ModalBody>
 
-                            <div>
-                                <div className='flex items-center gap-2 mb-4'>
-                                    <Input
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        type='email'
-                                    />
-                                    <Button color='primary' isLoading={isLoading} onPress={handleInvite}>
-                                        Invite
-                                    </Button>
-                                </div>
-                                <p className='font-semibold'>Invitations</p>
-                                <div className='grid grid-cols-[1fr,_auto] mt-2 gap-y-3 items-center'>
-                                    {result?.data.map(item =>
-                                        <Fragment key={item.id}>
-                                            <span className='text-sm'>{item.email}</span>
-                                            <Chip className='capitalize' size='sm' color={statusColorPicker(item.status)} >
-                                                {item.status}
-                                            </Chip>
-                                        </Fragment>)}
-                                </div>
-                            </div>
+                            <Tabs className={'mx-auto mb-4'} selectedKey={selected} onSelectionChange={(e) => setSelected(e as string)}
+                                aria-label="Options" color="primary" variant="bordered">
+                                <Tab
+                                    key="link"
+                                    title={
+                                        <div className="flex items-center space-x-2">
+                                            <Link className='w-5' />
+                                            <span>Invite Link</span>
+                                        </div>
+                                    }
+                                />
+                                <Tab
+                                    key="email"
+                                    title={
+                                        <div className="flex items-center space-x-2">
+                                            <MailsIcon className='w-5' />
+                                            <span>Email</span>
+                                        </div>
+                                    }
+                                />
+
+
+                            </Tabs>
+                            {selected === 'email' && <InviteByEmail data={result?.data || []} roomId={roomId} />}
+
+                            {selected === 'link' && <InviteByLink roomId={roomId} />}
+
                         </ModalBody>
                         <ModalFooter>
                             <Button color="danger" variant="light" onPress={() => onCloseModal()}>
@@ -91,6 +102,6 @@ export default function InvitationsModal({ roomId, invitationsPromise }: { roomI
                     </>
                 )}
             </ModalContent>
-        </Modal>
+        </Modal >
     );
 }

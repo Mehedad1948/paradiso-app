@@ -17,7 +17,7 @@ export interface RoomInviteLink {
 }
 
 export interface CreateRoomInviteLinkInputs {
-  roomId: number;
+  roomId: number | string;
   maxUsage?: number;
   expiresAt?: string;
   note?: string;
