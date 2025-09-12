@@ -1,4 +1,4 @@
-import authServices from '@/services/auth/authServices';
+import authServices from "@/services/auth/authServices";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
