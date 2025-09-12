@@ -27,26 +27,7 @@ export type MovieWithRatings = {
   }[];
 };
 
-export type PaginationMeta = {
-  totalItems: number;
-  itemsPerPage: number;
-  totalPages: number;
-  currentPage: number;
-};
 
-export type PaginationLinks = {
-  first: string;
-  current: string;
-  next: string;
-  previous: string;
-  last: string;
-};
-
-export type PaginatedResponse<T> = {
-  data: T[];
-  meta: PaginationMeta;
-  links: PaginationLinks;
-};
 
 export type UserType = {
   id: number;

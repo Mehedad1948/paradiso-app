@@ -68,7 +68,7 @@ export default function RatingTable({ roomPromises }:
 
     return (
         <>
-            {<Table bottomContent={<TableBottomContent  pages={result?.meta.totalPages || 0} />} bottomContentPlacement="outside" aria-label="Movies with Ratings table">
+            {<Table  bottomContentPlacement="outside" aria-label="Movies with Ratings table">
                 <TableHeader columns={columns}>
                     {
                         (column) => <TableColumn key={column.key}>

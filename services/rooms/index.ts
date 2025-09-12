@@ -6,9 +6,10 @@ import {
   RoomRatingFilters,
 } from "@/types/rooms";
 import { WebServices } from "..";
-import { MovieWithRatings, PaginatedResponse } from "@/types";
+import { MovieWithRatings } from "@/types";
 import { invitation } from "@/types/invitations";
 import { NEXT_TAGS } from "@/constants/tags";
+import { PaginatedResponse } from "@/types/request";
 
 class RoomsServices {
   private webService = new WebServices("/rooms");

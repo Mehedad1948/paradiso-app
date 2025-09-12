@@ -1,12 +1,18 @@
 'use client'
 
 import useSetSearchParams from '@/hooks/useSetSearchParams';
+import ratingServices from '@/services/ratings';
+import { PaginatedResponse, RequestResult } from '@/types/request';
 import { Pagination } from '@heroui/pagination';
-import { useState } from 'react';
+import { use, useState } from 'react';
 
-interface Props { pages: number, }
+interface Props {
+    dataPromise: Promise<RequestResult<PaginatedResponse<{}>>>,
+    className?: string
+}
 
-export default function TableBottomContent({ pages, }: Props) {
+export default function TableBottomContent({ dataPromise, className }: Props) {
+    const { result } = use(dataPromise)
     const { params, setSearchParam } = useSetSearchParams()
     const [page, setPage] = useState(Number(params.page) || 1)
 
@@ -16,14 +22,16 @@ export default function TableBottomContent({ pages, }: Props) {
     }
 
     return (
-        <div className='flex items-center gap-4 justify-end'>
+        <div className={`
+        ${className}
+        flex items-center gap-4 justify-end`}>
             <Pagination
                 isCompact
                 showControls
                 showShadow
                 color="primary"
                 page={page}
-                total={pages}
+                total={result?.meta.totalPages || 1}
                 onChange={onChangePage}
             />
         </div>

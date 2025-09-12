@@ -1,8 +1,9 @@
-import { PaginatedResponse, UserType } from "@/types";
+import { UserType } from "@/types";
 import { WebServices } from "..";
 import { MovieWithRatings, VoteType } from "@/types/ratings";
+import { PaginatedResponse } from "@/types/request";
 
- class RatingServices {
+class RatingServices {
   private webService = new WebServices("/ratings");
 
   getAllRatings() {

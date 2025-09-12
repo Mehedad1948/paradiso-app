@@ -16,8 +16,7 @@ export async function GET(request: Request) {
   const res = await authServices.refreshToken({ refreshToken });
 
   if (res.response?.ok && res.result?.accessToken) {
-    // ❗️Next.js doesn't let you set cookies directly in API routes like this
-    // You must use `NextResponse` to set cookies
+ 
 
     const response = NextResponse.redirect(new URL(redirectTo, request.url));
     response.cookies.set("token", res.result.accessToken, {
