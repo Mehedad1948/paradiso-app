@@ -9,6 +9,7 @@
     "lint": "eslint --fix"
   },
   "dependencies": {
+    "@heroui/accordion": "^2.2.23",
     "@heroui/alert": "^2.2.20",
     "@heroui/autocomplete": "^2.3.21",
     "@heroui/avatar": "^2.2.16",
@@ -16,6 +17,8 @@
     "@heroui/card": "^2.2.19",
     "@heroui/chip": "^2.2.21",
     "@heroui/code": "2.2.14",
+    "@heroui/date-picker": "^2.3.27",
+    "@heroui/dropdown": "^2.3.26",
     "@heroui/input": "2.4.19",
     "@heroui/input-otp": "^2.1.18",
     "@heroui/kbd": "2.2.15",
@@ -32,6 +35,7 @@
     "@heroui/tabs": "^2.2.23",
     "@heroui/theme": "2.4.15",
     "@heroui/toast": "^2.0.9",
+    "@react-aria/i18n": "^3.12.12",
     "@react-aria/ssr": "3.9.8",
     "@react-aria/visually-hidden": "3.8.22",
     "@types/fontfaceobserver": "^2.1.3",

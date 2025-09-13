@@ -9,6 +9,7 @@ export interface RoomInviteLink {
   expiresAt?: string | null;
   createdAt: string;
   updatedAt: string;
+  uses: number;
   createdBy: {
     id: number;
     username: string;
@@ -19,15 +20,15 @@ export interface RoomInviteLink {
 export interface CreateRoomInviteLinkInputs {
   roomId: number | string;
   maxUsage?: number;
-  expiresAt?: string;
+  expiresAt?: Date;
   note?: string;
 }
 
 export interface UpdateRoomInviteLinkInputs {
   roomId: number | string;
-  id: string;
+  id: string | number;
   isActive?: boolean;
   maxUsage?: number;
-  expiresAt?: string;
+  expiresAt?: Date;
   note?: string;
 }

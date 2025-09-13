@@ -2,10 +2,13 @@ import { generateInviteLink } from '@/app/actions/rooms/invitations/generateInvi
 import { getInviteLinks } from '@/app/actions/rooms/invitations/getInviteLinks';
 import { useAction } from '@/hooks/core/useAction';
 import { useServerQuery } from '@/hooks/core/useServerQuery';
+import { Accordion, AccordionItem } from '@heroui/accordion';
 import { Button } from '@heroui/button';
-import { addToast } from '@heroui/toast';
-import { Link, LucideSplinePointer } from 'lucide-react';
 import { Spinner } from "@heroui/spinner";
+import { addToast } from '@heroui/toast';
+import { Copy, Link } from 'lucide-react';
+import InviteLinkItem from './InviteLinkItem';
+import CopierButton from '@/components/utils/CopierButton';
 export default function InviteByLink({ roomId }: { roomId: string }) {
     const { data, isLoading, refetch } = useServerQuery(() => getInviteLinks(roomId))
     const { data: generatedLinkData, execute, isLoading: isGenerating } = useAction(generateInviteLink, {
@@ -18,11 +21,30 @@ export default function InviteByLink({ roomId }: { roomId: string }) {
         }
     })
 
+
+
     return (
         <div className=''>
             <div className='flex flex-col gap-2'>
                 {isLoading ? <Spinner /> : data?.data && data?.data?.length > 0 ?
-                    data?.data?.map(item => <div>{item.inviteUrl}</div>) :
+                    <Accordion>
+                        {data?.data?.map((item, index) =>
+                            <AccordionItem key={item.id} aria-label={item.inviteUrl}
+                                title={
+                                    <div className='line-clamp-1 flex items-center gap-2'>{index + 1}.
+                                        <CopierButton content={item.inviteUrl}>
+                                            <Copy className='hover:text-primary-500 w-5 transition-colors duration-300' />
+                                        </CopierButton>
+                                        <p className='line-clamp-1'>
+                                            {item.inviteUrl}
+                                        </p>
+                                    </div>
+                                }>
+                                <InviteLinkItem link={item} onUpdate={refetch} />
+                            </AccordionItem>
+                        )}
+                    </Accordion>
+                    :
                     <div onClick={() => !isGenerating && execute(roomId)}
                         className='border cursor-pointer hover:bg-primary-50 border-dashed bg-primary-50/50 border-primary-200 rounded-xl p-6 flex items-center justify-center'>
                         <Button isLoading={isGenerating} size='sm' color='primary'>
