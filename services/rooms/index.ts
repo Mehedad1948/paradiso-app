@@ -72,9 +72,9 @@ class RoomsServices {
     });
   }
 
-  invitations(roomId: string) {
+  invitations(roomId: string, page = 1) {
     return this.webService.get<PaginatedResponse<Invitation>>(
-      `/${roomId}/invitations`,
+      `/${roomId}/invitations?page=${page}&limit=${5}`,
       {
         next: {
           tags: [`invitations-${roomId}`],

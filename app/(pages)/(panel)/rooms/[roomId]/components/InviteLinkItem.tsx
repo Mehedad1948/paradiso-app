@@ -51,7 +51,10 @@ export default function InviteLinkItem({ link, onUpdate }: { link: RoomInviteLin
     }
 
     return (
-        <div className='grid text-primary-600 grid-cols-[1fr,136px] gap-4'>
+        <div className={` 
+            ${isUpdating ? 'blur-sm' : ''}
+        grid text-primary-600 grid-cols-[1fr,136px] gap-4
+        `}>
             <span>Status</span>
             {<Chip className='cursor-pointer w-full mx-auto mr-0' onClick={handelChangeStatus} variant='bordered' color={link.isActive ? 'success' : 'danger'} >
                 {link.isActive ? 'Active' : 'Not Active'}
@@ -60,7 +63,7 @@ export default function InviteLinkItem({ link, onUpdate }: { link: RoomInviteLin
             <span>Expires at</span>
             <Dropdown>
                 <DropdownTrigger>
-                    <Button isLoading={isUpdating} variant='flat' color='primary'
+                    <Button variant='flat' color='primary'
                         className='flex gap-2 w-full items-center justify-between'>
 
                         {link.expiresAt ? format(link.expiresAt, 'yyyy MMM dd') : <span className='text-muted-foreground'>Never</span>}

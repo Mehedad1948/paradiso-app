@@ -14,7 +14,7 @@ export default function CopierButton({ content, message, ...props }: BackProps) 
             navigator.clipboard
                 .writeText(content)
                 .then(() => {
-                    addToast({ title: message || `Copied to clipboard` })
+                    addToast({ title: message || `Copied to clipboard`, color: 'primary' })
                 })
                 .catch((err) => {
                     console.error("Failed to copy text: ", err);
