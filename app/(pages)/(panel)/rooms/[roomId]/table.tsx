@@ -93,7 +93,11 @@ export default function RatingTable({ roomPromises }:
                                     alt={item.title}
                                     className='rounded-lg'
                                 />
-                                <span className=' text-base'>{item.title} <span className='text-primary-500 text-sm'> - {format(item.release_date, 'yyyy')}</span></span>
+                                <span className=' text-base'>{item.title}
+                                    {item.release_date && <span className='text-primary-500 text-sm'>
+                                        {' '}- {format(item.release_date, 'yyyy')}
+                                    </span>}
+                                </span>
                             </TableCell>
                             {item.ratings.map(({ user, rate }) => (
                                 <TableCell key={user.id}>

@@ -24,9 +24,10 @@ class RoomInviteLinksService {
   }
 
   update(data: UpdateRoomInviteLinkInputs) {
+    const { id, roomId, ...body } = data;
     return this.webService.patch<RoomInviteLink>(
-      `/${data.roomId}/invite-links/${data.id}`,
-      { body: data },
+      `/${roomId}/invite-links/${id}`,
+      { body: body },
     );
   }
 
