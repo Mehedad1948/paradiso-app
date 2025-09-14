@@ -41,7 +41,7 @@ export function useServerQuery<T>(
 
   useEffect(() => {
     fetchData();
-  }, [...dependencies]);
+  }, [...dependencies , refetchCounter]);
 
   const refetch = useCallback(() => {
     setRefetchCounter((prev) => prev + 1);

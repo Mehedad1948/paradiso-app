@@ -13,10 +13,11 @@ import { Input } from '@heroui/input';
 import { addToast } from '@heroui/toast';
 import { format } from 'date-fns';
 import { Edit } from 'lucide-react';
-import { useState } from 'react';
+import { Key, useState } from 'react';
 
 
 export default function InviteLinkItem({ link, onUpdate }: { link: RoomInviteLink, onUpdate: () => void }) {
+
     const { execute: updateExecute, isLoading: isUpdating } = useAction(updateInviteLink, {
         onSuccess: () => {
             onUpdate()
@@ -27,13 +28,14 @@ export default function InviteLinkItem({ link, onUpdate }: { link: RoomInviteLin
         }
     })
 
-    function handleChangeExpire(key: string) {
-        if (key === "undefined") {
+    function handleChangeExpire(key: Key) {
+        const stringKey = String(key);
+        if (stringKey === "undefined") {
             updateExecute({ expiresAt: undefined, id: link.id, roomId: link.roomId });
             return;
         }
 
-        const days = parseInt(key, 10);
+        const days = parseInt(stringKey, 10);
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + days);
 

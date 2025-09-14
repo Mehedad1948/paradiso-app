@@ -29,8 +29,6 @@ export function useAction<T extends (...args: any[]) => Promise<any>>(
       const res: ActionReturn<T> = await action(...args);
       const response = res
 
-      console.log("🚀🚀🚀🚀", response);
-
       if (response.response.ok) {
         setData(response.result);
         if (options?.onSuccess) {

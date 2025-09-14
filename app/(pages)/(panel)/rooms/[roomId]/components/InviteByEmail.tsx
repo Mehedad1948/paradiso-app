@@ -33,11 +33,8 @@ export default function InviteByEmail({ roomId }: { roomId: string }) {
         activePage,
         range,
         setPage,
-        onNext,
-        onPrevious,
     } = usePagination({
         total: total,
-        showControls: true,
         siblings: 2,
         boundaries: 1,
     });
@@ -103,7 +100,7 @@ export default function InviteByEmail({ roomId }: { roomId: string }) {
                         </Fragment>)}
                 </div>}
 
-            {range.length > 3 && <ul className="flex gap-2 items-center w-fit mx-auto mt-4">
+            {<ul className="flex gap-2 items-center w-fit mx-auto mt-4">
                 {range.map((page) => {
 
 
