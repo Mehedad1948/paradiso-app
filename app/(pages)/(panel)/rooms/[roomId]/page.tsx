@@ -17,8 +17,6 @@ export default async function page({ params, searchParams }: {
     const searchParamsObject = await searchParams
 
 
-    const invitations = roomsServices.invitations(roomId)
-
     const ratingsPromise = roomsServices.getRoomRatings(Number(roomId),
         { ...searchParamsObject })
 
@@ -34,11 +32,11 @@ export default async function page({ params, searchParams }: {
                 <RatingTable roomPromises={roomPromises} />
             </Suspense>
 
-            <TableBottomContent className='my-4'  dataPromise={ratingsPromise} />
+            <TableBottomContent className='my-4' dataPromise={ratingsPromise} />
 
             <AddMovieModal roomId={roomId} />
 
-            <InvitationsModal invitationsPromise={invitations} roomId={roomId} />
+            <InvitationsModal roomId={roomId} />
 
         </div>
     );

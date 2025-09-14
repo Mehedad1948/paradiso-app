@@ -13,10 +13,11 @@ import { Input } from '@heroui/input';
 import { addToast } from '@heroui/toast';
 import { format } from 'date-fns';
 import { Edit } from 'lucide-react';
-import { useState } from 'react';
+import { Key, useState } from 'react';
 
 
 export default function InviteLinkItem({ link, onUpdate }: { link: RoomInviteLink, onUpdate: () => void }) {
+
     const { execute: updateExecute, isLoading: isUpdating } = useAction(updateInviteLink, {
         onSuccess: () => {
             onUpdate()
@@ -27,13 +28,14 @@ export default function InviteLinkItem({ link, onUpdate }: { link: RoomInviteLin
         }
     })
 
-    function handleChangeExpire(key: string) {
-        if (key === "undefined") {
+    function handleChangeExpire(key: Key) {
+        const stringKey = String(key);
+        if (stringKey === "undefined") {
             updateExecute({ expiresAt: undefined, id: link.id, roomId: link.roomId });
             return;
         }
 
-        const days = parseInt(key, 10);
+        const days = parseInt(stringKey, 10);
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + days);
 
@@ -51,7 +53,10 @@ export default function InviteLinkItem({ link, onUpdate }: { link: RoomInviteLin
     }
 
     return (
-        <div className='grid text-primary-600 grid-cols-[1fr,136px] gap-4'>
+        <div className={` 
+            ${isUpdating ? 'blur-sm' : ''}
+        grid text-primary-600 grid-cols-[1fr,136px] gap-4
+        `}>
             <span>Status</span>
             {<Chip className='cursor-pointer w-full mx-auto mr-0' onClick={handelChangeStatus} variant='bordered' color={link.isActive ? 'success' : 'danger'} >
                 {link.isActive ? 'Active' : 'Not Active'}
@@ -60,7 +65,7 @@ export default function InviteLinkItem({ link, onUpdate }: { link: RoomInviteLin
             <span>Expires at</span>
             <Dropdown>
                 <DropdownTrigger>
-                    <Button isLoading={isUpdating} variant='flat' color='primary'
+                    <Button variant='flat' color='primary'
                         className='flex gap-2 w-full items-center justify-between'>
 
                         {link.expiresAt ? format(link.expiresAt, 'yyyy MMM dd') : <span className='text-muted-foreground'>Never</span>}

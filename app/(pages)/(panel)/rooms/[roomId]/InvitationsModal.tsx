@@ -22,11 +22,10 @@ import { Link, Mailbox, MailsIcon } from 'lucide-react';
 import InviteByEmail from './components/InviteByEmail';
 import InviteByLink from './components/InviteByLink';
 
-export default function InvitationsModal({ roomId, invitationsPromise }: { roomId: string, invitationsPromise: ReturnType<typeof roomsServices.invitations>; }) {
+export default function InvitationsModal({ roomId, }: { roomId: string, }) {
 
     const { isOpen, onCloseModal } = useModalController('invite-modal')
 
-    const { result } = use(invitationsPromise)
 
     const [email, setEmail] = useState('')
 
@@ -89,7 +88,7 @@ export default function InvitationsModal({ roomId, invitationsPromise }: { roomI
 
 
                             </Tabs>
-                            {selected === 'email' && <InviteByEmail data={result?.data || []} roomId={roomId} />}
+                            {selected === 'email' && <InviteByEmail roomId={roomId} />}
 
                             {selected === 'link' && <InviteByLink roomId={roomId} />}
 
