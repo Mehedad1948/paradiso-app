@@ -32,3 +32,7 @@ export interface UpdateRoomInviteLinkInputs {
   expiresAt?: Date;
   note?: string;
 }
+export interface DeleteRoomInviteLinkInputs {
+  roomId: number | string;
+  id: string | number;
+}
