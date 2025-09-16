@@ -1,3 +1,4 @@
+import { deleteInviteLink } from '@/app/actions/rooms/invitations/deleteInviteLink';
 import { updateInviteLink } from '@/app/actions/rooms/invitations/updateInviteLink';
 import { useAction } from '@/hooks/core/useAction';
 import { RoomInviteLink } from '@/types/roomInviteLinks';
@@ -12,7 +13,7 @@ import {
 import { Input } from '@heroui/input';
 import { addToast } from '@heroui/toast';
 import { format } from 'date-fns';
-import { Edit } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import { Key, useState } from 'react';
 
 
@@ -23,6 +24,15 @@ export default function InviteLinkItem({ link, onUpdate }: { link: RoomInviteLin
             onUpdate()
             addToast({
                 title: 'Your link has been updated!',
+                color: 'success'
+            })
+        }
+    })
+    const { execute: deleteExecute, isLoading: isDeleting } = useAction(deleteInviteLink, {
+        onSuccess: () => {
+            onUpdate()
+            addToast({
+                title: 'Your link has been Deleted!',
                 color: 'success'
             })
         }
@@ -109,6 +119,16 @@ export default function InviteLinkItem({ link, onUpdate }: { link: RoomInviteLin
                         </Button>
                 }
             </span>
+            <Button
+                onPress={() => deleteExecute({ id: link.id, roomId: link.roomId })}
+                isLoading={isDeleting}
+                className='col-start-2 flex items-center justify-between'
+                color='danger'
+                variant='flat'
+            >
+                <span> Delete </span>
+                <Trash2 className='w-4' />
+            </Button>
         </div>
 
     );

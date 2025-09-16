@@ -29,6 +29,12 @@ export default function InviteByLink({ roomId }: { roomId: string }) {
 
     return (
         <div>
+            {data?.data && data?.data?.length > 0 && <div className='mb-2'>
+                <Button onPress={() => !isGenerating && execute(roomId)}
+                    isLoading={isGenerating} size="sm" color="primary">
+                    Create New Invite Link <Link className="w-4" />
+                </Button>
+            </div>}
             <div className="flex flex-col gap-2">
                 {isLoading ? (
                     <Spinner />
@@ -65,12 +71,12 @@ export default function InviteByLink({ roomId }: { roomId: string }) {
                         onClick={() => !isGenerating && execute(roomId)}
                         className="border cursor-pointer hover:bg-primary-50 border-dashed bg-primary-50/50 border-primary-200 rounded-xl p-6 flex items-center justify-center"
                     >
-                        <Button isLoading={isGenerating} size="sm" color="primary">
+                        <Button className='pointer-events-none' isLoading={isGenerating} size="sm" color="primary">
                             Create Invite Link <Link className="w-4" />
                         </Button>
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 }

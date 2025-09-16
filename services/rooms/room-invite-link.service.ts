@@ -3,6 +3,7 @@ import {
   RoomInviteLink,
   CreateRoomInviteLinkInputs,
   UpdateRoomInviteLinkInputs,
+  InviteLinkInfo,
 } from "@/types/roomInviteLinks";
 import { WebServices } from "..";
 
@@ -40,8 +41,12 @@ class RoomInviteLinksService {
   verify(token: string) {
     // stays global, not tied to room
     return new WebServices().get<{ valid: boolean; roomId?: number }>(
-      `/verify/${token}`,
+      `/invite-links/verify/${token}`,
     );
+  }
+
+  tokenInfo(token: string) {
+    return new WebServices().get<InviteLinkInfo>(`/invite-links/${token}`);
   }
 }
 

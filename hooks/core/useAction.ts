@@ -24,6 +24,7 @@ export function useAction<T extends (...args: any[]) => Promise<any>>(
     setIsLoading(true);
     setIsError(false);
 
+
     try {
       // Call the Server Action
       const res: ActionReturn<T> = await action(...args);

@@ -32,3 +32,23 @@ export interface UpdateRoomInviteLinkInputs {
   expiresAt?: Date;
   note?: string;
 }
+export interface DeleteRoomInviteLinkInputs {
+  roomId: number | string;
+  id: string | number;
+}
+
+export interface InviteLinkInfo {
+  room: {
+    id: string | number;
+    name: string;
+    description: string;
+    image?: string;
+  };
+  inviter: {
+    id: string | number;
+    name: string;
+    avatar: string;
+  } | null;
+  canJoin: boolean;
+  message: string;
+}

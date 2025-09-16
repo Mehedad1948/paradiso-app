@@ -100,7 +100,7 @@ export default function InviteByEmail({ roomId }: { roomId: string }) {
                         </Fragment>)}
                 </div>}
 
-            {<ul className="flex gap-2 items-center w-fit mx-auto mt-4">
+            {range.length > 1 && <ul className="flex gap-2 items-center w-fit mx-auto mt-4">
                 {range.map((page) => {
 
 
