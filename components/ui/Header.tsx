@@ -6,7 +6,7 @@ export default async function Header() {
     const { result: user } = await usersServices.getMe();
 
     return (
-        <div className='w-full fixed left-0 right-0 top-0   z-10 bg-foreground-200/50 py-4  '>
+        <div className='w-full fixed left-0 right-0 top-0 backdrop-blur-sm  z-10 bg-foreground-200/50 py-4  '>
             <div className='flex justify-between lg:px-8 container mx-auto  items-center'>
 
                 <ClientDataSetter user={user} />
