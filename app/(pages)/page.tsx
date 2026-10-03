@@ -4,6 +4,8 @@ import { ArrowDown, ArrowUpRight, Asterisk } from "lucide-react";
 import { cacheLife } from "next/cache";
 import type { Metadata } from "next";
 import ParadisoWordmark from "@/components/landing/ParadisoWordmark";
+import CinemaGrid from "@/components/landing/CinemaGrid";
+import styles from "@/components/landing/CinemaHero.module.css";
 
 export const metadata: Metadata = {
   title: { absolute: "Paradiso — cinema for your circle" },
@@ -25,9 +27,12 @@ export default async function Home() {
         <h1 id="landing-title" className="sr-only">
           Paradiso — cinema for your circle
         </h1>
-        <ParadisoWordmark />
+        <div className={styles.hero}>
+          <ParadisoWordmark />
+          <CinemaGrid />
+        </div>
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-6 pt-5 text-sm font-medium text-muted max-sm:items-start">
-          <span>Every letter has a story.</span>
+          <span>Every frame has a story.</span>
           <span className="inline-flex items-center gap-2.5">
             Hover, focus, or tap to discover{" "}
             <Asterisk size={13} aria-hidden="true" />

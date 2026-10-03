@@ -20,6 +20,19 @@ Configure these server environment variables in `.env`:
 
 `BASE_API_URL` and authentication tokens stay on the server. Authentication API routes set HttpOnly, SameSite=Lax cookies; Secure is enabled in production. Access tokens must verify with `JWT_SECRET`; cookie lifetimes follow JWT expiry, with a seven-day fallback for opaque refresh tokens.
 
+## Backend OpenAPI contracts
+
+The source URL is configured in `openapi.config.mjs`. `openapi/backend.json` is a committed schema snapshot, and `types/generated/backend.ts` contains the TypeScript contracts generated from it. The initial snapshot came from the local `paradiso-backend/openapi.json` checkout. Request types in `types/auth.ts`, `types/rooms.ts`, and `types/ratings.ts` reference exact operations through `types/backend.ts`.
+
+```powershell
+npm run api:refresh       # Fetch the backend schema and regenerate contracts
+npm run api:generate      # Regenerate contracts from the committed snapshot, offline
+npm run api:check         # Fail if generated contracts differ from the snapshot
+npm run api:check:remote  # Fail if either the snapshot or contracts differ from the live backend
+```
+
+Commit the snapshot and generated file together after a refresh. `api:refresh` requires access to the backend URL; `api:generate` and `api:check` work without network access. Set `OPENAPI_SCHEMA_URL` to use a different schema URL for a refresh or remote check. These are compile-time TypeScript contracts, so existing BFF input validation still handles untrusted requests at runtime.
+
 ## Authentication
 
 Auth pages use `hooks/auth/useAuthForm.ts` and `lib/api/auth.ts` to call the same-origin `POST /api/auth/[operation]` BFF. The BFF validates inputs, calls server-only services, and returns messages rather than tokens. Registration posts to backend `/users`; other backend routes are `/auth/sign-in`, `/auth/verify-email`, `/auth/forget-password`, `/auth/reset-password`, and `/auth/refresh-tokens`.

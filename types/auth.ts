@@ -1,23 +1,11 @@
-export interface SignInInputs {
-  email: string;
-  password: string;
-}
-export interface RegisterInputs extends SignInInputs {
-  username: string;
-}
-export interface VerifyEmailInputs {
-  email: string;
-  code: string;
-}
-export interface ForgotPasswordInputs {
-  email: string;
-}
-export interface ResetPasswordInputs extends VerifyEmailInputs {
-  password: string;
-}
-export interface RefreshTokenInputs {
-  refreshToken: string;
-}
+import type { BackendRequestBody } from "./backend";
+
+export type SignInInputs = BackendRequestBody<"/auth/sign-in", "post">;
+export type RegisterInputs = BackendRequestBody<"/users", "post">;
+export type VerifyEmailInputs = BackendRequestBody<"/auth/verify-email", "post">;
+export type ForgotPasswordInputs = BackendRequestBody<"/auth/forget-password", "post">;
+export type ResetPasswordInputs = BackendRequestBody<"/auth/reset-password", "post">;
+export type RefreshTokenInputs = BackendRequestBody<"/auth/refresh-tokens", "post">;
 export interface TokenPair {
   accessToken: string;
   refreshToken: string;

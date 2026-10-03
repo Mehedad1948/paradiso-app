@@ -8,7 +8,11 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "api:generate": "node scripts/openapi.mjs generate",
+    "api:check": "node scripts/openapi.mjs check",
+    "api:refresh": "node scripts/openapi.mjs refresh",
+    "api:check:remote": "node scripts/openapi.mjs check-remote"
   },
   "dependencies": {
     "@heroui/accordion": "2.2.23",

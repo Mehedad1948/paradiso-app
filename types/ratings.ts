@@ -20,7 +20,4 @@ export type MovieWithRatings = {
   }[];
 };
 
-export type VoteType = {
-  rate: number;
-  movieId: string;
-};
+export type VoteType = import("./backend").BackendRequestBody<"/ratings/{id}", "post">;

@@ -10,17 +10,9 @@ export type Room = {
   owner: UserType;
 };
 
-export type CreateRoomInputs = {
-  name: string;
-  description?: string;
-  image?: string | null;
-  isPublic?: boolean;
-};
+export type CreateRoomInputs = import("./backend").BackendRequestBody<"/rooms", "post">;
 
-export type JoinRoomInputs = {
-  userId: number;
-  roomId: number;
-};
+export type JoinRoomInputs = import("./backend").BackendRequestBody<"/rooms/join", "post">;
 
 export type addMovieToRoomInputs = {
   roomId: string | number;
