@@ -31,7 +31,7 @@ export default function InviteDialog({
 
   return (
     <Modal placement="bottom-center" size="xl" isOpen onClose={onClose}>
-      <ModalContent>
+      <ModalContent className="border border-line bg-elevated text-ink shadow-[0_24px_80px_rgb(0_0_0_/_16%)] [&_header]:text-2xl [&_header]:font-semibold [&_header]:tracking-[-0.04em] [&_[data-slot=body]]:text-base">
         {() => (
           <>
             <ModalHeader className="flex flex-col gap-1 mb-0">
@@ -39,12 +39,19 @@ export default function InviteDialog({
             </ModalHeader>
             <ModalBody>
               <Tabs
-                className={"mx-auto mb-4"}
+                className="mx-auto mb-4 [&_[role=tab]]:text-muted [&_[role=tab][aria-selected=true]]:bg-ink [&_[role=tab][aria-selected=true]]:text-canvas [&_[role=tab][aria-selected=true]_*]:text-canvas"
+                classNames={{
+                  cursor: "hidden",
+                  tabList:
+                    "gap-2 p-1 border border-default-300 rounded-md bg-content2",
+                  tab: "h-11 rounded-md px-5",
+                  tabContent: "font-semibold text-base",
+                }}
                 selectedKey={selected}
                 onSelectionChange={(e) => setSelected(e as string)}
                 aria-label="Options"
-                color="primary"
-                variant="bordered"
+                color="default"
+                variant="light"
               >
                 <Tab
                   key="link"

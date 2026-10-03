@@ -50,6 +50,8 @@ export default function RegisterPage() {
         <Input
           name="username"
           label="Username"
+          labelPlacement="outside"
+          placeholder=" "
           autoComplete="username"
           isRequired
           maxLength={100}
@@ -59,6 +61,8 @@ export default function RegisterPage() {
         <Input
           name="email"
           label="Email"
+          labelPlacement="outside"
+          placeholder=" "
           type="email"
           autoComplete="email"
           isRequired
@@ -72,6 +76,8 @@ export default function RegisterPage() {
         <Input
           name="password"
           label="Password"
+          labelPlacement="outside"
+          placeholder=" "
           type="password"
           autoComplete="new-password"
           isRequired
@@ -83,6 +89,8 @@ export default function RegisterPage() {
         <Input
           name="confirmPassword"
           label="Confirm password"
+          labelPlacement="outside"
+          placeholder=" "
           type="password"
           autoComplete="new-password"
           isRequired

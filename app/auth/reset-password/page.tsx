@@ -79,6 +79,8 @@ export default function ResetPasswordPage() {
         <Input
           name="email"
           label="Email"
+          labelPlacement="outside"
+          placeholder=" "
           type="email"
           autoComplete="email"
           isRequired
@@ -118,6 +120,8 @@ export default function ResetPasswordPage() {
         <Input
           name="password"
           label="New password"
+          labelPlacement="outside"
+          placeholder=" "
           type="password"
           autoComplete="new-password"
           isRequired
@@ -129,6 +133,8 @@ export default function ResetPasswordPage() {
         <Input
           name="confirmPassword"
           label="Confirm new password"
+          labelPlacement="outside"
+          placeholder=" "
           type="password"
           autoComplete="new-password"
           isRequired

@@ -1,124 +1,101 @@
-import ThreeWindow from '@/components/threes/ThreeWindow';
-import { cacheLife } from 'next/cache';
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowDown, ArrowUpRight, Asterisk } from "lucide-react";
+import { cacheLife } from "next/cache";
+import type { Metadata } from "next";
+import ParadisoWordmark from "@/components/landing/ParadisoWordmark";
 
+export const metadata: Metadata = {
+  title: { absolute: "Paradiso — cinema for your circle" },
+  description:
+    "Find your next favorite film, gather your people, and make a night of it with Paradiso.",
+};
 
 export default async function Home() {
-  'use cache';
-  cacheLife('hours');
-  return <>
-    <ThreeWindow />
-    <div data-scroll className=''>
+  "use cache";
+  cacheLife("hours");
 
-      <div className="page max-w-7xl mx-auto">
-        <header>
-          <h1>Paradiso</h1>
-          <img className='img opacity-0' src="/john-wick-background-image.jpg" alt="" />
-        </header>
-
-        <div className="grid grid-cols-2 gap-2">
-
-          <a href="https://www.livescience.com/octopuses-punch-fish.html" className="item item_v">
-            <div className="item__image">
-              <img className='img' src="/1.jpg" alt="" />
-              <div className="item__meta">December 23, 2020</div>
-            </div>
-
-            <h2 className="item__title">Octopus punches fish in the head (just because it can)</h2>
-            <p>Octopuses sometimes partner with fish to hunt, but the partnership comes with risks (for the fish, that is).</p>
-          </a>
-
-
-          <a href="https://www.livescience.com/balloon-like-comb-jelly-discovered-puerto-rico.html" className="item item_h">
-            <div className="item__image">
-              <img className='img' src="/2.jpg" alt="" />
-              <div className="item__meta">December 01, 2020</div>
-            </div>
-
-            <h2 className="item__title">Newfound marine blob looks like 'party balloon' with two strings, scientists say</h2>
-            <p>This is the first species NOAA scientists have ever discovered from video footage alone.</p>
-          </a>
-
-
-          <a href="https://www.livescience.com/largest-recorded-swarm-of-deep-sea-fish.html" className="item item_h">
-            <div className="item__image">
-              <img className='img' src="/1.jpg" alt="" />
-              <div className="item__meta">November 26, 2020</div>
-            </div>
-
-            <h2 className="item__title">Swarm of eels breaks record</h2>
-            <p>Before we start mining for precious metals in the darkness of the deep sea, we might try switching on the light first and observing our surroundings.</p>
-          </a>
-
-
-          <a href="https://www.livescience.com/mantis-shrimp-property-wars.html" className="item item_v">
-            <div className="item__image">
-              <img className='img' src="/3.jpg" alt="" />
-              <div className="item__meta">November 03, 2020</div>
-            </div>
-
-            <h2 className="item__title">Mantis shrimp punch down</h2>
-            <p>Home-stealers fought the hardest for smaller-than-ideal dens.</p>
-          </a>
-
-
-
-          <a href="https://www.livescience.com/megalodon-big-for-a-shark.html" className="item item_v">
-            <div className="item__image">
-              <img className='img' src="/1.jpg" alt="" />
-              <div className="item__meta">October 05, 2020</div>
-            </div>
-
-            <h2 className="item__title">Megalodon's hugeness</h2>
-            <p>Even among its extinct relatives, Megalodon was unequalled in length and mass.</p>
-          </a>
-
-
-          <a href="https://www.livescience.com/tiny-sunfish-larva.html" className="item item_h">
-            <div className="item__image">
-              <img className='img' src="/2.jpg" alt="" />
-              <div className="item__meta">July 27, 2020</div>
-            </div>
-
-            <h2 className="item__title">Adorable sunfish</h2>
-            <p>Sunfish in the Molidae family are among the biggest fish in the world.</p>
-          </a>
-
-
-          <a href="https://www.livescience.com/supergiant-isopod-newfound-species.html" className="item item_h">
-            <div className="item__image">
-              <img className='img' src="/2.jpg" alt="" />
-              <div className="item__meta">August 18, 2020</div>
-            </div>
-
-            <h2 className="item__title">Massive 'Darth Vader' sea bug</h2>
-            <p>The newly described species is one of the biggest isopods known to science.</p>
-          </a>
-
-
-          <a href="https://www.livescience.com/worlds-deepest-octopus.html" className="item item_v">
-            <div className="item__image">
-              <img className='img' src="/3.jpg" alt="" />
-              <div className="item__meta">June 01, 2020</div>
-            </div>
-
-            <h2 className="item__title">Scientists capture the world's deepest octopus</h2>
-            <p>The octopus was found miles beneath the ocean surface.</p>
-          </a>
-
+  return (
+    <div className="min-h-svh bg-canvas px-[4.5vw] pb-0 pt-28 text-ink max-sm:px-[5vw] max-sm:pt-28 max-[480px]:pt-36">
+      <section
+        id="landing"
+        className="mx-auto max-w-[1600px] scroll-mt-32"
+        aria-labelledby="landing-title"
+      >
+        <h1 id="landing-title" className="sr-only">
+          Paradiso — cinema for your circle
+        </h1>
+        <ParadisoWordmark />
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-6 pt-5 text-sm font-medium text-muted max-sm:items-start">
+          <span>Every letter has a story.</span>
+          <span className="inline-flex items-center gap-2.5">
+            Hover, focus, or tap to discover{" "}
+            <Asterisk size={13} aria-hidden="true" />
+          </span>
         </div>
-
-
-
-        <footer className="footer">
-          <p>&copy; all news from <a href="https://www.livescience.com/topics/ocean">LiveScience</a></p>
+        <div className="flex items-end justify-between gap-10 pb-14 pt-12 [&>h2]:text-[clamp(38px,4.2vw,68px)] [&>h2]:font-semibold [&>h2]:leading-[1.08] [&>h2]:tracking-[-0.065em] [&>h2_span]:font-serif [&>h2_span]:font-normal [&>h2_span]:italic [&>h2_span]:tracking-[-0.045em] max-sm:flex-col max-sm:items-start max-sm:gap-6 max-sm:pb-9 max-sm:pt-8 max-sm:[&>h2]:text-[clamp(34px,10.8vw,48px)]">
+          <h2>
+            Good films.
+            <br />
+            <span>Better company.</span>
+          </h2>
+          <div className="max-w-[380px] [&>p]:mb-6 [&>p]:text-base [&>p]:leading-[1.75] [&>p]:text-muted max-lg:max-w-[300px] max-sm:w-full max-sm:max-w-none">
+            <p>
+              A place to find your next favorite film, gather your people, and
+              make a night of it.
+            </p>
+            <Link href="/rooms" className="inline-flex items-center justify-between gap-11 rounded-md bg-ink px-6 py-4 text-[15px] font-semibold text-canvas transition-colors hover:bg-accent hover:text-on-accent [&>svg]:transition-transform hover:[&>svg]:translate-x-0.5 hover:[&>svg]:-translate-y-0.5 motion-reduce:transition-none max-sm:w-full">
+              Enter dashboard <ArrowUpRight size={21} aria-hidden="true" />
+            </Link>
+          </div>
+        </div>
+      </section>
+      <section
+        id="the-experience"
+        className="mx-auto grid min-h-[350px] max-w-[1600px] grid-cols-[1fr_0.38fr] max-lg:grid-cols-[1fr_0.48fr] max-sm:grid-cols-1"
+        aria-label="The Paradiso experience"
+      >
+        <div className="group relative min-h-[350px] overflow-hidden bg-media after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-b after:from-transparent after:from-40% after:to-black/75 max-sm:min-h-[280px]">
+          <Image
+            src="/12-angry.jpg"
+            alt="A scene from 12 Angry Men, with the jury gathered around a table"
+            fill
+            sizes="(max-width: 700px) 100vw, 70vw"
+            className="object-cover object-[center_40%] transition-transform duration-1000 group-hover:scale-[1.025] motion-reduce:transform-none motion-reduce:transition-none"
+          />
+          <div className="absolute bottom-5 left-6 right-6 z-[1] flex flex-wrap justify-between gap-4 text-sm font-medium text-media-foreground max-lg:[&>span:last-child]:hidden max-sm:bottom-5 max-sm:left-5 max-sm:right-5">
+            <span>Different perspectives. One great story.</span>
+            <span>01 / The gathering</span>
+          </div>
+        </div>
+        <div className="flex flex-col items-start justify-between bg-surface px-9 py-8 [&>p]:my-4.5 [&>p]:text-[clamp(30px,3vw,48px)] [&>p]:font-medium [&>p]:leading-[1.08] [&>p]:tracking-[-0.05em] [&>p_em]:font-serif [&>p_em]:font-normal max-lg:p-6 max-sm:gap-5 max-sm:p-6 max-sm:[&>p]:m-0 max-sm:[&>p]:text-4xl">
+          <Asterisk
+            className="-ml-2 text-accent max-sm:hidden"
+            size={56}
+            strokeWidth={1}
+            aria-hidden="true"
+          />
           <p>
-            This page was made for <a href="https://www.awwwards.com/academy/course/merging-webgl-and-html-worlds">Merging WebGL and HTML course on Awwwards.com</a>
-            <br />Wish you a good day! =)</p>
-        </footer>
-
-      </div>
-
-
+            Some things
+            <br />
+            are better
+            <br />
+            <em>shared.</em>
+          </p>
+          <Link href="/rooms" className="inline-flex items-center gap-5 border-b border-line pb-2 text-[15px] font-semibold [&>svg]:transition-transform hover:[&>svg]:translate-x-0.5 hover:[&>svg]:-translate-y-0.5">
+            Find your room <ArrowUpRight size={18} aria-hidden="true" />
+          </Link>
+        </div>
+      </section>
+      <footer className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-4 py-8 text-sm font-medium text-muted max-sm:items-start max-sm:gap-5">
+        <span>
+          Paradiso <span className="px-3 text-muted">/</span> For the love
+          of cinema.
+        </span>
+        <a href="#landing" className="inline-flex items-center gap-2 [&>svg]:rotate-180">
+          Back to the opening <ArrowDown size={14} aria-hidden="true" />
+        </a>
+      </footer>
     </div>
-  </>
+  );
 }

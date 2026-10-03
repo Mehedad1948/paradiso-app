@@ -14,7 +14,7 @@ export default function PanelPagination({
   if (totalPages <= 1) return null;
   return (
     <Pagination
-      className="mt-4"
+      className="mt-6"
       isCompact
       showControls
       color="primary"

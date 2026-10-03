@@ -64,13 +64,17 @@ export default function RoomRatingTable({
     [result.data],
   );
   return (
-    <Table aria-label="Movies with ratings">
+    <Table
+      aria-label="Movies with ratings"
+      classNames={{ wrapper: "rounded-[10px] border border-line bg-elevated p-3 shadow-none [&_table]:min-w-[720px] [&_th]:bg-surface [&_th]:py-3.5 [&_th]:text-sm [&_th]:font-semibold [&_th]:text-muted [&_td]:border-b [&_td]:border-line [&_td]:py-4 [&_td]:text-[15px] [&_td]:font-medium [&_td:first-child]:min-w-[260px] [&_td:first-child]:max-w-[440px] [&_tr:last-child_td]:border-b-0" }}
+    >
       <TableHeader columns={columns}>
         {(column) => (
           <TableColumn key={column.key}>
             {column.userId !== undefined ? (
               <Button
                 variant="light"
+                className="font-semibold text-foreground"
                 aria-label={`Sort by ${column.label}'s rating`}
                 endContent={
                   filters.sortByUserId === String(column.userId) &&

@@ -48,6 +48,8 @@ export default function VerifyPage() {
         <Input
           name="email"
           label="Email"
+          labelPlacement="outside"
+          placeholder=" "
           type="email"
           autoComplete="email"
           isRequired

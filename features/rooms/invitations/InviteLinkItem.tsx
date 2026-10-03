@@ -93,7 +93,7 @@ export default function InviteLinkItem({ link }: { link: RoomInviteLink }) {
 
   return (
     <div
-      className="grid text-primary-600 grid-cols-[1fr,136px] gap-4"
+      className="grid text-foreground grid-cols-[minmax(0,1fr),minmax(0,160px)] gap-4 rounded-lg border border-default-300 bg-content2 p-4 items-center"
       aria-busy={pending}
     >
       <span>Status</span>

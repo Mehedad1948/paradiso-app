@@ -56,7 +56,7 @@ export default function CreateRoomDialog({ onClose }: { onClose: () => void }) {
       hideCloseButton={isCreating || isUploading}
       onClose={onClose}
     >
-      <ModalContent className="!p-0 overflow-hidden rounded-large">
+      <ModalContent className="border border-line bg-elevated text-ink shadow-[0_24px_80px_rgb(0_0_0_/_16%)] [&_header]:text-2xl [&_header]:font-semibold [&_header]:tracking-[-0.04em] [&_[data-slot=body]]:text-base !p-0 overflow-hidden rounded-large">
         {() => (
           <>
             <div className="relative">
@@ -67,7 +67,7 @@ export default function CreateRoomDialog({ onClose }: { onClose: () => void }) {
                 className="w-full aspect-[2.5/1] object-cover"
                 src="/12-angry.jpg"
               />
-              <p className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/60 to-black/0 px-6 py-4">
+              <p className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 to-black/0 px-6 py-4 text-white text-2xl font-semibold">
                 Create new Room
               </p>
             </div>

@@ -8,12 +8,12 @@ export default function AuthFeedback({
   return (
     <>
       {error && (
-        <p role="alert" className="text-sm text-danger-500">
+        <p role="alert" className="text-base text-danger-500">
           {error}
         </p>
       )}
       {!error && message && (
-        <p role="status" className="text-sm text-foreground-600">
+        <p role="status" className="text-base text-foreground-600">
           {message}
         </p>
       )}

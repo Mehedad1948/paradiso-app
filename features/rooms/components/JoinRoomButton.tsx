@@ -12,10 +12,10 @@ export default function JoinRoomButton({ roomId }: { roomId: number }) {
       isLoading={isLoading}
       isDisabled={isLoading}
       onPress={() => execute(roomId)}
-      className="text-foreground-800 bg-black/20"
+      className="min-h-[46px] rounded-md bg-ink text-[15px] font-semibold text-canvas shrink-0"
       color="secondary"
       radius="lg"
-      size="sm"
+      size="md"
       variant="flat"
     >
       Join

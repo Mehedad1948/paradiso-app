@@ -15,7 +15,7 @@ export default function QueryError({
   const pathname = usePathname();
   const query = useSearchParams().toString();
   return (
-    <div role="alert" className="p-4 flex items-center gap-3">
+    <div role="alert" className="my-4 flex flex-wrap items-center gap-4 rounded-lg border border-line bg-surface p-5 text-base">
       <p>{error.message}</p>
       {error instanceof BffError && error.status === 401 ? (
         <Link

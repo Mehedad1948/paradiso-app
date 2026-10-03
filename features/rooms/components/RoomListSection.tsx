@@ -27,10 +27,18 @@ export default function RoomListSection({
   }, [query.data, query.isPlaceholderData, page, totalPages, onPage]);
   return (
     <section
+      className="[&+section]:mt-12"
       aria-busy={query.isFetching}
       aria-label={usersRoom ? "My rooms" : "All rooms"}
     >
-      <h2 className="py-4">{usersRoom ? "My Rooms" : "All Rooms"}</h2>
+      <div className="mb-6 flex flex-wrap items-baseline justify-between gap-3 [&>h2]:text-[clamp(24px,2.3vw,32px)] [&>p]:text-sm [&>p]:text-muted">
+        <h2>{usersRoom ? "Your rooms" : "Discover rooms"}</h2>
+        <p>
+          {usersRoom
+            ? "Your people. Your watchlists."
+            : "Find a circle that shares your taste."}
+        </p>
+      </div>
       {query.isError && (
         <QueryError error={query.error} retry={() => query.refetch()} />
       )}
@@ -39,7 +47,7 @@ export default function RoomListSection({
       ) : (
         query.data && (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+            <div className="grid grid-cols-3 gap-6 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:gap-5">
               {usersRoom && <CreateRoomCard onCreate={onCreate} />}
               {query.data.data.map((room) => (
                 <RoomCard
@@ -53,8 +61,10 @@ export default function RoomListSection({
               ))}
               {query.data.data.length === 0 && (
                 <div>
-                  <p className="text-base text-center text-foreground-500 aspect-square flex items-center justify-center p-4 border border-default-300 rounded-3xl w-full h-full">
-                    No Rooms were found.
+                  <p className="flex min-h-[220px] items-center justify-center rounded-[10px] border border-line bg-surface p-7 text-center text-muted">
+                    {usersRoom
+                      ? "Your next movie night starts with a room."
+                      : "No rooms here yet. Be the first to start one."}
                   </p>
                 </div>
               )}

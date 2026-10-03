@@ -69,6 +69,8 @@ export default function SignInPage() {
         <Input
           name="email"
           label="Email"
+          labelPlacement="outside"
+          placeholder=" "
           type="email"
           autoComplete="email"
           isRequired
@@ -83,6 +85,8 @@ export default function SignInPage() {
         <Input
           name="password"
           label="Password"
+          labelPlacement="outside"
+          placeholder=" "
           type="password"
           autoComplete="current-password"
           isRequired

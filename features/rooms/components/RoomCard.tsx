@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import type { PanelRoom } from "@/lib/api/panel";
 import JoinRoomButton from "./JoinRoomButton";
+import { posters } from "@/config/posters";
+import { ArrowUpRight } from "lucide-react";
 export default function RoomCard({
   room,
   canVisit,
@@ -13,29 +15,33 @@ export default function RoomCard({
   canVisit: boolean;
 }) {
   return (
-    <Card isFooterBlurred className="border-none" radius="lg">
+    <Card className="overflow-hidden rounded-[10px] border border-line bg-elevated shadow-none" radius="lg" shadow="none">
       <Image
         alt={room.name}
-        className="object-cover w-full h-full"
+        className="aspect-[16/10] w-full object-cover"
         height={280}
         width={280}
-        src={room.imageUrl || "https://heroui.com/images/hero-card.jpeg"}
+        src={room.imageUrl || posters.fellowship}
       />
-      <CardFooter className="justify-between before:bg-white/10 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
-        <p className="text-tiny text-center text-white font-semibold">
-          {room.name}
-        </p>
+      <CardFooter className="flex items-center justify-between gap-4 p-5">
+        <div className="min-w-0">
+          <p className="mb-1.5 text-sm text-muted">
+            {room.isPublic ? "Open to discovery" : "Your private circle"}
+          </p>
+          <p className="break-words text-lg font-semibold leading-[1.3]">{room.name}</p>
+        </div>
         {canVisit ? (
           <Button
             as={Link}
             href={`/rooms/${room.id}`}
-            className="text-tiny text-white bg-black/20"
+            className="min-h-[46px] rounded-md border border-line bg-surface text-[15px] font-semibold text-ink shrink-0"
             color="default"
             radius="lg"
-            size="sm"
+            size="md"
             variant="flat"
+            endContent={<ArrowUpRight size={17} aria-hidden="true" />}
           >
-            Visit
+            Enter
           </Button>
         ) : (
           <JoinRoomButton roomId={room.id} />

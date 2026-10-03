@@ -41,7 +41,7 @@ export default function VoteMovieDialog({
       hideCloseButton={isAdding}
       onClose={onClose}
     >
-      <ModalContent className="!p-0 overflow-hidden rounded-large">
+      <ModalContent className="border border-line bg-elevated text-ink shadow-[0_24px_80px_rgb(0_0_0_/_16%)] [&_header]:text-2xl [&_header]:font-semibold [&_header]:tracking-[-0.04em] [&_[data-slot=body]]:text-base !p-0 overflow-hidden rounded-large">
         {(onClose) => (
           <>
             <form

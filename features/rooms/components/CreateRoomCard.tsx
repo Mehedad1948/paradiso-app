@@ -1,30 +1,14 @@
 "use client";
-import { Button } from "@heroui/button";
-import { Card, CardFooter } from "@heroui/card";
-import Image from "next/image";
+
+import { ArrowUpRight, Plus } from "lucide-react";
 
 export default function CreateRoomCard({ onCreate }: { onCreate: () => void }) {
   return (
-    <Card isFooterBlurred className="border-none" radius="lg">
-      <Image
-        alt="Create a room"
-        className="object-cover aspect-square w-full h-full"
-        height={280}
-        width={280}
-        src="/12-angry.jpg"
-      />
-      <CardFooter className="justify-between before:bg-white/10 border-white/20 border-1 overflow-hidden py-1 absolute before:rounded-xl rounded-large bottom-1 w-[calc(100%_-_8px)] shadow-small ml-1 z-10">
-        <Button
-          className="text-tiny text-white w-full bg-black/20"
-          color="default"
-          radius="lg"
-          size="sm"
-          variant="flat"
-          onPress={onCreate}
-        >
-          Create Your Room
-        </Button>
-      </CardFooter>
-    </Card>
+    <button type="button" onClick={onCreate} className="flex h-full min-h-[280px] w-full cursor-pointer flex-col items-start justify-center gap-4 rounded-[10px] border border-dashed border-line bg-surface p-7 text-left transition-colors hover:border-accent hover:bg-elevated [&>svg]:text-accent [&>strong]:text-2xl [&>strong]:leading-[1.15] [&>strong]:tracking-[-0.04em] [&>span]:max-w-60 [&>span]:text-[15px] [&>span]:text-muted max-sm:min-h-[220px] motion-reduce:transition-none">
+      <Plus size={34} strokeWidth={1.5} aria-hidden="true" />
+      <strong>A room of your own.</strong>
+      <span>Bring your favorite people and your next great watchlist.</span>
+      <ArrowUpRight size={22} aria-hidden="true" />
+    </button>
   );
 }

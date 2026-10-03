@@ -1,18 +1,20 @@
 
 'use client'
 
-import React, { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
+import { Avatar } from '@heroui/avatar';
+import { ArrowUpRight } from 'lucide-react';
+import { posters } from '@/config/posters';
 
 const InvitationCard = ({
-  roomImage = '/default-room.jpg',
-  roomName = 'Meeting Room',
-  inviterName = 'John Doe',
-  inviterAvatar = '/default-avatar.jpg',
+  roomImage = posters.fellowship,
+  roomName = 'Your screening room',
+  inviterName = 'A fellow film lover',
+  inviterAvatar = '',
   isValidToken = true,
   onAccept = () => {},
   onDecline = () => {},
-  theme = 'dark' // 'dark' or 'light'
 }) => {
   const mountRef = useRef<HTMLDivElement | null>(null);
 
@@ -301,7 +303,7 @@ const InvitationCard = ({
       const targetOpacity = isHovered ? 0.9 : 0.6;
       dustParticles.material.opacity += (targetOpacity - dustParticles.material.opacity) * 0.03;
       
-      filmStrips.forEach((strip, index) => {
+      filmStrips.forEach((strip) => {
         const targetStripOpacity = isHovered ? 0.6 : 0.4;
         strip.material.opacity += (targetStripOpacity - strip.material.opacity) * 0.03;
       });
@@ -323,240 +325,34 @@ const InvitationCard = ({
     };
   }, []); // Removed isHovered dependency to prevent recreation
 
-  const styles: Record<string, React.CSSProperties> = {
-    pageContainer: {
-      position: 'relative',
-      width: '100vw',
-      minHeight: '100vh',
-      overflow: 'hidden',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: theme === 'dark' 
-        ? 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)'
-        : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 50%, #cbd5e1 100%)',
-    },
-    threejsBackground: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      zIndex: 1,
-      pointerEvents: 'none',
-    },
-    cardContainer: {
-      position: 'relative',
-      zIndex: 10,
-      width: '400px',
-      minHeight: '500px',
-      borderRadius: '24px',
-      overflow: 'hidden',
-      background: theme === 'dark' 
-        ? 'rgba(15, 15, 23, 0.9)'
-        : 'rgba(255, 255, 255, 0.9)',
-      backdropFilter: 'blur(25px)',
-      border: theme === 'dark' 
-        ? '1px solid rgba(255, 215, 0, 0.3)'
-        : '1px solid rgba(255, 215, 0, 0.4)',
-      boxShadow: theme === 'dark'
-        ? '0 25px 50px -12px rgba(255, 215, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)'
-        : '0 25px 50px -12px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 215, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.8)',
-      transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-      transform: isHovered ? 'translateY(-12px) scale(1.02)' : 'translateY(0) scale(1)',
-    },
-    content: {
-      padding: '32px',
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      position: 'relative',
-      zIndex: 2,
-    },
-    roomImageContainer: {
-      position: 'relative',
-      width: '100%',
-      height: '200px',
-      borderRadius: '16px',
-      overflow: 'hidden',
-      marginBottom: '24px',
-      background: 'linear-gradient(45deg, #FFD700, #FFA500, #FF6347)',
-      padding: '2px',
-    },
-    roomImage: {
-      width: '100%',
-      height: '100%',
-      objectFit: 'cover',
-      borderRadius: '14px',
-    },
-    roomName: {
-      fontSize: '28px',
-      fontWeight: '700',
-      color: theme === 'dark' ? '#ffffff' : '#171717',
-      marginBottom: '20px',
-      textAlign: 'center',
-      background: 'linear-gradient(135deg, #FFD700, #FFA500, #FF6347)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text',
-      textShadow: theme === 'dark' ? '0 0 20px rgba(255, 215, 0, 0.3)' : 'none',
-    },
-    inviterSection: {
-      display: 'flex',
-      alignItems: 'center',
-      marginBottom: '32px',
-      padding: '20px',
-      borderRadius: '16px',
-      background: theme === 'dark'
-        ? 'rgba(255, 215, 0, 0.1)'
-        : 'rgba(255, 215, 0, 0.08)',
-      border: `1px solid ${theme === 'dark' ? 'rgba(255, 215, 0, 0.3)' : 'rgba(255, 215, 0, 0.2)'}`,
-      backdropFilter: 'blur(10px)',
-    },
-    avatar: {
-      width: '52px',
-      height: '52px',
-      borderRadius: '50%',
-      objectFit: 'cover',
-      marginRight: '16px',
-      border: '3px solid #FFD700',
-      boxShadow: '0 0 20px rgba(255, 215, 0, 0.4)',
-    },
-    inviterText: {
-      fontSize: '14px',
-      color: theme === 'dark' ? '#a1a1aa' : '#71717a',
-      marginBottom: '4px',
-    },
-    inviterName: {
-      fontSize: '20px',
-      fontWeight: '600',
-      color: theme === 'dark' ? '#ffffff' : '#171717',
-    },
-    buttonContainer: {
-      display: 'flex',
-      gap: '16px',
-      marginTop: 'auto',
-    },
-    button: {
-      flex: 1,
-      padding: '16px',
-      borderRadius: '14px',
-      border: 'none',
-      fontSize: '16px',
-      fontWeight: '600',
-      cursor: 'pointer',
-      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-      position: 'relative',
-      overflow: 'hidden',
-    },
-    acceptButton: {
-      background: 'linear-gradient(135deg, #FFD700, #FFA500)',
-      color: '#000000',
-      boxShadow: '0 4px 15px rgba(255, 215, 0, 0.4)',
-    },
-    declineButton: {
-      background: theme === 'dark' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(239, 68, 68, 0.1)',
-      color: '#ef4444',
-      border: '1px solid rgba(239, 68, 68, 0.4)',
-    },
-    errorMessage: {
-      textAlign: 'center',
-      padding: '32px',
-      borderRadius: '16px',
-      background: 'rgba(239, 68, 68, 0.1)',
-      border: '1px solid rgba(239, 68, 68, 0.3)',
-      color: '#ef4444',
-      fontSize: '16px',
-      fontWeight: '500',
-      backdropFilter: 'blur(10px)',
-    },
-  };
-
   return (
-    <div style={styles.pageContainer}>
-      {/* Full-screen Three.js Background */}
-      <div style={styles.threejsBackground} ref={mountRef} />
-      
-      {/* Floating Card */}
-      <div 
-        style={styles.cardContainer}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-      >
-        <div style={styles.content}>
-          {isValidToken ? (
-            <>
-              {/* Room Image */}
-              <div style={styles.roomImageContainer}>
-                <img 
-                  src={roomImage} 
-                  alt={roomName}
-                  style={styles.roomImage}
-                  onError={(e) => {
-                    e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGRkQ3MDAiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PHBhdGggZD0iTTEwMCA4MEM5NC40NzcgODAgOTAgODQuNDc3IDkwIDkwQzkwIDk1LjUyMyA5NC40NzcgMTAwIDEwMCAxMDBDMTA1LjUyMyAxMDAgMTEwIDk1LjUyMyAxMTAgOTBDMTEwIDg0LjQ3NyAxMDUuNTIzIDgwIDEwMCA4MFoiIGZpbGw9IiNGRkQ3MDAiLz48cGF0aCBkPSJNNzAgMTIwQzc1LjUyMyAxMjAgODAgMTE1LjUyMyA4MCAxMTBDODAgMTA0LjQ3NyA3NS41MjMgMTAwIDcwIDEwMEM2NC40NzcgMTAwIDYwIDEwNC40NzcgNjAgMTEwQzYwIDExNS41MjMgNjQuNDc3IDEyMCA3MCAxMjBaIiBmaWxsPSIjRkZBNTAwIi8+PHBhdGggZD0iTTEzMCAxMjBDMTM1LjUyMyAxMjAgMTQwIDExNS41MjMgMTQwIDExMEMxNDAgMTA0LjQ3NyAxMzUuNTIzIDEwMCAxMzAgMTAwQzEyNC40NzcgMTAwIDEyMCAxMDQuNDc3IDEyMCAxMTBDMTIwIDExNS41MjMgMTI0LjQ3NyAxMjAgMTMwIDEyMFoiIGZpbGw9IiNGRjYzNDciLz48L3N2Zz4=';
-                  }}
-                />
-              </div>
-
-              {/* Room Name */}
-              <h2 style={styles.roomName}>{roomName}</h2>
-
-              {/* Inviter Section */}
-              <div style={styles.inviterSection}>
-                <img 
-                  src={inviterAvatar} 
-                  alt={inviterName}
-                  style={styles.avatar}
-                  onError={(e) => {
-                    e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIyNCIgZmlsbD0iI0ZGRDcwMCIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iMjAiIHI9IjgiIGZpbGw9IndoaXRlIi8+PHBhdGggZD0iTTggMzZDOCAyOC4yNjggMTUuMjY4IDIyIDI0IDIyQzMyLjczMiAyMiA0MCAyOC4yNjggNDAgMzYiIGZpbGw9IndoaXRlIi8+PC9zdmc+';
-                  }}
-                />
-                <div>
-                  <p style={styles.inviterText}>You're invited by</p>
-                  <p style={styles.inviterName}>{inviterName}</p>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div style={styles.buttonContainer}>
-                <button 
-                  style={{...styles.button, ...styles.acceptButton}}
-                  onClick={onAccept}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-3px)';
-                    e.currentTarget.style.boxShadow = '0 15px 35px rgba(255, 215, 0, 0.6)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(255, 215, 0, 0.4)';
-                  }}
-                >
-                  Accept and Join
-                </button>
-                <button 
-                  style={{...styles.button, ...styles.declineButton}}
-                  onClick={onDecline}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-3px)';
-                    e.currentTarget.style.boxShadow = '0 15px 35px rgba(239, 68, 68, 0.3)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
-                >
-                  Decline
-                </button>
-              </div>
-            </>
-          ) : (
-            // Invalid Token Message
-            <div style={styles.errorMessage}>
-              <h3 style={{ marginBottom: '16px', fontSize: '24px' }}>🎭 Invalid Invitation</h3>
-              <p>This invitation token is no longer valid or has expired. Please request a new invitation from the room administrator.</p>
+    <div className="relative flex min-h-svh w-full items-center justify-center bg-canvas px-[4.5vw] pb-12 pt-32 text-ink max-[480px]:px-[5vw] max-[480px]:pb-8 max-[480px]:pt-36">
+      <div className="pointer-events-none fixed inset-0 z-[1] h-svh w-full opacity-70" ref={mountRef} aria-hidden="true" />
+      <div className="relative z-[2] w-full max-w-[960px] overflow-hidden rounded-xl border border-line bg-elevated/95 shadow-[0_24px_60px_rgb(0_0_0_/_12%)] backdrop-blur-[20px] transition-[transform,border-color] duration-[400ms] hover:-translate-y-1 hover:border-accent motion-reduce:transform-none motion-reduce:transition-none" onMouseEnter={() => setIsHovered(true)} onMouseLeave={() => setIsHovered(false)}>
+        {isValidToken ? (
+          <div className="grid grid-cols-[1fr_1.1fr] gap-9 p-7 max-md:grid-cols-1 max-md:gap-6 max-md:p-6 max-[480px]:p-5">
+            <div className="min-h-[440px] overflow-hidden rounded-md bg-surface max-md:h-60 max-md:min-h-0">
+              <img src={roomImage} alt={roomName} className="h-full w-full object-cover" onError={(event) => {
+                if (event.currentTarget.getAttribute("src") !== posters.fellowship) event.currentTarget.src = posters.fellowship;
+              }} />
             </div>
-          )}
-        </div>
+            <div className="flex min-w-0 flex-col items-start justify-center py-3.5 max-md:py-0">
+              <p className="mb-5 text-sm font-semibold text-accent">A seat has your name on it</p>
+              <h1 className="mb-5 break-words text-[clamp(32px,4.2vw,52px)] font-semibold tracking-[-0.055em]">{roomName}</h1>
+              <p className="mb-7 text-base leading-[1.7] text-muted">Great stories deserve good company. You’re invited to join the circle.</p>
+              <div className="mb-8 flex w-full items-center gap-4 rounded-lg border border-line bg-surface p-4">
+                <Avatar src={inviterAvatar} name={inviterName} className="size-12 shrink-0" />
+                <div><p className="text-sm text-muted">Invited by</p><p className="break-words text-[17px] font-semibold text-ink">{inviterName}</p></div>
+              </div>
+              <div className="flex w-full flex-wrap gap-3 max-[480px]:flex-col">
+                <button type="button" className="inline-flex flex-1 cursor-pointer items-center justify-center gap-4 rounded-md bg-ink px-4.5 py-3.5 text-[15px] font-semibold text-canvas hover:bg-accent hover:text-on-accent" onClick={onAccept}>Accept and join <ArrowUpRight size={19} aria-hidden="true" /></button>
+                <button type="button" className="inline-flex cursor-pointer items-center justify-center gap-4 rounded-md border border-line bg-surface px-4.5 py-3.5 text-[15px] font-semibold text-ink" onClick={onDecline}>Decline</button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="p-10 [&>h1]:mb-6 [&>h1]:text-4xl [&>p]:text-base [&>p]:text-muted" role="alert"><h1>This invitation has ended.</h1><p>Request a fresh invitation from the room’s host and we’ll save you a seat.</p></div>
+        )}
       </div>
     </div>
   );

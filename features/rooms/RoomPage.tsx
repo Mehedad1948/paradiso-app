@@ -12,6 +12,8 @@ import RoomToolbar from "./components/RoomToolbar";
 import RoomRatingTable from "./components/RoomRatingTable";
 import PanelPagination from "./components/PanelPagination";
 import DialogLoading from "./components/DialogLoading";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 const AddMovieDialog = dynamic(() => import("./dialogs/AddMovieDialog"), {
   ssr: false,
   loading: DialogLoading,
@@ -60,12 +62,21 @@ function RoomPage({ roomId }: { roomId: string }) {
   const disabled = !room.data || room.isError || ratings.isPlaceholderData;
   return (
     <div
-      className="min-h-fit p-4"
+      className="min-h-fit"
       aria-busy={ratings.isFetching || room.isFetching}
     >
-      <h1 className="text-2xl font-semibold mb-4">
-        {room.data?.name || "Room"}
-      </h1>
+      <Link href="/rooms" className="mb-6 inline-flex items-center gap-2 text-[15px] text-muted hover:text-accent">
+        <ArrowLeft size={18} aria-hidden="true" /> All rooms
+      </Link>
+      <div className="mb-10 flex items-end justify-between gap-6 border-b border-line pb-9 max-sm:mb-7 max-sm:flex-col max-sm:items-start max-sm:pb-7 max-sm:[&>button]:w-full">
+        <div>
+          <p className="mb-3.5 text-sm font-semibold uppercase tracking-[0.09em] text-accent">The screening room</p>
+          <h1 className="mb-4 break-words text-[clamp(36px,4.8vw,68px)] tracking-[-0.06em] [&_em]:font-serif [&_em]:font-normal max-sm:text-[38px]">{room.data?.name || "Room"}</h1>
+          <p className="max-w-[540px] text-base text-muted">
+            A shared watchlist. A few different opinions. Your next great film.
+          </p>
+        </div>
+      </div>
       <RoomToolbar
         search={filters.search || ""}
         onSearch={setSearch}
@@ -86,6 +97,9 @@ function RoomPage({ roomId }: { roomId: string }) {
         room.data &&
         ratings.data && (
           <>
+            <p className="mb-3 text-sm text-default-500 sm:hidden">
+              Scroll across to see every rating and action.
+            </p>
             <RoomRatingTable
               result={ratings.data}
               room={room.data}

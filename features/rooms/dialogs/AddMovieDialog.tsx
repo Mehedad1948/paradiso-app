@@ -49,7 +49,7 @@ export default function AddMovieDialog({
       isKeyboardDismissDisabled={isAdding}
       hideCloseButton={isAdding}
     >
-      <ModalContent>
+      <ModalContent className="border border-line bg-elevated text-ink shadow-[0_24px_80px_rgb(0_0_0_/_16%)] [&_header]:text-2xl [&_header]:font-semibold [&_header]:tracking-[-0.04em] [&_[data-slot=body]]:text-base">
         {() => (
           <>
             <ModalHeader className="flex flex-col gap-1 mb-4">
