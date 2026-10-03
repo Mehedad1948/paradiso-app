@@ -1,4 +1,3 @@
-import { NEXT_TAGS } from "@/constants/tags";
 import { MovieWithRatings } from "@/types";
 import { Invitation } from "@/types/invitations";
 import { PaginatedResponse } from "@/types/request";
@@ -18,12 +17,15 @@ class RoomsServices {
     page,
     limit,
     usersRoom = false,
+    signal,
   }: {
     page: number;
     limit: number;
     usersRoom?: boolean;
+    signal?: AbortSignal;
   }) {
     return this.webService.get<PaginatedResponse<Room>>(``, {
+      signal,
       params: {
         page,
         limit,
@@ -32,11 +34,15 @@ class RoomsServices {
     });
   }
 
-  getRoomById(roomId: number) {
-    return this.webService.get<Room>(`/${roomId}`);
+  getRoomById(roomId: number, signal?: AbortSignal) {
+    return this.webService.get<Room>(`/${roomId}`, { signal });
   }
 
-  async getRoomRatings(roomId: number, filters?: RoomRatingFilters) {
+  async getRoomRatings(
+    roomId: number,
+    filters?: RoomRatingFilters,
+    signal?: AbortSignal,
+  ) {
     const params = new URLSearchParams();
     if (filters?.search) params.set("search", filters.search);
     if (filters?.sortBy) params.set("sortBy", filters.sortBy);
@@ -52,7 +58,7 @@ class RoomsServices {
 
     return this.webService.get<PaginatedResponse<MovieWithRatings>>(
       `/${roomId}/rating?${params.toString()}`,
-      { next: { tags: [`${NEXT_TAGS.ROOM_RATINGS}-${roomId}`] } },
+      { signal },
     );
   }
 
@@ -72,14 +78,10 @@ class RoomsServices {
     });
   }
 
-  invitations(roomId: string, page = 1) {
+  invitations(roomId: string, page = 1, signal?: AbortSignal) {
     return this.webService.get<PaginatedResponse<Invitation>>(
       `/${roomId}/invitations?page=${page}&limit=${5}`,
-      {
-        next: {
-          tags: [`invitations-${roomId}`],
-        },
-      },
+      { signal },
     );
   }
 

@@ -3,9 +3,11 @@ import { WebServices } from "..";
 export class MoviesServices {
   private webService = new WebServices();
 
-  searchDbMovies({ query }: { query: string }) {
-
-    return this.webService.get<any>(`/movies/tmdb/search?query=${query}`);
+  searchDbMovies({ query, signal }: { query: string; signal?: AbortSignal }) {
+    return this.webService.get<{ results: import("@/types/movies").DbMovie[] }>(
+      "/movies/tmdb/search",
+      { params: { query }, signal },
+    );
   }
 
   addMovie({ query }: { query: string }) {

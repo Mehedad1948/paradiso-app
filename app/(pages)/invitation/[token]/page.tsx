@@ -1,11 +1,17 @@
 
 
 import roomInviteLinksService from '@/services/rooms/room-invite-link.service';
-import Image from 'next/image';
 import InvitationCard from './Threejs';
+import { Suspense } from 'react';
 
-export default async function page({ params }: { params: { token: string } }) {
-    const { result, response } = await roomInviteLinksService.tokenInfo(params.token)
+export default function InvitationPage({ params }: { params: Promise<{ token: string }> }) {
+    return <Suspense fallback={<p>Loading invitation…</p>}><InvitationContent params={params} /></Suspense>;
+}
+
+async function InvitationContent({ params }: { params: Promise<{ token: string }> }) {
+    const { token } = await params;
+    const { result, response } = await roomInviteLinksService.tokenInfo(token)
+    if (!response.ok || !result) return <p role="alert">This invitation is unavailable.</p>;
 
     const { inviter, canJoin, message, room } = result;
 

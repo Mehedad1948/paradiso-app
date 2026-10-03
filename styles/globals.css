@@ -124,7 +124,7 @@ h1,h2{
 }
 
 @media screen and (max-width: 600px) { 
-    .grid{
+    .page .grid{
         display: block;
     }
     .item_v,.item_h{

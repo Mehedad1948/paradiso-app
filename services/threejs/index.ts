@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import FontFaceObserver from "fontfaceobserver";
 import imagesLoaded from "imagesloaded";
 import Scroll from "./scroll";
@@ -31,7 +31,10 @@ export default class Sketch {
   private images: HTMLImageElement[];
   private currentScroll: number;
   private prevScroll: number;
-  private scroll: Scroll = new Scroll();
+  private scroll: Scroll;
+  private disposed = false;
+  private animationFrame?: number;
+  private cleanupCallbacks: (() => void)[] = [];
   private raycaster: THREE.Raycaster;
   private pointer: THREE.Vector2;
   private composer: any;
@@ -48,6 +51,7 @@ export default class Sketch {
     mesh: THREE.Mesh;
   }[] = [];
   constructor(option: { dom: any }) {
+    this.scroll = new Scroll();
     this.time = 0;
 
     this.container = option.dom;
@@ -99,7 +103,7 @@ export default class Sketch {
 
     Promise.all([fontOpen, preloadImages])
       .then(() => {
-        this.scroll = new Scroll();
+        if (this.disposed) return;
         this.addImages();
         this.setPosition();
         this.resize();
@@ -109,9 +113,11 @@ export default class Sketch {
 
         this.mouseMovement();
 
-        window.addEventListener("scroll", () => {
+        const onScroll = () => {
           this.currentScroll = window.scrollY;
-        });
+        };
+        window.addEventListener("scroll", onScroll);
+        this.cleanupCallbacks.push(() => window.removeEventListener("scroll", onScroll));
       })
       .catch((error) => {
         console.error("Error loading resources:", error);
@@ -119,9 +125,7 @@ export default class Sketch {
   }
 
   mouseMovement() {
-    window.addEventListener(
-      "pointermove",
-      (event) => {
+    const onPointerMove = (event: PointerEvent) => {
         this.pointer.x = (event.clientX / this.width) * 2 - 1;
         this.pointer.y = -(event.clientY / this.height) * 2 + 1;
         this.raycaster.setFromCamera(this.pointer, this.camera);
@@ -134,9 +138,9 @@ export default class Sketch {
 
           (obj as any).material.uniforms.hover.value = intersects[0].uv;
         }
-      },
-      false,
-    );
+      };
+    window.addEventListener("pointermove", onPointerMove);
+    this.cleanupCallbacks.push(() => window.removeEventListener("pointermove", onPointerMove));
   }
 
   addImages() {
@@ -159,7 +163,6 @@ export default class Sketch {
     this.imageStore = this.images.map((img) => {
       let bounds = img.getBoundingClientRect();
       const texture = new THREE.TextureLoader().load(img.src);
-      texture.needsUpdate = true;
       let geometry = new THREE.PlaneGeometry(
         bounds.width,
         bounds.height,
@@ -169,19 +172,26 @@ export default class Sketch {
 
       let material = this.material.clone();
 
-      img.addEventListener("mouseenter", () => {
+      const onEnter = () => {
         gsap.to(material.uniforms.hoverState, {
           duration: 1,
           value: 1,
           ease: "power3.out",
         });
-      });
-      img.addEventListener("mouseout", () => {
+      };
+      const onLeave = () => {
         gsap.to(material.uniforms.hoverState, {
           duration: 1,
           value: 0,
           ease: "power3.out",
         });
+      };
+      img.addEventListener("mouseenter", onEnter);
+      img.addEventListener("mouseout", onLeave);
+      this.cleanupCallbacks.push(() => {
+        img.removeEventListener("mouseenter", onEnter);
+        img.removeEventListener("mouseout", onLeave);
+        gsap.killTweensOf(material.uniforms.hoverState);
       });
 
       this.materials.push(material);
@@ -214,7 +224,9 @@ export default class Sketch {
   }
 
   setupResize() {
-    window.addEventListener("resize", this.resize.bind(this));
+    const onResize = this.resize.bind(this);
+    window.addEventListener("resize", onResize);
+    this.cleanupCallbacks.push(() => window.removeEventListener("resize", onResize));
   }
 
   resize() {
@@ -226,6 +238,7 @@ export default class Sketch {
   }
 
   render() {
+    if (this.disposed) return;
     this.time += 0.05;
 
     this.scroll.render();
@@ -233,12 +246,6 @@ export default class Sketch {
     this.prevScroll = this.currentScroll;
     this.currentScroll = this.scroll.scrollToRender;
 
-    const shouldRender =
-      Math.round(this.currentScroll) !== Math.round(this.prevScroll) ||
-      this.currentScroll === 0;
-
-    // if (shouldRender) {
-    console.log("should render");
 
     this.setPosition();
 
@@ -257,7 +264,36 @@ export default class Sketch {
     this.composer.render();
     // }
 
-    requestAnimationFrame(this.render.bind(this));
+    this.animationFrame = requestAnimationFrame(this.render.bind(this));
+  }
+
+  dispose() {
+    this.disposed = true;
+    if (this.animationFrame !== undefined) cancelAnimationFrame(this.animationFrame);
+    this.cleanupCallbacks.forEach(cleanup => cleanup());
+    this.scroll.destroy();
+    this.controls.dispose();
+    this.scene.traverse(object => {
+      if (object instanceof THREE.Mesh) {
+        object.geometry.dispose();
+        const materials = Array.isArray(object.material) ? object.material : [object.material];
+        materials.forEach(material => {
+          if (material instanceof THREE.ShaderMaterial) {
+            Object.values(material.uniforms).forEach(uniform => {
+              if (uniform.value instanceof THREE.Texture) uniform.value.dispose();
+            });
+          }
+          material.dispose();
+        });
+      }
+    });
+    this.material.dispose();
+    this.geometry.dispose();
+    this.customPass?.dispose();
+    this.composer?.dispose();
+    this.renderer.setAnimationLoop(null);
+    this.renderer.dispose();
+    this.renderer.domElement.remove();
   }
 
   composerPass() {

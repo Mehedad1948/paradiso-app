@@ -1,77 +1,89 @@
-'use client'
-
-import { verifyEmail } from '@/app/actions/auth/verify';
-import useSetSearchParams from '@/hooks/useSetSearchParams';
-import { Button } from '@heroui/button';
+"use client";
+import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
-import { InputOtp } from '@heroui/input-otp';
-import { addToast } from '@heroui/toast';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useRef, useState } from 'react';
-
-export default function RegisterPage() {
-  const [error, setError] = useState<string | null>(null);
-  const formRef = useRef<HTMLFormElement | null>(null);
-
-  const [isLoading, setIsLoading] = useState(false);
-
-  const { setSearchParam, params: { code, email } } = useSetSearchParams();
-  const { push } = useRouter();
-
-  async function handleRegister(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setIsLoading(true)
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const code = formData.get("code") as string;
-
-    const res = await verifyEmail({ email, code });
-    const { result, response } = res;
-
-    if (response?.ok) {
-      addToast({
-        title: "Welcome",
-        description: `Your email is successfully verified! `,
-        color: 'success',
-      });
-      push(`/room`);
-    } else {
-      setError(response?.message || "Unknown error");
-    }
-    setIsLoading(false)
-  }
-
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { authApi } from "@/lib/api/auth";
+import { useAuthForm } from "@/hooks/auth/useAuthForm";
+import { useAuthLocation } from "@/hooks/auth/useAuthLocation";
+import AuthFeedback from "@/components/auth/AuthFeedback";
+import { InputOtp } from "@heroui/input-otp";
+import { useEffect, useState } from "react";
+export default function VerifyPage() {
+  const router = useRouter();
+  const location = useAuthLocation();
+  const form = useAuthForm(authApi.verify, true);
+  const initialCode = location.params.get("code") || "";
+  const [code, setCode] = useState(
+    /^\d{4}$/.test(initialCode) ? initialCode : "",
+  );
+  useEffect(
+    () => setCode(/^\d{4}$/.test(initialCode) ? initialCode : ""),
+    [initialCode],
+  );
   return (
     <div className="h-full flex flex-col justify-center">
-      <div className="text-3xl font-semibold text-white">
-        Verify
-      </div>
+      <h1 className="text-3xl font-semibold">Verify your email</h1>
+      <AuthFeedback
+        message={
+          location.params.get("status") === "registered"
+            ? "Account created. Check your email for the verification code."
+            : "Enter the four-digit code sent to your email."
+        }
+      />
       <form
-        ref={formRef}
-        onSubmit={handleRegister}
-        className="flex mt-8 flex-col items-stretch gap-4"
+        ref={form.formRef}
+        className="flex mt-8 flex-col gap-4"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void form.submit({ email: location.email, code }, (result) =>
+            router.replace(
+              result.authenticated
+                ? location.origin
+                : location.href("sign-in", { reason: "verified" }),
+            ),
+          );
+        }}
       >
-        <Input defaultValue={email} name="email" label="Email" type="email" />
+        <Input
+          name="email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          isRequired
+          isDisabled={form.isPending}
+          value={location.email}
+          onValueChange={(value) => {
+            location.setEmail(value);
+            form.clearError();
+          }}
+        />
         <InputOtp
           name="code"
-
-          onComplete={() => {
-            formRef.current?.requestSubmit(); // 🧠 Native submit
-          }}
-          className="mx-auto"
-          size="lg"
-          defaultValue={code}
+          aria-label="Email verification code"
+          autoComplete="one-time-code"
           length={4}
+          value={code}
+          isDisabled={form.isPending}
+          onValueChange={(value) => {
+            setCode(value);
+            form.clearError();
+          }}
         />
-        {error && <p className="text-sm text-rose-500">{error}</p>}
-        <Button isLoading={isLoading} isDisabled={isLoading} type="submit" color="secondary">
-          Verify
+        <AuthFeedback error={form.error} />
+        <Button
+          type="submit"
+          color="secondary"
+          isLoading={form.isPending}
+          isDisabled={form.isPending}
+        >
+          Verify email
         </Button>
-        <Link href={'/auth/sign-in'} className="w-full">
-          <Button type="button" color="default" className="w-full">
-            Back to log in page
-          </Button>
+        <Link
+          href={location.href("sign-in")}
+          className="text-center text-primary-500"
+        >
+          Back to sign in
         </Link>
       </form>
     </div>

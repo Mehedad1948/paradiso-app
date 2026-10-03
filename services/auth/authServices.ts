@@ -1,65 +1,37 @@
-import { WebServices } from "..";
-import {
+﻿import type {
+  TokenPair,
   ForgotPasswordInputs,
   RefreshTokenInputs,
-  RegisterInputs,
   ResetPasswordInputs,
   SignInInputs,
   VerifyEmailInputs,
-} from "./types";
-
- class AuthServices {
+} from "@/types/auth";
+import { WebServices } from "..";
+class AuthServices {
   private webService = new WebServices("/auth");
-
-  async signIn(body: SignInInputs) {
-    const res = await this.webService.post<{
-      accessToken: string;
-      refreshToken: string;
-    }>("/sign-in", {
+  signIn(body: SignInInputs) {
+    return this.webService.post<TokenPair>("/sign-in", {
       body,
+      withAuth: false,
     });
-    return res;
   }
-
-
-
-  async verifyEmail(body: VerifyEmailInputs) {
-    const res = await this.webService.post<{
-      accessToken: string;
-      refreshToken: string;
-    }>(`/verify-email`, {
+  verifyEmail(body: VerifyEmailInputs) {
+    return this.webService.post<TokenPair>("/verify-email", {
       body,
+      withAuth: false,
     });
-    return res;
   }
-
-  async forgotPassword(body: ForgotPasswordInputs) {
-    const res = await this.webService.post(`/forget-password`, {
-      body,
-    });
-    return res;
+  forgotPassword(body: ForgotPasswordInputs) {
+    return this.webService.post("/forget-password", { body, withAuth: false });
   }
-
-  async resetPassword(body: ResetPasswordInputs) {
-    const res = await this.webService.post(`/reset-password`, {
-      body,
-    });
-    return res;
+  resetPassword(body: ResetPasswordInputs) {
+    return this.webService.post("/reset-password", { body, withAuth: false });
   }
-
-  async refreshToken(body: RefreshTokenInputs) {
-    const res = await this.webService.post<{
-      accessToken: string;
-      refreshToken: string;
-    }>(`/refresh-tokens`, {
+  refreshToken(body: RefreshTokenInputs) {
+    return this.webService.post<TokenPair>("/refresh-tokens", {
       body,
+      withAuth: false,
     });
-    return res;
   }
 }
-
- const authServices = new AuthServices();
-
- export default authServices;
-
-// testtest@Password123.com
+export default new AuthServices();

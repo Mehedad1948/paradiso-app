@@ -1,38 +1,55 @@
-'use client'
+"use client";
 
-import { addToast } from '@heroui/toast';
-import { ButtonHTMLAttributes } from 'react';
+import { addToast } from "@heroui/toast";
+import { ButtonHTMLAttributes } from "react";
 
 interface BackProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-    content: string;
-    message?: string
+  content: string;
+  message?: string;
 }
 
-export default function CopierButton({ content, message, ...props }: BackProps) {
-    const handleCopyClick = () => {
-        if (navigator.clipboard) {
-            navigator.clipboard
-                .writeText(content)
-                .then(() => {
-                    addToast({ title: message || `Copied to clipboard`, color: 'primary' })
-                })
-                .catch((err) => {
-                    console.error("Failed to copy text: ", err);
-                });
-        } else {
-            console.error("Clipboard API not supported");
-        }
-    };
+export default function CopierButton({
+  content,
+  message,
+  onClick,
+  ...props
+}: BackProps) {
+  const handleCopyClick = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard
+        .writeText(content)
+        .then(() => {
+          addToast({
+            title: message || `Copied to clipboard`,
+            color: "primary",
+          });
+        })
+        .catch(() => {
+          addToast({
+            title: "Unable to copy. Please copy the text manually.",
+            color: "danger",
+          });
+        });
+    } else {
+      addToast({
+        title: "Clipboard unavailable. Please copy the text manually.",
+        color: "danger",
+      });
+    }
+  };
 
-    return (
-        <button onClick={(e) => {
-            e.stopPropagation();
+  return (
+    <button
+      type="button"
+      {...props}
+      onClick={(e) => {
+        e.stopPropagation();
 
-            props.onClick && props.onClick(e)
-            handleCopyClick()
-        }}
-            {...props}>
-            {props.children}
-        </button>
-    );
+        onClick?.(e);
+        if (!e.defaultPrevented) handleCopyClick();
+      }}
+    >
+      {props.children}
+    </button>
+  );
 }

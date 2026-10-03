@@ -1,182 +1,156 @@
-'use client'
-
-import { forgotPassword } from '@/app/actions/auth/forgot-password'
-import { resetPassword } from '@/app/actions/auth/reset-password'
-import { verifyEmail } from '@/app/actions/auth/verify'
-import useSetSearchParams from '@/hooks/useSetSearchParams'
-import { Button } from '@heroui/button'
-import { Input } from '@heroui/input'
-import { InputOtp } from '@heroui/input-otp'
-import { addToast } from '@heroui/toast'
-import { SquarePen } from 'lucide-react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
-
+"use client";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { authApi } from "@/lib/api/auth";
+import { useAuthForm } from "@/hooks/auth/useAuthForm";
+import { useAuthLocation } from "@/hooks/auth/useAuthLocation";
+import AuthFeedback from "@/components/auth/AuthFeedback";
+import { InputOtp } from "@heroui/input-otp";
+import { useEffect, useState } from "react";
+import { confirmPassword, emailInput } from "@/lib/auth/validation";
+import { useResendCooldown } from "@/hooks/auth/useResendCooldown";
 export default function ResetPasswordPage() {
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [secondsLeft, setSecondsLeft] = useState(120)
-  const [canResend, setCanResend] = useState(false)
-
-  const formRef = useRef<HTMLFormElement | null>(null)
-  const {
-    params: { email, code }
-  } = useSetSearchParams()
-  const { push } = useRouter()
-
-  useEffect(() => {
-    if (secondsLeft <= 0) {
-      setCanResend(true)
-      return
+  const router = useRouter();
+  const location = useAuthLocation();
+  const form = useAuthForm(authApi.resetPassword, true);
+  const resend = useAuthForm(authApi.forgotPassword);
+  const cooldown = useResendCooldown(location.email);
+  const initialCode = location.params.get("code") || "";
+  const [code, setCode] = useState(
+    /^\d{4}$/.test(initialCode) ? initialCode : "",
+  );
+  const [message, setMessage] = useState<string | null>(
+    location.params.get("status") === "code-sent"
+      ? "Check your email for the password reset code."
+      : null,
+  );
+  useEffect(
+    () => setCode(/^\d{4}$/.test(initialCode) ? initialCode : ""),
+    [initialCode],
+  );
+  const pending = form.isPending || resend.isPending;
+  function requestCode() {
+    if (pending || cooldown.secondsLeft > 0) return;
+    form.clearError();
+    try {
+      emailInput(location.email);
+    } catch (error) {
+      resend.setError((error as Error).message);
+      return;
     }
-
-    const timer = setInterval(() => {
-      setSecondsLeft((prev) => prev - 1)
-    }, 1000)
-
-    return () => clearInterval(timer)
-  }, [secondsLeft])
-
-  async function handleResend() {
-
-
-    const res = await forgotPassword({ email });
-    const { result, response } = res;
-
-    if (response?.ok) {
-      addToast({
-        title: "Email Sent",
-        description: `Please check your email for the password reset link.`,
-        color: 'success',
-      });
-      setSecondsLeft(120)
-      setCanResend(false)
-    } else {
-      setError(response?.message || "Unknown error");
-    }
+    void resend.submit({ email: location.email }, (result) => {
+      cooldown.start();
+      setCode("");
+      setMessage(result.message);
+    });
   }
-
-  async function handleRegister(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setError(null)
-    setIsLoading(true)
-
-    const formData = new FormData(e.currentTarget)
-    const code = formData.get('code') as string
-    const password = formData.get('password') as string
-    const repeatPassword = formData.get('repeat-password') as string
-
-    if (password !== repeatPassword) {
-      setError('Passwords do not match')
-      addToast({
-        title: 'Passwords do not match',
-        color: 'danger'
-      })
-      setIsLoading(false)
-      return
-    }
-
-    if (code.length !== 4) {
-      setError('Please enter the verification code')
-      addToast({
-        title: 'Please enter the verification code',
-        color: 'danger'
-      })
-      setIsLoading(false)
-      return
-    }
-
-    const res = await resetPassword({ email, code, password })
-    const { result, response } = res
-
-    if (response?.ok) {
-      addToast({
-        title: 'Your password has been reset',
-        color: 'success'
-      })
-      push(`/auth/sign-in?email=${email}`)
-    } else {
-      setError(response?.message || 'Unknown error')
-    }
-
-    setIsLoading(false)
-  }
-
   return (
     <div className="h-full flex flex-col justify-center">
-      <div className="text-3xl font-semibold text-white">Reset Password</div>
-
+      <h1 className="text-3xl font-semibold">Reset password</h1>
+      <p className="mt-2 text-sm text-foreground-600">
+        Enter your email and reset code, then choose a new password.
+      </p>
       <form
-        ref={formRef}
-        onSubmit={handleRegister}
-        className="flex mt-8 flex-col items-stretch gap-4"
+        ref={form.formRef}
+        className="flex mt-8 flex-col gap-4"
+        onSubmit={(event) => {
+          event.preventDefault();
+          resend.clearError();
+          const fields = new FormData(event.currentTarget);
+          const password = String(fields.get("password") || "");
+          try {
+            confirmPassword(
+              password,
+              String(fields.get("confirmPassword") || ""),
+            );
+          } catch (error) {
+            form.setError((error as Error).message);
+            return;
+          }
+          void form.submit({ email: location.email, code, password }, () =>
+            router.replace(
+              location.href("sign-in", { reason: "password-reset" }),
+            ),
+          );
+        }}
       >
-        <div className="w-full flex items-center gap-2">
-          <span>We have sent a verification code to your email:</span>
-          <span className="text-primary text-sm font-semibold">
-            {canResend ? (
-              <Button
-                variant='light'
-                color='primary'
-                type="button"
-                onClick={handleResend}
-                className="underline font-semibold"
-              >
-                Resend
-              </Button>
-            ) : (
-              `Resend in ${secondsLeft}s`
-            )}
-          </span>
-        </div>
-
-        <div className="text-secondary-500 justify-center flex items-center gap-1 w-full text-center">
-          <span className="relative">
-            {email}
-            <Link
-              className="absolute left-full translate-x-1 -translate-y-1/2 top-1/2"
-              href={`/auth/forgot-password?email=${email}`}
-            >
-              <Button variant="light" color="primary" className="!px-2" size="sm">
-                <SquarePen size={16} />
-              </Button>
-            </Link>
-          </span>
-        </div>
-
+        <Input
+          name="email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          isRequired
+          isDisabled={pending}
+          value={location.email}
+          onValueChange={(value) => {
+            location.setEmail(value);
+            form.clearError();
+            resend.clearError();
+            setMessage(null);
+          }}
+        />
         <InputOtp
           name="code"
-          defaultValue={code}
-          className="mx-auto"
-          size="lg"
+          aria-label="Password reset code"
+          autoComplete="one-time-code"
           length={4}
+          value={code}
+          isDisabled={pending}
+          onValueChange={(value) => {
+            setCode(value);
+            form.clearError();
+          }}
         />
+        <Button
+          type="button"
+          variant="light"
+          color="primary"
+          onPress={requestCode}
+          isLoading={resend.isPending}
+          isDisabled={pending || cooldown.secondsLeft > 0}
+        >
+          {cooldown.secondsLeft > 0
+            ? "Resend code in " + cooldown.secondsLeft + "s"
+            : "Send another code"}
+        </Button>
         <Input
           name="password"
-          label="New Password"
+          label="New password"
           type="password"
           autoComplete="new-password"
+          isRequired
+          minLength={6}
+          maxLength={128}
+          isDisabled={pending}
+          onValueChange={() => form.clearError()}
         />
         <Input
-          name="repeat-password"
-          label="Confirm New Password"
+          name="confirmPassword"
+          label="Confirm new password"
           type="password"
           autoComplete="new-password"
+          isRequired
+          isDisabled={pending}
+          onValueChange={() => form.clearError()}
         />
-
-        {error && <p className="text-sm text-rose-500">{error}</p>}
-
-        <Button isLoading={isLoading} isDisabled={isLoading} type="submit" color="secondary">
-          Reset Password
+        <AuthFeedback error={form.error || resend.error} message={message} />
+        <Button
+          type="submit"
+          color="secondary"
+          isLoading={form.isPending}
+          isDisabled={pending}
+        >
+          Reset password
         </Button>
-
-        <Link href={'/auth/sign-in'} className="w-full">
-          <Button type="button" color="default" className="w-full">
-            Back to log in page
-          </Button>
+        <Link
+          href={location.href("sign-in")}
+          className="text-center text-primary-500"
+        >
+          Back to sign in
         </Link>
       </form>
     </div>
-  )
+  );
 }

@@ -7,7 +7,8 @@ import { useEffect } from 'react';
 export default function ThreeWindow() {
 
     useEffect(() => {
-       new Sketch({ dom: document.getElementById('three-window') });
+       const sketch = new Sketch({ dom: document.getElementById('three-window') });
+       return () => sketch.dispose();
     }, [])
 
     return (

@@ -1,83 +1,109 @@
-'use client'
-
-import { ReactNode, useState } from 'react';
+"use client";
+import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
-import { Button } from '@heroui/button';
-import { signIn } from '@/app/actions/auth/sing-in';
-import { addToast } from '@heroui/toast';
-import { register } from '@/app/actions/auth/register';
-import { useRouter } from 'next/navigation';
-
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { authApi } from "@/lib/api/auth";
+import { useAuthForm } from "@/hooks/auth/useAuthForm";
+import { useAuthLocation } from "@/hooks/auth/useAuthLocation";
+import AuthFeedback from "@/components/auth/AuthFeedback";
+import { confirmPassword } from "@/lib/auth/validation";
 export default function RegisterPage() {
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const { push } = useRouter()
-
-  async function handleRegister(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setError(null);
-
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const confirmPassword = formData.get("confirmPassword") as string;
-    const username = formData.get("username") as string;
-
-    // Basic validations
-    if (!username || !email || !password || !confirmPassword) {
-      setError("All fields are required.");
-      return;
-    }
-
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Invalid email address.");
-      return;
-    }
-
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long.");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-
-    const res = await register({ email, password, username });
-    const { result, response } = res;
-
-    if (response?.ok) {
-      addToast({
-        title: "Account successfully created!",
-        description: `Please check your inbox to get the verification link`,
-        color: 'success',
-      });
-      push(`/auth/verify?email=${email}`);
-    } else {
-      setError(response?.message || "Unknown error");
-    }
-    setIsLoading(false);
-  }
-
+  const router = useRouter();
+  const location = useAuthLocation();
+  const form = useAuthForm(authApi.register);
   return (
     <div className="h-full flex flex-col justify-center">
-      <div className="text-3xl font-semibold text-white">
-        Register
-      </div>
-      <form onSubmit={handleRegister} className="flex mt-8 flex-col items-stretch gap-4">
-        <Input name="username" label="Username" type="text" />
-        <Input name="email" label="Email" type="email" />
-        <Input name="password" label="Password" type="password" />
-        <Input name="confirmPassword" label="Confirm Password" type="password" />
-        {error && <p className="text-sm text-rose-500">{error}</p>}
-        <Button isLoading={isLoading} type="submit" color="secondary">
-          Register
+      <h1 className="text-3xl font-semibold">Create an account</h1>
+      <form
+        ref={form.formRef}
+        className="flex mt-8 flex-col gap-4"
+        onSubmit={(event) => {
+          event.preventDefault();
+          const fields = new FormData(event.currentTarget);
+          const password = String(fields.get("password") || "");
+          try {
+            confirmPassword(
+              password,
+              String(fields.get("confirmPassword") || ""),
+            );
+          } catch (error) {
+            form.setError((error as Error).message);
+            return;
+          }
+          void form.submit(
+            {
+              email: location.email,
+              password,
+              username: String(fields.get("username") || ""),
+            },
+            () =>
+              router.replace(
+                location.href("verify", {
+                  status: "registered",
+                  email: location.email.trim(),
+                }),
+              ),
+          );
+        }}
+      >
+        <Input
+          name="username"
+          label="Username"
+          autoComplete="username"
+          isRequired
+          maxLength={100}
+          isDisabled={form.isPending}
+          onValueChange={() => form.clearError()}
+        />
+        <Input
+          name="email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          isRequired
+          isDisabled={form.isPending}
+          value={location.email}
+          onValueChange={(value) => {
+            location.setEmail(value);
+            form.clearError();
+          }}
+        />
+        <Input
+          name="password"
+          label="Password"
+          type="password"
+          autoComplete="new-password"
+          isRequired
+          minLength={6}
+          maxLength={128}
+          isDisabled={form.isPending}
+          onValueChange={() => form.clearError()}
+        />
+        <Input
+          name="confirmPassword"
+          label="Confirm password"
+          type="password"
+          autoComplete="new-password"
+          isRequired
+          isDisabled={form.isPending}
+          onValueChange={() => form.clearError()}
+        />
+        <AuthFeedback error={form.error} />
+        <Button
+          type="submit"
+          color="secondary"
+          isLoading={form.isPending}
+          isDisabled={form.isPending}
+        >
+          Create account
         </Button>
-        <Button type="button" color="default" onClick={() => push('/auth/sign-in')}>
-          Go to login page
-        </Button>
+        <Link
+          href={location.href("sign-in")}
+          className="text-center text-primary-500"
+        >
+          Already have an account? Sign in
+        </Link>
       </form>
     </div>
   );

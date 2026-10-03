@@ -17,10 +17,14 @@ class RoomInviteLinksService {
     );
   }
 
-  getAll(roomId: number | string, params?: { page?: number; limit?: number }) {
+  getAll(
+    roomId: number | string,
+    params?: { page?: number; limit?: number },
+    signal?: AbortSignal,
+  ) {
     return this.webService.get<PaginatedResponse<RoomInviteLink>>(
       `/${roomId}/invite-links`,
-      { params },
+      { params, signal },
     );
   }
 

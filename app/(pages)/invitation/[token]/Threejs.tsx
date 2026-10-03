@@ -14,16 +14,16 @@ const InvitationCard = ({
   onDecline = () => {},
   theme = 'dark' // 'dark' or 'light'
 }) => {
-  const mountRef = useRef(null);
-  const sceneRef = useRef(null);
-  const animationRef = useRef(null);
+  const mountRef = useRef<HTMLDivElement | null>(null);
+
+  const animationRef = useRef<number | null>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
   const targetMouseRef = useRef({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
 
   // Smooth mouse tracking
   useEffect(() => {
-    const handleMouseMove = (event) => {
+    const handleMouseMove = (event: MouseEvent) => {
       targetMouseRef.current = {
         x: (event.clientX / window.innerWidth) * 2 - 1,
         y: -(event.clientY / window.innerHeight) * 2 + 1
@@ -110,7 +110,7 @@ const InvitationCard = ({
     scene.add(dustParticles);
 
     // Film strip rings
-    const filmStrips = [];
+    const filmStrips: THREE.Mesh<THREE.RingGeometry, THREE.MeshBasicMaterial>[] = [];
     for (let i = 0; i < 4; i++) {
       const stripGeometry = new THREE.RingGeometry(4 + i * 1.5, 4.3 + i * 1.5, 8, 1);
       const stripMaterial = new THREE.MeshBasicMaterial({
@@ -131,7 +131,7 @@ const InvitationCard = ({
     }
 
     // Movie camera models (simplified geometric representation)
-    const cameras = [];
+    const cameras: THREE.Group[] = [];
     for (let i = 0; i < 3; i++) {
       const cameraGroup = new THREE.Group();
       
@@ -162,7 +162,7 @@ const InvitationCard = ({
     }
 
     // Film reels
-    const filmReels = [];
+    const filmReels: THREE.Group[] = [];
     for (let i = 0; i < 4; i++) {
       const reelGroup = new THREE.Group();
       
@@ -200,7 +200,7 @@ const InvitationCard = ({
     }
 
     // Floating film frames
-    const filmFrames = [];
+    const filmFrames: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshLambertMaterial>[] = [];
     for (let i = 0; i < 6; i++) {
       const frameGeometry = new THREE.PlaneGeometry(0.8, 1.2);
       const frameMaterial = new THREE.MeshLambertMaterial({
@@ -227,10 +227,7 @@ const InvitationCard = ({
     }
 
     camera.position.set(0, 0, 20);
-    sceneRef.current = { 
-      scene, camera, renderer, dustParticles, filmStrips, cameras, filmReels, filmFrames,
-      dustPositions, dustVelocities 
-    };
+
 
     // Handle window resize
     const handleResize = () => {
@@ -326,7 +323,7 @@ const InvitationCard = ({
     };
   }, []); // Removed isHovered dependency to prevent recreation
 
-  const styles = {
+  const styles: Record<string, React.CSSProperties> = {
     pageContainer: {
       position: 'relative',
       width: '100vw',
@@ -496,7 +493,7 @@ const InvitationCard = ({
                   alt={roomName}
                   style={styles.roomImage}
                   onError={(e) => {
-                    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGRkQ3MDAiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PHBhdGggZD0iTTEwMCA4MEM5NC40NzcgODAgOTAgODQuNDc3IDkwIDkwQzkwIDk1LjUyMyA5NC40NzcgMTAwIDEwMCAxMDBDMTA1LjUyMyAxMDAgMTEwIDk1LjUyMyAxMTAgOTBDMTEwIDg0LjQ3NyAxMDUuNTIzIDgwIDEwMCA4MFoiIGZpbGw9IiNGRkQ3MDAiLz48cGF0aCBkPSJNNzAgMTIwQzc1LjUyMyAxMjAgODAgMTE1LjUyMyA4MCAxMTBDODAgMTA0LjQ3NyA3NS41MjMgMTAwIDcwIDEwMEM2NC40NzcgMTAwIDYwIDEwNC40NzcgNjAgMTEwQzYwIDExNS41MjMgNjQuNDc3IDEyMCA3MCAxMjBaIiBmaWxsPSIjRkZBNTAwIi8+PHBhdGggZD0iTTEzMCAxMjBDMTM1LjUyMyAxMjAgMTQwIDExNS41MjMgMTQwIDExMEMxNDAgMTA0LjQ3NyAxMzUuNTIzIDEwMCAxMzAgMTAwQzEyNC40NzcgMTAwIDEyMCAxMDQuNDc3IDEyMCAxMTBDMTIwIDExNS41MjMgMTI0LjQ3NyAxMjAgMTMwIDEyMFoiIGZpbGw9IiNGRjYzNDciLz48L3N2Zz4=';
+                    e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIyMDAiIGZpbGw9IiNGRkQ3MDAiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PHBhdGggZD0iTTEwMCA4MEM5NC40NzcgODAgOTAgODQuNDc3IDkwIDkwQzkwIDk1LjUyMyA5NC40NzcgMTAwIDEwMCAxMDBDMTA1LjUyMyAxMDAgMTEwIDk1LjUyMyAxMTAgOTBDMTEwIDg0LjQ3NyAxMDUuNTIzIDgwIDEwMCA4MFoiIGZpbGw9IiNGRkQ3MDAiLz48cGF0aCBkPSJNNzAgMTIwQzc1LjUyMyAxMjAgODAgMTE1LjUyMyA4MCAxMTBDODAgMTA0LjQ3NyA3NS41MjMgMTAwIDcwIDEwMEM2NC40NzcgMTAwIDYwIDEwNC40NzcgNjAgMTEwQzYwIDExNS41MjMgNjQuNDc3IDEyMCA3MCAxMjBaIiBmaWxsPSIjRkZBNTAwIi8+PHBhdGggZD0iTTEzMCAxMjBDMTM1LjUyMyAxMjAgMTQwIDExNS41MjMgMTQwIDExMEMxNDAgMTA0LjQ3NyAxMzUuNTIzIDEwMCAxMzAgMTAwQzEyNC40NzcgMTAwIDEyMCAxMDQuNDc3IDEyMCAxMTBDMTIwIDExNS41MjMgMTI0LjQ3NyAxMjAgMTMwIDEyMFoiIGZpbGw9IiNGRjYzNDciLz48L3N2Zz4=';
                   }}
                 />
               </div>
@@ -511,7 +508,7 @@ const InvitationCard = ({
                   alt={inviterName}
                   style={styles.avatar}
                   onError={(e) => {
-                    e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIyNCIgZmlsbD0iI0ZGRDcwMCIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iMjAiIHI9IjgiIGZpbGw9IndoaXRlIi8+PHBhdGggZD0iTTggMzZDOCAyOC4yNjggMTUuMjY4IDIyIDI0IDIyQzMyLjczMiAyMiA0MCAyOC4yNjggNDAgMzYiIGZpbGw9IndoaXRlIi8+PC9zdmc+';
+                    e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDgiIGhlaWdodD0iNDgiIHZpZXdCb3g9IjAgMCA0OCA0OCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIyNCIgY3k9IjI0IiByPSIyNCIgZmlsbD0iI0ZGRDcwMCIvPjxjaXJjbGUgY3g9IjI0IiBjeT0iMjAiIHI9IjgiIGZpbGw9IndoaXRlIi8+PHBhdGggZD0iTTggMzZDOCAyOC4yNjggMTUuMjY4IDIyIDI0IDIyQzMyLjczMiAyMiA0MCAyOC4yNjggNDAgMzYiIGZpbGw9IndoaXRlIi8+PC9zdmc+';
                   }}
                 />
                 <div>
@@ -526,12 +523,12 @@ const InvitationCard = ({
                   style={{...styles.button, ...styles.acceptButton}}
                   onClick={onAccept}
                   onMouseEnter={(e) => {
-                    e.target.style.transform = 'translateY(-3px)';
-                    e.target.style.boxShadow = '0 15px 35px rgba(255, 215, 0, 0.6)';
+                    e.currentTarget.style.transform = 'translateY(-3px)';
+                    e.currentTarget.style.boxShadow = '0 15px 35px rgba(255, 215, 0, 0.6)';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.transform = 'translateY(0)';
-                    e.target.style.boxShadow = '0 4px 15px rgba(255, 215, 0, 0.4)';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(255, 215, 0, 0.4)';
                   }}
                 >
                   Accept and Join
@@ -540,12 +537,12 @@ const InvitationCard = ({
                   style={{...styles.button, ...styles.declineButton}}
                   onClick={onDecline}
                   onMouseEnter={(e) => {
-                    e.target.style.transform = 'translateY(-3px)';
-                    e.target.style.boxShadow = '0 15px 35px rgba(239, 68, 68, 0.3)';
+                    e.currentTarget.style.transform = 'translateY(-3px)';
+                    e.currentTarget.style.boxShadow = '0 15px 35px rgba(239, 68, 68, 0.3)';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.transform = 'translateY(0)';
-                    e.target.style.boxShadow = 'none';
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
                   Decline

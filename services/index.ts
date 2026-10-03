@@ -1,3 +1,4 @@
+import "server-only";
 import { RequestResult } from "@/types/request";
 import { cookies } from "next/headers";
 
@@ -52,6 +53,11 @@ export class WebServices {
       method,
       headers: normalizedHeaders,
       ...rest,
+      // Authenticated backend responses must never enter a shared Next.js cache.
+      cache: "no-store",
+      signal: rest.signal
+        ? AbortSignal.any([rest.signal, AbortSignal.timeout(15_000)])
+        : AbortSignal.timeout(15_000),
     };
 
     if (body instanceof FormData) {
@@ -71,18 +77,26 @@ export class WebServices {
       } else {
         parsed = await response.text();
       }
+      const message =
+        typeof parsed?.message === "string"
+          ? parsed.message
+          : Array.isArray(parsed?.message)
+            ? parsed.message
+                .filter((item: unknown) => typeof item === "string")
+                .join(" ")
+            : undefined;
 
       return {
-        result: response.ok ? (parsed as T) : parsed.message || null,
+        result: response.ok ? (parsed as T) : null,
         response: {
-          ...(parsed.message ? { message: parsed.message } : {}),
+          ...(message ? { message } : {}),
           ok: response.ok,
           status: response.status,
           statusText: response.statusText,
         },
         error: response.ok
           ? undefined
-          : parsed.message || `HTTP ${response.status}: ${response.statusText}`,
+          : message || `HTTP ${response.status}: ${response.statusText}`,
       };
     } catch (error: any) {
       return {

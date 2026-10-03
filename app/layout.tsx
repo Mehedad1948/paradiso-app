@@ -1,6 +1,5 @@
 import "@/styles/globals.css";
 import { Metadata, Viewport } from "next";
-import { Link } from "@heroui/link";
 import clsx from "clsx";
 
 
@@ -8,8 +7,6 @@ import clsx from "clsx";
 import { siteConfig } from "@/config/site";
 import { fontSans } from "@/config/fonts";
 import Providers from './providers';
-import ThreeWindow from '@/components/threes/ThreeWindow';
-import Header from '@/components/ui/Header';
 
 export const metadata: Metadata = {
   title: {

@@ -1,7 +1,10 @@
 import ThreeWindow from '@/components/threes/ThreeWindow';
+import { cacheLife } from 'next/cache';
 
 
-export default function Home() {
+export default async function Home() {
+  'use cache';
+  cacheLife('hours');
   return <>
     <ThreeWindow />
     <div data-scroll className=''>

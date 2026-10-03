@@ -19,8 +19,8 @@ export interface RoomInviteLink {
 
 export interface CreateRoomInviteLinkInputs {
   roomId: number | string;
-  maxUsage?: number;
-  expiresAt?: Date;
+  maxUsage?: number | null;
+  expiresAt?: Date | null;
   note?: string;
 }
 
@@ -28,8 +28,8 @@ export interface UpdateRoomInviteLinkInputs {
   roomId: number | string;
   id: string | number;
   isActive?: boolean;
-  maxUsage?: number;
-  expiresAt?: Date;
+  maxUsage?: number | null;
+  expiresAt?: Date | null;
   note?: string;
 }
 export interface DeleteRoomInviteLinkInputs {

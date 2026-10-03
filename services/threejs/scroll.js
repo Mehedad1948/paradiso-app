@@ -8,9 +8,12 @@ const lerp = (a, b, n) => (1 - n) * a + n * b
 export default class Scroll {
   constructor() {
     this.DOM = { main: document.querySelector("main") };
+    this.originalMainStyle = this.DOM.main.getAttribute("style");
+    this.originalBodyHeight = document.body.style.height;
     // the scrollable element
     // we translate this element when scrolling (y-axis)
     this.DOM.scrollable = this.DOM.main.querySelector("div[data-scroll]");
+    this.originalScrollableStyle = this.DOM.scrollable.getAttribute("style");
     this.docScroll = 0;
     this.scrollToRender = 0;
     this.current = 0;
@@ -28,7 +31,7 @@ export default class Scroll {
     // init/bind events
     this.initEvents();
     // start the render loop
-    requestAnimationFrame(() => this.render());
+    this.animationFrame = requestAnimationFrame(() => this.render());
   }
 
   init() {
@@ -58,12 +61,11 @@ export default class Scroll {
   }
   initEvents() {
 
-    window.onbeforeunload = function () {
-      window.scrollTo(0, 0);
-    };
     // on resize reset the body's height
-    window.addEventListener("resize", () => this.setSize());
-    window.addEventListener("scroll", this.getScroll.bind(this));
+    this.onResize = () => this.setSize();
+    this.onScroll = this.getScroll.bind(this);
+    window.addEventListener("resize", this.onResize);
+    window.addEventListener("scroll", this.onScroll);
 
   }
 
@@ -99,5 +101,16 @@ export default class Scroll {
 
     // and translate the scrollable element
     this.setPosition();
+  }
+
+  destroy() {
+    cancelAnimationFrame(this.animationFrame);
+    window.removeEventListener("resize", this.onResize);
+    window.removeEventListener("scroll", this.onScroll);
+    if (this.originalMainStyle === null) this.DOM.main.removeAttribute("style");
+    else this.DOM.main.setAttribute("style", this.originalMainStyle);
+    if (this.originalScrollableStyle === null) this.DOM.scrollable.removeAttribute("style");
+    else this.DOM.scrollable.setAttribute("style", this.originalScrollableStyle);
+    document.body.style.height = this.originalBodyHeight;
   }
 }

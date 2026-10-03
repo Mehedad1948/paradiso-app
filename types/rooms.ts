@@ -1,5 +1,4 @@
 import { MovieWithRatings, UserType } from ".";
-import { DbMovie } from "./movies";
 
 export type Room = {
   id: number;

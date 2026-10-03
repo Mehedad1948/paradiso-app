@@ -10,15 +10,16 @@ export type MovieWithRatings = {
   release_date: string;
   imdbRate: number;
   image: string;
+  poster_path: string | null;
   isWatchedTogether: boolean;
   isIn: boolean;
-  addedBy: {
+  addedBy?: {
     id: number;
   };
   createdAt: string;
   updatedAt: string;
   ratings: {
-    rate: number;
+    rate: number | null;
     user: {
       id: number;
       username: string;
@@ -26,8 +27,6 @@ export type MovieWithRatings = {
     };
   }[];
 };
-
-
 
 export type UserType = {
   id: number;

@@ -1,5 +1,5 @@
 export type RequestResult<T> = {
-  result: T;
+  result: T | null;
   response: {
     ok: boolean;
     status: number;
