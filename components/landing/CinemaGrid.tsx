@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useRef } from "react";
 import type { SyntheticEvent } from "react";
 import { landingPosters } from "@/config/posters";
 
@@ -17,9 +18,9 @@ const cells = rows.flatMap((columns, row) =>
   columns.map((column) => ({ row: row + 1, column })),
 );
 
-function startReveal(event: SyntheticEvent<HTMLButtonElement>) {
-  const artwork = event.currentTarget.querySelector("img");
-  const number = event.currentTarget.querySelector("span");
+function startReveal(button: HTMLButtonElement) {
+  const artwork = button.querySelector("img");
+  const number = button.querySelector("span");
   if (!artwork || !number) return;
   if (artwork.getAnimations().some((animation) => animation.playState === "running")) return;
 
@@ -31,9 +32,60 @@ function startReveal(event: SyntheticEvent<HTMLButtonElement>) {
   number.classList.add("animate-cinema-number");
 }
 
+function handleReveal(event: SyntheticEvent<HTMLButtonElement>) {
+  startReveal(event.currentTarget);
+}
+
 export default function CinemaGrid() {
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let disposed = false;
+    const unregisterCallbacks: Array<() => void> = [];
+    const unregisterAll = () => {
+      for (const unregister of unregisterCallbacks.splice(0)) unregister();
+    };
+
+    async function registerPredictions() {
+      try {
+        const { ForesightManager } = await import("js.foresight");
+        if (disposed || !gridRef.current) return;
+
+        const manager = ForesightManager.initialize({
+          enableScrollPrediction: false,
+          enableTabPrediction: false,
+          touchDeviceStrategy: "none",
+          setDataAttributes: false,
+        });
+        const buttons = gridRef.current.querySelectorAll<HTMLButtonElement>("button");
+        buttons.forEach((button, index) => {
+          const registration = manager.register({
+            element: button,
+            callback: () => startReveal(button),
+            name: `cinema-grid-${index + 1}`,
+            hitSlop: 0,
+            reactivateAfter: 4_600,
+          });
+          unregisterCallbacks.push(registration.unregister);
+        });
+      } catch {
+        unregisterAll();
+        // Hover and focus still reveal posters if prediction cannot load.
+      }
+    }
+
+    void registerPredictions();
+    return () => {
+      disposed = true;
+      unregisterAll();
+    };
+  }, []);
+
   return (
     <div
+      ref={gridRef}
       className="grid aspect-square w-[86%] grid-cols-6 grid-rows-6 justify-self-end pl-px pt-px max-[640px]:w-[76%]"
       role="group"
       aria-label="Explore iconic cinema. Hover or focus to reveal a film."
@@ -47,8 +99,8 @@ export default function CinemaGrid() {
             className="group relative -ml-px -mt-px min-h-0 min-w-0 cursor-pointer touch-manipulation overflow-hidden border border-ink/20 bg-transparent focus-visible:z-[1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
             style={{ gridRow: row, gridColumn: column }}
             aria-label={`Reveal ${film.title}, frame ${index + 1}`}
-            onPointerEnter={startReveal}
-            onFocus={startReveal}
+            onPointerEnter={handleReveal}
+            onFocus={handleReveal}
           >
             <Image
               src={film.image}
