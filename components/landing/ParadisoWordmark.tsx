@@ -1,22 +1,30 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
-import { landingPosters } from "@/config/posters";
+import type { CSSProperties, SyntheticEvent } from "react";
+import { gridPosters } from "@/config/posters";
 
 const letters = [
-  { letter: "P", image: landingPosters[0].image, position: "35%" },
-  { letter: "A", image: landingPosters[1].image, position: "20%" },
-  { letter: "R", image: landingPosters[2].image, position: "65%" },
-  { letter: "A", image: landingPosters[3].image, position: "75%" },
-  { letter: "D", image: landingPosters[4].image, position: "50%" },
-  { letter: "I", image: landingPosters[0].image, position: "45%" },
-  { letter: "S", image: landingPosters[2].image, position: "75%" },
-  { letter: "O", image: landingPosters[1].image, position: "60%" },
+  { letter: "P", image: gridPosters.parisTexas.image, position: "35%" },
+  { letter: "A", image: gridPosters.dune.image, position: "20%" },
+  { letter: "R", image: gridPosters.cinemaParadiso.image, position: "65%" },
+  { letter: "A", image: gridPosters.walterMitty.image, position: "75%" },
+  { letter: "D", image: gridPosters.ilPostino.image, position: "50%" },
+  { letter: "I", image: gridPosters.divingBell.image, position: "45%" },
+  { letter: "S", image: gridPosters.trumanShow.image, position: "75%" },
+  { letter: "O", image: gridPosters.twelveAngryMen.image, position: "60%" },
 ];
 
-export default function ParadisoWordmark() {
-  const [selected, setSelected] = useState<number | null>(null);
+function startReveal(event: SyntheticEvent<HTMLButtonElement>) {
+  const artwork = event.currentTarget.querySelector<HTMLElement>("[data-letter-artwork]");
+  if (!artwork) return;
+  if (artwork.getAnimations().some((animation) => animation.playState === "running")) return;
 
+  artwork.classList.remove("animate-cinema-letter-reveal");
+  void artwork.offsetWidth;
+  artwork.classList.add("animate-cinema-letter-reveal");
+}
+
+export default function ParadisoWordmark() {
   return (
     <div
       className="grid w-full grid-cols-4 content-center [container-type:inline-size] font-[Arial,Helvetica,sans-serif] font-black leading-[0.95]"
@@ -29,21 +37,23 @@ export default function ParadisoWordmark() {
           type="button"
           className={`group relative min-w-0 cursor-pointer touch-manipulation bg-transparent py-[0.035em] text-[32cqi] [font-weight:inherit] leading-[inherit] focus-visible:z-[1] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${index === 5 ? "text-accent" : "text-ink"}`}
           aria-label={`Reveal cinematic artwork in letter ${letter}, ${index + 1} of 8`}
-          aria-pressed={selected === index}
-          onClick={() => setSelected(selected === index ? null : index)}
+          onPointerEnter={startReveal}
+          onFocus={startReveal}
+          onClick={startReveal}
           style={{
             "--letter-image": `url("${image}")`,
             "--image-position": position,
           } as CSSProperties}
         >
           <span
-            className="block transition-opacity duration-[700ms] ease-[ease] group-hover:opacity-0 group-hover:duration-[350ms] group-focus-visible:opacity-0 group-focus-visible:duration-[350ms] group-aria-[pressed=true]:opacity-0 group-aria-[pressed=true]:duration-[350ms] motion-reduce:transition-none"
+            className="block"
             aria-hidden="true"
           >
             {letter}
           </span>
           <span
-            className="absolute inset-0 [padding:inherit] bg-[image:var(--letter-image)] [background-size:auto_130%] [background-position:var(--image-position)_45%] bg-clip-text text-transparent opacity-0 transition-[opacity,background-position] duration-[700ms,900ms] ease-[ease] group-hover:[background-position:var(--image-position)_65%] group-hover:opacity-100 group-hover:duration-[350ms,900ms] group-focus-visible:[background-position:var(--image-position)_65%] group-focus-visible:opacity-100 group-focus-visible:duration-[350ms,900ms] group-aria-[pressed=true]:[background-position:var(--image-position)_65%] group-aria-[pressed=true]:opacity-100 group-aria-[pressed=true]:duration-[350ms,900ms] motion-reduce:transition-none"
+            data-letter-artwork
+            className="absolute inset-0 [padding:inherit] bg-[image:var(--letter-image)] [background-size:auto_130%] [background-position:var(--image-position)_45%] bg-clip-text text-transparent [clip-path:inset(0_100%_0_0)] motion-reduce:group-hover:[clip-path:inset(0_0_0_0)] motion-reduce:group-focus-visible:[clip-path:inset(0_0_0_0)] motion-reduce:animate-none"
             aria-hidden="true"
           >
             {letter}

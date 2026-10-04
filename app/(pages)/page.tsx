@@ -33,8 +33,8 @@ export default async function Home() {
         </div>
         <div className="flex items-end justify-between gap-10 pb-14 pt-12 [&>h2]:text-[clamp(38px,4.2vw,68px)] [&>h2]:font-semibold [&>h2]:leading-[1.08] [&>h2]:tracking-[-0.065em] [&>h2_span]:font-serif [&>h2_span]:font-normal [&>h2_span]:italic [&>h2_span]:tracking-[-0.045em] max-sm:flex-col max-sm:items-start max-sm:gap-6 max-sm:pb-9 max-sm:pt-8 max-sm:[&>h2]:text-[clamp(34px,10.8vw,48px)]">
           <h2>
-            Good films.
-            <br />
+            Good films.a
+            <br /> 
             <span>Better company.</span>
           </h2>
           <div className="max-w-[380px] [&>p]:mb-6 [&>p]:text-base [&>p]:leading-[1.75] [&>p]:text-muted max-lg:max-w-[300px] max-sm:w-full max-sm:max-w-none">
@@ -59,7 +59,7 @@ export default async function Home() {
             alt="A scene from 12 Angry Men, with the jury gathered around a table"
             fill
             sizes="(max-width: 700px) 100vw, 70vw"
-            className="object-cover object-[center_40%] transition-transform duration-1000 group-hover:scale-[1.025] motion-reduce:transform-none motion-reduce:transition-none"
+            className="object-cover object-[center_40%] transition-[transform,filter] duration-[1200ms] ease-in-out group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:transition-none"
           />
         </div>
         <div className="flex flex-col items-start justify-between bg-surface px-9 py-8 [&>p]:my-4.5 [&>p]:text-[clamp(30px,3vw,48px)] [&>p]:font-medium [&>p]:leading-[1.08] [&>p]:tracking-[-0.05em] [&>p_em]:font-serif [&>p_em]:font-normal max-lg:p-6 max-sm:gap-5 max-sm:p-6 max-sm:[&>p]:m-0 max-sm:[&>p]:text-4xl">

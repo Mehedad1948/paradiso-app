@@ -1,21 +1,22 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef } from "react";
 import type { SyntheticEvent } from "react";
-import { landingPosters } from "@/config/posters";
+import { gridPosters } from "@/config/posters";
 
-// A stepped silhouette leaves breathing room beside the lettering.
-const rows = [
-  [3, 4, 5, 6],
-  [2, 3, 4, 5, 6],
-  [1, 2, 3, 4, 5, 6],
-  [2, 3, 4, 5, 6],
-  [3, 4, 5, 6],
-  [4, 5, 6],
+// Green and blue flow into purple, red, then yellow across the stepped grid.
+const gridLayout: (keyof typeof gridPosters | null)[][] = [
+  [null, null, "treeOfLife", "wingsOfDesire", "rearWindow", "laLaLand"],
+  [null, "divingBell", "oceanHeaven", "walterMitty", "johnWick", "her"],
+  ["matrix", "stalker", "parisTexas", "trumanShow", "goodTime", "colorsRed"],
+  [null, "treeOfLife", "memento", "livesOfOthers", "vertigo", "amelie"],
+  [null, null, "stalag17", "dune", "fantasticMrFox", "killBill"],
+  [null, null, null, "taxiDriver", "twelveAngryMen", "fantasticMrFox"],
 ];
-const cells = rows.flatMap((columns, row) =>
-  columns.map((column) => ({ row: row + 1, column })),
+const cells = gridLayout.flatMap((columns, row) =>
+  columns.flatMap((poster, column) =>
+    poster ? [{ row: row + 1, column: column + 1, poster }] : [],
+  ),
 );
 
 function startReveal(button: HTMLButtonElement) {
@@ -37,61 +38,14 @@ function handleReveal(event: SyntheticEvent<HTMLButtonElement>) {
 }
 
 export default function CinemaGrid() {
-  const gridRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    let disposed = false;
-    const unregisterCallbacks: Array<() => void> = [];
-    const unregisterAll = () => {
-      for (const unregister of unregisterCallbacks.splice(0)) unregister();
-    };
-
-    async function registerPredictions() {
-      try {
-        const { ForesightManager } = await import("js.foresight");
-        if (disposed || !gridRef.current) return;
-
-        const manager = ForesightManager.initialize({
-          enableScrollPrediction: false,
-          enableTabPrediction: false,
-          touchDeviceStrategy: "none",
-          setDataAttributes: false,
-        });
-        const buttons = gridRef.current.querySelectorAll<HTMLButtonElement>("button");
-        buttons.forEach((button, index) => {
-          const registration = manager.register({
-            element: button,
-            callback: () => startReveal(button),
-            name: `cinema-grid-${index + 1}`,
-            hitSlop: 0,
-            reactivateAfter: 4_600,
-          });
-          unregisterCallbacks.push(registration.unregister);
-        });
-      } catch {
-        unregisterAll();
-        // Hover and focus still reveal posters if prediction cannot load.
-      }
-    }
-
-    void registerPredictions();
-    return () => {
-      disposed = true;
-      unregisterAll();
-    };
-  }, []);
-
   return (
     <div
-      ref={gridRef}
       className="grid aspect-square w-[86%] grid-cols-6 grid-rows-6 justify-self-end pl-px pt-px max-[640px]:w-[76%]"
       role="group"
       aria-label="Explore iconic cinema. Hover or focus to reveal a film."
     >
-      {cells.map(({ row, column }, index) => {
-        const film = landingPosters[index % landingPosters.length];
+      {cells.map(({ row, column, poster }, index) => {
+        const film = gridPosters[poster];
         return (
           <button
             key={`${row}-${column}`}

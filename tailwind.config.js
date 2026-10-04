@@ -43,10 +43,16 @@ const config = {
           "0%, 99.99%": { visibility: "hidden" },
           "100%": { visibility: "visible" },
         },
+        "cinema-letter-reveal": {
+          "0%": { clipPath: "inset(0 100% 0 0)" },
+          "5.4348%, 92.3913%": { clipPath: "inset(0 0 0 0)" },
+          "100%": { clipPath: "inset(0 100% 0 0)" },
+        },
       },
       animation: {
         "cinema-reveal": "cinema-reveal 4.6s linear",
         "cinema-number": "cinema-number 4.6s step-end",
+        "cinema-letter-reveal": "cinema-letter-reveal 4.6s linear",
       },
     },
   },
