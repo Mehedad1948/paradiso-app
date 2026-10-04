@@ -1,18 +1,12 @@
-import { WebServices } from "..";
+import { backendRequest } from "../backend";
 
-class StorageServices {
-  private webService = new WebServices();
-
+const storageServices = {
   uploadImage(file: File, folder: string) {
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("folder", folder);
-    return this.webService.post<{ name: string; id: number; path: string }>(
-      `/uploads/file`,
-      { body: formData },
-    );
-  }
-}
+    const body = new FormData();
+    body.set("file", file);
+    body.set("folder", folder);
+    return backendRequest("/uploads/file", "post", { body });
+  },
+};
 
-const storageServices = new StorageServices();
 export default storageServices;

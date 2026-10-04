@@ -126,7 +126,7 @@ export default function RoomRatingTable({
                       {/^\d{4}-/.test(movie.release_date || "") && (
                         <span className="text-primary-500 text-sm">
                           {" "}
-                          - {movie.release_date.slice(0, 4)}
+                          - {movie.release_date?.slice(0, 4)}
                         </span>
                       )}
                     </span>

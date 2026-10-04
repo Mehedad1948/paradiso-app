@@ -6,10 +6,10 @@ export type VerifyEmailInputs = BackendRequestBody<"/auth/verify-email", "post">
 export type ForgotPasswordInputs = BackendRequestBody<"/auth/forget-password", "post">;
 export type ResetPasswordInputs = BackendRequestBody<"/auth/reset-password", "post">;
 export type RefreshTokenInputs = BackendRequestBody<"/auth/refresh-tokens", "post">;
-export interface TokenPair {
-  accessToken: string;
-  refreshToken: string;
-}
+export type TokenPair = Pick<
+  import("./generated/backend").components["schemas"]["TokensResponse"],
+  "accessToken" | "refreshToken"
+>;
 export interface AuthResult {
   message: string;
   authenticated?: boolean;

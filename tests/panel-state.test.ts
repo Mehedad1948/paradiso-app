@@ -30,7 +30,7 @@ function setup() {
 }
 describe("panel mutation state", () => {
   it("invalidates only affected room data after adding a movie", async () => {
-    vi.spyOn(panelApi, "addMovie").mockResolvedValue({ message: "Added" });
+    vi.spyOn(panelApi, "addMovie").mockResolvedValue({ message: "Added", movieId: "movie-1", apiVersion: "1" });
     const { client, wrapper } = setup();
     const keys = [
       panelKeys.room("1"),
@@ -50,7 +50,7 @@ describe("panel mutation state", () => {
       expect(client.getQueryState(key)?.isInvalidated).toBe(false);
   });
   it("prevents immediate duplicate votes and waits for invalidation before closing", async () => {
-    let resolve!: (value: unknown) => void;
+    let resolve!: (value: Awaited<ReturnType<typeof panelApi.vote>>) => void;
     const vote = vi.spyOn(panelApi, "vote").mockImplementation(
       () =>
         new Promise((complete) => {
@@ -70,7 +70,7 @@ describe("panel mutation state", () => {
     await waitFor(() => expect(hook.result.current.isPending).toBe(true));
     expect(vote).toHaveBeenCalledTimes(1);
     expect(close).not.toHaveBeenCalled();
-    await act(async () => resolve({ message: "Rated" }));
+    await act(async () => resolve({} as Awaited<ReturnType<typeof panelApi.vote>>));
     await waitFor(() => expect(close).toHaveBeenCalledTimes(1));
     expect(invalidate.mock.invocationCallOrder[0]).toBeLessThan(
       close.mock.invocationCallOrder[0],
@@ -78,7 +78,7 @@ describe("panel mutation state", () => {
     await waitFor(() => expect(hook.result.current.isPending).toBe(false));
   });
   it("still invalidates server data after leaving a dialog, without a late close callback", async () => {
-    let resolve!: (value: unknown) => void;
+    let resolve!: (value: Awaited<ReturnType<typeof panelApi.vote>>) => void;
     vi.spyOn(panelApi, "vote").mockImplementation(
       () =>
         new Promise((complete) => {
@@ -97,7 +97,7 @@ describe("panel mutation state", () => {
     );
     await waitFor(() => expect(hook.result.current.isPending).toBe(true));
     hook.unmount();
-    resolve({ message: "Rated" });
+    resolve({} as Awaited<ReturnType<typeof panelApi.vote>>);
     await waitFor(() =>
       expect(client.getQueryState(key)?.isInvalidated).toBe(true),
     );

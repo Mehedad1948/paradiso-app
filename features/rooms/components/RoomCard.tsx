@@ -3,7 +3,7 @@ import { Card, CardFooter } from "@heroui/card";
 import { Button } from "@heroui/button";
 import Image from "next/image";
 import Link from "next/link";
-import type { PanelRoom } from "@/lib/api/panel";
+import type { PanelRoomListItem } from "@/lib/api/panel";
 import JoinRoomButton from "./JoinRoomButton";
 import { posters } from "@/config/posters";
 import { ArrowUpRight } from "lucide-react";
@@ -11,7 +11,7 @@ export default function RoomCard({
   room,
   canVisit,
 }: {
-  room: PanelRoom;
+  room: PanelRoomListItem;
   canVisit: boolean;
 }) {
   return (

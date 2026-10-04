@@ -1,7 +1,1 @@
-export type User = {
-  id: number;
-  email: string;
-  username: string;
-  avatar: string;
-  role: string;
-};
+export type User = import("./generated/backend").components["schemas"]["UserResponse"];

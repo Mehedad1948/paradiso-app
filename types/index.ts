@@ -4,34 +4,7 @@ export type IconSvgProps = SVGProps<SVGSVGElement> & {
   size?: number;
 };
 
-export type MovieWithRatings = {
-  id: string;
-  title: string;
-  release_date: string;
-  imdbRate: number;
-  image: string;
-  poster_path: string | null;
-  isWatchedTogether: boolean;
-  isIn: boolean;
-  addedBy?: {
-    id: number;
-  };
-  createdAt: string;
-  updatedAt: string;
-  ratings: {
-    rate: number | null;
-    user: {
-      id: number;
-      username: string;
-      avatar: string | null;
-    };
-  }[];
-};
+import type { components } from "./generated/backend";
 
-export type UserType = {
-  id: number;
-  username: string;
-  avatar: string | null;
-};
-
-// Usage:
+export type MovieWithRatings = components["schemas"]["RoomRating"];
+export type UserType = components["schemas"]["PublicUser"];

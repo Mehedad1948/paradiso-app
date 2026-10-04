@@ -1,54 +1,23 @@
-export interface RoomInviteLink {
-  id: number;
-  roomId: number;
-  token: string;
-  inviteUrl: string;
-  isActive: boolean;
-  maxUsage?: number | null;
-  usageCount: number;
-  expiresAt?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  uses: number;
-  createdBy: {
-    id: number;
-    username: string;
-    avatar?: string | null;
-  };
-}
+import type { BackendRequestBody } from "./backend";
+import type { components } from "./generated/backend";
 
-export interface CreateRoomInviteLinkInputs {
+export type RoomInviteLink = components["schemas"]["InviteLink"];
+export type InviteLinkInfo = components["schemas"]["InvitePreviewResponse"];
+
+type CreateBody = BackendRequestBody<"/rooms/{roomId}/invite-links", "post">;
+type UpdateBody = BackendRequestBody<"/rooms/{roomId}/invite-links/{id}", "patch">;
+
+// The BFF accepts Date objects from the client and serializes them for the backend.
+export type CreateRoomInviteLinkInputs = Omit<CreateBody, "expiresAt"> & {
   roomId: number | string;
-  maxUsage?: number | null;
   expiresAt?: Date | null;
-  note?: string;
-}
-
-export interface UpdateRoomInviteLinkInputs {
+};
+export type UpdateRoomInviteLinkInputs = Omit<UpdateBody, "expiresAt"> & {
   roomId: number | string;
-  id: string | number;
-  isActive?: boolean;
-  maxUsage?: number | null;
+  id: number | string;
   expiresAt?: Date | null;
-  note?: string;
-}
-export interface DeleteRoomInviteLinkInputs {
+};
+export type DeleteRoomInviteLinkInputs = {
   roomId: number | string;
-  id: string | number;
-}
-
-export interface InviteLinkInfo {
-  room: {
-    id: string | number;
-    name: string;
-    description: string;
-    image?: string;
-  };
-  inviter: {
-    id: string | number;
-    name: string;
-    avatar: string;
-  } | null;
-  canJoin: boolean;
-  message: string;
-}
+  id: number | string;
+};

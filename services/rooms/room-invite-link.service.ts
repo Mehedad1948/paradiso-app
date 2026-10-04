@@ -1,58 +1,40 @@
-import { PaginatedResponse } from "@/types/request";
-import {
-  RoomInviteLink,
-  CreateRoomInviteLinkInputs,
-  UpdateRoomInviteLinkInputs,
-  InviteLinkInfo,
-} from "@/types/roomInviteLinks";
-import { WebServices } from "..";
+import type { BackendRequestBody } from "@/types/backend";
+import { backendRequest } from "../backend";
 
-class RoomInviteLinksService {
-  private webService = new WebServices("/rooms");
+type CreateBody = BackendRequestBody<"/rooms/{roomId}/invite-links", "post">;
+type UpdateBody = BackendRequestBody<"/rooms/{roomId}/invite-links/{id}", "patch">;
 
-  create(data: CreateRoomInviteLinkInputs) {
-    return this.webService.post<RoomInviteLink>(
-      `/${data.roomId}/invite-links`,
-      { body: data },
-    );
-  }
-
-  getAll(
-    roomId: number | string,
-    params?: { page?: number; limit?: number },
-    signal?: AbortSignal,
-  ) {
-    return this.webService.get<PaginatedResponse<RoomInviteLink>>(
-      `/${roomId}/invite-links`,
-      { params, signal },
-    );
-  }
-
-  update(data: UpdateRoomInviteLinkInputs) {
-    const { id, roomId, ...body } = data;
-    return this.webService.patch<RoomInviteLink>(
-      `/${roomId}/invite-links/${id}`,
-      { body: body },
-    );
-  }
-
-  delete(roomId: number | string, id: string) {
-    return this.webService.delete<{ message: string }>(
-      `/${roomId}/invite-links/${id}`,
-    );
-  }
-
+const roomInviteLinksService = {
+  create(roomId: number, body: CreateBody = {}) {
+    return backendRequest("/rooms/{roomId}/invite-links", "post", {
+      pathParams: { roomId }, body,
+    });
+  },
+  getAll(roomId: number, page = 1, limit = 10, signal?: AbortSignal) {
+    return backendRequest("/rooms/{roomId}/invite-links", "get", {
+      pathParams: { roomId }, query: { page, limit }, signal,
+    });
+  },
+  update(roomId: number, id: number, body: UpdateBody) {
+    return backendRequest("/rooms/{roomId}/invite-links/{id}", "patch", {
+      pathParams: { roomId, id }, body,
+    });
+  },
+  delete(roomId: number, id: number) {
+    return backendRequest("/rooms/{roomId}/invite-links/{id}", "delete", {
+      pathParams: { roomId, id },
+    });
+  },
   verify(token: string) {
-    // stays global, not tied to room
-    return new WebServices().get<{ valid: boolean; roomId?: number }>(
-      `/invite-links/verify/${token}`,
-    );
-  }
-
+    return backendRequest("/invite-links/verify/{token}", "post", {
+      pathParams: { token },
+    });
+  },
   tokenInfo(token: string) {
-    return new WebServices().get<InviteLinkInfo>(`/invite-links/${token}`);
-  }
-}
+    return backendRequest("/invite-links/{token}", "get", {
+      pathParams: { token }, withAuth: false,
+    });
+  },
+};
 
-const roomInviteLinksService = new RoomInviteLinksService();
 export default roomInviteLinksService;

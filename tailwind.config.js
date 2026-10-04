@@ -33,6 +33,21 @@ const config = {
         sans: ["var(--font-sans)"],
         mono: ["var(--font-mono)"],
       },
+      keyframes: {
+        "cinema-reveal": {
+          "0%": { transform: "translateX(-100%)" },
+          "5.4348%, 92.3913%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-100%)" },
+        },
+        "cinema-number": {
+          "0%, 99.99%": { visibility: "hidden" },
+          "100%": { visibility: "visible" },
+        },
+      },
+      animation: {
+        "cinema-reveal": "cinema-reveal 4.6s linear",
+        "cinema-number": "cinema-number 4.6s step-end",
+      },
     },
   },
   darkMode: "class",

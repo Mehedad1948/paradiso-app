@@ -1,6 +1,7 @@
 import { bffRequest, queryString } from "./client";
 import type {
   Room,
+  RoomListItem,
   CreateRoomInputs,
   RoomRatingFilters,
   addMovieToRoomInputs,
@@ -10,7 +11,7 @@ import type { VoteType } from "@/types/ratings";
 import type { User } from "@/types/user";
 import type { Invitation } from "@/types/invitations";
 import type { PaginatedResponse } from "@/types/request";
-import type { DbMovie } from "@/types/movies";
+import type { BackendResponse } from "@/types/backend";
 import type {
   RoomInviteLink,
   UpdateRoomInviteLinkInputs,
@@ -18,13 +19,14 @@ import type {
 } from "@/types/roomInviteLinks";
 
 export type PanelRoom = Room & { imageUrl: string | null };
+export type PanelRoomListItem = RoomListItem & { imageUrl: string | null };
 const json = (body: unknown) => JSON.stringify(body);
 const roomPath = (id: string | number) => `/rooms/${encodeURIComponent(id)}`;
 
 export const panelApi = {
   me: (signal?: AbortSignal) => bffRequest<User>("/me", { signal }),
   rooms: (usersRoom: boolean, page: number, signal?: AbortSignal) =>
-    bffRequest<PaginatedResponse<PanelRoom>>(
+    bffRequest<PaginatedResponse<PanelRoomListItem>>(
       `/rooms${queryString({ usersRoom, page, limit: 10 })}`,
       { signal },
     ),
@@ -36,28 +38,30 @@ export const panelApi = {
       { signal },
     ),
   createRoom: (body: CreateRoomInputs) =>
-    bffRequest<PanelRoom>("/rooms", { method: "POST", body: json(body) }),
+    bffRequest<BackendResponse<"/rooms", "post"> & { imageUrl: string | null }>(
+      "/rooms", { method: "POST", body: json(body) },
+    ),
   joinRoom: (roomId: number) =>
-    bffRequest<{ message: string }>(`${roomPath(roomId)}/join`, {
+    bffRequest<BackendResponse<"/rooms/join", "post">>(`${roomPath(roomId)}/join`, {
       method: "POST",
     }),
   addMovie: ({ roomId, dbId }: addMovieToRoomInputs) =>
-    bffRequest<{ message: string }>(`${roomPath(roomId)}/movies`, {
+    bffRequest<BackendResponse<"/rooms/add-movie/{id}", "post">>(`${roomPath(roomId)}/movies`, {
       method: "POST",
       body: json({ dbId }),
     }),
   removeMovie: ({ roomId, movieId }: { roomId: string; movieId: string }) =>
-    bffRequest<{ message: string }>(
+    bffRequest<BackendResponse<"/rooms/delete-movie/{id}", "delete">>(
       `${roomPath(roomId)}/movies/${encodeURIComponent(movieId)}`,
       { method: "DELETE" },
     ),
   vote: ({ roomId, ...body }: VoteType & { roomId: string }) =>
-    bffRequest<unknown>(`${roomPath(roomId)}/ratings`, {
+    bffRequest<BackendResponse<"/ratings/{id}", "post">>(`${roomPath(roomId)}/ratings`, {
       method: "POST",
       body: json(body),
     }),
   searchMovies: (query: string, signal?: AbortSignal) =>
-    bffRequest<{ results: DbMovie[] }>(
+    bffRequest<BackendResponse<"/movies/tmdb/search", "get">>(
       `/movies/search${queryString({ query })}`,
       { signal },
     ),
@@ -67,7 +71,7 @@ export const panelApi = {
       { signal },
     ),
   inviteUser: ({ roomId, email }: { roomId: string; email: string }) =>
-    bffRequest<{ message: string }>(`${roomPath(roomId)}/invitations`, {
+    bffRequest<BackendResponse<"/rooms/{roomId}/invitations", "post">>(`${roomPath(roomId)}/invitations`, {
       method: "POST",
       body: json({ email }),
     }),
@@ -77,16 +81,16 @@ export const panelApi = {
       { signal },
     ),
   createInviteLink: (roomId: string) =>
-    bffRequest<RoomInviteLink>(`${roomPath(roomId)}/invite-links`, {
+    bffRequest<BackendResponse<"/rooms/{roomId}/invite-links", "post">>(`${roomPath(roomId)}/invite-links`, {
       method: "POST",
     }),
   updateInviteLink: ({ roomId, id, ...body }: UpdateRoomInviteLinkInputs) =>
-    bffRequest<RoomInviteLink>(
+    bffRequest<BackendResponse<"/rooms/{roomId}/invite-links/{id}", "patch">>(
       `${roomPath(roomId)}/invite-links/${encodeURIComponent(id)}`,
       { method: "PATCH", body: json(body) },
     ),
   deleteInviteLink: ({ roomId, id }: DeleteRoomInviteLinkInputs) =>
-    bffRequest<{ message: string }>(
+    bffRequest<BackendResponse<"/rooms/{roomId}/invite-links/{id}", "delete">>(
       `${roomPath(roomId)}/invite-links/${encodeURIComponent(id)}`,
       { method: "DELETE" },
     ),
@@ -94,7 +98,7 @@ export const panelApi = {
     const body = new FormData();
     body.set("file", file);
     body.set("folder", folder);
-    return bffRequest<{ name: string; id: number; path: string }>("/uploads", {
+    return bffRequest<BackendResponse<"/uploads/file", "post">>("/uploads", {
       method: "POST",
       body,
     });

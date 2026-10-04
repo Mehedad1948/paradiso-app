@@ -1,10 +1,4 @@
-import { User } from "./user";
+import type { components } from "./generated/backend";
 
-export type InvitationStatusesType = "pending" | "accepted" | "declined" | "expired";
-
-export interface Invitation {
-  id: number;
-  invitedBy: Pick<User, "avatar" | "email" | "id">;
-  email: string;
-  status: InvitationStatusesType;
-}
+export type Invitation = components["schemas"]["Invitation"];
+export type InvitationStatusesType = Invitation["status"];

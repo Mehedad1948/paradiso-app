@@ -17,9 +17,9 @@ import {
   useDeleteInviteLink,
 } from "@/hooks/queries/useInvitationQueries";
 
-export default function InviteLinkItem({ link }: { link: RoomInviteLink }) {
+export default function InviteLinkItem({ link, roomId }: { link: RoomInviteLink; roomId: string }) {
   const { execute: updateExecute, isPending: isUpdating } = useUpdateInviteLink(
-    String(link.roomId),
+    roomId,
     {
       onSuccess: () => {
         setShowUsageEditor(false);
@@ -31,7 +31,7 @@ export default function InviteLinkItem({ link }: { link: RoomInviteLink }) {
     },
   );
   const { execute: deleteExecute, isPending: isDeleting } = useDeleteInviteLink(
-    String(link.roomId),
+    roomId,
     {
       onSuccess: () => {
         addToast({
@@ -45,7 +45,7 @@ export default function InviteLinkItem({ link }: { link: RoomInviteLink }) {
   function handleChangeExpire(key: Key) {
     const stringKey = String(key);
     if (stringKey === "undefined") {
-      updateExecute({ expiresAt: null, id: link.id, roomId: link.roomId });
+      updateExecute({ expiresAt: null, id: link.id, roomId });
       return;
     }
 
@@ -53,7 +53,7 @@ export default function InviteLinkItem({ link }: { link: RoomInviteLink }) {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + days);
 
-    updateExecute({ expiresAt, id: link.id, roomId: link.roomId });
+    updateExecute({ expiresAt, id: link.id, roomId });
   }
 
   const [showUsageEditor, setShowUsageEditor] = useState(false);
@@ -74,7 +74,7 @@ export default function InviteLinkItem({ link }: { link: RoomInviteLink }) {
     updateExecute({
       maxUsage: usage ? Number(usage) : null,
       id: link.id,
-      roomId: link.roomId,
+      roomId,
     });
   }
   function editUsage() {
@@ -87,7 +87,7 @@ export default function InviteLinkItem({ link }: { link: RoomInviteLink }) {
     updateExecute({
       isActive: !link.isActive,
       id: link.id,
-      roomId: link.roomId,
+      roomId,
     });
   }
 
@@ -217,7 +217,7 @@ export default function InviteLinkItem({ link }: { link: RoomInviteLink }) {
         )}
       </span>
       <Button
-        onPress={() => deleteExecute({ id: link.id, roomId: link.roomId })}
+        onPress={() => deleteExecute({ id: link.id, roomId })}
         isLoading={isDeleting}
         isDisabled={pending}
         className="col-start-2 flex items-center justify-between"

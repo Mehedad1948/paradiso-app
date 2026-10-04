@@ -1,111 +1,64 @@
-import { MovieWithRatings } from "@/types";
-import { Invitation } from "@/types/invitations";
-import { PaginatedResponse } from "@/types/request";
-import {
-  addMovieToRoomInputs,
-  CreateRoomInputs,
-  JoinRoomInputs,
-  Room,
-  RoomRatingFilters,
-} from "@/types/rooms";
-import { WebServices } from "..";
+import type { BackendRequestBody } from "@/types/backend";
+import type { RoomRatingFilters } from "@/types/rooms";
+import { backendRequest } from "../backend";
 
-class RoomsServices {
-  private webService = new WebServices("/rooms");
+type AddMovieBody = BackendRequestBody<"/rooms/add-movie/{id}", "post">;
+type RemoveMovieBody = BackendRequestBody<"/rooms/delete-movie/{id}", "delete">;
 
-  getRooms({
-    page,
-    limit,
-    usersRoom = false,
-    signal,
-  }: {
+const roomsServices = {
+  getRooms({ page, limit, usersRoom = false, signal }: {
     page: number;
     limit: number;
     usersRoom?: boolean;
     signal?: AbortSignal;
   }) {
-    return this.webService.get<PaginatedResponse<Room>>(``, {
+    return backendRequest("/rooms", "get", {
+      query: { page, limit, usersRoom: String(usersRoom) as "true" | "false" },
       signal,
-      params: {
-        page,
-        limit,
-        usersRoom,
-      },
     });
-  }
-
-  getRoomById(roomId: number, signal?: AbortSignal) {
-    return this.webService.get<Room>(`/${roomId}`, { signal });
-  }
-
-  async getRoomRatings(
-    roomId: number,
-    filters?: RoomRatingFilters,
-    signal?: AbortSignal,
-  ) {
-    const params = new URLSearchParams();
-    if (filters?.search) params.set("search", filters.search);
-    if (filters?.sortBy) params.set("sortBy", filters.sortBy);
-    if (filters?.limit) params.set("limit", String(filters.limit));
-    if (filters?.page) params.set("page", String(filters.page));
-    if (filters?.sortOrder) params.set("sortOrder", filters.sortOrder);
-    if (filters?.sortByUserId) params.set("sortByUserId", filters.sortByUserId);
-    if (filters?.startDate)
-      params.set("startDate", filters.startDate.toISOString());
-    if (filters?.endDate) params.set("endDate", filters.endDate.toISOString());
-    if (filters?.isWatchTogether !== undefined)
-      params.set("isWatchTogether", String(filters.isWatchTogether));
-
-    return this.webService.get<PaginatedResponse<MovieWithRatings>>(
-      `/${roomId}/rating?${params.toString()}`,
-      { signal },
-    );
-  }
-
-  createRoom(data: CreateRoomInputs) {
-    return this.webService.post<Room>(``, { body: data });
-  }
-
-  joinRoom(data: JoinRoomInputs) {
-    return this.webService.post<{ message: string }>(`/join`, {
-      body: data,
-    });
-  }
-
-  inviteUser(roomId: string, email: string) {
-    return this.webService.post<{ message: string }>(`/${roomId}/invitations`, {
-      body: { email },
-    });
-  }
-
-  invitations(roomId: string, page = 1, signal?: AbortSignal) {
-    return this.webService.get<PaginatedResponse<Invitation>>(
-      `/${roomId}/invitations?page=${page}&limit=${5}`,
-      { signal },
-    );
-  }
-
-  addMovieToRoom(data: addMovieToRoomInputs) {
-    return this.webService.post<{ message: string }>(
-      `/add-movie/${data.roomId}`,
-      {
-        body: {
-          dbId: data.dbId,
-        },
+  },
+  getRoomById(id: number, signal?: AbortSignal) {
+    return backendRequest("/rooms/{id}", "get", { pathParams: { id }, signal });
+  },
+  getRoomRatings(roomId: number, filters: RoomRatingFilters = {}, signal?: AbortSignal) {
+    return backendRequest("/rooms/{roomId}/rating", "get", {
+      pathParams: { roomId },
+      query: {
+        page: filters.page,
+        limit: filters.limit,
+        search: filters.search,
+        sortBy: filters.sortBy,
+        sortOrder: filters.sortOrder,
+        sortByUserId: filters.sortByUserId ? Number(filters.sortByUserId) : undefined,
+        startDate: filters.startDate?.toISOString(),
+        endDate: filters.endDate?.toISOString(),
+        isWatchTogether: filters.isWatchTogether,
       },
-    );
-  }
+      signal,
+    });
+  },
+  createRoom(body: BackendRequestBody<"/rooms", "post">) {
+    return backendRequest("/rooms", "post", { body });
+  },
+  joinRoom(body: BackendRequestBody<"/rooms/join", "post">) {
+    return backendRequest("/rooms/join", "post", { body });
+  },
+  inviteUser(roomId: number, email: string) {
+    return backendRequest("/rooms/{roomId}/invitations", "post", {
+      pathParams: { roomId }, body: { email },
+    });
+  },
+  invitations(roomId: number, page = 1, signal?: AbortSignal) {
+    return backendRequest("/rooms/{roomId}/invitations", "get", {
+      pathParams: { roomId }, query: { page, limit: 5 }, signal,
+    });
+  },
+  addMovieToRoom(id: number, body: AddMovieBody) {
+    return backendRequest("/rooms/add-movie/{id}", "post", { pathParams: { id }, body });
+  },
+  deleteMovie(id: number, body: RemoveMovieBody) {
+    return backendRequest("/rooms/delete-movie/{id}", "delete", { pathParams: { id }, body });
+  },
+};
 
-  deleteMovie({ roomId, movieId }: { roomId: string; movieId: string }) {
-    return this.webService.delete<{ message: string }>(
-      `/delete-movie/${roomId}`,
-      {
-        body: {
-          movieId: movieId,
-        },
-      },
-    );
-  }
-}
-const roomsServices = new RoomsServices();
 export default roomsServices;

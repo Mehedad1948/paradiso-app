@@ -71,7 +71,7 @@ export default function InviteByLink({ roomId }: { roomId: string }) {
                 >
                   <Copy className="w-4" /> Copy invitation link
                 </CopierButton>
-                <InviteLinkItem link={item} />
+                <InviteLinkItem link={item} roomId={roomId} />
               </AccordionItem>
             ))}
           </Accordion>

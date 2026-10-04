@@ -9,23 +9,10 @@ export type RequestResult<T> = {
   error?: string;
 };
 
-export type PaginationMeta = {
-  totalItems: number;
-  itemsPerPage: number;
-  totalPages: number;
-  currentPage: number;
-};
+import type { components } from "./generated/backend";
 
-export type PaginationLinks = {
-  first: string;
-  current: string;
-  next: string;
-  previous: string;
-  last: string;
-};
-
-export type PaginatedResponse<T> = {
+export type PaginationMeta = components["schemas"]["PaginationMeta"];
+export type PaginationLinks = components["schemas"]["PaginationLinks"];
+export type PaginatedResponse<T> = Omit<components["schemas"]["RoomListResponse"], "data"> & {
   data: T[];
-  meta: PaginationMeta;
-  links: PaginationLinks;
 };

@@ -143,7 +143,7 @@ describe("BFF boundaries", () => {
       ["rooms", "1", "ratings"],
     );
     expect(response.status).toBe(200);
-    expect(mocks.castVote).toHaveBeenCalledWith("1", {
+    expect(mocks.castVote).toHaveBeenCalledWith(1, {
       rate: 0,
       movieId: "movie-1",
     });

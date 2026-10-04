@@ -30,7 +30,7 @@ export default function Header() {
             <div className="flex items-center gap-2.5 max-md:gap-2 max-[480px]:ml-auto">
               <Avatar
                 name={user.username}
-                src={user.avatar}
+                src={user.avatar ?? undefined}
                 alt={user.username}
               />
               <p className="max-w-[130px] truncate max-md:hidden">{user.username}</p>

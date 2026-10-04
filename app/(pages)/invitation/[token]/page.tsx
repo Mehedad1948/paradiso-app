@@ -49,7 +49,7 @@ async function InvitationContent({
         roomImage={
           room.image ? `${process.env.AWS_BASE_URL}${room.image}` : undefined
         }
-        inviterAvatar={inviter?.avatar}
+        inviterAvatar={inviter?.avatar ?? undefined}
         inviterName={inviter?.name}
         roomName={room.name}
       />

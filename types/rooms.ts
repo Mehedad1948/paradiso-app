@@ -1,34 +1,21 @@
-import { MovieWithRatings, UserType } from ".";
+import type { components } from "./generated/backend";
+import type { BackendQuery, BackendRequestBody } from "./backend";
 
-export type Room = {
-  id: number;
-  name: string;
-  image: string | null;
-  isPublic: boolean;
-  users: UserType[];
-  movies: MovieWithRatings[];
-  owner: UserType;
-};
+export type Room = components["schemas"]["RoomResponse"];
+export type RoomListItem = components["schemas"]["RoomListItem"];
 
 export type CreateRoomInputs = import("./backend").BackendRequestBody<"/rooms", "post">;
 
 export type JoinRoomInputs = import("./backend").BackendRequestBody<"/rooms/join", "post">;
 
-export type addMovieToRoomInputs = {
+export type addMovieToRoomInputs = BackendRequestBody<"/rooms/add-movie/{id}", "post"> & {
   roomId: string | number;
-  dbId: number;
 };
 
-export type RoomRatingFilters = {
-  search?: string;
-  sortBy?: "rate" | "userRate";
-  sortOrder?: "asc" | "desc";
+type RoomRatingQuery = BackendQuery<"/rooms/{roomId}/rating", "get">;
+export type RoomRatingFilters = Omit<RoomRatingQuery, "startDate" | "endDate" | "sortByUserId"> & {
   sortByUserId?: string;
   startDate?: Date;
   endDate?: Date;
-  isWatchTogether?: boolean;
-  limit?: number;
-  offset?: number;
-  page?: number;
 };
 

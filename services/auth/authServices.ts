@@ -1,37 +1,23 @@
-﻿import type {
-  TokenPair,
+import type {
   ForgotPasswordInputs,
   RefreshTokenInputs,
   ResetPasswordInputs,
   SignInInputs,
   VerifyEmailInputs,
 } from "@/types/auth";
-import { WebServices } from "..";
-class AuthServices {
-  private webService = new WebServices("/auth");
-  signIn(body: SignInInputs) {
-    return this.webService.post<TokenPair>("/sign-in", {
-      body,
-      withAuth: false,
-    });
-  }
-  verifyEmail(body: VerifyEmailInputs) {
-    return this.webService.post<TokenPair>("/verify-email", {
-      body,
-      withAuth: false,
-    });
-  }
-  forgotPassword(body: ForgotPasswordInputs) {
-    return this.webService.post("/forget-password", { body, withAuth: false });
-  }
-  resetPassword(body: ResetPasswordInputs) {
-    return this.webService.post("/reset-password", { body, withAuth: false });
-  }
-  refreshToken(body: RefreshTokenInputs) {
-    return this.webService.post<TokenPair>("/refresh-tokens", {
-      body,
-      withAuth: false,
-    });
-  }
-}
-export default new AuthServices();
+import { backendRequest } from "../backend";
+
+const authServices = {
+  signIn: (body: SignInInputs) =>
+    backendRequest("/auth/sign-in", "post", { body, withAuth: false }),
+  verifyEmail: (body: VerifyEmailInputs) =>
+    backendRequest("/auth/verify-email", "post", { body, withAuth: false }),
+  forgotPassword: (body: ForgotPasswordInputs) =>
+    backendRequest("/auth/forget-password", "post", { body, withAuth: false }),
+  resetPassword: (body: ResetPasswordInputs) =>
+    backendRequest("/auth/reset-password", "post", { body, withAuth: false }),
+  refreshToken: (body: RefreshTokenInputs) =>
+    backendRequest("/auth/refresh-tokens", "post", { body, withAuth: false }),
+};
+
+export default authServices;

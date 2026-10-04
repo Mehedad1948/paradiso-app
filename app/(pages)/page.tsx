@@ -31,13 +31,6 @@ export default async function Home() {
           <ParadisoWordmark />
           <CinemaGrid />
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-line pb-6 pt-5 text-sm font-medium text-muted max-sm:items-start">
-          <span>Every frame has a story.</span>
-          <span className="inline-flex items-center gap-2.5">
-            Hover, focus, or tap to discover{" "}
-            <Asterisk size={13} aria-hidden="true" />
-          </span>
-        </div>
         <div className="flex items-end justify-between gap-10 pb-14 pt-12 [&>h2]:text-[clamp(38px,4.2vw,68px)] [&>h2]:font-semibold [&>h2]:leading-[1.08] [&>h2]:tracking-[-0.065em] [&>h2_span]:font-serif [&>h2_span]:font-normal [&>h2_span]:italic [&>h2_span]:tracking-[-0.045em] max-sm:flex-col max-sm:items-start max-sm:gap-6 max-sm:pb-9 max-sm:pt-8 max-sm:[&>h2]:text-[clamp(34px,10.8vw,48px)]">
           <h2>
             Good films.
@@ -68,10 +61,6 @@ export default async function Home() {
             sizes="(max-width: 700px) 100vw, 70vw"
             className="object-cover object-[center_40%] transition-transform duration-1000 group-hover:scale-[1.025] motion-reduce:transform-none motion-reduce:transition-none"
           />
-          <div className="absolute bottom-5 left-6 right-6 z-[1] flex flex-wrap justify-between gap-4 text-sm font-medium text-media-foreground max-lg:[&>span:last-child]:hidden max-sm:bottom-5 max-sm:left-5 max-sm:right-5">
-            <span>Different perspectives. One great story.</span>
-            <span>01 / The gathering</span>
-          </div>
         </div>
         <div className="flex flex-col items-start justify-between bg-surface px-9 py-8 [&>p]:my-4.5 [&>p]:text-[clamp(30px,3vw,48px)] [&>p]:font-medium [&>p]:leading-[1.08] [&>p]:tracking-[-0.05em] [&>p_em]:font-serif [&>p_em]:font-normal max-lg:p-6 max-sm:gap-5 max-sm:p-6 max-sm:[&>p]:m-0 max-sm:[&>p]:text-4xl">
           <Asterisk

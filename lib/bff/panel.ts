@@ -6,9 +6,8 @@ import links from "@/services/rooms/room-invite-link.service";
 import users from "@/services/user";
 import ratings from "@/services/ratings";
 import storage from "@/services/storage";
-import { MoviesServices } from "@/services/movies";
+import { moviesServices } from "@/services/movies";
 import type { RequestResult } from "@/types/request";
-import type { Room } from "@/types/rooms";
 import {
   InputError,
   positiveInteger,
@@ -19,7 +18,7 @@ import {
   assertSameOrigin,
 } from "./validation";
 
-function imageUrl(room: Room) {
+function imageUrl<Room extends { image?: string | null }>(room: Room) {
   return {
     ...room,
     imageUrl: room.image
@@ -80,10 +79,10 @@ export async function handlePanelRequest(request: Request, path: string[]) {
       return respond(await users.getMe(request.signal));
     if (resource === "movies/search" && method === "GET") {
       return respond(
-        await new MoviesServices().searchDbMovies({
-          query: text(query.get("query"), "query", 200),
-          signal: request.signal,
-        }),
+        await moviesServices.searchDbMovies(
+          text(query.get("query"), "query", 200),
+          request.signal,
+        ),
       );
     }
     if (resource === "uploads" && method === "POST") {
@@ -213,7 +212,7 @@ export async function handlePanelRequest(request: Request, path: string[]) {
             )
               throw new InputError("Rate must be between 0 and 10");
             return respond(
-              await ratings.castVote(String(roomId), {
+              await ratings.castVote(roomId, {
                 movieId: identifier(data.movieId),
                 rate: data.rate,
               }),
@@ -224,8 +223,7 @@ export async function handlePanelRequest(request: Request, path: string[]) {
           if (method === "POST") {
             const data = await body(request);
             return respond(
-              await rooms.addMovieToRoom({
-                roomId,
+              await rooms.addMovieToRoom(roomId, {
                 dbId: positiveInteger(data.dbId, "dbId"),
               }),
             );
@@ -234,14 +232,14 @@ export async function handlePanelRequest(request: Request, path: string[]) {
         case "invitations":
           if (method === "GET")
             return respond(
-              await rooms.invitations(String(roomId), page(), request.signal),
+              await rooms.invitations(roomId, page(), request.signal),
             );
           if (method === "POST") {
             const data = await body(request);
             const email = text(data.email, "email", 254);
             if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
               throw new InputError("Invalid email");
-            return respond(await rooms.inviteUser(String(roomId), email));
+            return respond(await rooms.inviteUser(roomId, email));
           }
           break;
         case "invite-links":
@@ -249,11 +247,12 @@ export async function handlePanelRequest(request: Request, path: string[]) {
             return respond(
               await links.getAll(
                 roomId,
-                { page: page(), limit: limit() },
+                page(),
+                limit(),
                 request.signal,
               ),
             );
-          if (method === "POST") return respond(await links.create({ roomId }));
+          if (method === "POST") return respond(await links.create(roomId));
           break;
       }
     }
@@ -261,16 +260,15 @@ export async function handlePanelRequest(request: Request, path: string[]) {
       const id = identifier(path[3]);
       if (path[2] === "movies" && method === "DELETE")
         return respond(
-          await rooms.deleteMovie({ roomId: String(roomId), movieId: id }),
+          await rooms.deleteMovie(roomId, { movieId: id }),
         );
       if (path[2] === "invite-links") {
-        if (method === "DELETE") return respond(await links.delete(roomId, id));
+        if (method === "DELETE")
+          return respond(await links.delete(roomId, positiveInteger(id, "id")));
         if (method === "PATCH") {
           const data = await body(request);
           return respond(
-            await links.update({
-              roomId,
-              id,
+            await links.update(roomId, positiveInteger(id, "id"), {
               isActive: boolean(data.isActive, "isActive"),
               maxUsage:
                 data.maxUsage === null
@@ -278,12 +276,9 @@ export async function handlePanelRequest(request: Request, path: string[]) {
                   : data.maxUsage === undefined
                     ? undefined
                     : positiveInteger(data.maxUsage, "maxUsage"),
-              expiresAt:
-                data.expiresAt === null
-                  ? null
-                  : date(data.expiresAt, "expiresAt"),
-              note:
-                data.note === undefined ? undefined : text(data.note, "note"),
+              expiresAt: data.expiresAt === null
+                ? null
+                : date(data.expiresAt, "expiresAt")?.toISOString(),
             }),
           );
         }
