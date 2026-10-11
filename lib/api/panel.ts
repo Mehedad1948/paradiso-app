@@ -80,6 +80,11 @@ export const panelApi = {
       `${roomPath(roomId)}/invite-links${queryString({ page, limit: 10 })}`,
       { signal },
     ),
+  acceptInvite: (token: string) =>
+    bffRequest<BackendResponse<"/invite-links/verify/{token}", "post">>(
+      `/invite-links/verify/${encodeURIComponent(token)}`,
+      { method: "POST" },
+    ),
   createInviteLink: (roomId: string) =>
     bffRequest<BackendResponse<"/rooms/{roomId}/invite-links", "post">>(`${roomPath(roomId)}/invite-links`, {
       method: "POST",

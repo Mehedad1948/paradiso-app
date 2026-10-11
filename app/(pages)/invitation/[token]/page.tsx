@@ -1,7 +1,10 @@
 import roomInviteLinksService from "@/services/rooms/room-invite-link.service";
-import InvitationCard from "./Threejs";
+import AcceptInvitation from "./AcceptInvitation";
 import { Suspense } from "react";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { isAccessTokenValid } from "@/lib/auth/session";
+import { authHref } from "@/lib/auth/redirect";
 
 export default function InvitationPage({
   params,
@@ -42,10 +45,25 @@ async function InvitationContent({
     );
 
   const { inviter, room } = result;
+  const store = await cookies();
+  // Mirrors the route guard in proxy.ts so guests come back here after signing in.
+  const signInHref = (await isAccessTokenValid(store.get("token")?.value))
+    ? null
+    : authHref("sign-in", {
+        origin: `/invitation/${encodeURIComponent(token)}`,
+        reason:
+          store.has("token") || store.has("refreshToken")
+            ? "session-expired"
+            : undefined,
+        refresh: store.get("refreshToken")?.value ? "true" : undefined,
+      });
 
   return (
     <div>
-      <InvitationCard
+      <AcceptInvitation
+        token={token}
+        roomId={room.id}
+        signInHref={signInHref}
         roomImage={
           room.image ? `${process.env.AWS_BASE_URL}${room.image}` : undefined
         }

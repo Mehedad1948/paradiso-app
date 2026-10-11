@@ -85,6 +85,13 @@ export async function handlePanelRequest(request: Request, path: string[]) {
         ),
       );
     }
+    if (
+      path.length === 3 &&
+      path[0] === "invite-links" &&
+      path[1] === "verify" &&
+      method === "POST"
+    )
+      return respond(await links.verify(text(path[2], "token", 512)));
     if (resource === "uploads" && method === "POST") {
       const form = await request.formData();
       const file = form.get("file");

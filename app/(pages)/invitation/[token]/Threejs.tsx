@@ -13,6 +13,8 @@ const InvitationCard = ({
   inviterName = 'A fellow film lover',
   inviterAvatar = '',
   isValidToken = true,
+  isPending = false,
+  error = '',
   onAccept = () => {},
   onDecline = () => {},
 }) => {
@@ -345,9 +347,10 @@ const InvitationCard = ({
                 <div><p className="text-sm text-muted">Invited by</p><p className="break-words text-[17px] font-semibold text-ink">{inviterName}</p></div>
               </div>
               <div className="flex w-full flex-wrap gap-3 max-[480px]:flex-col">
-                <button type="button" className="inline-flex flex-1 cursor-pointer items-center justify-center gap-4 rounded-md bg-ink px-4.5 py-3.5 text-[15px] font-semibold text-canvas hover:bg-accent hover:text-on-accent" onClick={onAccept}>Accept and join <ArrowUpRight size={19} aria-hidden="true" /></button>
-                <button type="button" className="inline-flex cursor-pointer items-center justify-center gap-4 rounded-md border border-line bg-surface px-4.5 py-3.5 text-[15px] font-semibold text-ink" onClick={onDecline}>Decline</button>
+                <button type="button" className="inline-flex flex-1 cursor-pointer items-center justify-center gap-4 rounded-md bg-ink px-4.5 py-3.5 text-[15px] font-semibold text-canvas hover:bg-accent hover:text-on-accent disabled:cursor-wait disabled:opacity-70" onClick={onAccept} disabled={isPending}>{isPending ? 'Joining…' : 'Accept and join'} <ArrowUpRight size={19} aria-hidden="true" /></button>
+                <button type="button" className="inline-flex cursor-pointer items-center justify-center gap-4 rounded-md border border-line bg-surface px-4.5 py-3.5 text-[15px] font-semibold text-ink disabled:cursor-not-allowed disabled:opacity-70" onClick={onDecline} disabled={isPending}>Decline</button>
               </div>
+              {error && <p className="mt-4 text-sm text-danger" role="alert">{error}</p>}
             </div>
           </div>
         ) : (
