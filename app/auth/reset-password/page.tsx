@@ -7,7 +7,7 @@ import { authApi } from "@/lib/api/auth";
 import { useAuthForm } from "@/hooks/auth/useAuthForm";
 import { useAuthLocation } from "@/hooks/auth/useAuthLocation";
 import AuthFeedback from "@/components/auth/AuthFeedback";
-import { InputOtp } from "@heroui/input-otp";
+import AuthOtpInput from "@/components/auth/AuthOtpInput";
 import { useEffect, useState } from "react";
 import { confirmPassword, emailInput } from "@/lib/auth/validation";
 import { useResendCooldown } from "@/hooks/auth/useResendCooldown";
@@ -93,7 +93,7 @@ export default function ResetPasswordPage() {
             setMessage(null);
           }}
         />
-        <InputOtp
+        <AuthOtpInput
           name="code"
           aria-label="Password reset code"
           autoComplete="one-time-code"

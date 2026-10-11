@@ -48,6 +48,8 @@ function upstreamFailure(
   result: RequestResult<unknown>,
   operation: AuthOperation,
 ) {
+  console.log('asdas result.response', result.response);
+  
   const status =
     result.response.status >= 400 && result.response.status < 500
       ? result.response.status
@@ -182,6 +184,8 @@ export async function handleAuthRequest(request: Request, operation: string) {
       false,
     );
   } catch (error) {
+    console.log('test error ', error);
+    
     return failure(
       error instanceof InputError ? error.status : 502,
       error instanceof InputError

@@ -7,7 +7,7 @@ import { authApi } from "@/lib/api/auth";
 import { useAuthForm } from "@/hooks/auth/useAuthForm";
 import { useAuthLocation } from "@/hooks/auth/useAuthLocation";
 import AuthFeedback from "@/components/auth/AuthFeedback";
-import { InputOtp } from "@heroui/input-otp";
+import AuthOtpInput from "@/components/auth/AuthOtpInput";
 import { useEffect, useState } from "react";
 export default function VerifyPage() {
   const router = useRouter();
@@ -36,13 +36,12 @@ export default function VerifyPage() {
         className="flex mt-8 flex-col gap-4"
         onSubmit={(event) => {
           event.preventDefault();
-          void form.submit({ email: location.email, code }, (result) =>
-            router.replace(
-              result.authenticated
-                ? location.origin
-                : location.href("sign-in", { reason: "verified" }),
-            ),
-          );
+          void form.submit({ email: location.email, code }, (result) => {
+            // Hard navigation: the client router may hold a prefetched redirect back to sign-in.
+            if (result.authenticated) window.location.replace(location.origin);
+            else
+              router.replace(location.href("sign-in", { reason: "verified" }));
+          });
         }}
       >
         <Input
@@ -60,7 +59,7 @@ export default function VerifyPage() {
             form.clearError();
           }}
         />
-        <InputOtp
+        <AuthOtpInput
           name="code"
           aria-label="Email verification code"
           autoComplete="one-time-code"

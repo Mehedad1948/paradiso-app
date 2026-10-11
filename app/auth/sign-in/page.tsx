@@ -26,8 +26,9 @@ export default function SignInPage() {
     };
   }, [wantsRefresh, refreshSession, router, origin]);
   useEffect(() => {
-    if (wantsRefresh && refresh.isSuccess) router.replace(origin);
-  }, [wantsRefresh, refresh.isSuccess, router, origin]);
+    // Hard navigation: the client router may hold a prefetched redirect back to sign-in.
+    if (wantsRefresh && refresh.isSuccess) window.location.replace(origin);
+  }, [wantsRefresh, refresh.isSuccess, origin]);
   useEffect(() => {
     if (wantsRefresh && refresh.error)
       router.replace(location.href("sign-in", { reason: "session-expired" }));
@@ -62,7 +63,8 @@ export default function SignInPage() {
               email: location.email,
               password: String(fields.get("password") || ""),
             },
-            () => router.replace(location.origin),
+            // Hard navigation: the client router may hold a prefetched redirect back to sign-in.
+            () => window.location.replace(location.origin),
           );
         }}
       >
