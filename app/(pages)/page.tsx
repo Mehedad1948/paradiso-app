@@ -1,10 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowDown, ArrowUpRight, Asterisk } from "lucide-react";
 import { cacheLife } from "next/cache";
 import type { Metadata } from "next";
 import ParadisoWordmark from "@/components/landing/ParadisoWordmark";
 import CinemaGrid from "@/components/landing/CinemaGrid";
+import JuryReveal from "@/components/landing/JuryReveal";
 import styles from "@/components/landing/CinemaHero.module.css";
 
 export const metadata: Metadata = {
@@ -53,15 +53,7 @@ export default async function Home() {
         className="mx-auto grid min-h-[350px] max-w-[1600px] grid-cols-[1fr_0.38fr] max-lg:grid-cols-[1fr_0.48fr] max-sm:grid-cols-1"
         aria-label="The Paradiso experience"
       >
-        <div className="group relative min-h-[350px] overflow-hidden bg-media after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-b after:from-transparent after:from-40% after:to-black/75 max-sm:min-h-[280px]">
-          <Image
-            src="/12-angry.jpg"
-            alt="A scene from 12 Angry Men, with the jury gathered around a table"
-            fill
-            sizes="(max-width: 700px) 100vw, 70vw"
-            className="object-cover object-[center_40%] transition-[transform,filter] duration-[1200ms] ease-in-out group-hover:scale-[1.04] group-hover:brightness-110 motion-reduce:transition-none"
-          />
-        </div>
+        <JuryReveal />
         <div className="flex flex-col items-start justify-between bg-surface px-9 py-8 [&>p]:my-4.5 [&>p]:text-[clamp(30px,3vw,48px)] [&>p]:font-medium [&>p]:leading-[1.08] [&>p]:tracking-[-0.05em] [&>p_em]:font-serif [&>p_em]:font-normal max-lg:p-6 max-sm:gap-5 max-sm:p-6 max-sm:[&>p]:m-0 max-sm:[&>p]:text-4xl">
           <Asterisk
             className="-ml-2 text-accent max-sm:hidden"

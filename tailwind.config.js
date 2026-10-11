@@ -34,10 +34,22 @@ const config = {
         mono: ["var(--font-mono)"],
       },
       keyframes: {
+        // The poster is `invisible` at rest so no sub-pixel sliver leaks past the
+        // cell edge; the animation lifts that while it slides in from the left,
+        // holds, then accelerates out through the right edge.
         "cinema-reveal": {
-          "0%": { transform: "translateX(-100%)" },
-          "5.4348%, 92.3913%": { transform: "translateX(0)" },
-          "100%": { transform: "translateX(-100%)" },
+          "0%": { transform: "translateX(-100%)", visibility: "visible" },
+          "5.4348%": { transform: "translateX(0)" },
+          "91.5%": {
+            transform: "translateX(0)",
+            opacity: "1",
+            animationTimingFunction: "cubic-bezier(0.65, 0, 0.35, 1)",
+          },
+          "100%": {
+            transform: "translateX(100%)",
+            opacity: "0.85",
+            visibility: "visible",
+          },
         },
         "cinema-number": {
           "0%, 99.99%": { visibility: "hidden" },

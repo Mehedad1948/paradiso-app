@@ -61,7 +61,7 @@ export default function CinemaGrid() {
               alt=""
               fill
               sizes="(max-width: 640px) 12vw, 7vw"
-              className="-translate-x-full object-cover motion-reduce:group-hover:translate-x-0 motion-reduce:group-focus-visible:translate-x-0 motion-reduce:animate-none"
+              className="invisible -translate-x-full object-cover motion-reduce:group-hover:visible motion-reduce:group-hover:translate-x-0 motion-reduce:group-focus-visible:visible motion-reduce:group-focus-visible:translate-x-0 motion-reduce:animate-none"
               style={{ objectPosition: film.position }}
             />
             <span
