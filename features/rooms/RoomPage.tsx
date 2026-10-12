@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Spinner } from "@heroui/spinner";
+import { Button } from "@heroui/button";
 import { useMe } from "@/hooks/queries/useMe";
 import { useRoom, useRoomRatings } from "@/hooks/queries/useRoomQueries";
 import QueryError from "@/components/ui/QueryError";
@@ -13,7 +14,7 @@ import RoomRatingTable from "./components/RoomRatingTable";
 import PanelPagination from "./components/PanelPagination";
 import DialogLoading from "./components/DialogLoading";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 const AddMovieDialog = dynamic(() => import("./dialogs/AddMovieDialog"), {
   ssr: false,
   loading: DialogLoading,
@@ -27,6 +28,10 @@ const VoteMovieDialog = dynamic(() => import("./dialogs/VoteMovieDialog"), {
   loading: DialogLoading,
 });
 const DeleteMovieDialog = dynamic(() => import("./dialogs/DeleteMovieDialog"), {
+  ssr: false,
+  loading: DialogLoading,
+});
+const EditRoomSidebar = dynamic(() => import("./sidebars/EditRoomSidebar"), {
   ssr: false,
   loading: DialogLoading,
 });
@@ -60,6 +65,10 @@ function RoomPage({ roomId }: { roomId: string }) {
     setPage,
   ]);
   const disabled = !room.data || room.isError || ratings.isPlaceholderData;
+  const canManage =
+    !!room.data &&
+    !!me.data &&
+    (me.data.role === "admin" || room.data.owner.id === me.data.id);
   return (
     <div
       className="min-h-fit"
@@ -73,9 +82,20 @@ function RoomPage({ roomId }: { roomId: string }) {
           <p className="mb-3.5 text-sm font-semibold uppercase tracking-[0.09em] text-accent">The screening room</p>
           <h1 className="mb-4 break-words text-[clamp(36px,4.8vw,68px)] tracking-[-0.06em] [&_em]:font-serif [&_em]:font-normal max-sm:text-[38px]">{room.data?.name || "Room"}</h1>
           <p className="max-w-[540px] text-base text-muted">
-            A shared watchlist. A few different opinions. Your next great film.
+            {room.data?.description ||
+              "A shared watchlist. A few different opinions. Your next great film."}
           </p>
         </div>
+        {canManage && (
+          <Button
+            className="min-h-[46px] shrink-0 rounded-md border border-line bg-surface text-[15px] font-semibold text-ink"
+            startContent={<Pencil size={17} aria-hidden="true" />}
+            isDisabled={room.isError}
+            onPress={() => open("edit-room")}
+          >
+            Edit room
+          </Button>
+        )}
       </div>
       <RoomToolbar
         search={filters.search || ""}
@@ -124,6 +144,9 @@ function RoomPage({ roomId }: { roomId: string }) {
       )}
       {room.data && dialog === "invite" && (
         <InviteDialog key={roomId} roomId={roomId} onClose={close} />
+      )}
+      {room.data && canManage && dialog === "edit-room" && (
+        <EditRoomSidebar key={roomId} room={room.data} onClose={close} />
       )}
       {movie && action?.type === "vote" && me.data && (
         <VoteMovieDialog

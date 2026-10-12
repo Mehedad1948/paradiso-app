@@ -37,6 +37,15 @@ type Message = { message: string };
 export const useCreateRoom = (
   options?: MutationOptions<Awaited<ReturnType<typeof panelApi.createRoom>>>,
 ) => usePanelMutation(panelApi.createRoom, [panelKeys.rooms], options);
+export const useUpdateRoom = (
+  id: string,
+  options?: MutationOptions<Awaited<ReturnType<typeof panelApi.updateRoom>>>,
+) =>
+  usePanelMutation(
+    panelApi.updateRoom,
+    [panelKeys.rooms, panelKeys.room(id)],
+    options,
+  );
 export const useJoinRoom = (id: string, options?: MutationOptions<Message>) =>
   usePanelMutation(
     panelApi.joinRoom,

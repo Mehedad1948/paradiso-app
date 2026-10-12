@@ -40,6 +40,9 @@ const roomsServices = {
   createRoom(body: BackendRequestBody<"/rooms", "post">) {
     return backendRequest("/rooms", "post", { body });
   },
+  updateRoom(id: number, body: BackendRequestBody<"/rooms/{id}", "patch">) {
+    return backendRequest("/rooms/{id}", "patch", { pathParams: { id }, body });
+  },
   joinRoom(body: BackendRequestBody<"/rooms/join", "post">) {
     return backendRequest("/rooms/join", "post", { body });
   },

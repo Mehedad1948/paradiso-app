@@ -149,6 +149,31 @@ export async function handlePanelRequest(request: Request, path: string[]) {
         result: result.result ? imageUrl(result.result) : null,
       });
     }
+    if (path.length === 2 && method === "PATCH") {
+      const data = await body(request);
+      // Partial update: omitted fields are left untouched, null clears a nullable field.
+      const nullable = <T>(value: unknown, parse: (value: unknown) => T) =>
+        value === undefined ? undefined : value === null || value === "" ? null : parse(value);
+      const themeColor = nullable(data.themeColor, (value) => {
+        const color = text(value, "themeColor", 7);
+        if (!/^#[0-9a-fA-F]{6}$/.test(color))
+          throw new InputError("Theme color must be a #RRGGBB hex code");
+        return color;
+      });
+      const result = await rooms.updateRoom(roomId, {
+        name: data.name === undefined ? undefined : text(data.name, "name", 255),
+        description: nullable(data.description, (value) =>
+          text(value, "description", 2000),
+        ),
+        image: nullable(data.image, (value) => text(value, "image", 1000)),
+        isPublic: boolean(data.isPublic, "isPublic"),
+        themeColor,
+      });
+      return respond({
+        ...result,
+        result: result.result ? imageUrl(result.result) : null,
+      });
+    }
     if (path.length === 3) {
       switch (path[2]) {
         case "join":

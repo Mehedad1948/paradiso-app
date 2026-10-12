@@ -49,7 +49,7 @@ const trailFragment = /* glsl */ `
 
     vec2 aspect = vec2(uAspect, 1.0);
     float d = segmentDistance(vUv * aspect, uPrevMouse * aspect, uMouse * aspect);
-    value = max(value, uStrength * (1.0 - smoothstep(uRadius * 0.55, uRadius, d)));
+    value = max(value, uStrength * (1.0 - smoothstep(uRadius * 0.4, uRadius, d)));
 
     gl_FragColor = vec4(min(value, 1.0), 0.0, 0.0, 1.0);
   }
@@ -110,7 +110,7 @@ const revealFragment = /* glsl */ `
     vec2 tuv = uv + warp;
 
     float t = trail(tuv);
-    float mask = smoothstep(0.38, 0.5, t + (n - 0.5) * 0.25);
+    float mask = smoothstep(0.3, 0.52, t + (n - 0.5) * 0.32);
     float edge = mask * (1.0 - mask) * 4.0;
     // Keep the revealed image clean: distortion lives on the rim only.
     float rim = smoothstep(0.0, 0.25, edge);
@@ -123,7 +123,7 @@ const revealFragment = /* glsl */ `
 
     // Ripples travel along the trail's contours as it fades.
     float ripple = sin(t * 26.0 - uTime * 5.0);
-    vec2 disp = grad * (0.06 + 0.04 * ripple) * rim;
+    vec2 disp = grad * (0.08 + 0.05 * ripple) * rim;
 
     vec3 top = texture2D(uTop, cover(uv + disp * 0.6, uTopCover)).rgb;
 
@@ -285,7 +285,7 @@ function start(
       uMouse: { value: new THREE.Vector2(-1, -1) },
       uPrevMouse: { value: new THREE.Vector2(-1, -1) },
       uAspect: { value: 1 },
-      uRadius: { value: 0.35 },
+      uRadius: { value: 0.28 },
       uStrength: { value: 0 },
       uDecay: { value: 0.993 },
       uTexel: { value: new THREE.Vector2(1 / TRAIL_SIZE, 1 / TRAIL_SIZE) },

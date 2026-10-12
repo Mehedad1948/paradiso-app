@@ -3,6 +3,7 @@ import type {
   Room,
   RoomListItem,
   CreateRoomInputs,
+  UpdateRoomInputs,
   RoomRatingFilters,
   addMovieToRoomInputs,
 } from "@/types/rooms";
@@ -41,6 +42,8 @@ export const panelApi = {
     bffRequest<BackendResponse<"/rooms", "post"> & { imageUrl: string | null }>(
       "/rooms", { method: "POST", body: json(body) },
     ),
+  updateRoom: ({ roomId, ...body }: UpdateRoomInputs) =>
+    bffRequest<PanelRoom>(roomPath(roomId), { method: "PATCH", body: json(body) }),
   joinRoom: (roomId: number) =>
     bffRequest<BackendResponse<"/rooms/join", "post">>(`${roomPath(roomId)}/join`, {
       method: "POST",

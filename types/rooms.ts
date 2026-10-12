@@ -8,6 +8,10 @@ export type CreateRoomInputs = import("./backend").BackendRequestBody<"/rooms", 
 
 export type JoinRoomInputs = import("./backend").BackendRequestBody<"/rooms/join", "post">;
 
+export type UpdateRoomInputs = BackendRequestBody<"/rooms/{id}", "patch"> & {
+  roomId: string | number;
+};
+
 export type addMovieToRoomInputs = BackendRequestBody<"/rooms/add-movie/{id}", "post"> & {
   roomId: string | number;
 };

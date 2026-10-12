@@ -62,7 +62,7 @@ export default async function Home() {
             aria-hidden="true"
           />
           <p>
-            Some things
+            Some ideas
             <br />
             are better
             <br />

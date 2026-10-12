@@ -24,6 +24,7 @@
     "@heroui/chip": "2.2.21",
     "@heroui/code": "2.2.14",
     "@heroui/date-picker": "2.3.27",
+    "@heroui/drawer": "2.2.17",
     "@heroui/dropdown": "2.3.26",
     "@heroui/input": "2.4.19",
     "@heroui/input-otp": "2.1.18",

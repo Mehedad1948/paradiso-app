@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   joinRoom: vi.fn(),
   getRoomRatings: vi.fn(),
   castVote: vi.fn(),
+  updateRoom: vi.fn(),
 }));
 vi.mock("server-only", () => ({}));
 vi.mock("next/headers", () => ({
@@ -147,5 +148,48 @@ describe("BFF boundaries", () => {
       rate: 0,
       movieId: "movie-1",
     });
+  });
+  it("forwards only supplied room fields and clears nullable ones", async () => {
+    mocks.updateRoom.mockResolvedValue(ok({ id: 1, name: "Noir", image: null }));
+    const response = await handlePanelRequest(
+      request("rooms/1", "PATCH", {
+        name: " Noir ",
+        description: "",
+        themeColor: "#ff5733",
+        image: null,
+      }),
+      ["rooms", "1"],
+    );
+    expect(response.status).toBe(200);
+    const [id, payload] = mocks.updateRoom.mock.calls.at(-1)!;
+    expect(id).toBe(1);
+    expect(JSON.parse(JSON.stringify(payload))).toEqual({
+      name: "Noir",
+      description: null,
+      themeColor: "#ff5733",
+      image: null,
+    });
+    expect((await response.json()).result.imageUrl).toBeNull();
+  });
+  it.each([{ themeColor: "red" }, { name: "" }, { isPublic: "yes" }])(
+    "rejects invalid room update %j",
+    async (body) => {
+      mocks.updateRoom.mockClear();
+      const response = await handlePanelRequest(
+        request("rooms/1", "PATCH", body),
+        ["rooms", "1"],
+      );
+      expect(response.status).toBe(400);
+      expect(mocks.updateRoom).not.toHaveBeenCalled();
+    },
+  );
+  it("rejects cross-origin room updates", async () => {
+    mocks.updateRoom.mockClear();
+    const response = await handlePanelRequest(
+      request("rooms/1", "PATCH", { name: "x" }, "https://attacker.test"),
+      ["rooms", "1"],
+    );
+    expect(response.status).toBe(403);
+    expect(mocks.updateRoom).not.toHaveBeenCalled();
   });
 });
