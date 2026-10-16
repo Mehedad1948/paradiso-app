@@ -30,7 +30,6 @@ export default function RoomsPage() {
     <div>
       <div className="mb-10 flex items-end justify-between gap-6 border-b border-line pb-9 max-sm:mb-7 max-sm:flex-col max-sm:items-start max-sm:pb-7 max-sm:[&>button]:w-full">
         <div>
-          <p className="mb-3.5 text-sm font-semibold uppercase tracking-[0.09em] text-accent">Your cinema, together</p>
           <h1 className="mb-4 break-words text-[clamp(36px,4.8vw,68px)] tracking-[-0.06em] [&_em]:font-serif [&_em]:font-normal max-sm:text-[38px]">
             Make room for
             <br />

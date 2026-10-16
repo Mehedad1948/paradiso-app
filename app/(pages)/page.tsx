@@ -7,12 +7,20 @@ import CinemaGrid from "@/components/landing/CinemaGrid";
 import JuryReveal from "@/components/landing/JuryReveal";
 import FilmNegatives from "@/components/landing/FilmNegatives";
 import styles from "@/components/landing/CinemaHero.module.css";
+import { fontDisplay } from "@/config/fonts";
 
 export const metadata: Metadata = {
   title: { absolute: "Paradiso — cinema for your circle" },
   description:
     "Find your next favorite film, gather your people, and make a night of it with Paradiso.",
 };
+
+// Each verb is finished by a small tag: "Gather your people", etc.
+const verbs = [
+  { word: "Gather", rest: "your people", indent: "0cqi" },
+  { word: "Pick", rest: "the films", indent: "16cqi" },
+  { word: "Judge", rest: "the winner", indent: "5cqi", accent: true },
+];
 
 export default async function Home() {
   "use cache";
@@ -31,7 +39,6 @@ export default async function Home() {
         </h1>
         <div className={styles.hero}>
           <ParadisoWordmark />
-          <CinemaGrid />
         </div>
         <div className="flex items-end justify-between gap-10 pb-14 pt-12 [&>h2]:text-[clamp(38px,4.2vw,68px)] [&>h2]:font-semibold [&>h2]:leading-[1.08] [&>h2]:tracking-[-0.065em] [&>h2_span]:font-serif [&>h2_span]:font-normal [&>h2_span]:italic [&>h2_span]:tracking-[-0.045em] max-sm:flex-col max-sm:items-start max-sm:gap-6 max-sm:pb-9 max-sm:pt-8 max-sm:[&>h2]:text-[clamp(34px,10.8vw,48px)]">
           <h2>
@@ -48,6 +55,45 @@ export default async function Home() {
               Enter dashboard <ArrowUpRight size={21} aria-hidden="true" />
             </Link>
           </div>
+        </div>
+      </section>
+      <section
+        id="the-archive"
+        className="mx-auto grid max-w-[1600px] scroll-mt-32 grid-cols-2 items-center gap-[clamp(24px,4vw,72px)] border-t border-line py-[clamp(56px,7vw,112px)] max-sm:grid-cols-1 max-sm:gap-12"
+        aria-labelledby="archive-title"
+      >
+        <div className={`${fontDisplay.variable} relative z-10 [container-type:inline-size]`}>
+          <h2 id="archive-title" className="flex w-full flex-col">
+            {verbs.map(({ word, rest, indent, accent }, index) => (
+              <span
+                key={word}
+                className="flex items-end gap-[2.5cqi]"
+                style={{ paddingLeft: indent }}
+              >
+                <span
+                  className={
+                    accent
+                      ? "-rotate-2 font-[family-name:var(--font-display)] text-[25cqi] font-black italic leading-[0.9] tracking-[-0.03em] text-accent"
+                      : "text-[22cqi] font-black leading-[0.86] tracking-[-0.075em]"
+                  }
+                >
+                  {word}
+                </span>
+                <span className="mb-[2cqi] max-w-[18cqi] text-[clamp(11px,1.9cqi,15px)] font-extrabold uppercase leading-[1.15] tracking-[0.12em]">
+                  <span className="block font-mono text-accent" aria-hidden="true">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  {rest}
+                </span>
+              </span>
+            ))}
+          </h2>
+        </div>
+        <div className="grid">
+          <CinemaGrid />
+          <p className="mt-4 justify-self-end font-mono text-[11px] uppercase tracking-[0.16em] text-muted">
+            Hover a frame to reveal the film
+          </p>
         </div>
       </section>
       <section

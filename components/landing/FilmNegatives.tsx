@@ -6,8 +6,8 @@ import type { FilmNegativesScene, FilmScene } from "./film-negatives-scene";
 // Sixteen near-consecutive frames per scene, pre-graded and packed 4x4.
 // Each movie lists one or more scenes; a strip shows one movie.
 const MOVIES: string[][] = [
-  // Cinema Paradiso: the front rows at the cinema, and frames by lamplight.
-  ["paradiso-cinema", "paradiso-lamp"],
+  // 2001: A Space Odyssey: the bone thrown skyward, cut to the satellite.
+  ["space-odyssey"],
   // The Matrix: the bullet dodge.
   ["matrix"],
   // Pulp Fiction: the twist contest.
@@ -73,7 +73,7 @@ export default function FilmNegatives() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className={`pointer-events-none fixed inset-0 -z-10 h-full w-full transition-opacity duration-[1600ms] ${ready ? "opacity-45 dark:opacity-35" : "opacity-0"}`}
+      className={`pointer-events-none fixed inset-0 -z-10 h-full w-full transition-opacity duration-[1600ms] ${ready ? "opacity-100" : "opacity-0"}`}
     />
   );
 }

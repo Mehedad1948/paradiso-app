@@ -5,8 +5,9 @@ import * as THREE from "three";
  * to edge, rolling through slow waves while the film runs along them. Each
  * strip carries one iconic movie scene, frame by frame, with punched
  * perforations, edge print, a key-code barcode, grain and the odd emulsion
- * scratch. The film is VistaVision:
- * 35 mm run sideways, eight perforations and one wide frame at a time.
+ * scratch. The film is VistaVision: 35 mm run sideways, eight perforations
+ * and one wide frame at a time. Frames print in ink, and bloom into full
+ * colour near the pointer.
  *
  * The strips bend the way real film does: freely across their face (the
  * depth waves), only very gently within their own plane, and with a slow
@@ -124,8 +125,13 @@ const fragment = /* glsl */ `
   uniform vec3 uInk;
   uniform float uInkIsLight;
   uniform float uOpacity;
+  uniform float uBaseOpacity;
   uniform float uFlow;
   uniform float uSeed;
+  // Colour spotlight: pointer in drawing-buffer pixels, radius, strength.
+  uniform vec2 uSpot;
+  uniform float uSpotRadius;
+  uniform float uSpotStrength;
   varying vec2 vFilm;
   varying float vFacing;
   varying float vDepth;
@@ -178,7 +184,8 @@ const fragment = /* glsl */ `
     vec2 atlasUv = (cell + imageUv) / uSceneLayout.yz;
     // Picture density follows the ink, so frames read as photographs on
     // either theme: dark ink prints the shadows, light ink the highlights.
-    float scene = texture2D(uScene, atlasUv).r;
+    vec3 frameColor = texture2D(uScene, atlasUv).rgb;
+    float scene = luma(frameColor);
     float tone = mix(1.0 - scene, scene, uInkIsLight);
     // Each frame is exposed a touch differently, as on real stock.
     tone *= 1.0 + (hash(vec2(frame, uSeed)) - 0.5) * 0.08;
@@ -214,8 +221,16 @@ const fragment = /* glsl */ `
     float shade = mix(0.45, 1.0, vFacing);
     float sheen = pow(1.0 - vFacing, 3.0);
     float fog = 1.0 - smoothstep(9.0, 24.0, vDepth) * 0.55;
-    float alpha = clamp(density, 0.0, 1.0) * edges * shade * fog * uOpacity;
+    float alpha = clamp(density, 0.0, 1.0) * edges * shade * fog * uOpacity * uBaseOpacity;
     vec3 color = mix(uInk, vec3(1.0), sheen * 0.45);
+
+    // Near the pointer the pictures print in full colour, fading smoothly
+    // back to ink with distance; rails and perforations stay film.
+    float spot = 1.0 - smoothstep(uSpotRadius * 0.2, uSpotRadius, distance(gl_FragCoord.xy, uSpot));
+    float colour = spot * spot * (3.0 - 2.0 * spot) * uSpotStrength * inPicture;
+    vec3 print = frameColor * mix(0.6, 1.0, vFacing) + (hash(floor(vec2(a, v) * 260.0)) - 0.5) * 0.05;
+    color = mix(color, clamp(print, 0.0, 1.0), colour);
+    alpha = mix(alpha, edges * fog * uOpacity * 0.94, colour);
 
     gl_FragColor = vec4(color, alpha);
   }
@@ -293,6 +308,11 @@ export async function createFilmNegativesScene(
   const edge = edgePrint(getComputedStyle(document.body).getPropertyValue("--font-mono") || "monospace");
   const ink = { value: readInk(themeSource) };
   const inkIsLight = { value: isLight(ink.value) };
+  // How faint the ink film sits behind the page; colour prints ignore it.
+  const baseOpacity = { value: inkIsLight.value ? 0.35 : 0.45 };
+  const spot = { value: new THREE.Vector2(-1e4, -1e4) };
+  const spotRadius = { value: 300 };
+  const spotStrength = { value: 0 };
   const scene = new THREE.Scene();
 
   // Each strip is a ribbon of SEGMENTS quads whose vertices are rewritten
@@ -338,6 +358,10 @@ export async function createFilmNegativesScene(
         uInk: ink,
         uInkIsLight: inkIsLight,
         uOpacity: { value: strip.opacity },
+        uBaseOpacity: baseOpacity,
+        uSpot: spot,
+        uSpotRadius: spotRadius,
+        uSpotStrength: spotStrength,
         uFlow: { value: 0 },
         uSeed: { value: strip.seed },
       },
@@ -438,6 +462,8 @@ export async function createFilmNegativesScene(
   const startTime = performance.now();
   const pointer = new THREE.Vector2();
   const look = new THREE.Vector2();
+  const spotTarget = new THREE.Vector2();
+  let spotOn = false;
   let scroll = window.scrollY;
   let scrollEased = scroll;
   let rush = 0;
@@ -456,6 +482,8 @@ export async function createFilmNegativesScene(
     scroll = scrolled;
     scrollEased += (scroll - scrollEased) * Math.min(1, dt * 6);
     look.lerp(pointer, Math.min(1, dt * 2));
+    spot.value.lerp(spotTarget, Math.min(1, dt * 10));
+    spotStrength.value += ((spotOn ? 1 : 0) - spotStrength.value) * Math.min(1, dt * 4);
     camera.position.set(
       CAMERA.x + look.x * 0.45,
       CAMERA.y + look.y * 0.3 - scrollEased * 0.0022,
@@ -480,6 +508,7 @@ export async function createFilmNegativesScene(
     const { innerWidth, innerHeight } = window;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_DPR));
     renderer.setSize(innerWidth, innerHeight, false);
+    spotRadius.value = 300 * renderer.getPixelRatio();
     camera.aspect = innerWidth / innerHeight;
     camera.updateProjectionMatrix();
     if (reducedMotion) render(performance.now());
@@ -490,11 +519,23 @@ export async function createFilmNegativesScene(
       (event.clientX / window.innerWidth) * 2 - 1,
       1 - (event.clientY / window.innerHeight) * 2,
     );
+    // The canvas fills the viewport, so client pixels map straight onto it.
+    const ratio = renderer.getPixelRatio();
+    spotTarget.set(event.clientX * ratio, (window.innerHeight - event.clientY) * ratio);
+    if (!spotOn) spot.value.copy(spotTarget);
+    spotOn = true;
+  };
+  const onPointerEnd = (event: PointerEvent) => {
+    // Leaving the window, or lifting a finger, lets the colour fade out.
+    if (event.type === "pointerout" ? !event.relatedTarget : event.pointerType !== "mouse") {
+      spotOn = false;
+    }
   };
 
   const themeObserver = new MutationObserver(() => {
     ink.value = readInk(themeSource);
     inkIsLight.value = isLight(ink.value);
+    baseOpacity.value = inkIsLight.value ? 0.35 : 0.45;
     if (reducedMotion) render(performance.now());
   });
   themeObserver.observe(document.documentElement, {
@@ -505,6 +546,9 @@ export async function createFilmNegativesScene(
   window.addEventListener("resize", resize);
   if (!reducedMotion) {
     window.addEventListener("pointermove", onPointer, { passive: true });
+    window.addEventListener("pointerout", onPointerEnd, { passive: true });
+    window.addEventListener("pointerup", onPointerEnd, { passive: true });
+    window.addEventListener("pointercancel", onPointerEnd, { passive: true });
     frame = requestAnimationFrame(tick);
   }
   resize();
@@ -516,6 +560,9 @@ export async function createFilmNegativesScene(
       themeObserver.disconnect();
       window.removeEventListener("resize", resize);
       window.removeEventListener("pointermove", onPointer);
+      window.removeEventListener("pointerout", onPointerEnd);
+      window.removeEventListener("pointerup", onPointerEnd);
+      window.removeEventListener("pointercancel", onPointerEnd);
       for (const ribbon of ribbons) {
         ribbon.geometry.dispose();
         ribbon.material.dispose();
