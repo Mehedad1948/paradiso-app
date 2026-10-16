@@ -1,6 +1,5 @@
 "use client";
 import { Card, CardFooter } from "@heroui/card";
-import { Button } from "@heroui/button";
 import Image from "next/image";
 import Link from "next/link";
 import type { PanelRoomListItem } from "@/lib/api/panel";
@@ -14,8 +13,12 @@ export default function RoomCard({
   room: PanelRoomListItem;
   canVisit: boolean;
 }) {
-  return (
-    <Card className="overflow-hidden rounded-[10px] border border-line bg-elevated shadow-none" radius="lg" shadow="none">
+  const card = (
+    <Card
+      className={`h-full overflow-hidden rounded-[10px] border border-line bg-elevated shadow-none ${canVisit ? "transition-colors group-hover:border-muted" : ""}`}
+      radius="lg"
+      shadow="none"
+    >
       <Image
         alt={room.name}
         className="aspect-[16/10] w-full object-cover"
@@ -31,22 +34,30 @@ export default function RoomCard({
           <p className="break-words text-lg font-semibold leading-[1.3]">{room.name}</p>
         </div>
         {canVisit ? (
-          <Button
-            as={Link}
-            href={`/rooms/${room.id}`}
-            className="min-h-[46px] rounded-md border border-line bg-surface text-[15px] font-semibold text-ink shrink-0"
-            color="default"
-            radius="lg"
-            size="md"
-            variant="flat"
-            endContent={<ArrowUpRight size={17} aria-hidden="true" />}
+          // Visual only: the whole card is the link, so this can't be a nested <a>.
+          <span
+            aria-hidden="true"
+            className="inline-flex min-h-[46px] shrink-0 items-center gap-2 rounded-md border border-line bg-surface px-4 text-[15px] font-semibold text-ink transition-opacity group-hover:opacity-80"
           >
             Enter
-          </Button>
+            <ArrowUpRight size={17} />
+          </span>
         ) : (
           <JoinRoomButton roomId={room.id} />
         )}
       </CardFooter>
     </Card>
+  );
+
+  if (!canVisit) return card;
+
+  return (
+    <Link
+      href={`/rooms/${room.id}`}
+      aria-label={`Enter ${room.name}`}
+      className="group block rounded-[10px] outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
+    >
+      {card}
+    </Link>
   );
 }

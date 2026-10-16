@@ -3,9 +3,10 @@ import * as THREE from "three";
 /**
  * Landing backdrop: strips of 35 mm film thread across the screen from edge
  * to edge, rolling through slow waves while the film runs along them. Each
- * strip carries a shot from Cinema Paradiso, frame after frame in sequence,
- * with punched perforations, edge print, a key-code barcode, grain and the odd
- * emulsion scratch.
+ * strip carries one iconic movie scene, frame by frame, with punched
+ * perforations, edge print, a key-code barcode, grain and the odd emulsion
+ * scratch. The film is VistaVision:
+ * 35 mm run sideways, eight perforations and one wide frame at a time.
  *
  * The strips bend the way real film does: freely across their face (the
  * depth waves), only very gently within their own plane, and with a slow
@@ -15,13 +16,16 @@ import * as THREE from "three";
  */
 export type FilmNegativesScene = { dispose(): void };
 
+/** A greyscale atlas of `frames` consecutive frames, row-major. */
+export type FilmScene = {
+  src: string;
+  frames: number;
+  columns: number;
+};
+
 const FOV = 35;
 const CAMERA = new THREE.Vector3(0, 2.2, 12);
 const SEGMENTS = 360;
-// Each shot is a pre-graded greyscale atlas of SHOT_FRAMES sequential frames
-// in a SHOT_GRID x SHOT_GRID layout, cells shaped like the 35 mm picture.
-const SHOT_GRID = 4;
-const SHOT_FRAMES = SHOT_GRID * SHOT_GRID;
 const EDGE_FRAMES = 16;
 const EDGE_CELL = { width: 128, height: 32 };
 const MAX_DPR = 1.5;
@@ -81,18 +85,6 @@ const STRIPS: Strip[] = [
     seed: 2,
   },
   {
-    width: 0.75,
-    z: -5,
-    y: 0.82,
-    slope: -0.2,
-    waves: [[0.06, 0.9, 0.1, 4]],
-    depth: [[3, 0.8, 0.14, 2]],
-    twist: [0.3, 0.35, 0.07, 1],
-    speed: 0.3,
-    opacity: 0.8,
-    seed: 3,
-  },
-  {
     width: 0.7,
     z: -8,
     y: -0.86,
@@ -125,7 +117,9 @@ const vertex = /* glsl */ `
 `;
 
 const fragment = /* glsl */ `
-  uniform sampler2D uShot;
+  uniform sampler2D uScene;
+  // Frames, atlas columns, atlas rows.
+  uniform vec3 uSceneLayout;
   uniform sampler2D uEdge;
   uniform vec3 uInk;
   uniform float uInkIsLight;
@@ -136,11 +130,13 @@ const fragment = /* glsl */ `
   varying float vFacing;
   varying float vDepth;
 
-  // 35 mm, 4-perf, in film widths: frame pitch, picture size and rails.
-  const float PITCH = 0.56;
-  const float PICTURE = 0.47;
+  // VistaVision in film widths: an 8-perf frame pitch, a 1.56:1 picture
+  // and the rails. Edge print keeps the 35 mm half-frame spacing.
+  const float PERF_PITCH = 0.14;
+  const float PITCH = PERF_PITCH * 8.0;
+  const float PICTURE = 1.03;
   const float RAIL = 0.17;
-  const float PERF_PITCH = PITCH / 4.0;
+  const float EDGE_PITCH = 0.56;
 
   float hash(vec2 p) {
     return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -176,13 +172,13 @@ const fragment = /* glsl */ `
     vec2 pictureHalf = vec2(PICTURE * 0.5, 0.5 - RAIL);
     float inPicture = 1.0 - smoothstep(-aa, aa, roundedBox(picture, pictureHalf, 0.018));
     vec2 imageUv = clamp(picture / (pictureHalf * 2.0) + 0.5, 0.0, 1.0);
-    float shotFrame = mod(frame, ${SHOT_FRAMES}.0);
+    float cellIndex = mod(frame, uSceneLayout.x);
     // Atlas rows run top-down, texture v bottom-up.
-    vec2 cell = vec2(mod(shotFrame, ${SHOT_GRID}.0), ${SHOT_GRID - 1}.0 - floor(shotFrame / ${SHOT_GRID}.0));
-    vec2 atlasUv = (cell + imageUv) / ${SHOT_GRID}.0;
+    vec2 cell = vec2(mod(cellIndex, uSceneLayout.y), uSceneLayout.z - 1.0 - floor(cellIndex / uSceneLayout.y));
+    vec2 atlasUv = (cell + imageUv) / uSceneLayout.yz;
     // Picture density follows the ink, so frames read as photographs on
     // either theme: dark ink prints the shadows, light ink the highlights.
-    float scene = texture2D(uShot, atlasUv).r;
+    float scene = texture2D(uScene, atlasUv).r;
     float tone = mix(1.0 - scene, scene, uInkIsLight);
     // Each frame is exposed a touch differently, as on real stock.
     tone *= 1.0 + (hash(vec2(frame, uSeed)) - 0.5) * 0.08;
@@ -192,7 +188,7 @@ const fragment = /* glsl */ `
     float band = smoothstep(0.103, 0.103 + aa, rail) * (1.0 - smoothstep(0.158 - aa, 0.158, rail));
     if (v > 0.5) {
       // Canvas textures are flipped vertically, so read the band bottom-up.
-      vec2 edgeUv = vec2(fract(a / (PITCH * ${EDGE_FRAMES}.0)), 1.0 - (rail - 0.103) / 0.055);
+      vec2 edgeUv = vec2(fract(a / (EDGE_PITCH * ${EDGE_FRAMES}.0)), 1.0 - (rail - 0.103) / 0.055);
       density += texture2D(uEdge, edgeUv).a * band * 0.55;
     } else {
       float inFrame = mod(a, PITCH) / PITCH;
@@ -277,10 +273,10 @@ function readInk(element: HTMLElement) {
 
 export async function createFilmNegativesScene(
   canvas: HTMLCanvasElement,
-  shotSources: string[],
+  scenes: FilmScene[],
   signal: AbortSignal,
 ): Promise<FilmNegativesScene> {
-  const images = await Promise.all(shotSources.map(loadImage));
+  const images = await Promise.all(scenes.map((filmScene) => loadImage(filmScene.src)));
   // A canvas has a single WebGL context. If the caller gave up while assets
   // loaded (React runs effects twice in development), stop before a second
   // renderer can share that context with the one that replaces it.
@@ -293,15 +289,16 @@ export async function createFilmNegativesScene(
   const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 60);
   camera.position.copy(CAMERA);
 
-  const shots = images.map(texture);
+  const sceneTextures = images.map(texture);
   const edge = edgePrint(getComputedStyle(document.body).getPropertyValue("--font-mono") || "monospace");
   const ink = { value: readInk(themeSource) };
   const inkIsLight = { value: isLight(ink.value) };
   const scene = new THREE.Scene();
 
   // Each strip is a ribbon of SEGMENTS quads whose vertices are rewritten
-  // every frame from its path.
-  const ribbons = STRIPS.map((strip, index) => {
+  // every frame from its path, and carries one scene.
+  const ribbons = STRIPS.slice(0, scenes.length).map((strip, index) => {
+    const { frames, columns } = scenes[index];
     const points = SEGMENTS + 1;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(points * 2 * 3);
@@ -335,8 +332,8 @@ export async function createFilmNegativesScene(
       depthWrite: false,
       side: THREE.DoubleSide,
       uniforms: {
-        // Strips take turns with the shots.
-        uShot: { value: shots[index % shots.length] },
+        uScene: { value: sceneTextures[index] },
+        uSceneLayout: { value: new THREE.Vector3(frames, columns, Math.ceil(frames / columns)) },
         uEdge: { value: edge },
         uInk: ink,
         uInkIsLight: inkIsLight,
@@ -523,7 +520,7 @@ export async function createFilmNegativesScene(
         ribbon.geometry.dispose();
         ribbon.material.dispose();
       }
-      shots.forEach((shot) => shot.dispose());
+      sceneTextures.forEach((sceneTexture) => sceneTexture.dispose());
       edge.dispose();
       renderer.dispose();
     },
