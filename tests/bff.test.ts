@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   getRoomRatings: vi.fn(),
   castVote: vi.fn(),
   updateRoom: vi.fn(),
+  addCustomMovieToRoom: vi.fn(),
 }));
 vi.mock("server-only", () => ({}));
 vi.mock("next/headers", () => ({
@@ -191,5 +192,75 @@ describe("BFF boundaries", () => {
     );
     expect(response.status).toBe(403);
     expect(mocks.updateRoom).not.toHaveBeenCalled();
+  });
+  it("forwards a trimmed custom movie and omits empty optional fields", async () => {
+    mocks.addCustomMovieToRoom.mockResolvedValue(
+      ok({ message: "Added", movieId: "movie-1" }),
+    );
+    const response = await handlePanelRequest(
+      request("rooms/1/custom-movies", "POST", {
+        title: "  Home Movie ",
+        year: 2019,
+        imdbLink: "",
+        overview: " Shot on VHS ",
+        dbId: 99,
+      }),
+      ["rooms", "1", "custom-movies"],
+    );
+    expect(response.status).toBe(200);
+    expect(mocks.addCustomMovieToRoom).toHaveBeenCalledWith(1, {
+      title: "Home Movie",
+      year: 2019,
+      overview: "Shot on VHS",
+    });
+  });
+  it.each([
+    [{ title: " ", year: 2019 }, "title"],
+    [{ title: "Matrix", year: "1999" }, "year"],
+    [{ title: "Matrix", year: 1869 }, "year"],
+    [{ title: "Matrix", year: 1999, overview: "x".repeat(2001) }, "overview"],
+  ])("rejects invalid custom movie %j with field errors", async (body, field) => {
+    mocks.addCustomMovieToRoom.mockClear();
+    const response = await handlePanelRequest(
+      request("rooms/1/custom-movies", "POST", body),
+      ["rooms", "1", "custom-movies"],
+    );
+    expect(response.status).toBe(400);
+    expect((await response.json()).response.fieldErrors).toHaveProperty(field);
+    expect(mocks.addCustomMovieToRoom).not.toHaveBeenCalled();
+  });
+  it("maps backend validation messages to custom movie fields", async () => {
+    mocks.addCustomMovieToRoom.mockResolvedValue({
+      result: null,
+      response: {
+        ok: false,
+        status: 400,
+        message: "imdbLink must be a URL address",
+        messages: ["imdbLink must be a URL address"],
+      },
+    });
+    const response = await handlePanelRequest(
+      request("rooms/1/custom-movies", "POST", {
+        title: "Matrix",
+        year: 1999,
+        imdbLink: "not-imdb",
+      }),
+      ["rooms", "1", "custom-movies"],
+    );
+    expect(response.status).toBe(400);
+    expect((await response.json()).response.fieldErrors).toEqual({
+      imdbLink: "Must be a URL address",
+    });
+  });
+  it("preserves duplicate custom movie conflicts", async () => {
+    mocks.addCustomMovieToRoom.mockResolvedValue({
+      result: null,
+      response: { ok: false, status: 409, message: "Movie is already in the room" },
+    });
+    const response = await handlePanelRequest(
+      request("rooms/1/custom-movies", "POST", { title: "Matrix", year: 1999 }),
+      ["rooms", "1", "custom-movies"],
+    );
+    expect(response.status).toBe(409);
   });
 });

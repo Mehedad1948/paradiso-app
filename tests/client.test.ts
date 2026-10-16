@@ -58,6 +58,28 @@ it("turns authorization failures into typed errors for query retry decisions", a
     name: "BffError",
   });
 });
+it("exposes field validation errors on BffError", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockResolvedValue(
+      Response.json(
+        {
+          result: null,
+          response: {
+            ok: false,
+            message: "Enter the movie title",
+            fieldErrors: { title: "Enter the movie title" },
+          },
+        },
+        { status: 400 },
+      ),
+    ),
+  );
+  await expect(bffRequest("/rooms/1/custom-movies")).rejects.toMatchObject({
+    status: 400,
+    fieldErrors: { title: "Enter the movie title" },
+  });
+});
 it("encodes search strings and preserves zero/false filter values", () => {
   const query = new URLSearchParams(
     queryString({

@@ -58,6 +58,17 @@ export const useAddMovie = (id: string, options?: MutationOptions<Message>) =>
     [panelKeys.room(id), panelKeys.ratings(id)],
     options,
   );
+export const useAddCustomMovie = (
+  id: string,
+  options?: MutationOptions<
+    Awaited<ReturnType<typeof panelApi.addCustomMovie>>
+  >,
+) =>
+  usePanelMutation(
+    panelApi.addCustomMovie,
+    [panelKeys.room(id), panelKeys.ratings(id)],
+    options,
+  );
 export const useRemoveMovie = (
   id: string,
   options?: MutationOptions<Message>,

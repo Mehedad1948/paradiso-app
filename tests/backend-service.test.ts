@@ -68,7 +68,12 @@ describe("backend service transport", () => {
     expect(result).toMatchObject({
       result: null,
       error: "Invalid room Try again",
-      response: { ok: false, status: 400, message: "Invalid room Try again" },
+      response: {
+        ok: false,
+        status: 400,
+        message: "Invalid room Try again",
+        messages: ["Invalid room", "Try again"],
+      },
     });
   });
 

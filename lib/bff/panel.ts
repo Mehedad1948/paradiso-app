@@ -9,6 +9,10 @@ import storage from "@/services/storage";
 import { moviesServices } from "@/services/movies";
 import type { RequestResult } from "@/types/request";
 import {
+  customMovieErrorsFrom,
+  parseCustomMovie,
+} from "@/lib/movies/custom-movie";
+import {
   InputError,
   positiveInteger,
   text,
@@ -261,6 +265,27 @@ export async function handlePanelRequest(request: Request, path: string[]) {
             );
           }
           break;
+        case "custom-movies":
+          if (method === "POST") {
+            const parsed = parseCustomMovie(await body(request));
+            if (parsed.errors)
+              throw new InputError(
+                Object.values(parsed.errors)[0]!,
+                400,
+                parsed.errors,
+              );
+            const result = await rooms.addCustomMovieToRoom(roomId, parsed.body);
+            const fieldErrors =
+              result.response.status === 400 && result.response.messages
+                ? customMovieErrorsFrom(result.response.messages)
+                : undefined;
+            return respond(
+              fieldErrors
+                ? { ...result, response: { ...result.response, fieldErrors } }
+                : result,
+            );
+          }
+          break;
         case "invitations":
           if (method === "GET")
             return respond(
@@ -329,6 +354,9 @@ export async function handlePanelRequest(request: Request, path: string[]) {
           error instanceof InputError
             ? error.message
             : "Unexpected server error",
+        ...(error instanceof InputError && error.fieldErrors
+          ? { fieldErrors: error.fieldErrors }
+          : {}),
       },
     });
   }

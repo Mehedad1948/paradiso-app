@@ -12,6 +12,7 @@ import {
 } from "@heroui/modal";
 import { addToast } from "@heroui/toast";
 import { useRemoveMovie } from "@/hooks/queries/useRoomQueries";
+import MoviePoster from "../components/MoviePoster";
 
 export default function DeleteMovieDialog({
   movie,
@@ -65,17 +66,11 @@ export default function DeleteMovieDialog({
                   <div className="flex items-center gap-2"></div>
                 </div>
               </div>
-              {movie.poster_path && (
-                <img
-                  className="nd:w-full h-32 md:h-auto rounded-xl md:aspect-[1/1.6] object-contain md:object-cover"
-                  src={
-                    process.env.NEXT_PUBLIC_BASE_TMDB_IMAGE_URL +
-                    "w500" +
-                    movie.poster_path
-                  }
-                  alt={movie.title}
-                />
-              )}
+              <MoviePoster
+                path={movie.poster_path}
+                title={movie.title}
+                className="md:w-full h-32 md:h-auto rounded-xl md:aspect-[1/1.6] object-contain md:object-cover"
+              />
             </ModalBody>
 
             <ModalFooter className="flex flex-col">

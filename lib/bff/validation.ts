@@ -2,6 +2,7 @@ export class InputError extends Error {
   constructor(
     message: string,
     public readonly status = 400,
+    public readonly fieldErrors?: Record<string, string>,
   ) {
     super(message);
   }

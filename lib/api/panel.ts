@@ -8,6 +8,7 @@ import type {
   addMovieToRoomInputs,
 } from "@/types/rooms";
 import type { MovieWithRatings } from "@/types";
+import type { CustomMovieBody } from "@/lib/movies/custom-movie";
 import type { VoteType } from "@/types/ratings";
 import type { User } from "@/types/user";
 import type { Invitation } from "@/types/invitations";
@@ -53,6 +54,11 @@ export const panelApi = {
       method: "POST",
       body: json({ dbId }),
     }),
+  addCustomMovie: ({ roomId, ...body }: CustomMovieBody & { roomId: string }) =>
+    bffRequest<BackendResponse<"/rooms/add-custom-movie/{id}", "post">>(
+      `${roomPath(roomId)}/custom-movies`,
+      { method: "POST", body: json(body) },
+    ),
   removeMovie: ({ roomId, movieId }: { roomId: string; movieId: string }) =>
     bffRequest<BackendResponse<"/rooms/delete-movie/{id}", "delete">>(
       `${roomPath(roomId)}/movies/${encodeURIComponent(movieId)}`,

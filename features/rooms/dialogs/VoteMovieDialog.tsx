@@ -7,6 +7,7 @@ import { Input } from "@heroui/input";
 import { Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/modal";
 import { addToast } from "@heroui/toast";
 import { useState } from "react";
+import MoviePoster from "../components/MoviePoster";
 
 export default function VoteMovieDialog({
   movie,
@@ -102,17 +103,11 @@ export default function VoteMovieDialog({
                     </Button>
                   </div>
                 </div>
-                {movie.poster_path && (
-                  <img
-                    className="nd:w-full h-64 md:h-auto rounded-xl md:aspect-[1/1.6] object-contain md:object-cover"
-                    src={
-                      process.env.NEXT_PUBLIC_BASE_TMDB_IMAGE_URL +
-                      "w500" +
-                      movie.poster_path
-                    }
-                    alt={movie.title}
-                  />
-                )}
+                <MoviePoster
+                  path={movie.poster_path}
+                  title={movie.title}
+                  className="md:w-full h-64 md:h-auto rounded-xl md:aspect-[1/1.6] object-contain md:object-cover"
+                />
               </ModalBody>
             </form>
           </>

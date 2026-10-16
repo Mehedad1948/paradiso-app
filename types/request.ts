@@ -5,6 +5,9 @@ export type RequestResult<T> = {
     status: number;
     statusText: string;
     message?: string;
+    /** Every message of a validation failure, before they are joined. */
+    messages?: string[];
+    fieldErrors?: Record<string, string>;
   };
   error?: string;
 };

@@ -3,6 +3,7 @@ import type { RoomRatingFilters } from "@/types/rooms";
 import { backendRequest } from "../backend";
 
 type AddMovieBody = BackendRequestBody<"/rooms/add-movie/{id}", "post">;
+type AddCustomMovieBody = BackendRequestBody<"/rooms/add-custom-movie/{id}", "post">;
 type RemoveMovieBody = BackendRequestBody<"/rooms/delete-movie/{id}", "delete">;
 
 const roomsServices = {
@@ -58,6 +59,9 @@ const roomsServices = {
   },
   addMovieToRoom(id: number, body: AddMovieBody) {
     return backendRequest("/rooms/add-movie/{id}", "post", { pathParams: { id }, body });
+  },
+  addCustomMovieToRoom(id: number, body: AddCustomMovieBody) {
+    return backendRequest("/rooms/add-custom-movie/{id}", "post", { pathParams: { id }, body });
   },
   deleteMovie(id: number, body: RemoveMovieBody) {
     return backendRequest("/rooms/delete-movie/{id}", "delete", { pathParams: { id }, body });

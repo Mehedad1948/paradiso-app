@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@heroui/table";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import MoviePoster from "./MoviePoster";
 export default function RoomRatingTable({
   result,
   room,
@@ -111,19 +112,17 @@ export default function RoomRatingTable({
               <TableCell>
                 {columnKey === "title" ? (
                   <div className="flex items-center gap-3">
-                    {movie.poster_path && (
-                      <img
-                        src={`${process.env.NEXT_PUBLIC_BASE_TMDB_IMAGE_URL}w92${movie.poster_path}`}
-                        alt=""
-                        width={36}
-                        height={54}
-                        loading="lazy"
-                        className="rounded-lg"
-                      />
-                    )}
+                    <MoviePoster
+                      path={movie.poster_path}
+                      size="w92"
+                      width={36}
+                      height={54}
+                      className="rounded-lg"
+                    />
                     <span>
                       {movie.title}
-                      {/^\d{4}-/.test(movie.release_date || "") && (
+                      {/* Manual movies store only the year; TMDb ones a full date. */}
+                      {/^\d{4}/.test(movie.release_date || "") && (
                         <span className="text-primary-500 text-sm">
                           {" "}
                           - {movie.release_date?.slice(0, 4)}

@@ -3,7 +3,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef } from "react";
 import { addToast } from "@heroui/toast";
 
-export type MutationOptions<T> = { onSuccess?: (data: T) => void };
+export type MutationOptions<T> = {
+  onSuccess?: (data: T) => void;
+  /** Replaces the default error toast. */
+  onError?: (error: Error) => void;
+};
 
 /** Cache effects survive navigation; form callbacks belong to the active form. */
 export function usePanelMutation<T, V>(
@@ -34,8 +38,9 @@ export function usePanelMutation<T, V>(
         options?.onSuccess?.(data);
     },
     onError: (error, submitted) => {
-      if (generation.current === submitted.generation)
-        addToast({ title: error.message, color: "danger" });
+      if (generation.current !== submitted.generation) return;
+      if (options?.onError) options.onError(error);
+      else addToast({ title: error.message, color: "danger" });
     },
     onSettled: () => {
       busy.current = false;

@@ -76,6 +76,11 @@ export async function backendRequest<
       ? await response.json()
       : await response.text();
     const message = messageFrom(parsed);
+    const messages =
+      parsed && typeof parsed === "object" && "message" in parsed &&
+      Array.isArray(parsed.message)
+        ? parsed.message.filter((item): item is string => typeof item === "string")
+        : undefined;
     return {
       result: response.ok ? (parsed as BackendResponse<Path, Method>) : null,
       response: {
@@ -83,6 +88,7 @@ export async function backendRequest<
         status: response.status,
         statusText: response.statusText,
         ...(message ? { message } : {}),
+        ...(!response.ok && messages?.length ? { messages } : {}),
       },
       error: response.ok ? undefined : message || `HTTP ${response.status}: ${response.statusText}`,
     };

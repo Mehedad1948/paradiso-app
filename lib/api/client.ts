@@ -4,6 +4,7 @@ export class BffError extends Error {
   constructor(
     message: string,
     public readonly status: number,
+    public readonly fieldErrors?: Record<string, string>,
   ) {
     super(message);
     this.name = "BffError";
@@ -55,6 +56,7 @@ export async function apiRequest<T>(
     throw new BffError(
       payload.response.message || payload.error || "Request failed",
       response.status,
+      payload.response.fieldErrors,
     );
   }
   return payload.result as T;
