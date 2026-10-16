@@ -1,28 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { gridPosters } from "@/config/posters";
 import type { FilmNegativesScene } from "./film-negatives-scene";
 
-// Sixteen light posters for the frames; the heaviest grid files are left out.
-const FRAME_POSTERS = [
-  gridPosters.amelie,
-  gridPosters.wingsOfDesire,
-  gridPosters.ilPostino,
-  gridPosters.divingBell,
-  gridPosters.stalker,
-  gridPosters.colorsRed,
-  gridPosters.fantasticMrFox,
-  gridPosters.johnWick,
-  gridPosters.cinemaParadiso,
-  gridPosters.killBill,
-  gridPosters.taxiDriver,
-  gridPosters.twelveAngryMen,
-  gridPosters.parisTexas,
-  gridPosters.matrix,
-  gridPosters.rearWindow,
-  gridPosters.vertigo,
-].map((poster) => poster.image);
+// Cinema Paradiso stills; the strips take turns with them.
+const FRAME_IMAGES = [
+  "/frames/cineam-paradiso-fram.jpg",
+  "/frames/cineam-paradiso-fram-2.jpg",
+];
 
 /** Strips of film negative threading behind the landing page. */
 export default function FilmNegatives() {
@@ -34,12 +19,14 @@ export default function FilmNegatives() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     let scene: FilmNegativesScene | undefined;
-    let cancelled = false;
+    const controller = new AbortController();
 
     import("./film-negatives-scene")
-      .then(({ createFilmNegativesScene }) => createFilmNegativesScene(canvas, FRAME_POSTERS))
+      .then(({ createFilmNegativesScene }) =>
+        createFilmNegativesScene(canvas, FRAME_IMAGES, controller.signal),
+      )
       .then((created) => {
-        if (cancelled) return created.dispose();
+        if (controller.signal.aborted) return created.dispose();
         scene = created;
         setReady(true);
       })
@@ -48,7 +35,7 @@ export default function FilmNegatives() {
       });
 
     return () => {
-      cancelled = true;
+      controller.abort();
       scene?.dispose();
     };
   }, []);
@@ -57,7 +44,7 @@ export default function FilmNegatives() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className={`pointer-events-none fixed inset-0 -z-10 h-full w-full transition-opacity duration-[1600ms] ${ready ? "opacity-30 dark:opacity-20" : "opacity-0"}`}
+      className={`pointer-events-none fixed inset-0 -z-10 h-full w-full transition-opacity duration-[1600ms] ${ready ? "opacity-45 dark:opacity-35" : "opacity-0"}`}
     />
   );
 }

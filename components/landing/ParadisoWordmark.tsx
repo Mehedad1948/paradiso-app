@@ -59,11 +59,13 @@ export default function ParadisoWordmark() {
     if (!container || !canvas) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    let cancelled = false;
+    const controller = new AbortController();
     import("./wordmark-scene")
-      .then(({ createWordmarkScene }) => createWordmarkScene(container, canvas, letters))
+      .then(({ createWordmarkScene }) =>
+        createWordmarkScene(container, canvas, letters, controller.signal),
+      )
       .then((scene) => {
-        if (cancelled) return scene.dispose();
+        if (controller.signal.aborted) return scene.dispose();
         sceneRef.current = scene;
         setReady(true);
       })
@@ -72,7 +74,7 @@ export default function ParadisoWordmark() {
       });
 
     return () => {
-      cancelled = true;
+      controller.abort();
       sceneRef.current?.dispose();
       sceneRef.current = null;
     };

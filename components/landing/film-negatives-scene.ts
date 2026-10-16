@@ -1,22 +1,25 @@
 import * as THREE from "three";
 
 /**
- * Landing backdrop: strips of 35 mm negative thread across the screen from
- * edge to edge. Each strip runs along a waving 3D path that twists and swings
- * through slow loops, and the film keeps moving along it. Frames hold posters
- * as true negatives (bright scenes print dense), with punched perforations,
- * edge print, a key-code barcode, grain and the odd emulsion scratch.
+ * Landing backdrop: strips of 35 mm film thread across the screen from edge
+ * to edge, rolling through slow waves while the film runs along them. Each
+ * strip carries one still, repeated frame after frame as a real shot is, with
+ * punched perforations, edge print, a key-code barcode, grain and the odd
+ * emulsion scratch.
  *
- * Paths are evaluated on the CPU each frame so the film can be laid out by
- * true arc length: frames keep their proportions even through a loop.
+ * The strips bend the way real film does: freely across their face (the
+ * depth waves), only very gently within their own plane, and with a slow
+ * natural twist. A camera a little above the strips turns the depth waves
+ * into soft S-curves on screen. Paths are evaluated on the CPU each frame so
+ * the film is laid out by true arc length and frames keep their proportions.
  */
 export type FilmNegativesScene = { dispose(): void };
 
 const FOV = 35;
-const CAMERA_Z = 12;
-const SEGMENTS = 480;
-const ATLAS_CELLS = 4;
-const ATLAS_CELL_SIZE = 256;
+const CAMERA = new THREE.Vector3(0, 2.2, 12);
+const SEGMENTS = 360;
+// One atlas cell per still, shaped like the 35 mm picture area.
+const FRAME_CELL = { width: 288, height: 404 };
 const EDGE_FRAMES = 16;
 const EDGE_CELL = { width: 128, height: 32 };
 const MAX_DPR = 1.5;
@@ -27,13 +30,14 @@ type Strip = {
   // Film width in world units; the film's own pattern is measured in widths.
   width: number;
   z: number;
-  // Vertical placement and rise across the screen, in half-heights.
+  // Vertical placement and rise across the screen, in half-heights. These
+  // in-plane curves stay long and shallow, as film barely bends edgewise.
   y: number;
   slope: number;
   waves: Wave[];
-  depth: Wave;
+  // Bending across the face, in world units: the main motion.
+  depth: Wave[];
   twist: Wave;
-  loop?: { radius: number; span: number; center: number; drift: number; up: 1 | -1 };
   // Film speed along the path in widths per second; reversed strips enter
   // from the right.
   speed: number;
@@ -44,65 +48,59 @@ type Strip = {
 
 const STRIPS: Strip[] = [
   {
-    width: 1.05,
-    z: 2.5,
-    y: 0.38,
-    slope: -0.55,
-    waves: [
-      [0.16, 0.6, 0.23, 0],
-      [0.05, 1.7, -0.31, 1.3],
+    width: 1.2,
+    z: 1.5,
+    y: 0.4,
+    slope: -0.5,
+    waves: [[0.08, 0.55, 0.16, 0]],
+    depth: [
+      [2.2, 0.85, 0.22, 0],
+      [0.5, 1.9, -0.3, 1.2],
     ],
-    depth: [0.8, 0.5, 0.17, 0],
-    twist: [1.1, 0.8, 0.21, 0.4],
-    loop: { radius: 0.9, span: 0.085, center: 0.68, drift: 0.07, up: 1 },
-    speed: 0.5,
+    twist: [0.35, 0.4, 0.1, 0],
+    speed: 0.45,
     opacity: 1,
     seed: 1,
   },
   {
-    width: 0.78,
-    z: 0,
+    width: 0.9,
+    z: -1.5,
     y: -0.42,
-    slope: 0.5,
-    waves: [
-      [0.14, 0.9, -0.19, 2],
-      [0.05, 2.3, 0.27, 0.5],
+    slope: 0.45,
+    waves: [[0.07, 0.7, -0.13, 2]],
+    depth: [
+      [2.6, 1.05, -0.18, 1],
+      [0.4, 2.3, 0.26, 0.4],
     ],
-    depth: [1.2, 0.7, 0.13, 1],
-    twist: [1.5, 1.1, -0.17, 2.1],
-    loop: { radius: 0.7, span: 0.07, center: 0.3, drift: 0.09, up: -1 },
-    speed: 0.42,
+    twist: [0.45, 0.5, -0.08, 2],
+    speed: 0.38,
     reverse: true,
-    opacity: 0.9,
+    opacity: 0.95,
     seed: 2,
   },
   {
-    width: 0.62,
-    z: -4,
-    y: 0.72,
-    slope: -0.25,
-    waves: [
-      [0.11, 1.2, 0.15, 4],
-      [0.04, 2.8, -0.22, 1],
-    ],
-    depth: [1.5, 0.4, 0.11, 2],
-    twist: [2.2, 0.6, 0.12, 0],
-    speed: 0.32,
-    opacity: 0.75,
+    width: 0.75,
+    z: -5,
+    y: 0.82,
+    slope: -0.2,
+    waves: [[0.06, 0.9, 0.1, 4]],
+    depth: [[3, 0.8, 0.14, 2]],
+    twist: [0.3, 0.35, 0.07, 1],
+    speed: 0.3,
+    opacity: 0.8,
     seed: 3,
   },
   {
-    width: 0.56,
-    z: -7,
-    y: -0.78,
-    slope: 0.32,
-    waves: [[0.18, 0.7, -0.12, 5]],
-    depth: [1.2, 0.6, 0.1, 3],
-    twist: [0.9, 1.4, 0.18, 3],
-    loop: { radius: 0.85, span: 0.06, center: 0.56, drift: 0.11, up: -1 },
-    speed: 0.28,
+    width: 0.7,
+    z: -8,
+    y: -0.86,
+    slope: 0.3,
+    waves: [[0.08, 0.6, -0.09, 5]],
+    depth: [[3.2, 1, -0.12, 3]],
+    twist: [0.4, 0.45, 0.09, 3],
+    speed: 0.26,
     reverse: true,
-    opacity: 0.6,
+    opacity: 0.7,
     seed: 4,
   },
 ];
@@ -125,9 +123,12 @@ const vertex = /* glsl */ `
 `;
 
 const fragment = /* glsl */ `
-  uniform sampler2D uPosters;
+  uniform sampler2D uFrames;
+  uniform float uFrameIndex;
+  uniform float uFrameCount;
   uniform sampler2D uEdge;
   uniform vec3 uInk;
+  uniform float uInkIsLight;
   uniform float uOpacity;
   uniform float uFlow;
   uniform float uSeed;
@@ -169,24 +170,29 @@ const fragment = /* glsl */ `
     // Unexposed film base: a thin, even density.
     float density = 0.13;
 
-    // The picture: a negative, so bright scenes print dense. Consecutive
-    // frames of a shot repeat with a slight camera drift.
+    // The picture: consecutive frames of a shot repeat with a slight
+    // camera drift.
     float frame = floor(a / PITCH);
     vec2 picture = vec2(mod(a, PITCH) - PITCH * 0.5, v - 0.5);
     vec2 pictureHalf = vec2(PICTURE * 0.5, 0.5 - RAIL);
     float inPicture = 1.0 - smoothstep(-aa, aa, roundedBox(picture, pictureHalf, 0.018));
-    float shot = floor(frame / 3.0);
-    float cell = mod(floor(hash(vec2(shot, uSeed)) * 97.0), ${ATLAS_CELLS * ATLAS_CELLS}.0);
     vec2 imageUv = picture / (pictureHalf * 2.0) + 0.5;
     imageUv = (imageUv - 0.5) * 0.9 + 0.5 + vec2(mod(frame, 3.0) * 0.015 - 0.015, 0.0);
-    vec2 atlasUv = (vec2(mod(cell, ${ATLAS_CELLS}.0), floor(cell / ${ATLAS_CELLS}.0)) + imageUv) / ${ATLAS_CELLS}.0;
-    float scene = luma(texture2D(uPosters, atlasUv).rgb);
-    density = mix(density, 0.16 + scene * 0.72, inPicture);
+    imageUv = clamp(imageUv, 0.0, 1.0);
+    vec2 atlasUv = vec2((uFrameIndex + imageUv.x) / uFrameCount, imageUv.y);
+    // Picture density follows the ink, so frames read as photographs on
+    // either theme: dark ink prints the shadows, light ink the highlights.
+    float scene = texture2D(uFrames, atlasUv).r;
+    float tone = mix(1.0 - scene, scene, uInkIsLight);
+    // Each frame is exposed a touch differently, as on real stock.
+    tone *= 1.0 + (hash(vec2(frame, uSeed)) - 0.5) * 0.08;
+    density = mix(density, 0.08 + tone * 0.86, inPicture);
 
     // Edge print on one rail, key-code barcode on the other.
     float band = smoothstep(0.103, 0.103 + aa, rail) * (1.0 - smoothstep(0.158 - aa, 0.158, rail));
     if (v > 0.5) {
-      vec2 edgeUv = vec2(fract(a / (PITCH * ${EDGE_FRAMES}.0)), (rail - 0.103) / 0.055);
+      // Canvas textures are flipped vertically, so read the band bottom-up.
+      vec2 edgeUv = vec2(fract(a / (PITCH * ${EDGE_FRAMES}.0)), 1.0 - (rail - 0.103) / 0.055);
       density += texture2D(uEdge, edgeUv).a * band * 0.55;
     } else {
       float inFrame = mod(a, PITCH) / PITCH;
@@ -226,38 +232,59 @@ function loadImage(src: string) {
   return img.decode().then(() => img);
 }
 
-function context(canvas: HTMLCanvasElement) {
-  const ctx = canvas.getContext("2d");
+function context(canvas: HTMLCanvasElement, willReadFrequently = false) {
+  const ctx = canvas.getContext("2d", { willReadFrequently });
   if (!ctx) throw new Error("2D canvas unavailable");
   return ctx;
 }
 
+// No mipmaps: frames never get small enough to need them, and mip levels
+// would bleed neighbouring atlas cells into each other.
 function texture(canvas: HTMLCanvasElement) {
   const created = new THREE.CanvasTexture(canvas);
-  created.generateMipmaps = true;
-  created.minFilter = THREE.LinearMipmapLinearFilter;
-  created.anisotropy = 4;
+  created.generateMipmaps = false;
+  created.minFilter = THREE.LinearFilter;
   return created;
 }
 
-// Square, centre-cropped poster cells, one per frame subject.
-function posterAtlas(images: HTMLImageElement[]) {
+// Greyscale cells cropped to the picture's shape, one per still. Each still
+// is auto-levelled so dark or flat ones still print a full tonal range.
+function frameAtlas(images: HTMLImageElement[]) {
   const canvas = document.createElement("canvas");
-  canvas.width = canvas.height = ATLAS_CELLS * ATLAS_CELL_SIZE;
-  const ctx = context(canvas);
-  images.slice(0, ATLAS_CELLS * ATLAS_CELLS).forEach((img, index) => {
-    const side = Math.min(img.naturalWidth, img.naturalHeight);
+  canvas.width = FRAME_CELL.width * images.length;
+  canvas.height = FRAME_CELL.height;
+  const ctx = context(canvas, true);
+  const aspect = FRAME_CELL.width / FRAME_CELL.height;
+  images.forEach((img, index) => {
+    const x = index * FRAME_CELL.width;
+    const cropWidth = Math.min(img.naturalWidth, img.naturalHeight * aspect);
+    const cropHeight = cropWidth / aspect;
     ctx.drawImage(
       img,
-      (img.naturalWidth - side) / 2,
-      (img.naturalHeight - side) * 0.4,
-      side,
-      side,
-      (index % ATLAS_CELLS) * ATLAS_CELL_SIZE,
-      Math.floor(index / ATLAS_CELLS) * ATLAS_CELL_SIZE,
-      ATLAS_CELL_SIZE,
-      ATLAS_CELL_SIZE,
+      (img.naturalWidth - cropWidth) / 2,
+      (img.naturalHeight - cropHeight) * 0.35,
+      cropWidth,
+      cropHeight,
+      x,
+      0,
+      FRAME_CELL.width,
+      FRAME_CELL.height,
     );
+
+    const cell = ctx.getImageData(x, 0, FRAME_CELL.width, FRAME_CELL.height);
+    const { data } = cell;
+    const levels = new Float32Array(data.length / 4);
+    for (let i = 0; i < levels.length; i++) {
+      levels[i] = 0.299 * data[i * 4] + 0.587 * data[i * 4 + 1] + 0.114 * data[i * 4 + 2];
+    }
+    const sorted = Float32Array.from(levels).sort();
+    const low = sorted[Math.floor(sorted.length * 0.02)];
+    const high = Math.max(sorted[Math.floor(sorted.length * 0.98)], low + 1);
+    for (let i = 0; i < levels.length; i++) {
+      const value = Math.min(Math.max((levels[i] - low) / (high - low), 0), 1) * 255;
+      data[i * 4] = data[i * 4 + 1] = data[i * 4 + 2] = value;
+    }
+    ctx.putImageData(cell, x, 0);
   });
   return texture(canvas);
 }
@@ -280,8 +307,8 @@ function edgePrint(font: string) {
   return texture(canvas);
 }
 
-function smootherstep(t: number) {
-  return t * t * t * (t * (t * 6 - 15) + 10);
+function isLight(color: THREE.Vector3) {
+  return 0.299 * color.x + 0.587 * color.y + 0.114 * color.z > 0.5 ? 1 : 0;
 }
 
 function readInk(element: HTMLElement) {
@@ -291,20 +318,26 @@ function readInk(element: HTMLElement) {
 
 export async function createFilmNegativesScene(
   canvas: HTMLCanvasElement,
-  posterSources: string[],
+  frameSources: string[],
+  signal: AbortSignal,
 ): Promise<FilmNegativesScene> {
-  const images = await Promise.all(posterSources.map(loadImage));
+  const images = await Promise.all(frameSources.map(loadImage));
+  // A canvas has a single WebGL context. If the caller gave up while assets
+  // loaded (React runs effects twice in development), stop before a second
+  // renderer can share that context with the one that replaces it.
+  signal.throwIfAborted();
   const themeSource = canvas.parentElement ?? document.body;
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setClearColor(0x000000, 0);
 
   const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 60);
-  camera.position.set(0, 0, CAMERA_Z);
+  camera.position.copy(CAMERA);
 
-  const posters = posterAtlas(images);
+  const frames = frameAtlas(images);
   const edge = edgePrint(getComputedStyle(document.body).getPropertyValue("--font-mono") || "monospace");
   const ink = { value: readInk(themeSource) };
+  const inkIsLight = { value: isLight(ink.value) };
   const scene = new THREE.Scene();
 
   // Each strip is a ribbon of SEGMENTS quads whose vertices are rewritten
@@ -343,9 +376,13 @@ export async function createFilmNegativesScene(
       depthWrite: false,
       side: THREE.DoubleSide,
       uniforms: {
-        uPosters: { value: posters },
+        // Strips take turns with the stills.
+        uFrames: { value: frames },
+        uFrameIndex: { value: index % images.length },
+        uFrameCount: { value: images.length },
         uEdge: { value: edge },
         uInk: ink,
+        uInkIsLight: inkIsLight,
         uOpacity: { value: strip.opacity },
         uFlow: { value: 0 },
         uSeed: { value: strip.seed },
@@ -381,47 +418,27 @@ export async function createFilmNegativesScene(
   const lift = new THREE.Vector3();
   const width = new THREE.Vector3();
   const normal = new THREE.Vector3();
-  const forward = new THREE.Vector3(0, 0, 1);
-
-  const curl = new Float32Array(SEGMENTS + 1);
+  const up = new THREE.Vector3(0, 1, 0);
 
   const layOut = (ribbon: (typeof ribbons)[number], time: number) => {
     const { strip, path, positions, normals, along } = ribbon;
-    const halfHeight = Math.tan(THREE.MathUtils.degToRad(FOV / 2)) * (CAMERA_Z - strip.z);
+    const halfHeight = Math.tan(THREE.MathUtils.degToRad(FOV / 2)) * (CAMERA.z - strip.z);
     const halfWidth = halfHeight * camera.aspect;
     const direction = strip.reverse ? -1 : 1;
     const span = 1.25 * halfWidth;
 
     for (let i = 0; i <= SEGMENTS; i++) {
       const s = i / SEGMENTS;
-      let x = direction * (s * 2 - 1) * span;
       let y = strip.y + strip.slope * (s - 0.5);
       for (const [amplitude, frequency, speed, phase] of strip.waves) {
         y += amplitude * Math.sin(Math.PI * 2 * frequency * s + speed * time + phase);
       }
-      y *= halfHeight;
-      const [depthAmp, depthFreq, depthSpeed, depthPhase] = strip.depth;
-      let z = strip.z + depthAmp * Math.sin(Math.PI * 2 * depthFreq * s + depthSpeed * time + depthPhase);
-
-      // A loop-the-loop: the path doubles back over itself with an eased
-      // angle, so it leaves and rejoins the line without a kink. The film
-      // rolls onto its edge through the loop, curling like a ribbon instead
-      // of lying flat as a disc.
-      curl[i] = 0;
-      if (strip.loop) {
-        const { radius, span: loopSpan, center, drift, up } = strip.loop;
-        const middle = center + drift * Math.sin(time * 0.06 + strip.seed);
-        const u = (s - (middle - loopSpan)) / (loopSpan * 2);
-        if (u > 0 && u < 1) {
-          const angle = Math.PI * 2 * smootherstep(u);
-          x += direction * radius * Math.sin(angle);
-          y += up * radius * (1 - Math.cos(angle));
-          z += radius * 0.9 * Math.sin(angle / 2);
-          curl[i] = Math.sin(Math.PI * u) ** 2;
-        }
+      let z = strip.z;
+      for (const [amplitude, frequency, speed, phase] of strip.depth) {
+        z += amplitude * Math.sin(Math.PI * 2 * frequency * s + speed * time + phase);
       }
-      path[i * 3] = x;
-      path[i * 3 + 1] = y;
+      path[i * 3] = direction * (s * 2 - 1) * span;
+      path[i * 3 + 1] = y * halfHeight;
       path[i * 3 + 2] = z;
     }
 
@@ -434,11 +451,12 @@ export async function createFilmNegativesScene(
       tangent.fromArray(path, next * 3).sub(lift.fromArray(path, prev * 3)).normalize();
       if (i > 0) length += point.distanceTo(lift.fromArray(path, (i - 1) * 3));
 
-      // Width lies in the screen plane, then twists about the tangent.
+      // The film's width stays as upright as the path allows, so it bends
+      // across its face through the depth waves, then twists slowly about
+      // the tangent as a loose strip would.
       const s = i / SEGMENTS;
-      const wave = twistAmp * Math.sin(Math.PI * 2 * twistFreq * s + twistSpeed * time + twistPhase);
-      const twist = THREE.MathUtils.lerp(wave, Math.PI * 0.42, curl[i]);
-      side.crossVectors(tangent, forward).normalize();
+      const twist = twistAmp * Math.sin(Math.PI * 2 * twistFreq * s + twistSpeed * time + twistPhase);
+      side.copy(up).addScaledVector(tangent, -tangent.dot(up)).normalize();
       lift.crossVectors(tangent, side).normalize();
       width.copy(side).multiplyScalar(Math.cos(twist)).addScaledVector(lift, Math.sin(twist));
       normal.crossVectors(tangent, width).normalize();
@@ -484,7 +502,11 @@ export async function createFilmNegativesScene(
     scroll = scrolled;
     scrollEased += (scroll - scrollEased) * Math.min(1, dt * 6);
     look.lerp(pointer, Math.min(1, dt * 2));
-    camera.position.set(look.x * 0.45, look.y * 0.3 - scrollEased * 0.0022, CAMERA_Z);
+    camera.position.set(
+      CAMERA.x + look.x * 0.45,
+      CAMERA.y + look.y * 0.3 - scrollEased * 0.0022,
+      CAMERA.z,
+    );
     camera.lookAt(0, -scrollEased * 0.0016, 0);
 
     for (const ribbon of ribbons) {
@@ -518,6 +540,7 @@ export async function createFilmNegativesScene(
 
   const themeObserver = new MutationObserver(() => {
     ink.value = readInk(themeSource);
+    inkIsLight.value = isLight(ink.value);
     if (reducedMotion) render(performance.now());
   });
   themeObserver.observe(document.documentElement, {
@@ -543,7 +566,7 @@ export async function createFilmNegativesScene(
         ribbon.geometry.dispose();
         ribbon.material.dispose();
       }
-      posters.dispose();
+      frames.dispose();
       edge.dispose();
       renderer.dispose();
     },

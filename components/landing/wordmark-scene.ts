@@ -349,6 +349,7 @@ export async function createWordmarkScene(
   container: HTMLElement,
   canvas: HTMLCanvasElement,
   letters: WordmarkLetter[],
+  signal: AbortSignal,
 ): Promise<WordmarkScene> {
   const glyphElements = Array.from(
     container.querySelectorAll<HTMLElement>("[data-letter-glyph]"),
@@ -357,6 +358,10 @@ export async function createWordmarkScene(
     Promise.all(letters.map((letter) => loadImage(letter.image))),
     document.fonts.ready,
   ]);
+  // A canvas has a single WebGL context. If the caller gave up while assets
+  // loaded (React runs effects twice in development), stop before a second
+  // renderer can share that context with the one that replaces it.
+  signal.throwIfAborted();
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true });
   renderer.setClearColor(0x000000, 0);
