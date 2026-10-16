@@ -3,8 +3,8 @@ import * as THREE from "three";
 /**
  * Landing backdrop: strips of 35 mm film thread across the screen from edge
  * to edge, rolling through slow waves while the film runs along them. Each
- * strip carries one still, repeated frame after frame as a real shot is, with
- * punched perforations, edge print, a key-code barcode, grain and the odd
+ * strip carries a shot from Cinema Paradiso, frame after frame in sequence,
+ * with punched perforations, edge print, a key-code barcode, grain and the odd
  * emulsion scratch.
  *
  * The strips bend the way real film does: freely across their face (the
@@ -18,8 +18,10 @@ export type FilmNegativesScene = { dispose(): void };
 const FOV = 35;
 const CAMERA = new THREE.Vector3(0, 2.2, 12);
 const SEGMENTS = 360;
-// One atlas cell per still, shaped like the 35 mm picture area.
-const FRAME_CELL = { width: 288, height: 404 };
+// Each shot is a pre-graded greyscale atlas of SHOT_FRAMES sequential frames
+// in a SHOT_GRID x SHOT_GRID layout, cells shaped like the 35 mm picture.
+const SHOT_GRID = 4;
+const SHOT_FRAMES = SHOT_GRID * SHOT_GRID;
 const EDGE_FRAMES = 16;
 const EDGE_CELL = { width: 128, height: 32 };
 const MAX_DPR = 1.5;
@@ -123,9 +125,7 @@ const vertex = /* glsl */ `
 `;
 
 const fragment = /* glsl */ `
-  uniform sampler2D uFrames;
-  uniform float uFrameIndex;
-  uniform float uFrameCount;
+  uniform sampler2D uShot;
   uniform sampler2D uEdge;
   uniform vec3 uInk;
   uniform float uInkIsLight;
@@ -170,19 +170,19 @@ const fragment = /* glsl */ `
     // Unexposed film base: a thin, even density.
     float density = 0.13;
 
-    // The picture: consecutive frames of a shot repeat with a slight
-    // camera drift.
+    // The picture: the shot plays out frame by frame along the strip.
     float frame = floor(a / PITCH);
     vec2 picture = vec2(mod(a, PITCH) - PITCH * 0.5, v - 0.5);
     vec2 pictureHalf = vec2(PICTURE * 0.5, 0.5 - RAIL);
     float inPicture = 1.0 - smoothstep(-aa, aa, roundedBox(picture, pictureHalf, 0.018));
-    vec2 imageUv = picture / (pictureHalf * 2.0) + 0.5;
-    imageUv = (imageUv - 0.5) * 0.9 + 0.5 + vec2(mod(frame, 3.0) * 0.015 - 0.015, 0.0);
-    imageUv = clamp(imageUv, 0.0, 1.0);
-    vec2 atlasUv = vec2((uFrameIndex + imageUv.x) / uFrameCount, imageUv.y);
+    vec2 imageUv = clamp(picture / (pictureHalf * 2.0) + 0.5, 0.0, 1.0);
+    float shotFrame = mod(frame, ${SHOT_FRAMES}.0);
+    // Atlas rows run top-down, texture v bottom-up.
+    vec2 cell = vec2(mod(shotFrame, ${SHOT_GRID}.0), ${SHOT_GRID - 1}.0 - floor(shotFrame / ${SHOT_GRID}.0));
+    vec2 atlasUv = (cell + imageUv) / ${SHOT_GRID}.0;
     // Picture density follows the ink, so frames read as photographs on
     // either theme: dark ink prints the shadows, light ink the highlights.
-    float scene = texture2D(uFrames, atlasUv).r;
+    float scene = texture2D(uShot, atlasUv).r;
     float tone = mix(1.0 - scene, scene, uInkIsLight);
     // Each frame is exposed a touch differently, as on real stock.
     tone *= 1.0 + (hash(vec2(frame, uSeed)) - 0.5) * 0.08;
@@ -232,61 +232,20 @@ function loadImage(src: string) {
   return img.decode().then(() => img);
 }
 
-function context(canvas: HTMLCanvasElement, willReadFrequently = false) {
-  const ctx = canvas.getContext("2d", { willReadFrequently });
+function context(canvas: HTMLCanvasElement) {
+  const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("2D canvas unavailable");
   return ctx;
 }
 
 // No mipmaps: frames never get small enough to need them, and mip levels
 // would bleed neighbouring atlas cells into each other.
-function texture(canvas: HTMLCanvasElement) {
-  const created = new THREE.CanvasTexture(canvas);
+function texture(source: HTMLCanvasElement | HTMLImageElement) {
+  const created = new THREE.Texture(source);
   created.generateMipmaps = false;
   created.minFilter = THREE.LinearFilter;
+  created.needsUpdate = true;
   return created;
-}
-
-// Greyscale cells cropped to the picture's shape, one per still. Each still
-// is auto-levelled so dark or flat ones still print a full tonal range.
-function frameAtlas(images: HTMLImageElement[]) {
-  const canvas = document.createElement("canvas");
-  canvas.width = FRAME_CELL.width * images.length;
-  canvas.height = FRAME_CELL.height;
-  const ctx = context(canvas, true);
-  const aspect = FRAME_CELL.width / FRAME_CELL.height;
-  images.forEach((img, index) => {
-    const x = index * FRAME_CELL.width;
-    const cropWidth = Math.min(img.naturalWidth, img.naturalHeight * aspect);
-    const cropHeight = cropWidth / aspect;
-    ctx.drawImage(
-      img,
-      (img.naturalWidth - cropWidth) / 2,
-      (img.naturalHeight - cropHeight) * 0.35,
-      cropWidth,
-      cropHeight,
-      x,
-      0,
-      FRAME_CELL.width,
-      FRAME_CELL.height,
-    );
-
-    const cell = ctx.getImageData(x, 0, FRAME_CELL.width, FRAME_CELL.height);
-    const { data } = cell;
-    const levels = new Float32Array(data.length / 4);
-    for (let i = 0; i < levels.length; i++) {
-      levels[i] = 0.299 * data[i * 4] + 0.587 * data[i * 4 + 1] + 0.114 * data[i * 4 + 2];
-    }
-    const sorted = Float32Array.from(levels).sort();
-    const low = sorted[Math.floor(sorted.length * 0.02)];
-    const high = Math.max(sorted[Math.floor(sorted.length * 0.98)], low + 1);
-    for (let i = 0; i < levels.length; i++) {
-      const value = Math.min(Math.max((levels[i] - low) / (high - low), 0), 1) * 255;
-      data[i * 4] = data[i * 4 + 1] = data[i * 4 + 2] = value;
-    }
-    ctx.putImageData(cell, x, 0);
-  });
-  return texture(canvas);
 }
 
 // Latent edge print: a stock code every fourth frame, numbers between.
@@ -318,10 +277,10 @@ function readInk(element: HTMLElement) {
 
 export async function createFilmNegativesScene(
   canvas: HTMLCanvasElement,
-  frameSources: string[],
+  shotSources: string[],
   signal: AbortSignal,
 ): Promise<FilmNegativesScene> {
-  const images = await Promise.all(frameSources.map(loadImage));
+  const images = await Promise.all(shotSources.map(loadImage));
   // A canvas has a single WebGL context. If the caller gave up while assets
   // loaded (React runs effects twice in development), stop before a second
   // renderer can share that context with the one that replaces it.
@@ -334,7 +293,7 @@ export async function createFilmNegativesScene(
   const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 60);
   camera.position.copy(CAMERA);
 
-  const frames = frameAtlas(images);
+  const shots = images.map(texture);
   const edge = edgePrint(getComputedStyle(document.body).getPropertyValue("--font-mono") || "monospace");
   const ink = { value: readInk(themeSource) };
   const inkIsLight = { value: isLight(ink.value) };
@@ -376,10 +335,8 @@ export async function createFilmNegativesScene(
       depthWrite: false,
       side: THREE.DoubleSide,
       uniforms: {
-        // Strips take turns with the stills.
-        uFrames: { value: frames },
-        uFrameIndex: { value: index % images.length },
-        uFrameCount: { value: images.length },
+        // Strips take turns with the shots.
+        uShot: { value: shots[index % shots.length] },
         uEdge: { value: edge },
         uInk: ink,
         uInkIsLight: inkIsLight,
@@ -566,7 +523,7 @@ export async function createFilmNegativesScene(
         ribbon.geometry.dispose();
         ribbon.material.dispose();
       }
-      frames.dispose();
+      shots.forEach((shot) => shot.dispose());
       edge.dispose();
       renderer.dispose();
     },

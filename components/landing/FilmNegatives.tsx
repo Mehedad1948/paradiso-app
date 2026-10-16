@@ -3,11 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import type { FilmNegativesScene } from "./film-negatives-scene";
 
-// Cinema Paradiso stills; the strips take turns with them.
-const FRAME_IMAGES = [
-  "/frames/cineam-paradiso-fram.jpg",
-  "/frames/cineam-paradiso-fram-2.jpg",
-];
+// Sixteen sequential frames from each of two Cinema Paradiso shots (Toto in
+// the cinema at 0:19:30, and studying a frame by lamplight at 0:14:57),
+// pre-graded and packed 4x4. The strips take turns with them.
+const SHOTS = ["/frames/cinema-sequence.webp", "/frames/lamp-sequence.webp"];
 
 /** Strips of film negative threading behind the landing page. */
 export default function FilmNegatives() {
@@ -23,7 +22,7 @@ export default function FilmNegatives() {
 
     import("./film-negatives-scene")
       .then(({ createFilmNegativesScene }) =>
-        createFilmNegativesScene(canvas, FRAME_IMAGES, controller.signal),
+        createFilmNegativesScene(canvas, SHOTS, controller.signal),
       )
       .then((created) => {
         if (controller.signal.aborted) return created.dispose();
