@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import ParadisoWordmark from "@/components/landing/ParadisoWordmark";
 import CinemaGrid from "@/components/landing/CinemaGrid";
 import JuryReveal from "@/components/landing/JuryReveal";
+import FilmNegatives from "@/components/landing/FilmNegatives";
 import styles from "@/components/landing/CinemaHero.module.css";
 
 export const metadata: Metadata = {
@@ -18,7 +19,8 @@ export default async function Home() {
   cacheLife("hours");
 
   return (
-    <div className="min-h-svh bg-canvas px-[4.5vw] pb-0 pt-28 text-ink max-sm:px-[5vw] max-sm:pt-28 max-[480px]:pt-36">
+    <div className="relative isolate min-h-svh overflow-x-clip bg-canvas px-[4.5vw] pb-0 pt-28 text-ink max-sm:px-[5vw] max-sm:pt-28 max-[480px]:pt-36">
+      <FilmNegatives />
       <section
         id="landing"
         className="mx-auto max-w-[1600px] scroll-mt-32"
