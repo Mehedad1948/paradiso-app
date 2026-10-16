@@ -6,8 +6,8 @@ import * as THREE from "three";
  * strip carries one iconic movie scene, frame by frame, with punched
  * perforations, edge print, a key-code barcode, grain and the odd emulsion
  * scratch. The film is VistaVision: 35 mm run sideways, eight perforations
- * and one wide frame at a time. Frames print in ink, and bloom into full
- * colour near the pointer.
+ * and one wide frame at a time. Frames print in ink; hovering one splashes
+ * it, and a little of its neighbours, with the scene's full colour.
  *
  * The strips bend the way real film does: freely across their face (the
  * depth waves), only very gently within their own plane, and with a slow
@@ -30,6 +30,15 @@ const SEGMENTS = 360;
 const EDGE_FRAMES = 16;
 const EDGE_CELL = { width: 128, height: 32 };
 const MAX_DPR = 1.5;
+// VistaVision: eight perforations per frame, in film widths.
+const PERF_PITCH = 0.14;
+const FRAME_PITCH = PERF_PITCH * 8;
+// Colour splashes per strip, and how long one lasts after its frame was last
+// hovered: it holds for SPLASH_HOLD seconds, then drains over SPLASH_FADE.
+const SPLASHES = 12;
+const SPLASH_HOLD = 0.9;
+const SPLASH_FADE = 1.2;
+const SPLASH_LIFE = SPLASH_HOLD + SPLASH_FADE;
 
 type Wave = [amplitude: number, frequency: number, speed: number, phase: number];
 
@@ -70,8 +79,8 @@ const STRIPS: Strip[] = [
     seed: 1,
   },
   {
-    width: 0.9,
-    z: -1.5,
+    width: 1,
+    z: -0.2,
     y: -0.42,
     slope: 0.45,
     waves: [[0.07, 0.7, -0.13, 2]],
@@ -84,19 +93,6 @@ const STRIPS: Strip[] = [
     reverse: true,
     opacity: 0.95,
     seed: 2,
-  },
-  {
-    width: 0.7,
-    z: -8,
-    y: -0.86,
-    slope: 0.3,
-    waves: [[0.08, 0.6, -0.09, 5]],
-    depth: [[3.2, 1, -0.12, 3]],
-    twist: [0.4, 0.45, 0.09, 3],
-    speed: 0.26,
-    reverse: true,
-    opacity: 0.7,
-    seed: 4,
   },
 ];
 
@@ -128,24 +124,34 @@ const fragment = /* glsl */ `
   uniform float uBaseOpacity;
   uniform float uFlow;
   uniform float uSeed;
-  // Colour spotlight: pointer in drawing-buffer pixels, radius, strength.
-  uniform vec2 uSpot;
-  uniform float uSpotRadius;
-  uniform float uSpotStrength;
+  uniform float uTime;
+  // Colour splashes: film position (along, across), birth, last hovered.
+  uniform vec4 uSplashes[SPLASHES];
   varying vec2 vFilm;
   varying float vFacing;
   varying float vDepth;
 
   // VistaVision in film widths: an 8-perf frame pitch, a 1.56:1 picture
   // and the rails. Edge print keeps the 35 mm half-frame spacing.
-  const float PERF_PITCH = 0.14;
-  const float PITCH = PERF_PITCH * 8.0;
+  const float PERF_PITCH = ${PERF_PITCH};
+  const float PITCH = ${FRAME_PITCH};
   const float PICTURE = 1.03;
   const float RAIL = 0.17;
   const float EDGE_PITCH = 0.56;
 
   float hash(vec2 p) {
     return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+  }
+
+  float noise2(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(
+      mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),
+      mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x),
+      u.y
+    );
   }
 
   float noise(float x) {
@@ -224,10 +230,27 @@ const fragment = /* glsl */ `
     float alpha = clamp(density, 0.0, 1.0) * edges * shade * fog * uOpacity * uBaseOpacity;
     vec3 color = mix(uInk, vec3(1.0), sheen * 0.45);
 
-    // Near the pointer the pictures print in full colour, fading smoothly
-    // back to ink with distance; rails and perforations stay film.
-    float spot = 1.0 - smoothstep(uSpotRadius * 0.2, uSpotRadius, distance(gl_FragCoord.xy, uSpot));
-    float colour = spot * spot * (3.0 - 2.0 * spot) * uSpotStrength * inPicture;
+    // Hover splashes: colour bursts out from a hovered frame with a ragged,
+    // inky edge, reaching partly into its neighbours. It holds briefly after
+    // the pointer moves on, then drains away. Splashes ride with the film.
+    // Rails stay film.
+    float colour = 0.0;
+    // One ragged edge pattern, shared by every splash on the strip.
+    float ragged = (noise2(vec2(a, v) * 4.0) - 0.5) * 0.38
+      + (noise2(vec2(a, v) * 11.0 + 7.3) - 0.5) * 0.14;
+    for (int i = 0; i < SPLASHES; i++) {
+      vec4 splash = uSplashes[i];
+      float age = uTime - splash.z;
+      float idle = uTime - splash.w;
+      if (age < 0.0 || idle > ${SPLASH_LIFE.toFixed(2)}) continue;
+      float grow = 1.0 - pow(1.0 - clamp(age / 0.5, 0.0, 1.0), 3.0);
+      float fade = 1.0 - smoothstep(${SPLASH_HOLD.toFixed(2)}, ${SPLASH_LIFE.toFixed(2)}, idle);
+      vec2 offset = vec2(a - splash.x, (v - splash.y) * 1.2);
+      // As it drains, the splash also draws back from its edges.
+      float reach = 0.9 * grow * mix(0.7, 1.0, fade);
+      colour = max(colour, (1.0 - smoothstep(reach - 0.1, reach, length(offset) + ragged)) * fade);
+    }
+    colour *= inPicture;
     vec3 print = frameColor * mix(0.6, 1.0, vFacing) + (hash(floor(vec2(a, v) * 260.0)) - 0.5) * 0.05;
     color = mix(color, clamp(print, 0.0, 1.0), colour);
     alpha = mix(alpha, edges * fog * uOpacity * 0.94, colour);
@@ -310,15 +333,15 @@ export async function createFilmNegativesScene(
   const inkIsLight = { value: isLight(ink.value) };
   // How faint the ink film sits behind the page; colour prints ignore it.
   const baseOpacity = { value: inkIsLight.value ? 0.35 : 0.45 };
-  const spot = { value: new THREE.Vector2(-1e4, -1e4) };
-  const spotRadius = { value: 300 };
-  const spotStrength = { value: 0 };
+  const clock = { value: 0 };
   const scene = new THREE.Scene();
 
   // Each strip is a ribbon of SEGMENTS quads whose vertices are rewritten
   // every frame from its path, and carries one scene.
   const ribbons = STRIPS.slice(0, scenes.length).map((strip, index) => {
     const { frames, columns } = scenes[index];
+    // Unused slots sit far in the past, so the shader skips them.
+    const splashes = Array.from({ length: SPLASHES }, () => new THREE.Vector4(0, 0, -100, -100));
     const points = SEGMENTS + 1;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(points * 2 * 3);
@@ -348,6 +371,7 @@ export async function createFilmNegativesScene(
     const material = new THREE.ShaderMaterial({
       vertexShader: vertex,
       fragmentShader: fragment,
+      defines: { SPLASHES },
       transparent: true,
       depthWrite: false,
       side: THREE.DoubleSide,
@@ -359,9 +383,8 @@ export async function createFilmNegativesScene(
         uInkIsLight: inkIsLight,
         uOpacity: { value: strip.opacity },
         uBaseOpacity: baseOpacity,
-        uSpot: spot,
-        uSpotRadius: spotRadius,
-        uSpotStrength: spotStrength,
+        uTime: clock,
+        uSplashes: { value: splashes },
         uFlow: { value: 0 },
         uSeed: { value: strip.seed },
       },
@@ -384,6 +407,9 @@ export async function createFilmNegativesScene(
       along,
       path: new Float32Array(points * 3),
       flow: 0,
+      splashes,
+      // Which frame each splash slot is colouring.
+      splashFrames: new Array<number>(SPLASHES).fill(NaN),
     };
   });
   ribbons.sort((a, b) => a.strip.z - b.strip.z).forEach((ribbon, order) => {
@@ -462,13 +488,56 @@ export async function createFilmNegativesScene(
   const startTime = performance.now();
   const pointer = new THREE.Vector2();
   const look = new THREE.Vector2();
-  const spotTarget = new THREE.Vector2();
-  let spotOn = false;
+  let pointerActive = false;
   let scroll = window.scrollY;
   let scrollEased = scroll;
   let rush = 0;
   let lastTime = startTime;
   let frame = 0;
+
+  // Find the frame under the pointer by casting into the ribbons as last
+  // drawn, then start a splash there or keep its splash alive. Runs on every
+  // pointer move as well as every frame, so a fast sweep can't skip frames.
+  const raycaster = new THREE.Raycaster();
+  const triangle = new THREE.Triangle();
+  const barycentric = new THREE.Vector3();
+  const meshes = ribbons.map((ribbon) => ribbon.mesh);
+  const splashHoveredFrame = (now: number) => {
+    raycaster.setFromCamera(pointer, camera);
+    for (const ribbon of ribbons) ribbon.geometry.computeBoundingSphere();
+    const hit = raycaster.intersectObjects(meshes, false)[0];
+    const ribbon = hit && ribbons.find((candidate) => candidate.mesh === hit.object);
+    if (!hit?.face || !ribbon) return;
+
+    const { a, b, c } = hit.face;
+    const { positions, along } = ribbon;
+    triangle.a.fromArray(positions, a * 3);
+    triangle.b.fromArray(positions, b * 3);
+    triangle.c.fromArray(positions, c * 3);
+    if (!triangle.getBarycoord(hit.point, barycentric)) return;
+    // Vertices alternate between the film's two edges (across 0, then 1).
+    const film = barycentric.x * along[a] + barycentric.y * along[b] + barycentric.z * along[c] - ribbon.flow;
+    const across = barycentric.x * (a % 2) + barycentric.y * (b % 2) + barycentric.z * (c % 2);
+    const frameIndex = Math.floor(film / FRAME_PITCH);
+
+    const { splashes, splashFrames } = ribbon;
+    const alive = (slot: number) => now - splashes[slot].w < SPLASH_LIFE;
+
+    // A frame that is still coloured just stays coloured a little longer.
+    const existing = splashFrames.findIndex((frame, slot) => frame === frameIndex && alive(slot));
+    if (existing >= 0) {
+      splashes[existing].w = now;
+      return;
+    }
+    // Otherwise take a spent slot, or else the most faded one, so a splash
+    // that is still showing never vanishes mid-fade.
+    let slot = 0;
+    for (let i = 1; i < SPLASHES; i++) if (splashes[i].w < splashes[slot].w) slot = i;
+    // Splash from the frame's middle, drawn a little toward the pointer.
+    const middle = (frameIndex + 0.5) * FRAME_PITCH;
+    splashes[slot].set(middle + (film - middle) * 0.3, 0.5 + (across - 0.5) * 0.3, now, now);
+    splashFrames[slot] = frameIndex;
+  };
 
   const render = (now: number) => {
     const dt = Math.min((now - lastTime) / 1000, 1 / 20);
@@ -482,8 +551,6 @@ export async function createFilmNegativesScene(
     scroll = scrolled;
     scrollEased += (scroll - scrollEased) * Math.min(1, dt * 6);
     look.lerp(pointer, Math.min(1, dt * 2));
-    spot.value.lerp(spotTarget, Math.min(1, dt * 10));
-    spotStrength.value += ((spotOn ? 1 : 0) - spotStrength.value) * Math.min(1, dt * 4);
     camera.position.set(
       CAMERA.x + look.x * 0.45,
       CAMERA.y + look.y * 0.3 - scrollEased * 0.0022,
@@ -496,6 +563,8 @@ export async function createFilmNegativesScene(
       ribbon.material.uniforms.uFlow.value = reducedMotion ? 0 : ribbon.flow;
       layOut(ribbon, time);
     }
+    clock.value = (now - startTime) / 1000;
+    if (pointerActive) splashHoveredFrame(clock.value);
     renderer.render(scene, camera);
   };
 
@@ -508,7 +577,6 @@ export async function createFilmNegativesScene(
     const { innerWidth, innerHeight } = window;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_DPR));
     renderer.setSize(innerWidth, innerHeight, false);
-    spotRadius.value = 300 * renderer.getPixelRatio();
     camera.aspect = innerWidth / innerHeight;
     camera.updateProjectionMatrix();
     if (reducedMotion) render(performance.now());
@@ -519,16 +587,13 @@ export async function createFilmNegativesScene(
       (event.clientX / window.innerWidth) * 2 - 1,
       1 - (event.clientY / window.innerHeight) * 2,
     );
-    // The canvas fills the viewport, so client pixels map straight onto it.
-    const ratio = renderer.getPixelRatio();
-    spotTarget.set(event.clientX * ratio, (window.innerHeight - event.clientY) * ratio);
-    if (!spotOn) spot.value.copy(spotTarget);
-    spotOn = true;
+    pointerActive = true;
+    splashHoveredFrame((performance.now() - startTime) / 1000);
   };
   const onPointerEnd = (event: PointerEvent) => {
     // Leaving the window, or lifting a finger, lets the colour fade out.
     if (event.type === "pointerout" ? !event.relatedTarget : event.pointerType !== "mouse") {
-      spotOn = false;
+      pointerActive = false;
     }
   };
 

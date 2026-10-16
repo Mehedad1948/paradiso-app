@@ -15,7 +15,7 @@ const MOVIES: string[][] = [
   // Inception: Cobb spins the top.
   ["inception"],
 ];
-const STRIP_COUNT = 3;
+const STRIP_COUNT = 2;
 
 const pick = <T,>(items: T[]) => items[Math.floor(Math.random() * items.length)];
 
