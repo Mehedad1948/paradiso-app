@@ -6,7 +6,7 @@ import { AvatarGroup } from "@heroui/avatar";
 import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
 import { addToast } from "@heroui/toast";
-import { ArrowDown, Clapperboard, Vote } from "lucide-react";
+import { ArrowDown, Clapperboard, Vote, X } from "lucide-react";
 import QueryError from "@/components/ui/QueryError";
 import { useChatPinned, useChatUnread } from "@/hooks/queries/useChatQueries";
 import { chatApi } from "@/lib/api/chat";
@@ -51,10 +51,12 @@ function Divider({ label, tone = "muted" }: { label: string; tone?: "muted" | "n
 export default function RoomChat({
   room,
   me,
+  onClose,
   onShowInWatchlist,
 }: {
   room: PanelRoom;
   me: User;
+  onClose: () => void;
   onShowInWatchlist: (title: string) => void;
 }) {
   const roomId = String(room.id);
@@ -242,10 +244,10 @@ export default function RoomChat({
     <ChatContext.Provider value={context}>
       <section
         aria-label="Room chat"
-        className="flex h-[min(82svh,880px)] min-h-[480px] flex-col overflow-hidden rounded-[10px] border border-line bg-elevated"
+        className="flex h-full flex-col overflow-hidden bg-elevated"
       >
         <div aria-hidden="true" className="h-2.5 shrink-0 bg-media" style={{ backgroundImage: sprockets }} />
-        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-line px-4 py-3.5 sm:px-6">
+        <header className="flex shrink-0 items-center justify-between gap-4 border-b border-line py-3.5 pl-4 pr-3 sm:pl-6 sm:pr-4">
           <div className="min-w-0">
             <h2 className="text-[22px] font-semibold leading-tight tracking-[-0.04em]">
               The <em className="font-serif font-normal">lobby</em>
@@ -270,6 +272,14 @@ export default function RoomChat({
                 <ChatAvatar key={person.id} user={person} className="text-sm font-semibold ring-2 ring-elevated" />
               ))}
             </AvatarGroup>
+            <button
+              type="button"
+              aria-label="Close the lobby"
+              onClick={onClose}
+              className="flex size-9 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface hover:text-ink"
+            >
+              <X size={20} />
+            </button>
           </div>
         </header>
         {status === "ready" && <ChatPinnedBar pinned={pinnedMessages} />}

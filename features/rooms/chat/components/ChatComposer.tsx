@@ -152,9 +152,11 @@ export default forwardRef<
         return;
       }
     }
-    if (event.key === "Escape") {
+    if (event.key === "Escape" && (mention || mode)) {
+      // Handled here, so it must not also close the surrounding drawer.
+      event.stopPropagation();
       if (mention) setMention(null);
-      else if (mode) onModeChange(null);
+      else onModeChange(null);
       return;
     }
     if (event.key === "ArrowUp" && !text && !mode && lastEditable) {
