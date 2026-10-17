@@ -14,6 +14,8 @@ const MOVIES: string[][] = [
   ["pulp-fiction"],
   // Inception: Cobb spins the top.
   ["inception"],
+  // The Truman Show: the bow on the stairs before the exit door.
+  ["truman-show"],
 ];
 const STRIP_COUNT = 2;
 
