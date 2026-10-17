@@ -35,7 +35,7 @@ export default async function Home() {
         aria-labelledby="landing-title"
       >
         <h1 id="landing-title" className="sr-only">
-          Paradiso — cinema for your circle
+          Cinema Paradiso — cinema for your circle
         </h1>
         <div className={styles.hero}>
           <ParadisoWordmark />
@@ -91,9 +91,6 @@ export default async function Home() {
         </div>
         <div className="grid">
           <CinemaGrid />
-          <p className="mt-4 justify-self-end font-mono text-[11px] uppercase tracking-[0.16em] text-muted">
-            Hover a frame to reveal the film
-          </p>
         </div>
       </section>
       <section

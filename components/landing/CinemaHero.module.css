@@ -1,15 +1,9 @@
 .hero {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  align-items: center;
-  gap: clamp(24px, 4vw, 72px);
   padding: 16px 0 32px;
 }
 
 @media (max-width: 640px) {
   .hero {
-    grid-template-columns: 1fr;
-    gap: 24px;
     padding-top: 0;
     padding-bottom: 24px;
   }

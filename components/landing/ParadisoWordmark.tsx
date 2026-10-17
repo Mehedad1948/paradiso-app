@@ -11,7 +11,8 @@ type Letter = {
   image: string;
   position: string;
   // Cut-out collage: heavy grotesk mixed with black italic serif, each letter
-  // at its own size (cqi), baseline shift (em), tilt (deg) and overlap (em).
+  // at its own size (cqi, scaled by its line's --fit), baseline shift (em),
+  // tilt (deg) and overlap (em).
   serif?: boolean;
   size: number;
   y: number;
@@ -19,7 +20,15 @@ type Letter = {
   overlap: number;
 };
 
-const rows: Letter[][] = [
+const words: Letter[][] = [
+  [
+    { letter: "C", image: gridPosters.vertigo.image, position: "50%", size: 21, y: 0.02, rotate: -2, overlap: 0 },
+    { letter: "I", image: gridPosters.her.image, position: "40%", serif: true, size: 22, y: -0.03, rotate: 3, overlap: -0.02 },
+    { letter: "N", image: gridPosters.amelie.image, position: "55%", size: 21, y: 0.03, rotate: -3, overlap: -0.04 },
+    { letter: "E", image: gridPosters.laLaLand.image, position: "60%", serif: true, size: 22, y: -0.02, rotate: 2, overlap: -0.03 },
+    { letter: "M", image: gridPosters.rearWindow.image, position: "45%", size: 21, y: 0.02, rotate: -2, overlap: -0.04 },
+    { letter: "A", image: gridPosters.taxiDriver.image, position: "50%", size: 22, y: -0.04, rotate: 3, overlap: -0.04 },
+  ],
   [
     { letter: "P", image: gridPosters.parisTexas.image, position: "35%", size: 32, y: 0.02, rotate: -3, overlap: 0 },
     { letter: "A", image: gridPosters.dune.image, position: "20%", size: 33, y: -0.04, rotate: 2, overlap: -0.05 },
@@ -33,8 +42,16 @@ const rows: Letter[][] = [
     { letter: "O", image: gridPosters.twelveAngryMen.image, position: "60%", size: 31, y: -0.06, rotate: 2, overlap: -0.03 },
   ],
 ];
-const letters = rows.flat();
-const ACCENT_INDEX = 5;
+const letters = words.flat();
+const wordStart = words.map((_, index) =>
+  words.slice(0, index).reduce((count, word) => count + word.length, 0),
+);
+// CINEMA / PARADISO across the width; phones stack PARA over DISO at full size.
+const lines = [
+  { words: [0], className: "" },
+  { words: [1, 2], className: "-mt-[1cqi] [--fit:0.53] max-sm:block max-sm:[--fit:1]" },
+];
+const ACCENT_INDEX = 11;
 
 // CSS fallback for reduced motion or when WebGL is unavailable.
 function startReveal(event: SyntheticEvent<HTMLButtonElement>) {
@@ -102,51 +119,55 @@ export default function ParadisoWordmark() {
       ref={containerRef}
       className={`${fontDisplay.variable} relative w-full select-none py-[3cqi] [container-type:inline-size]`}
       role="group"
-      aria-label="Interactive Paradiso lettering"
+      aria-label="Interactive Cinema Paradiso lettering"
     >
-      {rows.map((row, rowIndex) => (
-        <div
-          key={rowIndex}
-          className={`flex items-end ${rowIndex === 1 ? "-mt-[2cqi] pl-[8cqi]" : ""}`}
-        >
-          {row.map(({ letter, image, position, serif, size, y, rotate, overlap }, column) => {
-            const order = rowIndex * row.length + column;
-            return (
-              <button
-                key={order}
-                type="button"
-                className={`group relative min-w-0 shrink-0 cursor-pointer touch-manipulation bg-transparent leading-[0.86] focus-visible:z-[1] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${serif ? "font-[family-name:var(--font-display)] font-black italic" : "font-sans font-black"} ${order === ACCENT_INDEX ? "text-accent" : "text-ink"}`}
-                aria-label={`Reveal cinematic artwork in letter ${letter}, ${order + 1} of 8`}
-                onPointerEnter={ready ? undefined : startReveal}
-                onFocus={handleFocus}
-                onClick={handleClick}
-                style={{
-                  fontSize: `${size}cqi`,
-                  marginLeft: `${overlap}em`,
-                  transform: `translateY(${y}em) rotate(${rotate}deg)`,
-                  "--letter-image": `url("${image}")`,
-                  "--image-position": position,
-                } as CSSProperties}
-              >
-                <span
-                  data-letter-glyph
-                  className={`block px-[0.02em] transition-opacity duration-500 ${ready ? "opacity-0" : ""}`}
-                  aria-hidden="true"
-                >
-                  {letter}
-                </span>
-                {!ready && (
-                  <span
-                    data-letter-artwork
-                    className="absolute inset-0 px-[0.02em] bg-[image:var(--letter-image)] [background-size:auto_130%] [background-position:var(--image-position)_45%] bg-clip-text text-transparent [clip-path:inset(0_100%_0_0)] motion-reduce:group-hover:[clip-path:inset(0_0_0_0)] motion-reduce:group-focus-visible:[clip-path:inset(0_0_0_0)] motion-reduce:animate-none"
-                    aria-hidden="true"
+      {lines.map((line, lineIndex) => (
+        <div key={lineIndex} className={`flex items-end ${line.className}`}>
+          {line.words.map((wordIndex) => (
+            <div
+              key={wordIndex}
+              className={`flex items-end ${wordIndex === 2 ? "max-sm:-mt-[2cqi] max-sm:pl-[8cqi]" : ""}`}
+            >
+              {words[wordIndex].map(({ letter, image, position, serif, size, y, rotate, overlap }, column) => {
+                const order = wordStart[wordIndex] + column;
+                return (
+                  <button
+                    key={order}
+                    type="button"
+                    className={`group relative min-w-0 shrink-0 cursor-pointer touch-manipulation bg-transparent leading-[0.86] [font-size:calc(var(--size)*var(--fit,1)*1cqi)] focus-visible:z-[1] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent ${serif ? "font-[family-name:var(--font-display)] font-black italic" : "font-sans font-black"} ${order === ACCENT_INDEX ? "text-accent" : "text-ink"}`}
+                    aria-label={`Reveal cinematic artwork in letter ${letter}, ${order + 1} of ${letters.length}`}
+                    onPointerEnter={ready ? undefined : startReveal}
+                    onFocus={handleFocus}
+                    onClick={handleClick}
+                    style={{
+                      "--size": size,
+                      marginLeft: `${overlap}em`,
+                      transform: `translateY(${y}em) rotate(${rotate}deg)`,
+                      "--letter-image": `url("${image}")`,
+                      "--image-position": position,
+                    } as CSSProperties}
                   >
-                    {letter}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+                    <span
+                      data-letter-glyph
+                      className={`block px-[0.02em] transition-opacity duration-500 ${ready ? "opacity-0" : ""}`}
+                      aria-hidden="true"
+                    >
+                      {letter}
+                    </span>
+                    {!ready && (
+                      <span
+                        data-letter-artwork
+                        className="absolute inset-0 px-[0.02em] bg-[image:var(--letter-image)] [background-size:auto_130%] [background-position:var(--image-position)_45%] bg-clip-text text-transparent [clip-path:inset(0_100%_0_0)] motion-reduce:group-hover:[clip-path:inset(0_0_0_0)] motion-reduce:group-focus-visible:[clip-path:inset(0_0_0_0)] motion-reduce:animate-none"
+                        aria-hidden="true"
+                      >
+                        {letter}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
         </div>
       ))}
       <canvas
