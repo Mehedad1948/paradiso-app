@@ -7,6 +7,7 @@ import users from "@/services/user";
 import ratings from "@/services/ratings";
 import storage from "@/services/storage";
 import { moviesServices } from "@/services/movies";
+import { handleChatRequest } from "./chat";
 import type { RequestResult } from "@/types/request";
 import {
   customMovieErrorsFrom,
@@ -146,6 +147,17 @@ export async function handlePanelRequest(request: Request, path: string[]) {
     if (path[0] !== "rooms" || !path[1])
       throw new InputError("Resource not found", 404);
     const roomId = positiveInteger(path[1], "roomId");
+    if (path[2] === "chat" && path.length > 3)
+      return respond(
+        await handleChatRequest({
+          roomId,
+          path: path.slice(3),
+          method,
+          query,
+          data: () => body(request),
+          signal: request.signal,
+        }),
+      );
     if (path.length === 2 && method === "GET") {
       const result = await rooms.getRoomById(roomId, request.signal);
       return respond({

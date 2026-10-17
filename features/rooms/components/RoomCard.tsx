@@ -5,7 +5,9 @@ import Link from "next/link";
 import type { PanelRoomListItem } from "@/lib/api/panel";
 import JoinRoomButton from "./JoinRoomButton";
 import { posters } from "@/config/posters";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, MessagesSquare } from "lucide-react";
+import { useChatUnread } from "@/hooks/queries/useChatQueries";
+import UnreadBadge from "../chat/components/UnreadBadge";
 export default function RoomCard({
   room,
   canVisit,
@@ -13,12 +15,22 @@ export default function RoomCard({
   room: PanelRoomListItem;
   canVisit: boolean;
 }) {
+  // Visitable rooms are the ones I belong to, so their chat is readable.
+  const unread = useChatUnread(String(room.id), { enabled: canVisit });
+  const hasUnread = !!unread.data && (unread.data.unreadCount > 0 || unread.data.mentionCount > 0);
   const card = (
     <Card
       className={`h-full overflow-hidden rounded-[10px] border border-line bg-elevated shadow-none ${canVisit ? "transition-colors group-hover:border-muted" : ""}`}
       radius="lg"
       shadow="none"
     >
+      {hasUnread && (
+        <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-2 rounded-full bg-media/85 py-1 pl-2.5 pr-1 text-sm font-semibold text-media-foreground backdrop-blur">
+          <MessagesSquare size={15} aria-hidden="true" />
+          <span className="sr-only">Lobby:</span>
+          <UnreadBadge unread={unread.data!} />
+        </span>
+      )}
       <Image
         alt={room.name}
         className="aspect-[16/10] w-full object-cover"
