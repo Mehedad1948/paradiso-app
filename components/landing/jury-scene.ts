@@ -44,7 +44,7 @@ const trailFragment = /* glsl */ `
 
     vec2 aspect = vec2(uAspect, 1.0);
     float d = segmentDistance(vUv * aspect, uPrevMouse * aspect, uMouse * aspect);
-    value = max(value, uStrength * (1.0 - smoothstep(uRadius * 0.4, uRadius, d)));
+    value = max(value, uStrength * (1.0 - smoothstep(uRadius * 0.25, uRadius, d)));
 
     gl_FragColor = vec4(min(value, 1.0), 0.0, 0.0, 1.0);
   }
@@ -105,7 +105,7 @@ const revealFragment = /* glsl */ `
     vec2 tuv = uv + warp;
 
     float t = trail(tuv);
-    float mask = smoothstep(0.3, 0.52, t + (n - 0.5) * 0.32);
+    float mask = smoothstep(0.2, 0.62, t + (n - 0.5) * 0.32);
     float edge = mask * (1.0 - mask) * 4.0;
     // Keep the revealed image clean: distortion lives on the rim only.
     float rim = smoothstep(0.0, 0.25, edge);
@@ -213,7 +213,7 @@ export function startJuryReveal(
       uMouse: { value: new THREE.Vector2(-1, -1) },
       uPrevMouse: { value: new THREE.Vector2(-1, -1) },
       uAspect: { value: 1 },
-      uRadius: { value: 0.28 },
+      uRadius: { value: 0.24 },
       uStrength: { value: 0 },
       uDecay: { value: 0.993 },
       uTexel: { value: new THREE.Vector2(1 / TRAIL_SIZE, 1 / TRAIL_SIZE) },

@@ -7,6 +7,7 @@ import { authApi } from "@/lib/api/auth";
 import { useAuthForm } from "@/hooks/auth/useAuthForm";
 import { useAuthLocation } from "@/hooks/auth/useAuthLocation";
 import AuthFeedback from "@/components/auth/AuthFeedback";
+import PasswordInput from "@/components/auth/PasswordInput";
 import { useEffect, useRef } from "react";
 export default function SignInPage() {
   const router = useRouter();
@@ -84,12 +85,11 @@ export default function SignInPage() {
             refresh.clearError();
           }}
         />
-        <Input
+        <PasswordInput
           name="password"
           label="Password"
           labelPlacement="outside"
           placeholder=" "
-          type="password"
           autoComplete="current-password"
           isRequired
           isDisabled={pending}

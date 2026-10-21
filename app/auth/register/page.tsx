@@ -7,6 +7,7 @@ import { authApi } from "@/lib/api/auth";
 import { useAuthForm } from "@/hooks/auth/useAuthForm";
 import { useAuthLocation } from "@/hooks/auth/useAuthLocation";
 import AuthFeedback from "@/components/auth/AuthFeedback";
+import PasswordInput from "@/components/auth/PasswordInput";
 import { confirmPassword } from "@/lib/auth/validation";
 export default function RegisterPage() {
   const router = useRouter();
@@ -73,12 +74,11 @@ export default function RegisterPage() {
             form.clearError();
           }}
         />
-        <Input
+        <PasswordInput
           name="password"
           label="Password"
           labelPlacement="outside"
           placeholder=" "
-          type="password"
           autoComplete="new-password"
           isRequired
           minLength={6}
@@ -86,12 +86,11 @@ export default function RegisterPage() {
           isDisabled={form.isPending}
           onValueChange={() => form.clearError()}
         />
-        <Input
+        <PasswordInput
           name="confirmPassword"
           label="Confirm password"
           labelPlacement="outside"
           placeholder=" "
-          type="password"
           autoComplete="new-password"
           isRequired
           isDisabled={form.isPending}

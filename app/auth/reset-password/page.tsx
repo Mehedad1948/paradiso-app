@@ -7,6 +7,7 @@ import { authApi } from "@/lib/api/auth";
 import { useAuthForm } from "@/hooks/auth/useAuthForm";
 import { useAuthLocation } from "@/hooks/auth/useAuthLocation";
 import AuthFeedback from "@/components/auth/AuthFeedback";
+import PasswordInput from "@/components/auth/PasswordInput";
 import AuthOtpInput from "@/components/auth/AuthOtpInput";
 import { useEffect, useState } from "react";
 import { confirmPassword, emailInput } from "@/lib/auth/validation";
@@ -117,12 +118,11 @@ export default function ResetPasswordPage() {
             ? "Resend code in " + cooldown.secondsLeft + "s"
             : "Send another code"}
         </Button>
-        <Input
+        <PasswordInput
           name="password"
           label="New password"
           labelPlacement="outside"
           placeholder=" "
-          type="password"
           autoComplete="new-password"
           isRequired
           minLength={6}
@@ -130,12 +130,11 @@ export default function ResetPasswordPage() {
           isDisabled={pending}
           onValueChange={() => form.clearError()}
         />
-        <Input
+        <PasswordInput
           name="confirmPassword"
           label="Confirm new password"
           labelPlacement="outside"
           placeholder=" "
-          type="password"
           autoComplete="new-password"
           isRequired
           isDisabled={pending}

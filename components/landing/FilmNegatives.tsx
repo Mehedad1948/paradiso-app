@@ -11,10 +11,11 @@ const MOVIES: string[][] = [
   ["space-odyssey"],
   // The Matrix: the bullet dodge.
   ["matrix"],
-  // Pulp Fiction: the twist contest.
-  ["pulp-fiction"],
-  // Inception: Cobb spins the top.
-  ["inception"],
+  // Out of rotation for now; the sheets stay in /frames/scenes.
+  // // Pulp Fiction: the twist contest.
+  // ["pulp-fiction"],
+  // // Inception: Cobb spins the top.
+  // ["inception"],
   // The Truman Show: the bow on the stairs before the exit door.
   ["truman-show"],
 ];
