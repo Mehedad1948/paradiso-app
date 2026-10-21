@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { onLandingRevealed } from "./landing-ready";
 import type { FilmNegativesScene, FilmScene } from "./film-negatives-scene";
 
 // Sixteen near-consecutive frames per scene, pre-graded and packed 4x4.
@@ -43,7 +44,8 @@ export default function FilmNegatives() {
   const scenesRef = useRef<FilmScene[] | null>(null);
   const [ready, setReady] = useState(false);
 
-  // Three.js loads after the page renders so it stays off the critical path.
+  // The backdrop is decoration, so it waits for the loading screen to lift
+  // and for the browser to go idle; the wordmark gets the network and GPU first.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -52,21 +54,37 @@ export default function FilmNegatives() {
     scenesRef.current ??= pickScenes();
     const scenes = scenesRef.current;
 
-    import("./film-negatives-scene")
-      .then(({ createFilmNegativesScene }) =>
-        createFilmNegativesScene(canvas, scenes, controller.signal),
-      )
-      .then((created) => {
-        if (controller.signal.aborted) return created.dispose();
-        scene = created;
-        setReady(true);
-      })
-      .catch(() => {
-        // The page reads fine without its backdrop.
-      });
+    const start = () => {
+      import("./film-negatives-scene")
+        .then(({ createFilmNegativesScene }) =>
+          createFilmNegativesScene(canvas, scenes, controller.signal),
+        )
+        .then((created) => {
+          if (controller.signal.aborted) return created.dispose();
+          scene = created;
+          setReady(true);
+        })
+        .catch(() => {
+          // The page reads fine without its backdrop.
+        });
+    };
+
+    let cancelIdle = () => {};
+    const stopWaiting = onLandingRevealed(() => {
+      if (controller.signal.aborted) return;
+      if (typeof window.requestIdleCallback === "function") {
+        const id = window.requestIdleCallback(start, { timeout: 1500 });
+        cancelIdle = () => window.cancelIdleCallback(id);
+      } else {
+        const id = setTimeout(start, 300);
+        cancelIdle = () => clearTimeout(id);
+      }
+    });
 
     return () => {
       controller.abort();
+      stopWaiting();
+      cancelIdle();
       scene?.dispose();
     };
   }, []);

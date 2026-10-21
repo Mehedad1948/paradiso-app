@@ -21,3 +21,12 @@ export const fontDisplay = FontDisplay({
   weight: ["900"],
   variable: "--font-display",
 });
+
+// Intertitle serif for the loading screen's silent-film title card.
+export const fontIntertitle = FontDisplay({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: ["600"],
+  variable: "--font-intertitle",
+  display: "swap",
+});

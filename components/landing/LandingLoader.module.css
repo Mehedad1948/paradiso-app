@@ -1,0 +1,174 @@
+/* Silent-film title card. Black stock, a double-ruled border and a serif
+   intertitle that flickers faintly like a projected frame. Only opacity and
+   transform animate, so it stays on the compositor. Fixed palette: a card
+   looks the same whatever the site theme. */
+.loader {
+  --paper: #efe6d2;
+  --paper-soft: rgb(239 230 210 / 0.72);
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: #0c0b0a;
+  color: var(--paper);
+  transition: opacity 0.9s ease;
+  /* Without JS the screen still gets out of the way. */
+  animation: failsafe 0.01s linear 14s forwards;
+}
+
+/* The card's ruled border: a double rule inside a thin outer rule. */
+.card {
+  position: absolute;
+  inset: clamp(14px, 3vw, 40px);
+  border: 1px solid var(--paper-soft);
+  animation: flicker 5s steps(1) infinite;
+}
+.card::before {
+  content: "";
+  position: absolute;
+  inset: clamp(6px, 1vw, 12px);
+  border: 4px double var(--paper-soft);
+}
+
+.content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(18px, 3vw, 34px);
+  padding: 0 7vw;
+  text-align: center;
+  font-family: var(--font-intertitle), Georgia, "Times New Roman", serif;
+  transition: opacity 0.5s ease, transform 0.8s ease;
+  animation: flicker 5s steps(1) infinite;
+}
+
+.title {
+  font-size: clamp(46px, 11vw, 148px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+/* Old-film texture, all on the compositor: a noise tile (rasterised once)
+   jumped about in steps, a vignette, and the odd scratch down the gate. */
+.grain {
+  position: absolute;
+  inset: -50%;
+  pointer-events: none;
+  opacity: 0.25;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency=%270.7%27 numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 2.4 -0.6'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 0.6s steps(1) infinite;
+}
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 45%, rgb(0 0 0 / 0.75) 100%);
+}
+.scratch {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgb(239 230 210 / 0.35) 20%, rgb(239 230 210 / 0.2) 70%, transparent);
+  opacity: 0;
+  animation: scratch 7s linear infinite;
+}
+.scratch + .scratch {
+  animation-duration: 11s;
+  animation-delay: 3s;
+}
+
+/* An ornamental rule that draws itself out as the reel loads. */
+.rule {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: min(360px, 62vw);
+  color: var(--paper-soft);
+}
+.rule::before,
+.rule::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0.04);
+  animation: draw 4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+.rule::before { transform-origin: right; }
+.rule::after { transform-origin: left; }
+.rule i {
+  width: 7px;
+  height: 7px;
+  background: currentColor;
+  transform: rotate(45deg);
+}
+
+/* Both captions share one cell, so the swap is a pure cross-fade. */
+.captions {
+  display: grid;
+  font-size: clamp(16px, 2.4vw, 26px);
+  font-style: italic;
+  letter-spacing: 0.08em;
+}
+.captions > span {
+  grid-area: 1 / 1;
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+.wait { color: var(--paper-soft); }
+.show { opacity: 0; transform: translateY(6px); }
+
+/* Showtime: the rule completes, the caption turns over and holds. */
+.showtime .rule::before,
+.showtime .rule::after { animation: none; transform: scaleX(1); transition: transform 0.9s ease; }
+.showtime .wait { opacity: 0; transform: translateY(-6px); }
+.showtime .show { opacity: 1; transform: none; }
+
+/* Open: the card steps back and dissolves into the page. */
+.open { opacity: 0; pointer-events: none; }
+.open .content { opacity: 0; transform: scale(1.03); }
+
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  17% { transform: translate(-7%, 5%); }
+  33% { transform: translate(6%, -9%); }
+  50% { transform: translate(-11%, -4%); }
+  67% { transform: translate(9%, 8%); }
+  83% { transform: translate(-4%, 11%); }
+}
+@keyframes scratch {
+  0%, 62% { opacity: 0; transform: translateX(22vw); }
+  63% { opacity: 1; transform: translateX(22vw); }
+  66% { opacity: 1; transform: translateX(23vw); }
+  67%, 100% { opacity: 0; transform: translateX(23vw); }
+}
+@keyframes draw {
+  to { transform: scaleX(0.9); }
+}
+/* The odd dropped frame, as the projector gate flutters. */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  12% { opacity: 0.93; }
+  13% { opacity: 1; }
+  47% { opacity: 0.95; }
+  48% { opacity: 1; }
+  81% { opacity: 0.92; }
+  82% { opacity: 1; }
+}
+@keyframes failsafe {
+  to { visibility: hidden; pointer-events: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .content { animation: none; }
+  .grain,
+  .scratch { animation: none; }
+}

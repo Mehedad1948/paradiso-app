@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, MouseEvent, SyntheticEvent } from "react";
 import { fontDisplay } from "@/config/fonts";
 import { gridPosters } from "@/config/posters";
+import { markLandingReady } from "./landing-ready";
 import type { WordmarkScene } from "./wordmark-scene";
 
 type Letter = {
@@ -74,7 +75,10 @@ export default function ParadisoWordmark() {
     const container = containerRef.current;
     const canvas = canvasRef.current;
     if (!container || !canvas) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      markLandingReady();
+      return;
+    }
 
     const controller = new AbortController();
     import("./wordmark-scene")
@@ -85,9 +89,11 @@ export default function ParadisoWordmark() {
         if (controller.signal.aborted) return scene.dispose();
         sceneRef.current = scene;
         setReady(true);
+        markLandingReady();
       })
       .catch(() => {
         // Keep the CSS reveal when images or WebGL fail.
+        if (!controller.signal.aborted) markLandingReady();
       });
 
     return () => {

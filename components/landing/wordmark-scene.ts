@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { onLandingRevealed } from "./landing-ready";
 
 /**
  * Halftone wordmark made of wet ink. Every letter is printed as a dot screen
@@ -682,18 +683,22 @@ export async function createWordmarkScene(
   const resizeObserver = new ResizeObserver(resize);
   resizeObserver.observe(container);
 
-  // The stamps start the first time the wordmark is actually on screen.
   const intersectionObserver = new IntersectionObserver(([entry]) => {
     visible = entry.isIntersecting;
-    if (visible && entranceStart === null) {
-      entranceStart = performance.now();
-      pulseStart = entranceStart + INTRO_PULSE_DELAY;
-      // The colour sweep enters from the wordmark's left edge.
-      material.uniforms.uPulseOrigin.value.set(size.bleed, size.height * 0.5);
-    }
     if (visible) wake();
   });
   intersectionObserver.observe(container);
+
+  // The stamps start once the loading screen has lifted and the wordmark is
+  // on screen, so the entrance is never played behind the curtain.
+  const beginEntrance = () => {
+    if (entranceStart !== null) return;
+    entranceStart = performance.now();
+    pulseStart = entranceStart + INTRO_PULSE_DELAY;
+    // The colour sweep enters from the wordmark's left edge.
+    material.uniforms.uPulseOrigin.value.set(size.bleed, size.height * 0.5);
+    wake();
+  };
 
   // Theme switches and late font swaps change only how the letters paint.
   const themeObserver = new MutationObserver(repaint);
@@ -710,12 +715,14 @@ export async function createWordmarkScene(
   container.addEventListener("pointerdown", onDown);
 
   resize();
+  const stopWaitingForReveal = onLandingRevealed(beginEntrance);
 
   return {
     pulseAt,
     dispose() {
       cancelAnimationFrame(frame);
       resizeObserver.disconnect();
+      stopWaitingForReveal();
       intersectionObserver.disconnect();
       themeObserver.disconnect();
       document.fonts.removeEventListener("loadingdone", repaint);

@@ -5,6 +5,7 @@ import type { Metadata } from "next";
 import ParadisoWordmark from "@/components/landing/ParadisoWordmark";
 import CinemaGrid from "@/components/landing/CinemaGrid";
 import JuryReveal from "@/components/landing/JuryReveal";
+import LandingLoader from "@/components/landing/LandingLoader";
 import FilmNegatives from "@/components/landing/FilmNegatives";
 import styles from "@/components/landing/CinemaHero.module.css";
 import { fontDisplay } from "@/config/fonts";
@@ -27,7 +28,10 @@ export default async function Home() {
   cacheLife("hours");
 
   return (
-    <div className="relative isolate min-h-svh overflow-x-clip bg-canvas px-[4.5vw] pb-0 pt-28 text-ink max-sm:px-[5vw] max-sm:pt-28 max-[480px]:pt-36">
+    <>
+      {/* Outside the isolated page wrapper so it stacks above the fixed header. */}
+      <LandingLoader />
+      <div className="relative isolate min-h-svh overflow-x-clip bg-canvas px-[4.5vw] pb-0 pt-28 text-ink max-sm:px-[5vw] max-sm:pt-28 max-[480px]:pt-36">
       <FilmNegatives />
       <section
         id="landing"
@@ -127,6 +131,7 @@ export default async function Home() {
           Back to the opening <ArrowDown size={14} aria-hidden="true" />
         </a>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }

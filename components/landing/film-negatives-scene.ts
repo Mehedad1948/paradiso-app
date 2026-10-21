@@ -4,8 +4,7 @@ import * as THREE from "three";
  * Landing backdrop: strips of 35 mm film thread across the screen from edge
  * to edge, rolling through slow waves while the film runs along them. Each
  * strip carries one iconic movie scene, frame by frame, with punched
- * perforations, edge print, a key-code barcode, grain and the odd emulsion
- * scratch. The film is VistaVision: 35 mm run sideways, eight perforations
+ * perforations, edge print, a key-code barcode, and grain. The film is VistaVision: 35 mm run sideways, eight perforations
  * and one wide frame at a time. Frames print in ink; hovering one splashes
  * it, and a little of its neighbours, with the scene's full colour.
  *
@@ -26,10 +25,12 @@ export type FilmScene = {
 
 const FOV = 35;
 const CAMERA = new THREE.Vector3(0, 2.2, 12);
-const SEGMENTS = 360;
+const SEGMENTS = 220;
 const EDGE_FRAMES = 16;
 const EDGE_CELL = { width: 128, height: 32 };
-const MAX_DPR = 1.5;
+// A faint backdrop: the shader antialiases its own edges, so a lower pixel
+// ratio and no MSAA cost nothing visible and save a lot of fill rate.
+const MAX_DPR = 1;
 // VistaVision: eight perforations per frame, in film widths.
 const PERF_PITCH = 0.14;
 const FRAME_PITCH = PERF_PITCH * 8;
@@ -154,12 +155,6 @@ const fragment = /* glsl */ `
     );
   }
 
-  float noise(float x) {
-    float i = floor(x);
-    float f = fract(x);
-    return mix(hash(vec2(i, uSeed)), hash(vec2(i + 1.0, uSeed)), f * f * (3.0 - 2.0 * f));
-  }
-
   float roundedBox(vec2 p, vec2 halfSize, float radius) {
     vec2 q = abs(p) - halfSize + radius;
     return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - radius;
@@ -211,11 +206,6 @@ const fragment = /* glsl */ `
 
     // Grain lives in the emulsion, so it travels with the film.
     density += (hash(floor(vec2(a, v) * 260.0)) - 0.5) * 0.07;
-
-    // A long emulsion scratch that comes and goes along the strip.
-    float scratchAt = 0.24 + 0.52 * hash(vec2(uSeed, 7.0));
-    float scratch = 1.0 - smoothstep(0.0, aa * 1.5, abs(v - scratchAt));
-    density -= scratch * smoothstep(0.55, 0.8, noise(a * 0.35)) * density * 0.8;
 
     // Perforations are punched clean through.
     vec2 perf = vec2(mod(a, PERF_PITCH) - PERF_PITCH * 0.5, rail - 0.07);
@@ -321,7 +311,7 @@ export async function createFilmNegativesScene(
   signal.throwIfAborted();
   const themeSource = canvas.parentElement ?? document.body;
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true });
   renderer.setClearColor(0x000000, 0);
 
   const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 60);
