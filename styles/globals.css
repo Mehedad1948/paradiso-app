@@ -13,3 +13,109 @@
   ::selection { @apply bg-accent text-on-accent; }
   :focus-visible { @apply outline outline-2 outline-offset-4 outline-accent; }
 }
+
+/* A post's image flying between its feed card and the open post (React <ViewTransition share="morph">). */
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-group(.morph) {
+  animation-duration: 420ms;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+::view-transition-image-pair(.morph) {
+  animation-name: morph-blur;
+}
+@keyframes morph-blur {
+  35% {
+    filter: blur(2px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
+/* ChromaGrid: spotlight reveals colour, rest of the grid is desaturated */
+.chroma-grid { --chroma-x: 50%; --chroma-y: 50%; --chroma-on: 0; }
+.chroma-card { position: relative; border-radius: 10px; --glow: #4f46e5; }
+.chroma-card:nth-child(6n + 1) { --glow: #4f46e5; }
+.chroma-card:nth-child(6n + 2) { --glow: #10b981; }
+.chroma-card:nth-child(6n + 3) { --glow: #f59e0b; }
+.chroma-card:nth-child(6n + 4) { --glow: #ef4444; }
+.chroma-card:nth-child(6n + 5) { --glow: #8b5cf6; }
+.chroma-card:nth-child(6n + 6) { --glow: #06b6d4; }
+.chroma-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--chroma-on, 0);
+  transition: opacity 0.3s ease;
+  background: radial-gradient(
+    circle 260px at var(--mx, 50%) var(--my, 50%),
+    color-mix(in srgb, var(--glow) 38%, transparent),
+    transparent 70%
+  );
+  mix-blend-mode: soft-light;
+}
+.chroma-grid:not(:hover) .chroma-card::after { opacity: 0; }
+.chroma-overlay {
+  position: absolute;
+  inset: -12px;
+  z-index: 10;
+  pointer-events: none;
+  backdrop-filter: grayscale(1) brightness(0.85);
+  -webkit-backdrop-filter: grayscale(1) brightness(0.85);
+  opacity: var(--chroma-on, 0);
+  transition: opacity 0.4s ease;
+  --mask: radial-gradient(
+    circle 220px at calc(var(--chroma-x) + 12px) calc(var(--chroma-y) + 12px),
+    transparent 0%,
+    transparent 25%,
+    rgba(0, 0, 0, 0.35) 60%,
+    #000 100%
+  );
+  mask-image: var(--mask);
+  -webkit-mask-image: var(--mask);
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .chroma-overlay, .chroma-card::after { display: none; }
+}
+
+/* BorderGlow: lit border wedge + outer glow that point at the cursor */
+.border-glow { --bg-angle: 0deg; --bg-prox: 0; position: relative; isolation: isolate; border-radius: 10px; height: 100%; }
+.border-glow-ring {
+  position: absolute; inset: 0; z-index: 6; padding: 1.5px; border-radius: inherit; pointer-events: none;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+  opacity: var(--bg-prox); transition: opacity 0.3s ease-out;
+}
+.border-glow-ring > span {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--glow, #4f46e5), color-mix(in srgb, var(--glow, #4f46e5) 50%, white));
+  mask-image: conic-gradient(from var(--bg-angle) at 50% 50%, #000 0deg, #000 35deg, transparent 110deg, transparent 250deg, #000 325deg, #000 360deg);
+  -webkit-mask-image: conic-gradient(from var(--bg-angle) at 50% 50%, #000 0deg, #000 35deg, transparent 110deg, transparent 250deg, #000 325deg, #000 360deg);
+}
+.border-glow-halo {
+  position: absolute; inset: -60px; z-index: -1; pointer-events: none;
+  opacity: var(--bg-prox); transition: opacity 0.3s ease-out;
+  mask-image: conic-gradient(from var(--bg-angle) at 50% 50%, #000 0deg, #000 30deg, transparent 100deg, transparent 260deg, #000 330deg, #000 360deg);
+  -webkit-mask-image: conic-gradient(from var(--bg-angle) at 50% 50%, #000 0deg, #000 30deg, transparent 100deg, transparent 260deg, #000 330deg, #000 360deg);
+}
+.border-glow-halo > span {
+  position: absolute; inset: 60px; border-radius: 10px;
+  box-shadow:
+    0 0 6px color-mix(in srgb, var(--glow, #4f46e5) 70%, transparent),
+    0 0 18px color-mix(in srgb, var(--glow, #4f46e5) 50%, transparent),
+    0 0 40px color-mix(in srgb, var(--glow, #4f46e5) 30%, transparent);
+}
+@media (hover: none), (prefers-reduced-motion: reduce) {
+  .border-glow-ring, .border-glow-halo { display: none; }
+}

@@ -2,19 +2,15 @@
 import { memo, useState } from "react";
 import clsx from "clsx";
 import ChatAvatar from "./ChatAvatar";
-import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
-import { Tooltip } from "@heroui/tooltip";
 import { addToast } from "@heroui/toast";
 import {
   Ban,
   Copy,
   Lock,
-  MoreHorizontal,
   Pencil,
   Pin,
   PinOff,
   Reply,
-  SmilePlus,
   Trash2,
 } from "lucide-react";
 import { isPollClosed } from "@/lib/chat/timeline";
@@ -26,18 +22,7 @@ import ChatReplyQuote from "./ChatReplyQuote";
 import ChatMovieCards from "./ChatMovieCards";
 import ChatPollCard from "./ChatPollCard";
 import ChatReactions from "./ChatReactions";
-import EmojiPicker, { QUICK_REACTIONS } from "./EmojiPicker";
-
-type MenuItem = {
-  key: string;
-  label: string;
-  icon: React.ReactNode;
-  danger?: boolean;
-  run: () => void;
-};
-
-const toolbarButton =
-  "flex size-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface hover:text-ink";
+import ChatMessageMenu, { type MenuItem } from "./ChatMessageMenu";
 
 export default memo(function ChatMessageItem({
   message,
@@ -53,7 +38,7 @@ export default memo(function ChatMessageItem({
 }) {
   const chat = useChat();
   const { me, isOwner, actions, members } = chat;
-  const [active, setActive] = useState(false);
+  const [menuAt, setMenuAt] = useState<{ x: number; y: number } | null>(null);
   const mine = message.author.id === me.id;
   const deleted = !!message.deletedAt;
   const mentionsMe = !mine && message.mentions.some((user) => user.id === me.id);
@@ -100,10 +85,17 @@ export default memo(function ChatMessageItem({
   return (
     <div
       data-message-id={message.id}
-      data-active={active}
+      onContextMenu={(event) => {
+        if (deleted || !menu.length || (event.target as HTMLElement).closest("a")) return;
+        event.preventDefault();
+        setMenuAt({ x: event.clientX, y: event.clientY });
+      }}
       onClick={(event) => {
-        // Touch screens have no hover: a tap on the row reveals its toolbar.
-        if (!(event.target as HTMLElement).closest("button, a, [role=menu]")) setActive((value) => !value);
+        // Touch screens have no right-click: a tap on the message opens the menu instead.
+        const touch = (event.nativeEvent as PointerEvent).pointerType === "touch";
+        if (!touch || deleted || !menu.length) return;
+        if ((event.target as HTMLElement).closest("button, a, input, [role=menu]")) return;
+        setMenuAt({ x: event.clientX, y: event.clientY });
       }}
       className={clsx(
         "group relative flex gap-3 px-4 transition-colors duration-700 sm:px-6",
@@ -111,6 +103,7 @@ export default memo(function ChatMessageItem({
         mine && "flex-row-reverse",
         mentionsMe &&
           "bg-warning/[0.07] before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-warning",
+        menuAt && "bg-ink/[0.05]",
         highlighted && "!bg-accent/15",
       )}
     >
@@ -125,7 +118,7 @@ export default memo(function ChatMessageItem({
           )}
         </div>
       )}
-      <div className={clsx("flex min-w-0 max-w-[min(82%,580px)] flex-col pb-0.5", mine ? "items-end" : "items-start")}>
+      <div className={clsx("relative flex min-w-0 max-w-[min(82%,580px)] flex-col pb-0.5", mine ? "items-end" : "items-start")}>
         {!continued && (
           <div className={clsx("mb-1 flex items-baseline gap-2 text-sm", mine && "flex-row-reverse")}>
             <span className="font-semibold text-ink">{mine ? "You" : message.author.username}</span>
@@ -190,63 +183,31 @@ export default memo(function ChatMessageItem({
           </div>
         )}
         {!deleted && <ChatReactions message={message} mine={mine} />}
+        {!deleted && !message.reactions.length && (
+          <button
+            type="button"
+            aria-label="React with ❤️"
+            onClick={() => actions.react(message.id, "❤️", true)}
+            className={clsx(
+              "pointer-events-none absolute -bottom-3 left-2 z-10 flex size-6 origin-center scale-0 items-center justify-center text-[16px] leading-none opacity-0",
+              "transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
+              "group-hover:pointer-events-auto group-hover:scale-100 group-hover:opacity-100",
+              "focus-visible:pointer-events-auto focus-visible:scale-100 focus-visible:opacity-100",
+              "hover:!scale-125 active:!scale-95",
+            )}
+          >
+            <span aria-hidden="true">❤️</span>
+          </button>
+        )}
       </div>
-      {!deleted && (
-        <div
-          role="toolbar"
-          aria-label="Message actions"
-          className={clsx(
-            "pointer-events-none absolute -top-3 z-10 flex items-center gap-0.5 rounded-lg border border-line bg-elevated p-0.5 opacity-0 shadow-[0_8px_24px_rgb(0_0_0_/_12%)] transition-opacity",
-            "group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100",
-            "group-data-[active=true]:pointer-events-auto group-data-[active=true]:opacity-100",
-            mine ? "left-4 sm:left-6" : "right-4 sm:right-6",
-          )}
-        >
-          {QUICK_REACTIONS.slice(0, 3).map((emoji) => (
-            <button
-              key={emoji}
-              type="button"
-              aria-label={`React with ${emoji}`}
-              className={clsx(toolbarButton, "text-base hover:scale-110")}
-              onClick={() => actions.react(message.id, emoji, true)}
-            >
-              {emoji}
-            </button>
-          ))}
-          <EmojiPicker label="Add a reaction" placement="bottom-end" onPick={(emoji) => actions.react(message.id, emoji, true)}>
-            <button type="button" aria-label="More reactions" className={toolbarButton}>
-              <SmilePlus size={17} />
-            </button>
-          </EmojiPicker>
-          <Tooltip content="Reply" delay={400} closeDelay={0}>
-            <button type="button" aria-label="Reply" className={toolbarButton} onClick={() => chat.reply(message)}>
-              <Reply size={17} />
-            </button>
-          </Tooltip>
-          <Dropdown placement="bottom-end" classNames={{ content: "border border-line bg-elevated" }}>
-            <DropdownTrigger>
-              <button type="button" aria-label="More actions" className={toolbarButton}>
-                <MoreHorizontal size={17} />
-              </button>
-            </DropdownTrigger>
-            <DropdownMenu
-              aria-label="Message menu"
-              items={menu}
-              onAction={(key) => menu.find((item) => item.key === key)?.run()}
-            >
-              {(item) => (
-                <DropdownItem
-                  key={item.key}
-                  startContent={item.icon}
-                  color={item.danger ? "danger" : "default"}
-                  className={item.danger ? "text-danger" : undefined}
-                >
-                  {item.label}
-                </DropdownItem>
-              )}
-            </DropdownMenu>
-          </Dropdown>
-        </div>
+      {menuAt && (
+        <ChatMessageMenu
+          x={menuAt.x}
+          y={menuAt.y}
+          items={menu}
+          onReact={(emoji) => actions.react(message.id, emoji, true)}
+          onClose={() => setMenuAt(null)}
+        />
       )}
     </div>
   );

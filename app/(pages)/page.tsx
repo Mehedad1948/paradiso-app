@@ -4,9 +4,11 @@ import { cacheLife } from "next/cache";
 import type { Metadata } from "next";
 import ParadisoWordmark from "@/components/landing/ParadisoWordmark";
 import CinemaGrid from "@/components/landing/CinemaGrid";
+import CommunityShowcase from "@/components/landing/CommunityShowcase";
 import JuryReveal from "@/components/landing/JuryReveal";
 import LandingLoader from "@/components/landing/LandingLoader";
 import FilmNegatives from "@/components/landing/FilmNegatives";
+import StarBorder from "@/components/ui/StarBorder";
 import styles from "@/components/landing/CinemaHero.module.css";
 import { fontDisplay } from "@/config/fonts";
 
@@ -55,9 +57,11 @@ export default async function Home() {
               A place to find your next favorite film, gather your people, and
               make a night of it.
             </p>
-            <Link href="/rooms" className="inline-flex items-center justify-between gap-11 rounded-md bg-ink px-6 py-4 text-[15px] font-semibold text-canvas transition-colors hover:bg-accent hover:text-on-accent [&>svg]:transition-transform hover:[&>svg]:translate-x-0.5 hover:[&>svg]:-translate-y-0.5 motion-reduce:transition-none max-sm:w-full">
-              Enter dashboard <ArrowUpRight size={21} aria-hidden="true" />
-            </Link>
+            <StarBorder className="max-sm:w-full">
+              <Link href="/rooms" className="flex items-center justify-between gap-11 rounded-md bg-ink px-6 py-4 text-[15px] font-semibold text-canvas transition-colors hover:bg-accent hover:text-on-accent [&>svg]:transition-transform hover:[&>svg]:translate-x-0.5 hover:[&>svg]:-translate-y-0.5 motion-reduce:transition-none">
+                Enter dashboard <ArrowUpRight size={21} aria-hidden="true" />
+              </Link>
+            </StarBorder>
           </div>
         </div>
       </section>
@@ -96,6 +100,36 @@ export default async function Home() {
         <div className="grid">
           <CinemaGrid />
         </div>
+      </section>
+      <section
+        id="the-community"
+        className="mx-auto grid max-w-[1600px] scroll-mt-32 grid-cols-2 items-center gap-[clamp(24px,4vw,72px)] border-t border-line py-[clamp(56px,7vw,112px)] max-sm:grid-cols-1 max-sm:gap-10"
+        aria-labelledby="community-title"
+      >
+        <div className="max-w-[560px]">
+          <span className="mb-6 block font-mono text-xs font-extrabold uppercase tracking-[0.12em] text-accent">
+            04 <span className="px-2 text-muted">/</span> Community
+          </span>
+          <h2
+            id="community-title"
+            className="text-[clamp(38px,4.8vw,76px)] font-semibold leading-[1.04] tracking-[-0.065em] [&>span]:font-serif [&>span]:font-normal [&>span]:italic [&>span]:tracking-[-0.045em]"
+          >
+            The film ends.
+            <br />
+            <span>The conversation doesn&apos;t.</span>
+          </h2>
+          <p className="my-7 max-w-[420px] text-base leading-[1.75] text-muted">
+            Post your takes, rate what you watched, and follow people whose taste
+            you trust. Every great night at Paradiso deserves an afterword.
+          </p>
+          <Link
+            href="/community"
+            className="inline-flex items-center gap-5 border-b border-line pb-2 text-[15px] font-semibold [&>svg]:transition-transform hover:[&>svg]:translate-x-0.5 hover:[&>svg]:-translate-y-0.5"
+          >
+            Join the conversation <ArrowUpRight size={18} aria-hidden="true" />
+          </Link>
+        </div>
+        <CommunityShowcase />
       </section>
       <section
         id="the-experience"

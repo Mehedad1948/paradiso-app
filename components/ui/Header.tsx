@@ -4,7 +4,8 @@ import { useMe } from "@/hooks/queries/useMe";
 import { Button } from "@heroui/button";
 import { useAuthForm } from "@/hooks/auth/useAuthForm";
 import { authApi } from "@/lib/api/auth";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import clsx from "clsx";
 import Link from "next/link";
 import { ArrowUpRight, Asterisk } from "lucide-react";
 import { ThemeSwitch } from "@/components/theme-switch";
@@ -13,6 +14,14 @@ export default function Header() {
   const { data: user, isPending } = useMe();
   const signOut = useAuthForm(authApi.signOut, true);
   const router = useRouter();
+  const pathname = usePathname();
+  const navLink = (href: string) =>
+    clsx(
+      "inline-flex items-center gap-2 border-b py-1.5 transition-colors",
+      pathname === href || pathname.startsWith(`${href}/`)
+        ? "border-ink"
+        : "border-transparent text-muted hover:text-ink",
+    );
 
   return (
     <div className="fixed inset-x-0 top-0 z-40 bg-canvas/95 px-[4.5vw] text-ink backdrop-blur-md max-md:px-[5vw]">
@@ -22,7 +31,10 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-5 text-[15px] font-semibold max-md:gap-3 max-md:text-sm max-[480px]:basis-full max-[480px]:justify-between">
-          <Link href="/rooms" className="inline-flex items-center gap-2 border-b border-ink py-1.5">
+          <Link href="/community" className={navLink("/community")}>
+            Community
+          </Link>
+          <Link href="/rooms" className={navLink("/rooms")}>
             Dashboard <ArrowUpRight size={15} aria-hidden="true" />
           </Link>
           <ThemeSwitch />

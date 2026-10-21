@@ -5,6 +5,7 @@ import { useRooms } from "@/hooks/queries/useRoomQueries";
 import QueryError from "@/components/ui/QueryError";
 import { Spinner } from "@heroui/spinner";
 import RoomCard from "./RoomCard";
+import ChromaGrid from "./ChromaGrid";
 import PanelPagination from "./PanelPagination";
 export default function RoomListSection({
   usersRoom,
@@ -47,17 +48,22 @@ export default function RoomListSection({
       ) : (
         query.data && (
           <>
-            <div className="grid grid-cols-3 gap-6 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:gap-5">
-              {usersRoom && <CreateRoomCard onCreate={onCreate} />}
+            <ChromaGrid className="grid grid-cols-3 gap-6 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:gap-5">
+              {usersRoom && (
+                <div className="chroma-card">
+                  <CreateRoomCard onCreate={onCreate} />
+                </div>
+              )}
               {query.data.data.map((room) => (
-                <RoomCard
-                  key={room.id}
-                  room={room}
-                  canVisit={
-                    usersRoom ||
-                    !!room.users?.some((user) => user.id === userId)
-                  }
-                />
+                <div key={room.id} className="chroma-card">
+                  <RoomCard
+                    room={room}
+                    canVisit={
+                      usersRoom ||
+                      !!room.users?.some((user) => user.id === userId)
+                    }
+                  />
+                </div>
               ))}
               {query.data.data.length === 0 && (
                 <div>
@@ -68,7 +74,7 @@ export default function RoomListSection({
                   </p>
                 </div>
               )}
-            </div>
+            </ChromaGrid>
             <PanelPagination
               page={page}
               totalPages={totalPages}

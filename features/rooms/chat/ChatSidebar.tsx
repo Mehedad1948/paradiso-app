@@ -1,15 +1,24 @@
 "use client";
-import { useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Drawer, DrawerContent } from "@heroui/drawer";
 import type { PanelRoom } from "@/lib/api/panel";
 import type { User } from "@/types/user";
 import RoomChat from "./RoomChat";
 
+const EXIT_MS = 220;
+
+const motionProps = {
+  variants: {
+    enter: { x: 0, transition: { duration: 0.26, ease: [0.22, 1, 0.36, 1] as const } },
+    exit: { x: "100%", transition: { duration: EXIT_MS / 1000, ease: [0.4, 0, 1, 1] as const } },
+  },
+};
+
 /** The lobby as a side panel: half the screen on desktop (within limits), full width on phones. */
 export default function ChatSidebar({
   room,
   me,
-  onClose,
+  onClose: onClosed,
   onShowInWatchlist,
 }: {
   room: PanelRoom;
@@ -17,6 +26,16 @@ export default function ChatSidebar({
   onClose: () => void;
   onShowInWatchlist: (title: string) => void;
 }) {
+  // Close in two steps so the exit transition can play: flip `isOpen`, then let the parent
+  // unmount the drawer once the animation is done.
+  const [open, setOpen] = useState(true);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const onClose = useCallback(() => {
+    setOpen(false);
+    timer.current ??= setTimeout(onClosed, EXIT_MS);
+  }, [onClosed]);
+  useEffect(() => () => clearTimeout(timer.current), []);
+
   // The drawer's own outside-click dismissal also fires for clicks inside portaled popovers
   // (message action menu, emoji picker), closing the whole chat. Dismiss only on a real
   // backdrop click instead.
@@ -35,10 +54,11 @@ export default function ChatSidebar({
 
   return (
     <Drawer
-      isOpen
+      isOpen={open}
       size="full"
       placement="right"
       isDismissable={false}
+      motionProps={motionProps}
       onClose={onClose}
       hideCloseButton
       classNames={{

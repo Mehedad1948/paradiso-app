@@ -32,6 +32,11 @@ export const panelApi = {
       `/rooms${queryString({ usersRoom, page, limit: 10 })}`,
       { signal },
     ),
+  myRooms: (page: number, signal?: AbortSignal) =>
+    bffRequest<PaginatedResponse<PanelRoomListItem>>(
+      `/rooms${queryString({ usersRoom: true, page, limit: 100 })}`,
+      { signal },
+    ),
   room: (id: string, signal?: AbortSignal) =>
     bffRequest<PanelRoom>(roomPath(id), { signal }),
   ratings: (id: string, filters: RoomRatingFilters, signal?: AbortSignal) =>

@@ -14,6 +14,8 @@ export default function ChatAvatar({
       name={user.username}
       title={user.username}
       getInitials={initial}
+      // A broken avatar URL falls back to the initial instead of an empty circle.
+      showFallback
       {...props}
     />
   );

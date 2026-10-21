@@ -8,6 +8,7 @@ import ratings from "@/services/ratings";
 import storage from "@/services/storage";
 import { moviesServices } from "@/services/movies";
 import { handleChatRequest } from "./chat";
+import { handleCommunityRequest } from "./community";
 import type { RequestResult } from "@/types/request";
 import {
   customMovieErrorsFrom,
@@ -72,10 +73,22 @@ async function body(request: Request): Promise<Record<string, unknown>> {
 export async function handlePanelRequest(request: Request, path: string[]) {
   try {
     if (request.method !== "GET") assertSameOrigin(request);
-    if (!(await cookies()).get("token")?.value)
-      throw new InputError("Sign in to continue", 401);
+    const signedIn = !!(await cookies()).get("token")?.value;
     const query = new URL(request.url).searchParams;
     const method = request.method;
+    // The community is readable signed out; its handler guards the write routes.
+    if (path[0] === "community")
+      return respond(
+        await handleCommunityRequest({
+          path: path.slice(1),
+          method,
+          query,
+          data: () => body(request),
+          signal: request.signal,
+          signedIn,
+        }),
+      );
+    if (!signedIn) throw new InputError("Sign in to continue", 401);
     const page = () => positiveInteger(query.get("page"), "page", 1);
     const limit = () => positiveInteger(query.get("limit"), "limit", 10, 100);
     const resource = path.join("/");
@@ -108,9 +121,19 @@ export async function handlePanelRequest(request: Request, path: string[]) {
       ) {
         throw new InputError("Choose an image up to 5 MB");
       }
-      if (form.get("folder") !== "rooms")
+      const folder = form.get("folder");
+      if (folder !== "rooms" && folder !== "community")
         throw new InputError("Invalid upload folder");
-      return respond(await storage.uploadImage(file, "rooms"));
+      const result = await storage.uploadImage(file, folder);
+      if (folder === "rooms" || !result.result) return respond(result);
+      // Community posts store an absolute HTTPS URL rather than a storage key.
+      const { path: stored, name } = result.result;
+      const url = /^https:\/\//.test(stored)
+        ? stored
+        : `${process.env.AWS_BASE_URL || ""}${name}`;
+      if (!url.startsWith("https://"))
+        throw new InputError("Uploaded image has no public HTTPS address", 502);
+      return respond({ ...result, result: { ...result.result, url } });
     }
     if (resource === "rooms") {
       if (method === "GET") {

@@ -7,6 +7,7 @@ import JoinRoomButton from "./JoinRoomButton";
 import { posters } from "@/config/posters";
 import { ArrowUpRight, MessagesSquare } from "lucide-react";
 import { useChatUnread } from "@/hooks/queries/useChatQueries";
+import BorderGlow from "./BorderGlow";
 import UnreadBadge from "../chat/components/UnreadBadge";
 export default function RoomCard({
   room,
@@ -17,7 +18,9 @@ export default function RoomCard({
 }) {
   // Visitable rooms are the ones I belong to, so their chat is readable.
   const unread = useChatUnread(String(room.id), { enabled: canVisit });
-  const hasUnread = !!unread.data && (unread.data.unreadCount > 0 || unread.data.mentionCount > 0);
+  const hasUnread =
+    !!unread.data &&
+    (unread.data.unreadCount > 0 || unread.data.mentionCount > 0);
   const card = (
     <Card
       className={`h-full overflow-hidden rounded-[10px] border border-line bg-elevated shadow-none ${canVisit ? "transition-colors group-hover:border-muted" : ""}`}
@@ -43,7 +46,9 @@ export default function RoomCard({
           <p className="mb-1.5 text-sm text-muted">
             {room.isPublic ? "Open to discovery" : "Your private circle"}
           </p>
-          <p className="break-words text-lg font-semibold leading-[1.3]">{room.name}</p>
+          <p className="break-words text-lg font-semibold leading-[1.3]">
+            {room.name}
+          </p>
         </div>
         {canVisit ? (
           // Visual only: the whole card is the link, so this can't be a nested <a>.
@@ -61,15 +66,17 @@ export default function RoomCard({
     </Card>
   );
 
-  if (!canVisit) return card;
+  if (!canVisit) return <BorderGlow>{card}</BorderGlow>;
 
   return (
-    <Link
-      href={`/rooms/${room.id}`}
-      aria-label={`Enter ${room.name}`}
-      className="group block rounded-[10px] outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
-    >
-      {card}
-    </Link>
+    <BorderGlow>
+      <Link
+        href={`/rooms/${room.id}`}
+        aria-label={`Enter ${room.name}`}
+        className="group block rounded-[10px] outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
+      >
+        {card}
+      </Link>
+    </BorderGlow>
   );
 }

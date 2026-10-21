@@ -15,7 +15,7 @@ import RoomRatingTable from "./components/RoomRatingTable";
 import PanelPagination from "./components/PanelPagination";
 import DialogLoading from "./components/DialogLoading";
 import Link from "next/link";
-import { ArrowLeft, MessagesSquare, Pencil } from "lucide-react";
+import { ArrowLeft, MessagesSquare, NotebookPen, Pencil } from "lucide-react";
 import UnreadBadge from "./chat/components/UnreadBadge";
 const AddMovieDialog = dynamic(() => import("./dialogs/AddMovieDialog"), {
   ssr: false,
@@ -34,6 +34,10 @@ const DeleteMovieDialog = dynamic(() => import("./dialogs/DeleteMovieDialog"), {
   loading: DialogLoading,
 });
 const ChatSidebar = dynamic(() => import("./chat/ChatSidebar"), {
+  ssr: false,
+  loading: DialogLoading,
+});
+const RoomDiscussion = dynamic(() => import("@/features/community/RoomDiscussion"), {
   ssr: false,
   loading: DialogLoading,
 });
@@ -105,8 +109,8 @@ function RoomPage({ roomId }: { roomId: string }) {
               "A shared watchlist. A few different opinions. Your next great film."}
           </p>
         </div>
-        {(canChat || canManage) && (
-          <div className="flex shrink-0 items-center gap-3 max-sm:w-full max-sm:[&>button]:flex-1">
+        {room.data && (
+          <div className="flex shrink-0 flex-wrap items-center gap-3 max-sm:w-full max-sm:[&>button]:flex-1">
             {canManage && (
               <Button
                 className="min-h-[46px] rounded-md border border-line bg-surface text-[15px] font-semibold text-ink"
@@ -117,6 +121,13 @@ function RoomPage({ roomId }: { roomId: string }) {
                 Edit room
               </Button>
             )}
+            <Button
+              className="min-h-[46px] rounded-md border border-line bg-surface text-[15px] font-semibold text-ink"
+              startContent={<NotebookPen size={17} aria-hidden="true" />}
+              onPress={() => open("discussion")}
+            >
+              Discussion
+            </Button>
             {canChat && (
               <Button
                 className="min-h-[46px] rounded-md bg-ink text-[15px] font-semibold text-canvas"
@@ -179,6 +190,9 @@ function RoomPage({ roomId }: { roomId: string }) {
           onClose={close}
           onShowInWatchlist={showInWatchlist}
         />
+      )}
+      {room.data && dialog === "discussion" && (
+        <RoomDiscussion room={room.data} canPost={canChat} onClose={close} />
       )}
       {room.data && dialog === "add-movie" && (
         <AddMovieDialog roomId={roomId} onClose={close} />
