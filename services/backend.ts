@@ -94,6 +94,13 @@ export async function backendRequest<
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown fetch error";
+    console.error("backendRequest failed", {
+      host: (() => {
+        try { return new URL(process.env.BASE_API_URL ?? "").host; } catch { return process.env.BASE_API_URL; }
+      })(),
+      path: String(path),
+      cause: error instanceof Error ? error.cause : undefined,
+    });
     return {
       result: null,
       response: { ok: false, status: 0, statusText: "", message },
