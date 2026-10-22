@@ -12,7 +12,7 @@ import { useRoomUrl } from "./hooks/useRoomUrl";
 import { useRoomDialog } from "./hooks/useRoomDialog";
 import RoomToolbar from "./components/RoomToolbar";
 import RoomRatingTable from "./components/RoomRatingTable";
-import PanelPagination from "./components/PanelPagination";
+import InfiniteScrollSentinel from "./components/InfiniteScrollSentinel";
 import DialogLoading from "./components/DialogLoading";
 import Link from "next/link";
 import { ArrowLeft, MessagesSquare, NotebookPen, Pencil } from "lucide-react";
@@ -51,7 +51,7 @@ export default function RoomRoute() {
   return <RoomPage key={roomId} roomId={roomId} />;
 }
 function RoomPage({ roomId }: { roomId: string }) {
-  const { update, filters, setPage, setSearch, sortByUser } = useRoomUrl();
+  const { update, filters, setSearch, sortByUser, sortByAverage } = useRoomUrl();
   const { dialog, open, close } = useRoomDialog();
   const room = useRoom(roomId);
   const ratings = useRoomRatings(roomId, filters);
@@ -63,17 +63,6 @@ function RoomPage({ roomId }: { roomId: string }) {
   const movie = ratings.data?.data.find(
     (movie) => movie.id === action?.movieId,
   );
-  const totalPages = Math.max(1, ratings.data?.meta.totalPages || 1);
-  useEffect(() => {
-    if (ratings.data && !ratings.isPlaceholderData && filters.page > totalPages)
-      setPage(totalPages);
-  }, [
-    ratings.data,
-    ratings.isPlaceholderData,
-    filters.page,
-    totalPages,
-    setPage,
-  ]);
   const disabled = !room.data || room.isError || ratings.isPlaceholderData;
   const canManage =
     !!room.data &&
@@ -171,16 +160,15 @@ function RoomPage({ roomId }: { roomId: string }) {
               filters={filters}
               disabled={disabled}
               onSort={sortByUser}
+              onSortAverage={sortByAverage}
               onVote={(movieId) => setAction({ type: "vote", movieId })}
               onDelete={(movieId) => setAction({ type: "delete", movieId })}
             />
-            <PanelPagination
-              page={filters.page}
-              totalPages={totalPages}
-              onChange={setPage}
-              disabled={ratings.isPlaceholderData}
-            />
-          </>
+            <InfiniteScrollSentinel
+              hasMore={!!ratings.hasNextPage}
+              loading={ratings.isFetchingNextPage}
+              onLoadMore={() => ratings.fetchNextPage()}
+            />          </>
         )
       )}
       {room.data && chatOpen && me.data && (

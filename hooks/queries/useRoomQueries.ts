@@ -1,5 +1,9 @@
 "use client";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useQuery,
+} from "@tanstack/react-query";
 import { panelApi } from "@/lib/api/panel";
 import { panelKeys } from "@/lib/query/panel-keys";
 import type { RoomRatingFilters } from "@/types/rooms";
@@ -17,15 +21,33 @@ export const useRoom = (id: string) =>
     queryFn: ({ signal }) => panelApi.room(id, signal),
     enabled: !!id,
   });
-export const useRoomRatings = (id: string, filters: RoomRatingFilters) =>
-  useQuery({
-    queryKey: [...panelKeys.ratings(id), filters],
-    queryFn: ({ signal }) => panelApi.ratings(id, filters, signal),
+export const ROOM_RATINGS_PAGE_SIZE = 25;
+export const useRoomRatings = (id: string, filters: RoomRatingFilters) => {
+  // Scrolling drives paging, so the page and limit are not part of the identity.
+  const { page: _page, limit: _limit, ...rest } = filters;
+  return useInfiniteQuery({
+    queryKey: [...panelKeys.ratings(id), rest],
+    queryFn: ({ signal, pageParam }) =>
+      panelApi.ratings(
+        id,
+        { ...rest, page: pageParam, limit: ROOM_RATINGS_PAGE_SIZE },
+        signal,
+      ),
+    initialPageParam: 1,
+    getNextPageParam: (last) =>
+      last.meta.currentPage < last.meta.totalPages
+        ? last.meta.currentPage + 1
+        : undefined,
     enabled: !!id,
-    // Pagination can retain rows; switching rooms must never display another room's data.
+    // Filters can retain rows; switching rooms must never display another room's data.
     placeholderData: (previous, query) =>
       query?.queryKey[1] === id ? previous : undefined,
+    select: (data) => ({
+      ...data.pages[data.pages.length - 1],
+      data: data.pages.flatMap((page) => page.data),
+    }),
   });
+};
 export const useMovieSearch = (query: string, enabled = true) =>
   useQuery({
     queryKey: ["movie-search", query.trim()],

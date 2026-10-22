@@ -27,8 +27,8 @@ describe("room URL state", () => {
     expect(filters).toMatchObject({
       page: 1,
       limit: 10,
-      sortBy: undefined,
-      sortOrder: undefined,
+      sortBy: "rate",
+      sortOrder: "desc",
       sortByUserId: undefined,
       startDate: undefined,
       endDate: undefined,

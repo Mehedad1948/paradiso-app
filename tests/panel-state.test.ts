@@ -108,13 +108,13 @@ describe("panel query identity", () => {
   it("keeps rows for pagination within a room but never carries them into another room", async () => {
     const first = {
       data: [{ id: "first-room-movie" }],
-      meta: { totalPages: 2 },
+      meta: { currentPage: 1, totalPages: 2 },
     } as Awaited<ReturnType<typeof panelApi.ratings>>;
     vi.spyOn(panelApi, "ratings")
       .mockResolvedValueOnce(first)
       .mockImplementation(() => new Promise(() => {}));
     const { wrapper } = setup();
-    const hook = renderHook(({ id, page }) => useRoomRatings(id, { page }), {
+    const hook = renderHook(({ id, page }) => useRoomRatings(id, { search: String(page) }), {
       wrapper,
       initialProps: { id: "1", page: 1 },
     });

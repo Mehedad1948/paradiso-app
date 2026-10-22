@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@heroui/table";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Star, Trash2 } from "lucide-react";
 import MoviePoster from "./MoviePoster";
 export default function RoomRatingTable({
   result,
@@ -22,6 +22,7 @@ export default function RoomRatingTable({
   filters,
   disabled,
   onSort,
+  onSortAverage,
   onVote,
   onDelete,
 }: {
@@ -31,6 +32,7 @@ export default function RoomRatingTable({
   filters: RoomRatingFilters;
   disabled: boolean;
   onSort: (userId: number) => void;
+  onSortAverage: () => void;
   onVote: (movieId: string) => void;
   onDelete: (movieId: string) => void;
 }) {
@@ -46,6 +48,11 @@ export default function RoomRatingTable({
         key: String(member.id),
         userId: member.id,
       })),
+      {
+        label: "AVG",
+        key: "average",
+        userId: undefined as number | undefined,
+      },
       {
         label: "ACTION",
         key: "action",
@@ -86,6 +93,22 @@ export default function RoomRatingTable({
                   )
                 }
                 onPress={() => onSort(column.userId!)}
+              >
+                {column.label}
+              </Button>
+            ) : column.key === "average" ? (
+              <Button
+                variant="light"
+                className="font-semibold text-foreground"
+                aria-label="Sort by average rating"
+                endContent={
+                  filters.sortBy === "rate" && filters.sortOrder === "asc" ? (
+                    <ChevronUp className="w-4" />
+                  ) : (
+                    <ChevronDown className="w-4" />
+                  )
+                }
+                onPress={onSortAverage}
               >
                 {column.label}
               </Button>
@@ -130,28 +153,46 @@ export default function RoomRatingTable({
                       )}
                     </span>
                   </div>
+                ) : columnKey === "average" ? (
+                  movie.averageRate != null ? (
+                    Number(movie.averageRate).toFixed(1)
+                  ) : (
+                    "-"
+                  )
                 ) : columnKey === "action" ? (
                   <div className="flex items-center gap-3">
                     <Button
-                      color="secondary"
                       size="sm"
+                      variant={movie.hasVoted ? "flat" : "solid"}
+                      color="secondary"
+                      className="font-semibold"
+                      startContent={
+                        <Star
+                          size={15}
+                          aria-hidden="true"
+                          className={movie.hasVoted ? "fill-current" : ""}
+                        />
+                      }
                       isDisabled={disabled || !user}
                       onPress={() => onVote(movie.id)}
                     >
-                      Vote
+                      {movie.hasVoted ? "Update" : "Vote"}
                     </Button>
                     {user &&
                       (user.role === "admin" ||
-                        room.owner.id === user.id ||
                         movie.addedBy?.id === user.id) && (
-                        <Button
-                          size="sm"
-                          color="danger"
-                          isDisabled={disabled}
-                          onPress={() => onDelete(movie.id)}
-                        >
-                          Delete
-                        </Button>
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="flat"
+                            color="danger"
+                            aria-label={`Remove ${movie.title}`}
+                            title="Remove from room"
+                            isDisabled={disabled}
+                            onPress={() => onDelete(movie.id)}
+                          >
+                            <Trash2 size={16} aria-hidden="true" />
+                          </Button>
                       )}
                   </div>
                 ) : (

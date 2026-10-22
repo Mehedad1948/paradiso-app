@@ -34,9 +34,9 @@ export function readRoomFilters(
     page: positivePage(params.get("page")),
     limit: positivePage(params.get("limit"), 10, 100),
     search: params.get("search")?.trim().slice(0, 200) || undefined,
-    sortBy: sortBy === "rate" || sortBy === "userRate" ? sortBy : undefined,
-    sortOrder:
-      sortOrder === "asc" || sortOrder === "desc" ? sortOrder : undefined,
+    // Highest average rating first unless the URL says otherwise.
+    sortBy: sortBy === "userRate" ? sortBy : "rate",
+    sortOrder: sortOrder === "asc" ? "asc" : "desc",
     sortByUserId:
       sortBy === "userRate" && userId && positivePage(userId, 0)
         ? userId

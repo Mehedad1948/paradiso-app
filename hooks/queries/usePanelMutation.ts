@@ -46,7 +46,7 @@ export function usePanelMutation<T, V>(
       busy.current = false;
     },
   });
-  const { mutate } = mutation;
+  const { mutate, mutateAsync } = mutation;
   const execute = useCallback(
     (variables: V) => {
       if (busy.current) return;
@@ -55,5 +55,19 @@ export function usePanelMutation<T, V>(
     },
     [mutate],
   );
-  return { execute, isPending: mutation.isPending, error: mutation.error };
+  /** Like execute, but resolves or rejects with the request, for pending UIs. */
+  const executeAsync = useCallback(
+    async (variables: V) => {
+      if (busy.current) throw new Error("busy");
+      busy.current = true;
+      return mutateAsync({ variables, generation: generation.current });
+    },
+    [mutateAsync],
+  );
+  return {
+    execute,
+    executeAsync,
+    isPending: mutation.isPending,
+    error: mutation.error,
+  };
 }

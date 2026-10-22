@@ -20,7 +20,7 @@ import { postTextError, ratingError } from "@/lib/community/validation";
 import { COMMUNITY_LIMITS, type CommunityPost, type ResolvedMovie } from "@/types/community";
 import { useViewer } from "../hooks/useViewer";
 import { hasCustomImage } from "../format";
-import SlideCommit from "@/components/ui/SlideCommit";
+import SlideToConfirm from "@/components/ui/SlideToConfirm";
 import FilmPicker from "./FilmPicker";
 import RatingInput from "./RatingInput";
 
@@ -351,15 +351,10 @@ export default function PostComposer({
           <Button variant="light" isDisabled={busy} onPress={onClose}>
             Cancel
           </Button>
-          <SlideCommit
+          <SlideToConfirm
             label={editing ? "Slide to save" : "Slide to post"}
             doneLabel={editing ? "Saved" : "Posted"}
             errorLabel="Couldn't post"
-            width={220}
-            height={44}
-            radius={22}
-            trackColor="#18181b"
-            handleColor="#f5f5f5"
             disabled={upload.isPending}
             onConfirm={submit}
             onDone={onClose}

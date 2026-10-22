@@ -47,5 +47,26 @@ export function useRoomUrl() {
       }),
     [update, filters.sortBy, filters.sortByUserId, filters.sortOrder],
   );
-  return { params, filters, update, setPage, setSearch, sortByUser };
+  const sortByAverage = useCallback(
+    () =>
+      update({
+        sortBy: "rate",
+        sortByUserId: null,
+        page: null,
+        sortOrder:
+          filters.sortBy === "rate" && filters.sortOrder !== "asc"
+            ? "asc"
+            : "desc",
+      }),
+    [update, filters.sortBy, filters.sortOrder],
+  );
+  return {
+    params,
+    filters,
+    update,
+    setPage,
+    setSearch,
+    sortByUser,
+    sortByAverage,
+  };
 }

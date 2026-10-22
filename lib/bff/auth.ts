@@ -48,8 +48,8 @@ function upstreamFailure(
   result: RequestResult<unknown>,
   operation: AuthOperation,
 ) {
-  console.log('asdas result.response', result.response);
-  
+  // eslint-disable-next-line no-console -- dev diagnostics for failed auth calls
+  console.warn(`[auth] ${operation} failed`, result.response);
   const status =
     result.response.status >= 400 && result.response.status < 500
       ? result.response.status
