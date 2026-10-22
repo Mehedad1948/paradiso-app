@@ -17,6 +17,7 @@ import DialogLoading from "./components/DialogLoading";
 import Link from "next/link";
 import { ArrowLeft, MessagesSquare, NotebookPen, Pencil } from "lucide-react";
 import UnreadBadge from "./chat/components/UnreadBadge";
+import { wallpaperGlow } from "./lib/wallpaper";
 const AddMovieDialog = dynamic(() => import("./dialogs/AddMovieDialog"), {
   ssr: false,
   loading: DialogLoading,
@@ -83,9 +84,15 @@ function RoomPage({ roomId }: { roomId: string }) {
   );
   return (
     <div
-      className="min-h-fit"
+      className="relative isolate min-h-fit"
       aria-busy={ratings.isFetching || room.isFetching}
     >
+      {/* The lobby's spotlight wash, fixed behind the page (below the header) and kept faint. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-x-0 bottom-0 top-24 -z-10"
+        style={{ backgroundImage: wallpaperGlow(0.75) }}
+      />
       <Link href="/rooms" className="mb-6 inline-flex items-center gap-2 text-[15px] text-muted hover:text-accent">
         <ArrowLeft size={18} aria-hidden="true" /> All rooms
       </Link>

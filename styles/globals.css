@@ -158,3 +158,87 @@
   .rate-gold [class*="elastic-slider-range"], .rate-gold-text, .rate-sparkles > span { animation: none; }
   .rate-sparkles > span { opacity: 0.8; }
 }
+
+/* Room table: each row carries a quiet tint of its average rating. */
+.rating-row {
+  --row-tint: hsl(var(--row-hue) 65% 50%);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--row-tint) 11%, transparent),
+    color-mix(in srgb, var(--row-tint) 4%, transparent) 35%,
+    transparent 70%
+  );
+  transition: background-color 0.2s ease;
+}
+.rating-row > td:first-child {
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--row-tint) 80%, transparent);
+}
+.rating-row[data-tier="gold"] {
+  --row-tint: #e8b923;
+}
+.rating-pill {
+  display: inline-flex;
+  min-width: 3.25rem;
+  justify-content: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--row-hue) 70% 64%);
+  background: color-mix(in srgb, var(--row-tint) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--row-tint) 28%, transparent);
+}
+:root:not(.dark) .rating-pill {
+  color: hsl(var(--row-hue) 70% 32%);
+}
+.rating-row[data-tier="gold"] .rating-pill {
+  position: relative;
+  color: #f2c94c;
+  background: rgb(232 185 35 / 16%);
+  border-color: rgb(242 201 76 / 45%);
+  box-shadow: 0 0 14px rgb(242 201 76 / 18%);
+}
+:root:not(.dark) .rating-row[data-tier="gold"] .rating-pill {
+  color: #8a6200;
+  background: rgb(242 201 76 / 22%);
+}
+.rating-pill-sparkles {
+  position: absolute; inset: -9px -12px; pointer-events: none;
+}
+.rating-pill-sparkles > span {
+  position: absolute;
+  width: 7px; height: 7px;
+  background: radial-gradient(circle, #fff 0 22%, #f7d36b 48%, transparent 72%);
+  clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%);
+  animation: rate-sparkle 2.4s ease-in-out infinite both;
+}
+.rating-pill-sparkles > span:nth-child(1) { top: 0; right: 4px; width: 9px; height: 9px; }
+.rating-pill-sparkles > span:nth-child(2) { bottom: 1px; left: 2px; animation-delay: 0.4s; }
+.rating-pill-sparkles > span:nth-child(3) { top: 2px; left: 10px; width: 5px; height: 5px; animation-delay: 0.9s; animation-duration: 1.9s; }
+.rating-pill-sparkles > span:nth-child(4) { bottom: -1px; right: 12px; width: 6px; height: 6px; animation-delay: 1.3s; }
+.rating-pill-sparkles > span:nth-child(5) { top: 45%; right: -2px; width: 5px; height: 5px; animation-delay: 1.7s; animation-duration: 2.8s; }
+.rating-pill-sparkles > span:nth-child(6) { top: 40%; left: -3px; width: 6px; height: 6px; animation-delay: 2.1s; animation-duration: 2.2s; }
+@media (prefers-reduced-motion: reduce) {
+  .rating-pill-sparkles > span { animation: none; opacity: 0.7; }
+}
+
+/* Light mode: pale tints and white-cored sparkles vanish on a white table. */
+:root:not(.dark) .rating-row {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--row-tint) 20%, transparent),
+    color-mix(in srgb, var(--row-tint) 8%, transparent) 35%,
+    transparent 72%
+  );
+}
+:root:not(.dark) .rating-row[data-tier="gold"] {
+  --row-tint: #e0a800;
+}
+:root:not(.dark) .rating-row[data-tier="gold"] .rating-pill {
+  border-color: rgb(212 160 0 / 55%);
+  box-shadow: 0 0 12px rgb(224 168 0 / 25%);
+}
+:root:not(.dark) .rating-pill-sparkles > span {
+  background: radial-gradient(circle, #fff 0 18%, #e879c6 42%, #a855f7 60%, transparent 74%);
+  filter: drop-shadow(0 0 1.5px rgb(192 132 252 / 45%));
+}

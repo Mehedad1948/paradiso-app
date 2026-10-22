@@ -1,5 +1,5 @@
 "use client";
-import { useMemo } from "react";
+import { useMemo, type CSSProperties } from "react";
 import type { MovieWithRatings } from "@/types";
 import type { User } from "@/types/user";
 import type { Room, RoomRatingFilters } from "@/types/rooms";
@@ -15,6 +15,19 @@ import {
 } from "@heroui/table";
 import { ChevronDown, ChevronUp, Star, Trash2 } from "lucide-react";
 import MoviePoster from "./MoviePoster";
+import { ratingHue } from "../lib/ratingColor";
+// Positions and timing live in CSS (nth-child); this only sets the count.
+const PILL_SPARKLES = Array.from({ length: 6 });
+/** Row tint keyed to the average: red through green, gold for 9 and up. */
+function ratingTint(average: number | null) {
+  if (average == null) return {};
+  const rate = Number(average);
+  return {
+    className: "rating-row",
+    "data-tier": rate >= 9 ? "gold" : undefined,
+    style: { "--row-hue": ratingHue(rate) } as CSSProperties,
+  };
+}
 export default function RoomRatingTable({
   result,
   room,
@@ -130,7 +143,7 @@ export default function RoomRatingTable({
         }
       >
         {(movie) => (
-          <TableRow key={movie.id}>
+          <TableRow key={movie.id} {...ratingTint(movie.averageRate)}>
             {(columnKey) => (
               <TableCell>
                 {columnKey === "title" ? (
@@ -155,7 +168,16 @@ export default function RoomRatingTable({
                   </div>
                 ) : columnKey === "average" ? (
                   movie.averageRate != null ? (
-                    Number(movie.averageRate).toFixed(1)
+                    <span className="rating-pill">
+                      {Number(movie.averageRate).toFixed(1)}
+                      {Number(movie.averageRate) >= 9 && (
+                        <span className="rating-pill-sparkles" aria-hidden="true">
+                          {PILL_SPARKLES.map((_, index) => (
+                            <span key={index} />
+                          ))}
+                        </span>
+                      )}
+                    </span>
                   ) : (
                     "-"
                   )

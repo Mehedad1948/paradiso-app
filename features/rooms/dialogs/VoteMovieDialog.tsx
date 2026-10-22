@@ -9,6 +9,7 @@ import { Star } from "lucide-react";
 import ElasticSlider from "@/components/ui/ElasticSlider";
 import SlideToConfirm from "@/components/ui/SlideToConfirm";
 import MoviePoster from "../components/MoviePoster";
+import { ratingHue } from "../lib/ratingColor";
 
 const rateLabel = (rate: number) =>
   rate >= 9 ? "Masterpiece" : rate >= 7.5 ? "Great" : rate >= 6 ? "Good" : rate >= 4 ? "Meh" : rate >= 2 ? "Poor" : "Awful";
@@ -112,7 +113,7 @@ export default function VoteMovieDialog({
                       rangeColor={
                         perfect
                           ? "linear-gradient(100deg, #b8860b, #ffd700 30%, #fff6c2 50%, #ffd700 70%, #b8860b)"
-                          : `hsl(${Math.round(rate * 12)} 80% 55%)`
+                          : `hsl(${ratingHue(rate)} 80% 55%)`
                       }
                       iconPlacement="inside"
                       leftIcon={<Star size={16} aria-hidden="true" />}

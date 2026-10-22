@@ -26,14 +26,13 @@ import ChatComposer, { type ComposerHandle } from "./components/ChatComposer";
 import PollComposerDialog from "./components/PollComposerDialog";
 import DeleteMessageDialog from "./components/DeleteMessageDialog";
 import ChatAvatar from "./components/ChatAvatar";
+import { wallpaperGlow } from "../lib/wallpaper";
 
 // Film-base perforations along the top edge of the lobby.
 const sprockets =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='10'%3E%3Crect x='5' y='2.5' width='8' height='5' rx='1.5' fill='%23f0f1f3' fill-opacity='.8'/%3E%3C/svg%3E\")";
 
-// Soft spotlight wash under a tiled cinema doodle, in the spirit of Telegram's chat wallpapers.
-const wallpaperGlow =
-  "radial-gradient(circle at 12% 8%, hsl(var(--heroui-primary-500) / 0.13), transparent 42%), radial-gradient(circle at 92% 88%, hsl(var(--heroui-warning-500) / 0.11), transparent 48%), radial-gradient(circle at 70% 30%, hsl(var(--heroui-success-500) / 0.06), transparent 40%)";
+// The spotlight wash sits under a tiled cinema doodle, in the spirit of Telegram's chat wallpapers.
 const doodles = {
   maskImage: "url(/patterns/lobby-doodles.svg)",
   WebkitMaskImage: "url(/patterns/lobby-doodles.svg)",
@@ -299,7 +298,7 @@ export default function RoomChat({
           </div>
         </header>
         {status === "ready" && <ChatPinnedBar pinned={pinnedMessages} />}
-        <div className="relative min-h-0 flex-1 bg-canvas" style={{ backgroundImage: wallpaperGlow }}>
+        <div className="relative min-h-0 flex-1 bg-canvas" style={{ backgroundImage: wallpaperGlow() }}>
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 bg-ink opacity-[0.07] dark:opacity-[0.06]"
