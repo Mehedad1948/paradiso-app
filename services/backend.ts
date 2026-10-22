@@ -93,14 +93,13 @@ export async function backendRequest<
       error: response.ok ? undefined : message || `HTTP ${response.status}: ${response.statusText}`,
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown fetch error";
-    console.error("backendRequest failed", {
-      host: (() => {
-        try { return new URL(process.env.BASE_API_URL ?? "").host; } catch { return process.env.BASE_API_URL; }
-      })(),
-      path: String(path),
-      cause: error instanceof Error ? error.cause : undefined,
-    });
+    const cause = error instanceof Error ? (error.cause as { code?: string; message?: string } | undefined) : undefined;
+    const reason = cause?.code || cause?.message;
+    let host = process.env.BASE_API_URL;
+    try { host = new URL(host ?? "").host; } catch {}
+    // Never sent to the browser: the BFF replaces messages of failed (5xx) calls.
+    const message = `${error instanceof Error ? error.message : "Unknown fetch error"}${reason ? ` (${reason})` : ""} [host: ${host}]`;
+    console.log("backendRequest failed", String(path), message);
     return {
       result: null,
       response: { ok: false, status: 0, statusText: "", message },
