@@ -12,11 +12,11 @@ import FilmNegatives from "@/components/landing/FilmNegatives";
 import SpecularBorder from "@/components/ui/SpecularBorder";
 import styles from "@/components/landing/CinemaHero.module.css";
 import { fontDisplay } from "@/config/fonts";
+import { seo } from "@/config/seo";
 
+// Inherits the full title, description and OG image from the root layout.
 export const metadata: Metadata = {
-  title: { absolute: "Paradiso — cinema for your circle" },
-  description:
-    "Find your next favorite film, gather your people, and make a night of it with Paradiso.",
+  title: { absolute: seo.title },
 };
 
 // Each verb is finished by a small tag: "Gather your people", etc.

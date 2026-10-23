@@ -5,6 +5,13 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { isAccessTokenValid } from "@/lib/auth/session";
 import { authHref } from "@/lib/auth/redirect";
+import { pageMetadata } from "@/config/seo";
+
+export const metadata = pageMetadata(
+  "You're invited",
+  "You've been invited to a private screening room on Paradiso. Take your seat.",
+  { noIndex: true },
+);
 
 export default function InvitationPage({
   params,

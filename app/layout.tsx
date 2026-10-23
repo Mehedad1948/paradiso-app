@@ -3,16 +3,37 @@ import type { Metadata, Viewport } from "next";
 import clsx from "clsx";
 
 import { siteConfig } from "@/config/site";
+import { seo, siteUrl } from "@/config/seo";
 import { fontSans } from "@/config/fonts";
 import Providers from "./providers";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: {
-    default: siteConfig.name,
-    template: `%s - ${siteConfig.name}`,
+    default: seo.title,
+    template: `%s | ${siteConfig.name}`,
   },
-  description: siteConfig.description,
+  description: seo.description,
   applicationName: siteConfig.name,
+  keywords: [...seo.keywords],
+  authors: [{ name: siteConfig.name }],
+  creator: siteConfig.name,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: siteConfig.name,
+    locale: "en_US",
+    url: "/",
+    title: seo.title,
+    description: seo.description,
+    images: [seo.ogImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: seo.title,
+    description: seo.description,
+    images: [seo.ogImage.url],
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
