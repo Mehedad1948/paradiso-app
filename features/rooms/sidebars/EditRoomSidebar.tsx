@@ -171,7 +171,7 @@ export default function EditRoomSidebar({
           maxLength={2000}
           isDisabled={busy}
         />
-        <div className="flex items-end gap-3">
+        {/* <div className="flex items-end gap-3">
           <Input
             label="Theme color"
             labelPlacement="outside"
@@ -193,7 +193,7 @@ export default function EditRoomSidebar({
             disabled={busy}
             onChange={(event) => setThemeColor(event.target.value)}
           />
-        </div>
+        </div> */}
         <Switch
           isSelected={isPublic}
           onValueChange={setIsPublic}

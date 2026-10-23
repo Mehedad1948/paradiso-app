@@ -14,6 +14,11 @@ import {
 } from "@/hooks/queries/useInvitationQueries";
 import QueryError from "@/components/ui/QueryError";
 
+// The backend builds `inviteUrl` from its own base URL, which can be wrong for this
+// frontend, so derive the link from the token and the origin the app is served from.
+const inviteLinkUrl = (token: string) =>
+  `${process.env.NEXT_PUBLIC_PRODUCT_BASE_URL}/invitation/${encodeURIComponent(token)}`;
+
 export default function InviteByLink({ roomId }: { roomId: string }) {
   const [page, setPage] = useState(1);
   const { data, isLoading, isError, error, refetch, isPlaceholderData } =
@@ -54,26 +59,29 @@ export default function InviteByLink({ roomId }: { roomId: string }) {
           <Spinner />
         ) : data?.data && data?.data.length > 0 ? (
           <Accordion>
-            {data.data.map((item, index) => (
-              <AccordionItem
-                key={item.id}
-                aria-label={item.inviteUrl}
-                title={
-                  <div className="line-clamp-1 flex items-center gap-2">
-                    {index + 1}.<p className="line-clamp-1">{item.inviteUrl}</p>
-                  </div>
-                }
-              >
-                <CopierButton
-                  content={item.inviteUrl}
-                  aria-label="Copy invitation link"
-                  className="flex items-center gap-2 mb-4 text-primary-500"
+            {data.data.map((item, index) => {
+              const url = inviteLinkUrl(item.token);
+              return (
+                <AccordionItem
+                  key={item.id}
+                  aria-label={url}
+                  title={
+                    <div className="line-clamp-1 flex items-center gap-2">
+                      {index + 1}.<p className="line-clamp-1">{url}</p>
+                    </div>
+                  }
                 >
-                  <Copy className="w-4" /> Copy invitation link
-                </CopierButton>
-                <InviteLinkItem link={item} roomId={roomId} />
-              </AccordionItem>
-            ))}
+                  <CopierButton
+                    content={url}
+                    aria-label="Copy invitation link"
+                    className="flex items-center gap-2 mb-4 text-primary-500"
+                  >
+                    <Copy className="w-4" /> Copy invitation link
+                  </CopierButton>
+                  <InviteLinkItem link={item} roomId={roomId} />
+                </AccordionItem>
+              );
+            })}
           </Accordion>
         ) : (
           <Button
