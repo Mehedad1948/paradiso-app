@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Button } from "@heroui/button";
 import { Tab, Tabs } from "@heroui/tabs";
 import { KeyRound, UserRound } from "lucide-react";
-import Sidebar from "@/components/ui/Sidebar";
+import Sidebar, { useSidebar } from "@/components/ui/Sidebar";
 import type { CurrentUser } from "@/types/user";
 import ProfileForm from "./components/ProfileForm";
 import PasswordForm from "./components/PasswordForm";
@@ -23,6 +23,7 @@ export default function ProfileSidebar({
   user: CurrentUser;
   onClose: () => void;
 }) {
+  const sidebar = useSidebar(onClose);
   const [section, setSection] = useState<Section>("profile");
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState<Record<Section, boolean>>({
@@ -38,13 +39,14 @@ export default function ProfileSidebar({
 
   return (
     <Sidebar
+      ref={sidebar.ref}
       title="Your account"
       description={user.email}
       onClose={onClose}
       busy={busy}
       footer={
         <>
-          <Button variant="light" isDisabled={busy} onPress={onClose}>
+          <Button variant="light" isDisabled={busy} onPress={sidebar.close}>
             Cancel
           </Button>
           <Button
@@ -93,7 +95,7 @@ export default function ProfileSidebar({
           user={user}
           onBusyChange={setBusy}
           onReadyChange={onReady.profile}
-          onSaved={onClose}
+          onSaved={sidebar.close}
         />
       </div>
       <div hidden={section !== "password"}>
@@ -101,7 +103,7 @@ export default function ProfileSidebar({
           id={forms.password.id}
           onBusyChange={setBusy}
           onReadyChange={onReady.password}
-          onSaved={onClose}
+          onSaved={sidebar.close}
         />
       </div>
     </Sidebar>

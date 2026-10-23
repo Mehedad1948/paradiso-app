@@ -6,7 +6,8 @@ import { Input, Textarea } from "@heroui/input";
 import { Switch } from "@heroui/switch";
 import { addToast } from "@heroui/toast";
 import { ImageUp, Trash2 } from "lucide-react";
-import Sidebar from "@/components/ui/Sidebar";
+import Sidebar, { useSidebar } from "@/components/ui/Sidebar";
+import { layerColors } from "@/components/ui/StaggeredDrawer";
 import { useUpdateRoom, useUploadImage } from "@/hooks/queries/useRoomQueries";
 import type { PanelRoom } from "@/lib/api/panel";
 import type { UpdateRoomInputs } from "@/types/rooms";
@@ -22,6 +23,7 @@ export default function EditRoomSidebar({
   room: PanelRoom;
   onClose: () => void;
 }) {
+  const sidebar = useSidebar(onClose);
   const roomId = String(room.id);
   const [name, setName] = useState(room.name);
   const [description, setDescription] = useState(room.description ?? "");
@@ -41,7 +43,7 @@ export default function EditRoomSidebar({
   const { execute: updateRoom, isPending: isSaving } = useUpdateRoom(roomId, {
     onSuccess: () => {
       addToast({ title: "Room updated", color: "success" });
-      onClose();
+      sidebar.close();
     },
   });
   const { execute: uploadImage, isPending: isUploading } = useUploadImage({
@@ -67,19 +69,21 @@ export default function EditRoomSidebar({
     if ((themeColor || null) !== room.themeColor)
       changes.themeColor = themeColor || null;
     if (image !== undefined) changes.image = image;
-    if (!Object.keys(changes).length) return onClose();
+    if (!Object.keys(changes).length) return sidebar.close();
     updateRoom({ roomId, ...changes });
   }
 
   return (
     <Sidebar
+      ref={sidebar.ref}
+      colors={layerColors(room.themeColor)}
       title="Edit room"
       description="Update how this room appears to its members."
       onClose={onClose}
       busy={busy}
       footer={
         <>
-          <Button variant="light" isDisabled={busy} onPress={onClose}>
+          <Button variant="light" isDisabled={busy} onPress={sidebar.close}>
             Cancel
           </Button>
           <Button

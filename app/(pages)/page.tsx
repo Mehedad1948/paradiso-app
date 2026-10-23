@@ -8,7 +8,7 @@ import CommunityShowcase from "@/components/landing/CommunityShowcase";
 import JuryReveal from "@/components/landing/JuryReveal";
 import LandingLoader from "@/components/landing/LandingLoader";
 import FilmNegatives from "@/components/landing/FilmNegatives";
-import StarBorder from "@/components/ui/StarBorder";
+import SpecularBorder from "@/components/ui/SpecularBorder";
 import styles from "@/components/landing/CinemaHero.module.css";
 import { fontDisplay } from "@/config/fonts";
 
@@ -57,11 +57,11 @@ export default async function Home() {
               A place to find your next favorite film, gather your people, and
               make a night of it.
             </p>
-            <StarBorder className="max-sm:w-full">
-              <Link href="/rooms" className="flex items-center justify-between gap-11 rounded-md bg-ink px-6 py-4 text-[15px] font-semibold text-canvas transition-colors hover:bg-accent hover:text-on-accent [&>svg]:transition-transform hover:[&>svg]:translate-x-0.5 hover:[&>svg]:-translate-y-0.5 motion-reduce:transition-none">
+            <SpecularBorder radius={14} className="max-sm:w-full">
+              <Link href="/rooms" className="flex w-full items-center justify-between gap-11 rounded-[inherit] bg-ink/[0.04] px-6 py-4 text-[15px] font-semibold text-ink shadow-[0_10px_24px_-14px_rgba(0,0,0,0.45)] backdrop-blur-sm transition-[background-color,transform] duration-200 hover:bg-ink/[0.08] active:scale-[0.97] [&>svg]:transition-transform hover:[&>svg]:translate-x-0.5 hover:[&>svg]:-translate-y-0.5 motion-reduce:transition-none">
                 Enter dashboard <ArrowUpRight size={21} aria-hidden="true" />
               </Link>
-            </StarBorder>
+            </SpecularBorder>
           </div>
         </div>
       </section>

@@ -1,18 +1,9 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Drawer, DrawerContent } from "@heroui/drawer";
+import { useCallback, useEffect, useRef } from "react";
+import StaggeredDrawer, { layerColors, type StaggeredDrawerHandle } from "@/components/ui/StaggeredDrawer";
 import type { PanelRoom } from "@/lib/api/panel";
 import type { User } from "@/types/user";
 import RoomChat from "./RoomChat";
-
-const EXIT_MS = 220;
-
-const motionProps = {
-  variants: {
-    enter: { x: 0, transition: { duration: 0.26, ease: [0.22, 1, 0.36, 1] as const } },
-    exit: { x: "100%", transition: { duration: EXIT_MS / 1000, ease: [0.4, 0, 1, 1] as const } },
-  },
-};
 
 /** The lobby as a side panel: half the screen on desktop (within limits), full width on phones. */
 export default function ChatSidebar({
@@ -26,15 +17,12 @@ export default function ChatSidebar({
   onClose: () => void;
   onShowInWatchlist: (title: string) => void;
 }) {
-  // Close in two steps so the exit transition can play: flip `isOpen`, then let the parent
-  // unmount the drawer once the animation is done.
-  const [open, setOpen] = useState(true);
-  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  // The drawer plays its exit animation, then calls `onClosed` so the parent can unmount it.
+  const drawer = useRef<StaggeredDrawerHandle>(null);
   const onClose = useCallback(() => {
-    setOpen(false);
-    timer.current ??= setTimeout(onClosed, EXIT_MS);
+    if (drawer.current) drawer.current.close();
+    else onClosed();
   }, [onClosed]);
-  useEffect(() => () => clearTimeout(timer.current), []);
 
   // The drawer's own outside-click dismissal also fires for clicks inside portaled popovers
   // (message action menu, emoji picker), closing the whole chat. Dismiss only on a real
@@ -53,24 +41,17 @@ export default function ChatSidebar({
   }, [onClose]);
 
   return (
-    <Drawer
-      isOpen={open}
+    <StaggeredDrawer
+      ref={drawer}
       size="full"
       placement="right"
       isDismissable={false}
-      motionProps={motionProps}
-      onClose={onClose}
-      hideCloseButton
-      classNames={{
-        backdrop: "bg-black/25",
-        base: "w-full overflow-hidden border-l border-line bg-elevated text-ink shadow-[0_24px_80px_rgb(0_0_0_/_22%)] sm:w-[50vw] sm:min-w-[520px] sm:max-w-[760px]",
-      }}
+      colors={layerColors(room.themeColor)}
+      onClose={onClosed}
+      backdropClassName="bg-black/25"
+      className="w-full sm:w-[50vw] sm:min-w-[520px] sm:max-w-[760px]"
     >
-      <DrawerContent>
-        {() => (
-          <RoomChat room={room} me={me} onClose={onClose} onShowInWatchlist={onShowInWatchlist} />
-        )}
-      </DrawerContent>
-    </Drawer>
+      <RoomChat room={room} me={me} onClose={onClose} onShowInWatchlist={onShowInWatchlist} />
+    </StaggeredDrawer>
   );
 }

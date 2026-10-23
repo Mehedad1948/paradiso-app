@@ -1,5 +1,6 @@
 "use client";
 import Sidebar from "@/components/ui/Sidebar";
+import { layerColors } from "@/components/ui/StaggeredDrawer";
 import { useViewer } from "./hooks/useViewer";
 import FeedList from "./components/FeedList";
 import { useState } from "react";
@@ -14,7 +15,7 @@ export default function RoomDiscussion({
   canPost,
   onClose,
 }: {
-  room: { id: number; name: string };
+  room: { id: number; name: string; themeColor?: string | null };
   canPost: boolean;
   onClose: () => void;
 }) {
@@ -25,6 +26,7 @@ export default function RoomDiscussion({
       title="Discussion"
       description={`Recommendations shared in ${room.name}.`}
       size="xl"
+      colors={layerColors(room.themeColor)}
       onClose={onClose}
     >
       <div className="-mx-6 -my-6">

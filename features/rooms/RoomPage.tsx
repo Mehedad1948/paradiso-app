@@ -8,6 +8,7 @@ import { useMe } from "@/hooks/queries/useMe";
 import { useRoom, useRoomRatings } from "@/hooks/queries/useRoomQueries";
 import { useChatUnread } from "@/hooks/queries/useChatQueries";
 import QueryError from "@/components/ui/QueryError";
+import ShinyText from "@/components/ui/ShinyText";
 import { useRoomUrl } from "./hooks/useRoomUrl";
 import { useRoomDialog } from "./hooks/useRoomDialog";
 import RoomToolbar from "./components/RoomToolbar";
@@ -99,7 +100,17 @@ function RoomPage({ roomId }: { roomId: string }) {
       <div className="mb-10 flex items-end justify-between gap-6 border-b border-line pb-9 max-sm:mb-7 max-sm:flex-col max-sm:items-start max-sm:pb-7">
         <div>
           <p className="mb-3.5 text-sm font-semibold uppercase tracking-[0.09em] text-accent">The screening room</p>
-          <h1 className="mb-4 break-words text-[clamp(36px,4.8vw,68px)] tracking-[-0.06em] [&_em]:font-serif [&_em]:font-normal max-sm:text-[38px]">{room.data?.name || "Room"}</h1>
+          <h1 className="mb-4 break-words text-[clamp(36px,4.8vw,68px)] tracking-[-0.06em] [&_em]:font-serif [&_em]:font-normal max-sm:text-[38px]">
+            <ShinyText
+              text={room.data?.name || "Room"}
+              color="hsl(var(--heroui-foreground))"
+              shineColor="hsl(var(--heroui-primary-500))"
+              speed={3}
+              delay={1.5}
+              shineWidth={35}
+              glow={0.4}
+            />
+          </h1>
           <p className="max-w-[540px] text-base text-muted">
             {room.data?.description ||
               "A shared watchlist. A few different opinions. Your next great film."}

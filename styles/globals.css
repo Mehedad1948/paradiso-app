@@ -242,3 +242,129 @@
   background: radial-gradient(circle, #fff 0 18%, #e879c6 42%, #a855f7 60%, transparent 74%);
   filter: drop-shadow(0 0 1.5px rgb(192 132 252 / 45%));
 }
+
+/* Top navigation progress — a reel of warm projector light: oxblood → ember → amber → cream. */
+.nav-progress {
+  --reel-oxblood: #5c1421;
+  --reel-crimson: #a3282f;
+  --reel-ember: #d4622a;
+  --reel-amber: #e8a93c;
+  --reel-cream: #f7e4b0;
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 9999;
+  height: 5px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 450ms ease 200ms;
+}
+.nav-progress[data-phase="loading"] {
+  opacity: 1;
+  transition: opacity 120ms ease;
+}
+.nav-progress[data-phase="idle"] {
+  transition: none;
+}
+.nav-progress-bar {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 3px;
+  transform: translateX(calc((var(--nav-progress, 0) - 1) * 100%));
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  background: linear-gradient(
+    90deg,
+    var(--reel-oxblood) 0%,
+    var(--reel-crimson) 24%,
+    var(--reel-ember) 50%,
+    var(--reel-amber) 76%,
+    var(--reel-cream) 100%
+  );
+  box-shadow:
+    0 0 6px rgb(212 98 42 / 45%),
+    0 1px 14px rgb(232 169 60 / 25%);
+}
+.nav-progress[data-phase="idle"] .nav-progress-bar {
+  transition: none;
+}
+/* A glint of light sweeping along the film. */
+.nav-progress-sheen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.nav-progress-sheen::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 30%;
+  background: linear-gradient(90deg, transparent, rgb(255 244 214 / 70%), transparent);
+  animation: nav-sheen 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+/* The projector lamp at the leading edge. */
+.nav-progress-head {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 90px;
+  height: 3px;
+  translate: 0 -50%;
+  background: radial-gradient(ellipse at right, var(--reel-cream), rgb(232 169 60 / 60%) 35%, transparent 70%);
+  filter: blur(1px);
+  animation: nav-flicker 2.4s steps(1) infinite;
+}
+.nav-progress-head::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -3px;
+  width: 7px;
+  height: 7px;
+  translate: 0 -50%;
+  border-radius: 9999px;
+  background: #fff8e6;
+  box-shadow:
+    0 0 8px 2px var(--reel-amber),
+    0 0 22px 6px rgb(212 98 42 / 55%);
+}
+/* Faint sprocket perforations running beneath, like film through a gate. */
+.nav-progress-film {
+  position: absolute;
+  inset: 4px 0 auto 0;
+  height: 1px;
+  clip-path: inset(0 calc((1 - var(--nav-progress, 0)) * 100%) 0 0);
+  transition: clip-path 260ms cubic-bezier(0.22, 1, 0.36, 1);
+  background: repeating-linear-gradient(
+    90deg,
+    rgb(232 169 60 / 55%) 0 6px,
+    transparent 6px 12px
+  );
+  animation: nav-film 0.5s linear infinite;
+}
+:root:not(.dark) .nav-progress-film {
+  background: repeating-linear-gradient(90deg, rgb(163 40 47 / 45%) 0 6px, transparent 6px 12px);
+}
+.nav-progress[data-phase="idle"] .nav-progress-film {
+  transition: none;
+}
+@keyframes nav-sheen {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(380%); }
+}
+@keyframes nav-film {
+  to { background-position: 12px 0; }
+}
+@keyframes nav-flicker {
+  0%, 100% { opacity: 1; }
+  37% { opacity: 0.82; }
+  41% { opacity: 1; }
+  68% { opacity: 0.9; }
+  72% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nav-progress-sheen::before,
+  .nav-progress-head,
+  .nav-progress-film {
+    animation: none;
+  }
+}

@@ -1,15 +1,23 @@
 "use client";
-import type { ReactNode } from "react";
-import {
-  Drawer,
-  DrawerBody,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-} from "@heroui/drawer";
+import { useCallback, useRef, type ReactNode, type RefObject } from "react";
+import { DrawerBody, DrawerFooter, DrawerHeader } from "@heroui/drawer";
+import { X } from "lucide-react";
+import StaggeredDrawer, { type StaggeredDrawerHandle } from "./StaggeredDrawer";
 
-/** Standard side panel. Use `busy` while a request is in flight to lock dismissal. */
+/** Closes a sidebar through its exit animation; falls back to `onClose` if it isn't mounted. */
+export function useSidebar(onClose: () => void) {
+  const ref = useRef<StaggeredDrawerHandle>(null);
+  const close = useCallback(() => {
+    if (ref.current) ref.current.close();
+    else onClose();
+  }, [onClose]);
+  return { ref, close };
+}
+
+/** Standard side panel. Use `busy` while a request is in flight to lock dismissal. Pass the
+ * `ref` from `useSidebar` and close with its `close` to animate closes started from inside. */
 export default function Sidebar({
+  ref,
   title,
   description,
   children,
@@ -18,7 +26,9 @@ export default function Sidebar({
   busy = false,
   placement = "right",
   size = "md",
+  colors,
 }: {
+  ref?: RefObject<StaggeredDrawerHandle | null>;
   title: ReactNode;
   description?: ReactNode;
   children: ReactNode;
@@ -27,39 +37,37 @@ export default function Sidebar({
   busy?: boolean;
   placement?: "left" | "right";
   size?: "sm" | "md" | "lg" | "xl";
+  colors?: string[];
 }) {
+  const own = useSidebar(onClose);
+  const drawer = ref ?? own.ref;
+  const close = () => (drawer.current ? drawer.current.close() : onClose());
   return (
-    <Drawer
-      isOpen
+    <StaggeredDrawer
+      ref={drawer}
       placement={placement}
       size={size}
+      colors={colors}
       onClose={onClose}
       isDismissable={!busy}
       isKeyboardDismissDisabled={busy}
-      hideCloseButton={busy}
-      classNames={{
-        base: "rounded-none border-l border-line bg-elevated text-ink shadow-[0_24px_80px_rgb(0_0_0_/_16%)] sm:m-0",
-        closeButton: "top-5 right-5 text-muted hover:text-ink",
-      }}
     >
-      <DrawerContent>
-        {() => (
-          <>
-            <DrawerHeader className="flex flex-col gap-1.5 border-b border-line px-6 pb-5 pt-6">
-              <span className="text-2xl font-semibold tracking-[-0.04em]">{title}</span>
-              {description && (
-                <span className="text-sm font-normal text-muted">{description}</span>
-              )}
-            </DrawerHeader>
-            <DrawerBody className="px-6 py-6 text-base">{children}</DrawerBody>
-            {footer && (
-              <DrawerFooter className="border-t border-line px-6 py-4">
-                {footer}
-              </DrawerFooter>
-            )}
-          </>
+      <DrawerHeader className="relative flex flex-col gap-1.5 border-b border-line px-6 pb-5 pt-6 pr-14">
+        <span className="text-2xl font-semibold tracking-[-0.04em]">{title}</span>
+        {description && <span className="text-sm font-normal text-muted">{description}</span>}
+        {!busy && (
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={close}
+            className="absolute right-5 top-5 rounded-full p-1.5 text-muted transition-colors hover:bg-surface hover:text-ink"
+          >
+            <X size={18} aria-hidden="true" />
+          </button>
         )}
-      </DrawerContent>
-    </Drawer>
+      </DrawerHeader>
+      <DrawerBody className="px-6 py-6 text-base">{children}</DrawerBody>
+      {footer && <DrawerFooter className="border-t border-line px-6 py-4">{footer}</DrawerFooter>}
+    </StaggeredDrawer>
   );
 }
