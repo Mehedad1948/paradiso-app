@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import clsx from "clsx";
 import { Button } from "@heroui/button";
 import { ArrowUpRight, Film, Megaphone, PenLine, Star, Users, X } from "lucide-react";
-import TintedAvatar from "./components/TintedAvatar";
+import UserAvatar from "@/components/ui/UserAvatar";
 import { useProfile } from "@/hooks/queries/useCommunityQueries";
 import type { FeedScope } from "@/types/community";
 import { useViewer, type Viewer } from "./hooks/useViewer";
@@ -192,7 +192,7 @@ function ViewerCard({ viewer }: { viewer: Viewer }) {
   return (
     <div className="rounded-[10px] border border-line bg-elevated p-5">
       <div className="flex items-center gap-3">
-        <TintedAvatar user={viewer.self!} className="h-12 w-12" />
+        <UserAvatar name={viewer.self!.username} src={viewer.self!.avatar} size={48} />
         <div className="min-w-0">
           <p className="truncate font-semibold">{me.username}</p>
           <p className="text-sm text-muted">

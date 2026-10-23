@@ -9,7 +9,7 @@ import { useInfiniteSentinel } from "../hooks/useInfiniteSentinel";
 import type { Viewer } from "../hooks/useViewer";
 import { profileHref } from "../format";
 import FollowButton from "./FollowButton";
-import UserAvatar from "./UserAvatar";
+import UserAvatar from "@/components/ui/UserAvatar";
 
 export default function PeopleSidebar({
   userId,
@@ -52,7 +52,7 @@ export default function PeopleSidebar({
           <ul className="-mx-2 flex flex-col">
             {list.map((user) => (
               <li key={user.id} className="flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-surface">
-                <UserAvatar user={user} className="h-10 w-10" />
+                <UserAvatar name={user.username} src={user.avatar} size={40} href={profileHref(user.id)} />
                 <Link href={profileHref(user.id)} onClick={sidebar.close} className="min-w-0 flex-1 truncate font-semibold hover:underline">
                   {user.username}
                 </Link>

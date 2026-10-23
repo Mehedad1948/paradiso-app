@@ -1,7 +1,7 @@
 "use client";
 import { memo, useState } from "react";
 import clsx from "clsx";
-import ChatAvatar from "./ChatAvatar";
+import UserAvatar from "@/components/ui/UserAvatar";
 import { addToast } from "@heroui/toast";
 import {
   Ban,
@@ -114,7 +114,7 @@ export default memo(function ChatMessageItem({
               {timeOf(message.createdAt)}
             </span>
           ) : (
-            <ChatAvatar user={message.author} className="size-9 text-sm font-semibold" />
+            <UserAvatar name={message.author.username} src={message.author.avatar} size="sm" />
           )}
         </div>
       )}

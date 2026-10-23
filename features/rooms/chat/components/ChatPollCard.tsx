@@ -1,7 +1,7 @@
 "use client";
 import clsx from "clsx";
 import { AvatarGroup } from "@heroui/avatar";
-import ChatAvatar from "./ChatAvatar";
+import UserAvatar from "@/components/ui/UserAvatar";
 import { Check, EyeOff, Lock, Trophy, Vote } from "lucide-react";
 import { isPollClosed } from "@/lib/chat/timeline";
 import type { ChatMessage, ChatPoll } from "@/types/chat";
@@ -129,10 +129,12 @@ export default function ChatPollCard({
                       )}
                     >
                       {voters.map((voter) => (
-                        <ChatAvatar
+                        <UserAvatar
                           key={voter!.id}
-                          user={voter!}
-                          className="size-5 text-[10px] font-semibold ring-1 ring-surface"
+                          name={voter!.username}
+                          src={voter!.avatar}
+                          size={20}
+                          className="ring-1 ring-surface"
                         />
                       ))}
                     </AvatarGroup>

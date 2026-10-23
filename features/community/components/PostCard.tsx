@@ -11,7 +11,7 @@ import { useDeletePost } from "@/hooks/queries/useCommunityQueries";
 import type { Viewer } from "../hooks/useViewer";
 import { usePostOverlay } from "../hooks/usePostOverlay";
 import { ago, fullDate, isEdited, postHref, profileHref } from "../format";
-import UserAvatar from "./UserAvatar";
+import UserAvatar from "@/components/ui/UserAvatar";
 import PostMedia from "./PostMedia";
 import PostActions from "./PostActions";
 import PromotionCard from "./PromotionCard";
@@ -77,7 +77,7 @@ function PostCard({
             "cursor-pointer transition-colors hover:bg-surface/40 motion-safe:animate-community-rise",
         )}
       >
-        <UserAvatar user={post.author} />
+        <UserAvatar name={post.author.username} src={post.author.avatar} href={profileHref(post.author.id)} />
         <div className="min-w-0">
           <header className="flex min-w-0 items-center gap-1.5 text-[15px] leading-snug">
             <Link

@@ -3,7 +3,7 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import clsx from "clsx";
 import { Clapperboard, ImagePlus, Star } from "lucide-react";
-import TintedAvatar from "./TintedAvatar";
+import UserAvatar from "@/components/ui/UserAvatar";
 import type { Viewer } from "../hooks/useViewer";
 import SignInLink from "./SignInLink";
 
@@ -40,7 +40,7 @@ export default function ComposerPrompt({
   return (
     <>
       <div className={frame}>
-        <TintedAvatar user={viewer.self!} className="h-11 w-11 shrink-0" />
+        <UserAvatar name={viewer.self!.username} src={viewer.self!.avatar} className="shrink-0" />
         <button
           type="button"
           onClick={() => setOpen(true)}

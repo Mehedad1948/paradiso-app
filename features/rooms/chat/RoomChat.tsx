@@ -25,7 +25,7 @@ import ChatPinnedBar from "./components/ChatPinnedBar";
 import ChatComposer, { type ComposerHandle } from "./components/ChatComposer";
 import PollComposerDialog from "./components/PollComposerDialog";
 import DeleteMessageDialog from "./components/DeleteMessageDialog";
-import ChatAvatar from "./components/ChatAvatar";
+import UserAvatar from "@/components/ui/UserAvatar";
 import { wallpaperGlow } from "../lib/wallpaper";
 
 // Film-base perforations along the top edge of the lobby.
@@ -284,7 +284,7 @@ export default function RoomChat({
             </span>
             <AvatarGroup max={4} size="sm" className="max-sm:hidden" aria-label={`${people.length} people in the room`}>
               {people.map((person) => (
-                <ChatAvatar key={person.id} user={person} className="text-sm font-semibold ring-2 ring-elevated" />
+                <UserAvatar key={person.id} name={person.username} src={person.avatar} size="sm" className="ring-2 ring-elevated" />
               ))}
             </AvatarGroup>
             <button

@@ -9,7 +9,7 @@ import { CHAT_LIMITS, type ChatMessage } from "@/types/chat";
 import MoviePoster from "../../components/MoviePoster";
 import { useChat } from "../ChatContext";
 import { summarize } from "../format";
-import ChatAvatar from "./ChatAvatar";
+import UserAvatar from "@/components/ui/UserAvatar";
 import EmojiPicker from "./EmojiPicker";
 import MoviePicker, { type Attachment } from "./MoviePicker";
 
@@ -238,7 +238,7 @@ export default forwardRef<
                   index === mention.index && "bg-surface",
                 )}
               >
-                <ChatAvatar user={user} className="size-6 shrink-0 text-xs font-semibold" />
+                <UserAvatar name={user.username} src={user.avatar} size="xs" className="shrink-0" />
                 <span className="truncate font-medium">@{user.username}</span>
               </button>
             ))}

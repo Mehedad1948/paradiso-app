@@ -3,9 +3,9 @@
 
 import { useRef, useEffect } from 'react';
 import type { CinemaScene } from './cinema-scene';
-import { Avatar } from '@heroui/avatar';
 import { ArrowUpRight } from 'lucide-react';
 import { posters } from '@/config/posters';
+import UserAvatar from '@/components/ui/UserAvatar';
 
 const InvitationCard = ({
   roomImage = posters.fellowship,
@@ -52,7 +52,7 @@ const InvitationCard = ({
               <h1 className="mb-5 break-words text-[clamp(32px,4.2vw,52px)] font-semibold tracking-[-0.055em]">{roomName}</h1>
               <p className="mb-7 text-base leading-[1.7] text-muted">Great stories deserve good company. You’re invited to join the circle.</p>
               <div className="mb-8 flex w-full items-center gap-4 rounded-lg border border-line bg-surface p-4">
-                <Avatar src={inviterAvatar} name={inviterName} className="size-12 shrink-0" />
+                <UserAvatar src={inviterAvatar} name={inviterName} size={48} className="shrink-0" />
                 <div><p className="text-sm text-muted">Invited by</p><p className="break-words text-[17px] font-semibold text-ink">{inviterName}</p></div>
               </div>
               <div className="flex w-full flex-wrap gap-3 max-[480px]:flex-col">

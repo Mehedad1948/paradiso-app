@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { Button } from "@heroui/button";
 import { ArrowLeft, Film, PenLine } from "lucide-react";
 import QueryError from "@/components/ui/QueryError";
-import TintedAvatar from "./components/TintedAvatar";
+import UserAvatar from "@/components/ui/UserAvatar";
 import { BffError } from "@/lib/api/client";
 import { useProfile } from "@/hooks/queries/useCommunityQueries";
 import { useViewer } from "./hooks/useViewer";
@@ -62,9 +62,9 @@ function ProfilePage({ userId }: { userId: number }) {
           <div className="mb-10 flex items-end justify-between gap-6 border-b border-line pb-9 max-sm:mb-7 max-sm:flex-col max-sm:items-start max-sm:pb-7">
             <div className="flex min-w-0 items-center gap-6 max-sm:gap-4">
               {profile.data ? (
-                <TintedAvatar user={profile.data} className="h-24 w-24 shrink-0 text-3xl max-sm:h-[72px] max-sm:w-[72px]" />
+                <UserAvatar name={profile.data.username} src={profile.data.avatar} size="xl" className="shrink-0" />
               ) : (
-                <span className="h-24 w-24 shrink-0 rounded-full bg-surface motion-safe:animate-pulse max-sm:h-[72px] max-sm:w-[72px]" />
+                <span className="h-[88px] w-[88px] shrink-0 rounded-full bg-surface motion-safe:animate-pulse" />
               )}
               <div className="min-w-0">
                 <p className="mb-2 text-sm font-semibold uppercase tracking-[0.09em] text-accent">

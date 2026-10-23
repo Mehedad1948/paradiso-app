@@ -1,5 +1,5 @@
 "use client";
-import { Avatar } from "@heroui/avatar";
+import UserAvatar from "@/components/ui/UserAvatar";
 import { useMe } from "@/hooks/queries/useMe";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
@@ -52,9 +52,10 @@ export default function Header() {
                 aria-label="Open your account"
                 className="group flex items-center gap-2.5 rounded-full py-0.5 pl-0.5 pr-1 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent max-md:pr-0.5"
               >
-                <Avatar
+                <UserAvatar
                   name={user.username}
-                  src={user.avatar ?? undefined}
+                  src={user.avatar}
+                  size={40}
                   alt=""
                   className="ring-1 ring-line transition-shadow group-hover:ring-ink/40"
                 />

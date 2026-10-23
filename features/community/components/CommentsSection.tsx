@@ -8,7 +8,6 @@ import { Spinner } from "@heroui/spinner";
 import { Tooltip } from "@heroui/tooltip";
 import { MessageCircle, Trash2 } from "lucide-react";
 import QueryError from "@/components/ui/QueryError";
-import TintedAvatar from "./TintedAvatar";
 import {
   useComments,
   useCreateComment,
@@ -21,7 +20,7 @@ import type { Viewer } from "../hooks/useViewer";
 import { ago, fullDate, plural, profileHref } from "../format";
 import ConfirmDialog from "./ConfirmDialog";
 import SignInLink from "./SignInLink";
-import UserAvatar from "./UserAvatar";
+import UserAvatar from "@/components/ui/UserAvatar";
 
 function CommentBox({ post, viewer }: { post: CommunityPost; viewer: Viewer }) {
   const [text, setText] = useState("");
@@ -50,7 +49,7 @@ function CommentBox({ post, viewer }: { post: CommunityPost; viewer: Viewer }) {
 
   return (
     <div className="grid grid-cols-[44px_minmax(0,1fr)] gap-x-3.5 px-5 py-4 sm:px-6">
-      <TintedAvatar user={viewer.self!} className="h-11 w-11" />
+      <UserAvatar name={viewer.self!.username} src={viewer.self!.avatar} />
       <div>
         <Textarea
           aria-label="Add a comment"
@@ -99,7 +98,7 @@ function CommentItem({
   const remove = useDeleteComment();
   return (
     <li className="grid grid-cols-[44px_minmax(0,1fr)] gap-x-3.5 px-5 py-4 sm:px-6 motion-safe:animate-community-rise">
-      <UserAvatar user={comment.author} className="h-10 w-10" />
+      <UserAvatar name={comment.author.username} src={comment.author.avatar} size={40} href={profileHref(comment.author.id)} />
       <div className="min-w-0">
         <div className="flex min-w-0 items-center gap-1.5 text-[15px] leading-snug">
           <Link href={profileHref(comment.author.id)} className="truncate font-semibold hover:underline">
