@@ -7,6 +7,7 @@ export interface CircularCarouselItem {
   alt?: string;
   title?: string;
   subtitle?: string;
+  eyebrow?: string;
 }
 
 export type CircularCarouselPreset = 'cylinder' | 'orbit' | 'wheel' | 'panorama';
@@ -39,6 +40,7 @@ export interface CircularCarouselProps {
   innerShade?: number;
   cornerRadius?: number;
   captions?: boolean;
+  overlay?: boolean;
   onChange?: (index: number) => void;
   onItemClick?: (item: CircularCarouselItem, index: number) => void;
   className?: string;
@@ -356,6 +358,7 @@ const CircularCarousel = ({
   innerShade = 0.6,
   cornerRadius = 12,
   captions = false,
+  overlay = false,
   onChange,
   onItemClick,
   className = '',
@@ -1027,7 +1030,7 @@ const CircularCarousel = ({
           style={{ height: axis === 'x' ? size : cardH, borderRadius: frameRadius }}
         >
           <img
-            className="pointer-events-none absolute block max-w-none select-none object-cover [-webkit-user-drag:none]"
+            className={`pointer-events-none absolute block max-w-none select-none object-cover [-webkit-user-drag:none] ${overlay ? 'brightness-[0.92] transition-[filter] duration-500 group-hover/card:brightness-110' : ''}`}
             src={item.src}
             alt=""
             draggable={false}
@@ -1044,6 +1047,34 @@ const CircularCarousel = ({
               decoding="async"
               style={{ ...photoStyle, animationDelay: `${Math.round(leaving.delays[index])}ms` }}
             />
+          )}
+          {overlay && !back && (item.title || item.subtitle) && (
+            // Laid out at full card size and offset like the photo, so each strip shows its slice
+            // and the text bends with the card's curve.
+            <div className="pointer-events-none absolute text-white" style={photoStyle}>
+              <div
+                className="absolute inset-x-0 bottom-0 flex h-[62%] flex-col justify-end gap-2 px-5 pb-5 transition-[height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/card:h-[88%]"
+                style={{
+                  background:
+                    'linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.7) 45%, rgba(0,0,0,0) 100%)'
+                }}
+              >
+                {item.eyebrow && (
+                  <span className="truncate font-mono text-[11px] font-extrabold uppercase tracking-[0.14em] text-white/60">
+                    {item.eyebrow}
+                  </span>
+                )}
+                {item.subtitle && (
+                  <p className="line-clamp-3 font-serif text-[19px] italic leading-[1.3] tracking-[-0.01em] group-hover/card:line-clamp-6">
+                    &ldquo;{item.subtitle}&rdquo;
+                  </p>
+                )}
+                {item.title && <span className="text-[13px] font-semibold opacity-75">— {item.title}</span>}
+                <span className="-mb-6 mt-0 border-t border-white/20 pt-0 text-[12px] font-semibold uppercase tracking-[0.12em] opacity-0 transition-all duration-500 group-hover/card:mb-0 group-hover/card:mt-1 group-hover/card:pt-3 group-hover/card:opacity-100">
+                  Read the post →
+                </span>
+              </div>
+            </div>
           )}
           {back && <div className="pointer-events-none absolute inset-0 bg-black opacity-[var(--cc-inner)]" />}
           <div className="pointer-events-none absolute inset-0 bg-[var(--cc-fade)] opacity-[var(--cc-depth,0)]" />
@@ -1098,14 +1129,18 @@ const CircularCarousel = ({
                   ref={element => {
                     cardRefs.current[index] = element;
                   }}
-                  className="absolute left-0 top-0 h-0 w-0 [transform-style:preserve-3d]"
+                  className="group/card absolute left-0 top-0 h-0 w-0 [transform-style:preserve-3d]"
                   data-cc-index={index}
                   role="group"
                   aria-roledescription="slide"
                   aria-label={`${item.title || item.alt || `Image ${index + 1}`}, ${index + 1} of ${count}`}
                 >
-                  {tiles.map(tile => renderTile(item, tile, false, index))}
-                  {layout.backfaces && tiles.map(tile => renderTile(item, tile, true, index))}
+                  <div
+                    className={`absolute left-0 top-0 h-0 w-0 [transform-style:preserve-3d] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${overlay ? 'group-hover/card:[transform:translateZ(36px)]' : ''}`}
+                  >
+                    {tiles.map(tile => renderTile(item, tile, false, index))}
+                    {layout.backfaces && tiles.map(tile => renderTile(item, tile, true, index))}
+                  </div>
                 </div>
               ))}
             </div>

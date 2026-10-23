@@ -16,8 +16,9 @@ function toItem(post: CommunityPost): ShowcaseItem | null {
     postId: post.id,
     src,
     alt: `${post.movie.title} — post by ${post.author.username}`,
+    eyebrow: post.movie.title,
     title: post.author.username,
-    subtitle: quote.length > 70 ? `${quote.slice(0, 67)}…` : quote,
+    subtitle: quote.length > 140 ? `${quote.slice(0, 137)}…` : quote,
   };
 }
 
@@ -28,7 +29,7 @@ export default async function CommunityShowcase() {
 
   // No session token: the cached result is shared by every visitor.
   const { result } = await backendRequest("/community/posts", "get", {
-    query: { limit: 12 },
+    query: { limit: 8 },
     withAuth: false,
   });
   const items = (result?.data ?? []).flatMap((post) => toItem(post) ?? []);

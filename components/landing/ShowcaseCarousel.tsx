@@ -14,10 +14,12 @@ export default function ShowcaseCarousel({ items }: { items: ShowcaseItem[] }) {
     <CircularCarousel
       items={items}
       preset="cylinder"
-      cardWidth={240}
+      cardWidth={320}
       aspectRatio={2 / 3}
+      tilt={-9}
+      speed={8}
       fadeColor="hsl(var(--heroui-background))"
-      captions
+      overlay
       className="h-full w-full"
       onItemClick={(_, index) => router.push(postHref(items[index].postId))}
     />
