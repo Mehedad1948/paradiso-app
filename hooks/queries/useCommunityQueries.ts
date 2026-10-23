@@ -192,7 +192,7 @@ export function useCreatePost() {
         : [
             { kind: "global" },
             { kind: "global", authorId: post.author.id },
-            { kind: "global", movieId: post.movie.id },
+            ...(post.movie ? [{ kind: "global" as const, movieId: post.movie.id }] : []),
           ];
       scopes.forEach((scope) => prepend(client, communityKeys.feed(scope), post));
       client.setQueryData(communityKeys.post(post.id), post);
@@ -220,6 +220,36 @@ export function useDeletePost() {
       mapPosts(client, (post) => (post.id === id ? null : post));
       client.removeQueries({ queryKey: communityKeys.comments(id) });
     },
+  });
+}
+
+/** Optimistic like/dislike: pressing the active reaction again clears it. */
+export function useReact() {
+  const client = useQueryClient();
+  const apply = (postId: number, counts: Pick<CommunityPost, "likeCount" | "dislikeCount" | "myReaction">) =>
+    mapPosts(client, (post) => (post.id === postId ? { ...post, ...counts } : post));
+  return useMutation({
+    mutationFn: communityApi.react,
+    onMutate: ({ postId, value }) => {
+      let previous: Pick<CommunityPost, "likeCount" | "dislikeCount" | "myReaction"> | undefined;
+      mapPosts(client, (post) => {
+        if (post.id !== postId) return post;
+        previous = { likeCount: post.likeCount, dislikeCount: post.dislikeCount, myReaction: post.myReaction };
+        const was = post.myReaction;
+        return {
+          ...post,
+          myReaction: value,
+          likeCount: post.likeCount + (value === 1 ? 1 : 0) - (was === 1 ? 1 : 0),
+          dislikeCount: post.dislikeCount + (value === -1 ? 1 : 0) - (was === -1 ? 1 : 0),
+        };
+      });
+      return { previous };
+    },
+    onError: (error, { postId }, context) => {
+      if (context?.previous) apply(postId, context.previous);
+      toastError(error);
+    },
+    onSuccess: (counts, { postId }) => apply(postId, counts),
   });
 }
 

@@ -201,6 +201,18 @@ export async function handleCommunityRequest({
         return mapResult(await community.update(postId, input), withRoomImage);
       }
     }
+    if (action === "reaction" && path.length === 3) {
+      if (method === "PUT") {
+        auth();
+        const { value } = await data();
+        if (value !== 1 && value !== -1) throw new InputError("Invalid reaction");
+        return community.react(postId, value);
+      }
+      if (method === "DELETE") {
+        auth();
+        return community.removeReaction(postId);
+      }
+    }
     if (action === "comments") {
       if (path.length === 3 && method === "GET")
         return community.comments(postId, cursor(), signal);

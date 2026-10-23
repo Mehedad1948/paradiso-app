@@ -5,7 +5,7 @@ export type CommunityPost = components["schemas"]["CommunityPost"];
 export type CommunityComment = components["schemas"]["CommunityComment"];
 export type CommunityProfile = components["schemas"]["CommunityProfileResponse"];
 export type CommunityUser = components["schemas"]["PublicUser"];
-export type CommunityMovie = CommunityPost["movie"];
+export type CommunityMovie = NonNullable<CommunityPost["movie"]>;
 export type CommunityPromotion = NonNullable<CommunityPost["promotion"]>;
 
 /** Cursor page shared by every community list route. */

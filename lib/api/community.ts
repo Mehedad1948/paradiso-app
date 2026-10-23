@@ -35,6 +35,11 @@ export const communityApi = {
     bffRequest<CommunityPost>(postPath(id), { method: "PATCH", body: json(body) }),
   remove: (id: number) =>
     bffRequest<{ message: string }>(postPath(id), { method: "DELETE" }),
+  react: ({ postId, value }: { postId: number; value: 1 | -1 | null }) =>
+    bffRequest<{ likeCount: number; dislikeCount: number; myReaction: 1 | -1 | null }>(
+      `${postPath(postId)}/reaction`,
+      value === null ? { method: "DELETE" } : { method: "PUT", body: json({ value }) },
+    ),
   comments: (postId: number, cursor: Cursor, signal?: AbortSignal) =>
     bffRequest<CursorPage<CommunityComment>>(
       `${postPath(postId)}/comments${queryString(cursor)}`,

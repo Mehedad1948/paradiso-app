@@ -13,6 +13,7 @@ import { usePostOverlay } from "../hooks/usePostOverlay";
 import { ago, fullDate, isEdited, postHref, profileHref } from "../format";
 import UserAvatar from "./UserAvatar";
 import PostMedia from "./PostMedia";
+import PostActions from "./PostActions";
 import PromotionCard from "./PromotionCard";
 import PostMenu, { copyPostLink } from "./PostMenu";
 import ConfirmDialog from "./ConfirmDialog";
@@ -156,8 +157,28 @@ function PostCard({
             share="morph"
             default="none"
           >
-            <PostMedia post={post} size={detail ? "lg" : "md"} />
+            <PostMedia
+              post={post}
+              size={detail ? "lg" : "md"}
+              actions={<PostActions post={post} viewer={viewer} />}
+            />
           </ViewTransition>
+          {post.quotedPost && (
+            <div className="mt-3 rounded-2xl border border-line p-3">
+              <span className="text-sm font-semibold">{post.quotedPost.author.username}</span>
+              {post.quotedPost.text && (
+                <p className="mt-1 line-clamp-4 whitespace-pre-wrap break-words text-[15px]">
+                  {post.quotedPost.text}
+                </p>
+              )}
+              <PostMedia post={post.quotedPost} size="md" />
+            </div>
+          )}
+          {!post.movie && !post.imageUrl && (
+            <div className="mt-3 flex">
+              <PostActions post={post} viewer={viewer} />
+            </div>
+          )}
           {post.promotion && (
             <PromotionCard promotion={post.promotion} viewer={viewer} />
           )}

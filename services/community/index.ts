@@ -33,6 +33,14 @@ const communityServices = {
   delete(postId: number) {
     return backendRequest(postPath, "delete", { pathParams: { postId } });
   },
+  react(postId: number, value: 1 | -1) {
+    return backendRequest("/community/posts/{postId}/reaction", "put", {
+      pathParams: { postId }, body: { value },
+    });
+  },
+  removeReaction(postId: number) {
+    return backendRequest("/community/posts/{postId}/reaction", "delete", { pathParams: { postId } });
+  },
   comments(postId: number, query: PageQuery, signal?: AbortSignal) {
     return backendRequest("/community/posts/{postId}/comments", "get", {
       pathParams: { postId }, query, signal,

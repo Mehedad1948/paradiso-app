@@ -27,7 +27,7 @@ export function imageSrc(path: string | null | undefined, size: "w185" | "w500" 
 
 /** True when the author attached their own still rather than the movie poster. */
 export const hasCustomImage = (post: Pick<CommunityPost, "imageUrl" | "movie">) =>
-  !!post.imageUrl && post.imageUrl !== post.movie.poster_path && /^https:\/\//.test(post.imageUrl);
+  !!post.imageUrl && post.imageUrl !== post.movie?.poster_path && /^https:\/\//.test(post.imageUrl);
 
 export const formatRating = (value: number) => (value === 10 ? "10" : value.toFixed(1));
 

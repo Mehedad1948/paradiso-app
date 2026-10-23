@@ -78,7 +78,7 @@ export default function PostComposer({
   const upload = useUploadPostImage();
 
   const [movie, setMovie] = useState<ResolvedMovie | null>(
-    post ? { ...post.movie } : null,
+    post?.movie ? { ...post.movie } : null,
   );
   const [rating, setRating] = useState(post?.rating ?? 7);
   const [text, setText] = useState(post?.text ?? "");

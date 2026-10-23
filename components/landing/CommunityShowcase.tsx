@@ -7,16 +7,18 @@ import ShowcaseCarousel, { type ShowcaseItem } from "./ShowcaseCarousel";
 const MIN_CARDS = 3;
 
 function toItem(post: CommunityPost): ShowcaseItem | null {
+  const movie = post.movie;
+  if (!movie) return null;
   const src = hasCustomImage(post)
     ? post.imageUrl
-    : imageSrc(post.movie.poster_path, "w780");
+    : imageSrc(movie.poster_path, "w780");
   if (!src) return null;
   const quote = post.text.replace(/\s+/g, " ").trim();
   return {
     postId: post.id,
     src,
-    alt: `${post.movie.title} — post by ${post.author.username}`,
-    eyebrow: post.movie.title,
+    alt: `${movie.title} — post by ${post.author.username}`,
+    eyebrow: movie.title,
     title: post.author.username,
     subtitle: quote.length > 140 ? `${quote.slice(0, 137)}…` : quote,
   };
