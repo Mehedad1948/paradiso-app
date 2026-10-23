@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowDown, ArrowUpRight, Asterisk } from "lucide-react";
+import { ArrowDown, ArrowUpRight } from "lucide-react";
+import { LogoMark } from "@/components/ui/Logo";
 import { cacheLife } from "next/cache";
 import type { Metadata } from "next";
 import ParadisoWordmark from "@/components/landing/ParadisoWordmark";
@@ -138,12 +139,7 @@ export default async function Home() {
       >
         <JuryReveal />
         <div className="flex flex-col items-start justify-between bg-surface px-9 py-8 [&>p]:my-4.5 [&>p]:text-[clamp(30px,3vw,48px)] [&>p]:font-medium [&>p]:leading-[1.08] [&>p]:tracking-[-0.05em] [&>p_em]:font-serif [&>p_em]:font-normal max-lg:p-6 max-sm:gap-5 max-sm:p-6 max-sm:[&>p]:m-0 max-sm:[&>p]:text-4xl">
-          <Asterisk
-            className="-ml-2 text-accent max-sm:hidden"
-            size={56}
-            strokeWidth={1}
-            aria-hidden="true"
-          />
+          <LogoMark className="h-14 w-auto text-accent max-sm:hidden" />
           <p>
             Some ideas
             <br />

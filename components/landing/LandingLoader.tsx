@@ -6,7 +6,7 @@ import {
   markLandingRevealed,
   onLandingReady,
 } from "./landing-ready";
-import { fontIntertitle } from "@/config/fonts";
+import { fontIntertitle, fontLogo } from "@/config/fonts";
 import styles from "./LandingLoader.module.css";
 
 // If the scenes never report in (slow network, no WebGL), carry on anyway.
@@ -74,7 +74,7 @@ export default function LandingLoader() {
 
   return (
     <div
-      className={`${fontIntertitle.variable} ${styles.loader} ${state}`}
+      className={`${fontIntertitle.variable} ${fontLogo.variable} ${styles.loader} ${state}`}
       role="status"
       aria-live="polite"
       aria-busy={phase === "loading"}
@@ -82,7 +82,7 @@ export default function LandingLoader() {
       <div className={styles.card} aria-hidden="true" />
       <div className={styles.content}>
         <h2 className={styles.title}>
-          Cinema
+          <span className={styles.titleLead}>Cinema</span>
           <br />
           Paradiso
         </h2>

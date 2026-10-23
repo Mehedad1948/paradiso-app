@@ -1,5 +1,6 @@
 import {
   Fira_Code as FontMono,
+  Great_Vibes,
   Montserrat as FontSans,
   Playfair_Display as FontDisplay,
 } from "next/font/google";
@@ -28,5 +29,13 @@ export const fontIntertitle = FontDisplay({
   style: ["normal", "italic"],
   weight: ["600"],
   variable: "--font-intertitle",
+  display: "swap",
+});
+
+// Script face for the "Paradiso" wordmark and the loading screen title.
+export const fontLogo = Great_Vibes({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-logo",
   display: "swap",
 });

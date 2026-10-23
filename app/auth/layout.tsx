@@ -1,7 +1,8 @@
 import { type ReactNode, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Asterisk, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import Logo from "@/components/ui/Logo";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { posters } from "@/config/posters";
 
@@ -9,9 +10,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-svh bg-canvas px-[4.5vw] pb-10 text-ink max-md:px-[5vw]">
       <nav className="mx-auto mb-7 flex min-h-[88px] max-w-[1440px] items-center justify-between border-b border-line max-md:mb-6" aria-label="Account navigation">
-        <Link href="/" className="inline-flex items-center gap-2 text-2xl font-semibold tracking-[-0.075em] [&>svg]:text-accent" aria-label="Paradiso home">
-          <Asterisk size={25} aria-hidden="true" /> paradiso
-        </Link>
+        <Logo />
         <ThemeSwitch />
       </nav>
       <div className="mx-auto grid min-h-[calc(100svh-160px)] max-w-[1440px] grid-cols-2 overflow-hidden rounded-[10px] border border-line max-md:min-h-0 max-md:grid-cols-1">

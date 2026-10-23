@@ -44,14 +44,15 @@
   animation: flicker 5s steps(1) infinite;
 }
 
+/* Script title: no caps or tracking, which would break the joined letters. */
 .title {
-  font-size: clamp(46px, 11vw, 148px);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-family: var(--font-logo), cursive;
+  font-size: clamp(58px, 13vw, 176px);
+  font-weight: 400;
+  line-height: 1.05;
   text-wrap: balance;
 }
+.titleLead { font-size: 0.9em; }
 
 /* Old-film texture, all on the compositor: a noise tile (rasterised once)
    jumped about in steps, a vignette, and the odd scratch down the gate. */
