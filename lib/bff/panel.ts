@@ -4,12 +4,20 @@ import { NextResponse } from "next/server";
 import rooms from "@/services/rooms";
 import links from "@/services/rooms/room-invite-link.service";
 import users from "@/services/user";
+import auth from "@/services/auth/authServices";
+import { passwordInput, usernameInput } from "@/lib/auth/validation";
 import ratings from "@/services/ratings";
 import storage from "@/services/storage";
 import { moviesServices } from "@/services/movies";
 import { handleChatRequest } from "./chat";
 import { handleCommunityRequest } from "./community";
 import type { RequestResult } from "@/types/request";
+import {
+  AVATAR_MAX_BYTES,
+  AVATAR_TYPES,
+  MAX_FAVORITE_GENRES,
+  type UpdateMeInputs,
+} from "@/types/user";
 import {
   customMovieErrorsFrom,
   parseCustomMovie,
@@ -58,6 +66,43 @@ function respond<T>(result: RequestResult<T>) {
   });
 }
 
+const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Profile fields only; omitted fields stay unchanged on the backend. */
+function parseUpdateMe(data: Record<string, unknown>): UpdateMeInputs {
+  const unknown = Object.keys(data).find(
+    (key) => !["avatar", "genreIds", "onboarded", "username"].includes(key),
+  );
+  if (unknown) throw new InputError(`Unexpected field ${unknown}`);
+  const update: UpdateMeInputs = {};
+  if (data.username !== undefined) update.username = usernameInput(data.username);
+  if (data.avatar !== undefined) {
+    if (data.avatar === null) update.avatar = null;
+    else {
+      const avatar = text(data.avatar, "avatar", 255);
+      if (!/^https:\/\/[^\s]+$/.test(avatar)) throw new InputError("Invalid avatar");
+      update.avatar = avatar;
+    }
+  }
+  if (data.genreIds !== undefined) {
+    const ids = data.genreIds;
+    if (
+      !Array.isArray(ids) ||
+      ids.length > MAX_FAVORITE_GENRES ||
+      ids.some((id) => typeof id !== "string" || !uuid.test(id)) ||
+      new Set(ids).size !== ids.length
+    )
+      throw new InputError(`Choose up to ${MAX_FAVORITE_GENRES} different genres`);
+    update.genreIds = ids as string[];
+  }
+  if (data.onboarded !== undefined) {
+    if (data.onboarded !== true) throw new InputError("Invalid onboarded");
+    update.onboarded = true;
+  }
+  if (!Object.keys(update).length) throw new InputError("Nothing to update");
+  return update;
+}
+
 async function body(request: Request): Promise<Record<string, unknown>> {
   try {
     const value: unknown = await request.json();
@@ -95,6 +140,26 @@ export async function handlePanelRequest(request: Request, path: string[]) {
 
     if (resource === "me" && method === "GET")
       return respond(await users.getMe(request.signal));
+    if (resource === "me" && method === "PATCH")
+      return respond(await users.updateMe(parseUpdateMe(await body(request))));
+    if (resource === "me/password" && method === "POST") {
+      const data = await body(request);
+      const currentPassword = passwordInput(data.currentPassword);
+      const newPassword = passwordInput(data.newPassword, true);
+      if (newPassword === currentPassword)
+        throw new InputError("Choose a password different from your current one.");
+      const me = await users.getMe(request.signal);
+      if (!me.response.ok || !me.result) return respond(me);
+      // The backend does not ask for the old password, so prove it here with a sign-in.
+      const check = await auth.signIn({ email: me.result.email, password: currentPassword });
+      if (check.response.status === 400 || check.response.status === 401)
+        throw new InputError("Your current password is incorrect.");
+      if (!check.response.ok) return respond(check);
+      const result = await users.updateMe({ password: newPassword });
+      return respond({ ...result, result: result.result ? { ok: true } : null });
+    }
+    if (resource === "genres" && method === "GET")
+      return respond(await users.genres(request.signal));
     if (resource === "movies/search" && method === "GET") {
       return respond(
         await moviesServices.searchDbMovies(
@@ -113,7 +178,15 @@ export async function handlePanelRequest(request: Request, path: string[]) {
     if (resource === "uploads" && method === "POST") {
       const form = await request.formData();
       const file = form.get("file");
-      if (
+      const folder = form.get("folder");
+      if (folder !== "rooms" && folder !== "community" && folder !== "avatars")
+        throw new InputError("Invalid upload folder");
+      if (folder === "avatars") {
+        if (!(file instanceof File) || file.size === 0 || !AVATAR_TYPES.includes(file.type))
+          throw new InputError("Choose a JPEG, PNG or WebP image", 415);
+        if (file.size > AVATAR_MAX_BYTES)
+          throw new InputError("Choose an image up to 2 MB", 413);
+      } else if (
         !(file instanceof File) ||
         !file.type.startsWith("image/") ||
         file.size === 0 ||
@@ -121,9 +194,6 @@ export async function handlePanelRequest(request: Request, path: string[]) {
       ) {
         throw new InputError("Choose an image up to 5 MB");
       }
-      const folder = form.get("folder");
-      if (folder !== "rooms" && folder !== "community")
-        throw new InputError("Invalid upload folder");
       const result = await storage.uploadImage(file, folder);
       if (folder === "rooms" || !result.result) return respond(result);
       // Community posts store an absolute HTTPS URL rather than a storage key.

@@ -10,7 +10,7 @@ import type {
 import type { MovieWithRatings } from "@/types";
 import type { CustomMovieBody } from "@/lib/movies/custom-movie";
 import type { VoteType } from "@/types/ratings";
-import type { User } from "@/types/user";
+import type { ChangePasswordInputs, CurrentUser, UpdateMeInputs } from "@/types/user";
 import type { Invitation } from "@/types/invitations";
 import type { PaginatedResponse } from "@/types/request";
 import type { BackendResponse } from "@/types/backend";
@@ -26,7 +26,13 @@ const json = (body: unknown) => JSON.stringify(body);
 const roomPath = (id: string | number) => `/rooms/${encodeURIComponent(id)}`;
 
 export const panelApi = {
-  me: (signal?: AbortSignal) => bffRequest<User>("/me", { signal }),
+  me: (signal?: AbortSignal) => bffRequest<CurrentUser>("/me", { signal }),
+  updateMe: (body: UpdateMeInputs) =>
+    bffRequest<CurrentUser>("/me", { method: "PATCH", body: json(body) }),
+  changePassword: (body: ChangePasswordInputs) =>
+    bffRequest<{ ok: true }>("/me/password", { method: "POST", body: json(body) }),
+  genres: (signal?: AbortSignal) =>
+    bffRequest<BackendResponse<"/genres", "get">>("/genres", { signal }),
   rooms: (usersRoom: boolean, page: number, signal?: AbortSignal) =>
     bffRequest<PaginatedResponse<PanelRoomListItem>>(
       `/rooms${queryString({ usersRoom, page, limit: 10 })}`,

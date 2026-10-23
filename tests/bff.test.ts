@@ -4,6 +4,9 @@ const mocks = vi.hoisted(() => ({
   token: "session-token" as string | undefined,
   getRooms: vi.fn(),
   getMe: vi.fn(),
+  updateMe: vi.fn(),
+  uploadImage: vi.fn(),
+  signIn: vi.fn(),
   joinRoom: vi.fn(),
   getRoomRatings: vi.fn(),
   castVote: vi.fn(),
@@ -19,8 +22,9 @@ vi.mock("next/headers", () => ({
 vi.mock("@/services/rooms", () => ({ default: mocks }));
 vi.mock("@/services/user", () => ({ default: mocks }));
 vi.mock("@/services/ratings", () => ({ default: mocks }));
+vi.mock("@/services/auth/authServices", () => ({ default: mocks }));
 vi.mock("@/services/rooms/room-invite-link.service", () => ({ default: {} }));
-vi.mock("@/services/storage", () => ({ default: {} }));
+vi.mock("@/services/storage", () => ({ default: mocks }));
 vi.mock("@/services/movies", () => ({ MoviesServices: class {} }));
 
 import { handlePanelRequest } from "@/lib/bff/panel";
@@ -250,6 +254,97 @@ describe("BFF boundaries", () => {
     expect(response.status).toBe(400);
     expect((await response.json()).response.fieldErrors).toEqual({
       imdbLink: "Must be a URL address",
+    });
+  });
+  it("forwards only onboarding fields when updating the current user", async () => {
+    mocks.updateMe.mockResolvedValue(ok({ id: 1, onboardedAt: "2026-10-23T00:00:00Z" }));
+    const genreIds = ["3f2b8a1e-0c4d-4e5f-9a6b-7c8d9e0f1a2b"];
+    const response = await handlePanelRequest(
+      request("me", "PATCH", { avatar: "https://cdn.test/a.webp", genreIds, onboarded: true }),
+      ["me"],
+    );
+    expect(response.status).toBe(200);
+    expect(mocks.updateMe).toHaveBeenCalledWith({
+      avatar: "https://cdn.test/a.webp",
+      genreIds,
+      onboarded: true,
+    });
+  });
+  it.each([
+    {},
+    { onboarded: false },
+    { password: "hunter22" },
+    { username: "  " },
+    { avatar: "data:image/png;base64,AAAA" },
+    { genreIds: ["not-a-uuid"] },
+    { genreIds: Array(2).fill("3f2b8a1e-0c4d-4e5f-9a6b-7c8d9e0f1a2b") },
+    {
+      genreIds: Array.from({ length: 11 }, (_, i) =>
+        `3f2b8a1e-0c4d-4e5f-9a6b-7c8d9e0f1a${String(i).padStart(2, "0")}`,
+      ),
+    },
+  ])("rejects invalid current user update %j", async (body) => {
+    mocks.updateMe.mockClear();
+    const response = await handlePanelRequest(request("me", "PATCH", body), ["me"]);
+    expect(response.status).toBe(400);
+    expect(mocks.updateMe).not.toHaveBeenCalled();
+  });
+  it.each([
+    [new File(["x"], "a.gif", { type: "image/gif" }), 415],
+    [new File([new Uint8Array(2 * 1024 * 1024 + 1)], "a.png", { type: "image/png" }), 413],
+  ])("rejects an unsuitable avatar before uploading", async (file, status) => {
+    mocks.uploadImage.mockClear();
+    const form = new FormData();
+    form.set("file", file);
+    form.set("folder", "avatars");
+    const response = await handlePanelRequest(
+      new Request("http://localhost/api/bff/uploads", { method: "POST", body: form }),
+      ["uploads"],
+    );
+    expect(response.status).toBe(status);
+    expect(mocks.uploadImage).not.toHaveBeenCalled();
+  });
+  it("trims an edited username", async () => {
+    mocks.updateMe.mockResolvedValue(ok({ id: 1 }));
+    const response = await handlePanelRequest(
+      request("me", "PATCH", { username: "  Ana " }),
+      ["me"],
+    );
+    expect(response.status).toBe(200);
+    expect(mocks.updateMe).toHaveBeenCalledWith({ username: "Ana" });
+  });
+  describe("password change", () => {
+    const change = (body: unknown) =>
+      handlePanelRequest(request("me/password", "POST", body), ["me", "password"]);
+    beforeEach(() => {
+      mocks.updateMe.mockReset().mockResolvedValue(ok({ id: 1 }));
+      mocks.signIn.mockReset().mockResolvedValue(ok({ accessToken: "secret" }));
+      mocks.getMe.mockResolvedValue(ok({ id: 1, email: "ana@example.test" }));
+    });
+    it("verifies the current password before setting the new one", async () => {
+      const response = await change({ currentPassword: "old-pass", newPassword: "new-pass" });
+      expect(response.status).toBe(200);
+      expect(mocks.signIn).toHaveBeenCalledWith({ email: "ana@example.test", password: "old-pass" });
+      expect(mocks.updateMe).toHaveBeenCalledWith({ password: "new-pass" });
+      expect(JSON.stringify(await response.json())).not.toContain("secret");
+    });
+    it("rejects a wrong current password without updating", async () => {
+      mocks.signIn.mockResolvedValue({
+        result: null,
+        response: { ok: false, status: 401, message: "Invalid credentials" },
+      });
+      const response = await change({ currentPassword: "wrong", newPassword: "new-pass" });
+      expect(response.status).toBe(400);
+      expect(mocks.updateMe).not.toHaveBeenCalled();
+    });
+    it.each([
+      { currentPassword: "old-pass", newPassword: "short" },
+      { currentPassword: "same-pass", newPassword: "same-pass" },
+      { newPassword: "new-pass" },
+    ])("rejects %j", async (body) => {
+      const response = await change(body);
+      expect(response.status).toBe(400);
+      expect(mocks.signIn).not.toHaveBeenCalled();
     });
   });
   it("preserves duplicate custom movie conflicts", async () => {

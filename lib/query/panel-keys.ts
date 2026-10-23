@@ -1,5 +1,6 @@
 export const panelKeys = {
   me: ["me"] as const,
+  genres: ["genres"] as const,
   rooms: ["rooms"] as const,
   room: (id: string) => ["room", id, "detail"] as const,
   ratings: (id: string) => ["room", id, "ratings"] as const,

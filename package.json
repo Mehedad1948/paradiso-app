@@ -66,6 +66,7 @@
     "ogl": "^1.0.11",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "react-easy-crop": "^5.5.7",
     "server-only": "^0.0.1",
     "three": "^0.177.0",
     "undici": "^7.30.1",

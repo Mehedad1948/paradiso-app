@@ -28,5 +28,6 @@ export const config = {
     "/profile/:path*",
     "/settings/:path*",
     "/rooms/:path*",
+    "/auth/onboarding",
   ],
 };

@@ -9,10 +9,15 @@ import clsx from "clsx";
 import Link from "next/link";
 import { ArrowUpRight, Asterisk } from "lucide-react";
 import { ThemeSwitch } from "@/components/theme-switch";
+import { useState } from "react";
+import dynamic from "next/dynamic";
+
+const ProfileSidebar = dynamic(() => import("@/features/profile/ProfileSidebar"));
 
 export default function Header() {
   const { data: user, isPending } = useMe();
   const signOut = useAuthForm(authApi.signOut, true);
+  const [profileOpen, setProfileOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const navLink = (href: string) =>
@@ -40,12 +45,23 @@ export default function Header() {
           <ThemeSwitch />
           {user ? (
             <div className="flex items-center gap-2.5 max-md:gap-2 max-[480px]:ml-auto">
-              <Avatar
-                name={user.username}
-                src={user.avatar ?? undefined}
-                alt={user.username}
-              />
-              <p className="max-w-[130px] truncate max-md:hidden">{user.username}</p>
+              <button
+                type="button"
+                onClick={() => setProfileOpen(true)}
+                aria-haspopup="dialog"
+                aria-label="Open your account"
+                className="group flex items-center gap-2.5 rounded-full py-0.5 pl-0.5 pr-1 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent max-md:pr-0.5"
+              >
+                <Avatar
+                  name={user.username}
+                  src={user.avatar ?? undefined}
+                  alt=""
+                  className="ring-1 ring-line transition-shadow group-hover:ring-ink/40"
+                />
+                <span className="max-w-[130px] truncate border-b border-transparent transition-colors group-hover:border-ink max-md:hidden">
+                  {user.username}
+                </span>
+              </button>
               <Button
                 size="sm"
                 className="text-sm font-semibold text-ink max-[480px]:min-w-0 max-[480px]:px-2"
@@ -75,6 +91,9 @@ export default function Header() {
           )}
         </div>
       </nav>
+      {user && profileOpen && (
+        <ProfileSidebar user={user} onClose={() => setProfileOpen(false)} />
+      )}
     </div>
   );
 }
