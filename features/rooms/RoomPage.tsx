@@ -37,6 +37,10 @@ const VoteMovieDialog = dynamic(() => import("./dialogs/VoteMovieDialog"), {
   ssr: false,
   loading: DialogLoading,
 });
+const EditMovieDialog = dynamic(() => import("./dialogs/EditMovieDialog"), {
+  ssr: false,
+  loading: DialogLoading,
+});
 const DeleteMovieDialog = dynamic(() => import("./dialogs/DeleteMovieDialog"), {
   ssr: false,
   loading: DialogLoading,
@@ -53,7 +57,7 @@ const EditRoomSidebar = dynamic(() => import("./sidebars/EditRoomSidebar"), {
   ssr: false,
   loading: DialogLoading,
 });
-type MovieAction = { type: "vote" | "delete"; movieId: string } | null;
+type MovieAction = { type: "vote" | "delete" | "edit"; movieId: string } | null;
 export default function RoomRoute() {
   const { roomId } = useParams<{ roomId: string }>();
   return <RoomPage key={roomId} roomId={roomId} />;
@@ -215,6 +219,7 @@ function RoomPage({ roomId }: { roomId: string }) {
               onSortAverage={sortByAverage}
               onVote={(movieId) => setAction({ type: "vote", movieId })}
               onDelete={(movieId) => setAction({ type: "delete", movieId })}
+              onEdit={(movieId) => setAction({ type: "edit", movieId })}
             />
             <InfiniteScrollSentinel
               hasMore={!!ratings.hasNextPage}
@@ -249,6 +254,14 @@ function RoomPage({ roomId }: { roomId: string }) {
           roomId={roomId}
           movie={movie}
           userId={me.data.id}
+          onClose={() => setAction(null)}
+        />
+      )}
+      {movie && action?.type === "edit" && (
+        <EditMovieDialog
+          key={movie.id}
+          roomId={roomId}
+          movie={movie}
           onClose={() => setAction(null)}
         />
       )}

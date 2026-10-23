@@ -433,6 +433,16 @@ export async function handlePanelRequest(request: Request, path: string[]) {
       );
     if (path.length === 4) {
       const id = identifier(path[3]);
+      if (path[2] === "movies" && method === "PATCH") {
+        const data = await body(request);
+        const patch: Record<string, unknown> = {};
+        if (data.title !== undefined) patch.title = text(data.title, "title", 255);
+        if (data.release_date !== undefined)
+          patch.release_date = text(data.release_date, "release_date", 10);
+        if (data.isWatchedTogether !== undefined)
+          patch.isWatchedTogether = boolean(data.isWatchedTogether, "isWatchedTogether");
+        return respond(await moviesServices.update(id, patch));
+      }
       if (path[2] === "movies" && method === "DELETE")
         return respond(
           await rooms.deleteMovie(roomId, { movieId: id }),

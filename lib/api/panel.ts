@@ -75,6 +75,21 @@ export const panelApi = {
       `${roomPath(roomId)}/custom-movies`,
       { method: "POST", body: json(body) },
     ),
+  updateMovie: ({
+    roomId,
+    movieId,
+    ...body
+  }: {
+    roomId: string;
+    movieId: string;
+    title?: string;
+    release_date?: string;
+    isWatchedTogether?: boolean;
+  }) =>
+    bffRequest<BackendResponse<"/movies/{id}", "put">>(
+      `${roomPath(roomId)}/movies/${encodeURIComponent(movieId)}`,
+      { method: "PATCH", body: json(body) },
+    ),
   removeMovie: ({ roomId, movieId }: { roomId: string; movieId: string }) =>
     bffRequest<BackendResponse<"/rooms/delete-movie/{id}", "delete">>(
       `${roomPath(roomId)}/movies/${encodeURIComponent(movieId)}`,

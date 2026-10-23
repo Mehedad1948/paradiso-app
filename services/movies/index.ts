@@ -2,6 +2,7 @@ import type { BackendRequestBody } from "@/types/backend";
 import { backendRequest } from "../backend";
 
 type CreateMovieBody = BackendRequestBody<"/movies", "post">;
+type UpdateMovieBody = BackendRequestBody<"/movies/{id}", "put">;
 
 export const moviesServices = {
   searchDbMovies(query: string, signal?: AbortSignal) {
@@ -18,6 +19,9 @@ export const moviesServices = {
   },
   list(page: number, limit: number, signal?: AbortSignal) {
     return backendRequest("/movies", "get", { query: { page, limit }, signal });
+  },
+  update(id: string, body: UpdateMovieBody) {
+    return backendRequest("/movies/{id}", "put", { pathParams: { id }, body });
   },
   create(body: CreateMovieBody) {
     return backendRequest("/movies", "post", { body });

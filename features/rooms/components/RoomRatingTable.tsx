@@ -17,6 +17,7 @@ import {
   ArrowDownWideNarrow,
   ArrowUpDown,
   ArrowUpNarrowWide,
+  PencilLine,
   Star,
   Trash2,
   UsersRound,
@@ -97,6 +98,7 @@ export default function RoomRatingTable({
   onSortAverage,
   onVote,
   onDelete,
+  onEdit,
 }: {
   result: PaginatedResponse<MovieWithRatings>;
   room: Room;
@@ -109,6 +111,7 @@ export default function RoomRatingTable({
   onSortAverage: () => void;
   onVote: (movieId: string) => void;
   onDelete: (movieId: string) => void;
+  onEdit: (movieId: string) => void;
 }) {
   const columns = useMemo(
     () => [
@@ -276,6 +279,18 @@ export default function RoomRatingTable({
                     {user &&
                       (user.role === "admin" ||
                         movie.addedBy?.id === user.id) && (
+                          <>
+                          <Button
+                            isIconOnly
+                            size="sm"
+                            variant="flat"
+                            aria-label={`Edit ${movie.title}`}
+                            title="Edit movie"
+                            isDisabled={disabled}
+                            onPress={() => onEdit(movie.id)}
+                          >
+                            <PencilLine size={16} aria-hidden="true" />
+                          </Button>
                           <Button
                             isIconOnly
                             size="sm"
@@ -288,6 +303,7 @@ export default function RoomRatingTable({
                           >
                             <Trash2 size={16} aria-hidden="true" />
                           </Button>
+                          </>
                       )}
                   </div>
                 ) : (
