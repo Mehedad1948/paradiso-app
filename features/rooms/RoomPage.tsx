@@ -19,6 +19,8 @@ import RoomToolbar from "./components/RoomToolbar";
 import RoomRatingTable from "./components/RoomRatingTable";
 import RoomQuickFilters from "./components/RoomQuickFilters";
 import UnratedBanner from "./components/UnratedBanner";
+import RoomMembers from "./components/RoomMembers";
+import RoomMemberPills from "./components/RoomMemberPills";
 import InfiniteScrollSentinel from "./components/InfiniteScrollSentinel";
 import DialogLoading from "./components/DialogLoading";
 import Image from "next/image";
@@ -78,6 +80,7 @@ function RoomPage({ roomId }: { roomId: string }) {
   const ratings = useRoomRatings(roomId, filters);
   const me = useMe();
   const [action, setAction] = useState<MovieAction>(null);
+  const [showMembers, setShowMembers] = useState(false);
   useEffect(() => {
     setAction(null);
   }, []);
@@ -137,7 +140,6 @@ function RoomPage({ roomId }: { roomId: string }) {
           </div>
         )}
         <div className="room-hero-text">
-          <p className="mb-3.5 text-sm font-semibold uppercase tracking-[0.09em] text-accent">The screening room</p>
           <h1 className="mb-4 break-words text-[clamp(36px,4.8vw,68px)] tracking-[-0.06em] [&_em]:font-serif [&_em]:font-normal max-sm:text-[38px]">
             <ShinyText
               text={room.data?.name || "Room"}
@@ -153,6 +155,17 @@ function RoomPage({ roomId }: { roomId: string }) {
             {room.data?.description ||
               "A shared watchlist. A few different opinions. Your next great film."}
           </p>
+          {room.data && (
+            <RoomMembers
+              members={room.data.users}
+              ownerId={room.data.owner.id}
+              disabled={disabled}
+              onInvite={() => open("invite")}
+              expanded={showMembers}
+              listId="room-member-list"
+              onToggle={() => setShowMembers((shown) => !shown)}
+            />
+          )}
         </div>
         {room.data && (
           <div className="flex shrink-0 flex-wrap items-center gap-3 max-sm:w-full max-sm:[&>button]:flex-1">
@@ -186,6 +199,15 @@ function RoomPage({ roomId }: { roomId: string }) {
           </div>
         )}
       </div>
+      {room.data && (
+        <RoomMemberPills
+          id="room-member-list"
+          open={showMembers}
+          members={room.data.users}
+          ownerId={room.data.owner.id}
+          meId={me.data?.id}
+        />
+      )}
       {isMember && summary.data && !(watchedTogether && unrated) && (
         <UnratedBanner
           roomId={roomId}
