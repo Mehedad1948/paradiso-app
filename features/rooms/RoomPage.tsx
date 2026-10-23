@@ -21,6 +21,8 @@ import RoomQuickFilters from "./components/RoomQuickFilters";
 import UnratedBanner from "./components/UnratedBanner";
 import InfiniteScrollSentinel from "./components/InfiniteScrollSentinel";
 import DialogLoading from "./components/DialogLoading";
+import Image from "next/image";
+import { posters } from "@/config/posters";
 import Link from "next/link";
 import { ArrowLeft, MessagesSquare, NotebookPen, Pencil } from "lucide-react";
 import UnreadBadge from "./chat/components/UnreadBadge";
@@ -117,8 +119,24 @@ function RoomPage({ roomId }: { roomId: string }) {
       <Link href="/rooms" className="mb-6 inline-flex items-center gap-2 text-[15px] text-muted hover:text-accent">
         <ArrowLeft size={18} aria-hidden="true" /> All rooms
       </Link>
-      <div className="mb-10 flex items-end justify-between gap-6 border-b border-line pb-9 max-sm:mb-7 max-sm:flex-col max-sm:items-start max-sm:pb-7">
-        <div>
+      <div className="relative isolate mb-10 flex items-end justify-between gap-6 pb-9 max-sm:mb-7 max-sm:flex-col max-sm:items-start max-sm:pb-7">
+        {room.data && (
+          <div
+            aria-hidden="true"
+            className="room-hero-art pointer-events-none absolute -top-20 bottom-0 right-0 -z-10 w-[72%] max-sm:-top-16 max-sm:w-full"
+          >
+            <Image
+              // Same fallback as the room's card, so the header matches the lobby.
+              src={room.data.imageUrl || posters.fellowship}
+              alt=""
+              fill
+              priority
+              sizes="(max-width: 640px) 100vw, 72vw"
+              className="object-cover"
+            />
+          </div>
+        )}
+        <div className="room-hero-text">
           <p className="mb-3.5 text-sm font-semibold uppercase tracking-[0.09em] text-accent">The screening room</p>
           <h1 className="mb-4 break-words text-[clamp(36px,4.8vw,68px)] tracking-[-0.06em] [&_em]:font-serif [&_em]:font-normal max-sm:text-[38px]">
             <ShinyText
@@ -140,7 +158,7 @@ function RoomPage({ roomId }: { roomId: string }) {
           <div className="flex shrink-0 flex-wrap items-center gap-3 max-sm:w-full max-sm:[&>button]:flex-1">
             {canManage && (
               <Button
-                className="min-h-[46px] rounded-md border border-line bg-surface text-[15px] font-semibold text-ink"
+                className="min-h-[46px] rounded-md border border-line bg-surface/75 text-[15px] font-semibold text-ink backdrop-blur-md"
                 startContent={<Pencil size={17} aria-hidden="true" />}
                 isDisabled={room.isError}
                 onPress={() => open("edit-room")}
@@ -149,7 +167,7 @@ function RoomPage({ roomId }: { roomId: string }) {
               </Button>
             )}
             <Button
-              className="min-h-[46px] rounded-md border border-line bg-surface text-[15px] font-semibold text-ink"
+              className="min-h-[46px] rounded-md border border-line bg-surface/75 text-[15px] font-semibold text-ink backdrop-blur-md"
               startContent={<NotebookPen size={17} aria-hidden="true" />}
               onPress={() => open("discussion")}
             >

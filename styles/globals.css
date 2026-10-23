@@ -260,6 +260,96 @@
   .unrated-banner { animation: none; }
 }
 
+/*
+ * Room cover behind the header: it bleeds in from the right like a title card and
+ * dissolves into the page on every other edge, so the title sits on clean canvas.
+ */
+.room-hero-art {
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, #000 40%, #000 82%, transparent),
+    linear-gradient(to bottom, transparent, #000 25%, #000 70%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent, #000 40%, #000 82%, transparent),
+    linear-gradient(to bottom, transparent, #000 25%, #000 70%, transparent);
+  mask-composite: intersect;
+}
+.room-hero-art img {
+  object-position: center 30%;
+  filter: saturate(0.9) contrast(1.05);
+  animation: room-hero-in 1.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* A wash of the page colour from the text side keeps long titles readable. */
+.room-hero-art::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    hsl(var(--heroui-background) / 0.6),
+    transparent 45%
+  );
+}
+/*
+ * Light mode: a dark still dissolving into a pale page leaves grey haze, so the
+ * cover becomes a crisp framed picture instead, with the actions lined up below it.
+ */
+:root:not(.dark) .room-hero-art {
+  -webkit-mask-image: none;
+  mask-image: none;
+  /* From the back link's line down to just above the actions, which sit beneath it. */
+  top: -3.75rem;
+  bottom: calc(2.25rem + 46px + 1rem);
+  width: 46%;
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.06),
+    0 24px 48px -24px rgb(15 23 42 / 0.45);
+}
+:root:not(.dark) .room-hero-art img {
+  object-position: center 40%;
+  filter: saturate(0.9);
+}
+/* A hairline inner edge keeps dark covers from looking cut out of the page. */
+:root:not(.dark) .room-hero-art::after {
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.14);
+  background: none;
+}
+@media (min-width: 640px) {
+  /* Keep the title and description clear of the framed picture. */
+  :root:not(.dark) .room-hero-text {
+    max-width: 52%;
+  }
+}
+@media (max-width: 639px) {
+  /* Phones stack it above the title as a plain cover strip. */
+  :root:not(.dark) .room-hero-art {
+    position: relative;
+    inset: auto;
+    order: -1;
+    width: 100%;
+    aspect-ratio: 16 / 8;
+  }
+}
+@media (max-width: 639px) {
+  /* Full width on phones, so the text is always over it: fade harder and scrim it all. */
+  .room-hero-art {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 60%, transparent);
+    mask-image: linear-gradient(to bottom, transparent, #000 20%, #000 60%, transparent);
+  }
+  .room-hero-art::after {
+    background: hsl(var(--heroui-background) / 0.45);
+  }
+}
+@keyframes room-hero-in {
+  from { opacity: 0; transform: scale(1.06); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .room-hero-art img { animation: none; }
+}
+
 /* Photo-less avatar: a quiet charcoal disc lit by a soft, name-tinted glow in one corner. */
 .avatar-placeholder {
   color: hsl(var(--av-hue) 45% 90%);
