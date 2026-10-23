@@ -21,7 +21,7 @@ describe("room URL state", () => {
   it("normalizes malformed filters before constructing a query or request", () => {
     const filters = readRoomFilters(
       new URLSearchParams(
-        "page=-1&limit=1000&sortBy=invalid&sortOrder=no&startDate=broken&endDate=also-broken&isWatchTogether=maybe&sortByUserId=NaN",
+        "page=-1&limit=1000&sortBy=invalid&sortOrder=no&startDate=broken&endDate=also-broken&isWatchTogether=maybe&hasVoted=maybe&sortByUserId=NaN",
       ),
     );
     expect(filters).toMatchObject({
@@ -33,6 +33,7 @@ describe("room URL state", () => {
       startDate: undefined,
       endDate: undefined,
       isWatchTogether: undefined,
+      hasVoted: undefined,
     });
     expect(() => queryString(filters)).not.toThrow();
   });
@@ -47,6 +48,7 @@ describe("room URL state", () => {
       startDate: "2026-01-01",
       endDate: "2026-02-01",
       isWatchTogether: "false",
+      hasVoted: "false",
     });
     const filters = readRoomFilters(params);
     expect(filters).toMatchObject({
@@ -55,6 +57,7 @@ describe("room URL state", () => {
       search: "a&b",
       sortByUserId: "3",
       isWatchTogether: false,
+      hasVoted: false,
     });
     expect(new URLSearchParams(queryString(filters)).get("startDate")).toBe(
       "2026-01-01T00:00:00.000Z",

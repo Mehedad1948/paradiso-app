@@ -20,7 +20,7 @@ export default function MoviePoster({
   if (path)
     return (
       <img
-        src={`${process.env.NEXT_PUBLIC_BASE_TMDB_IMAGE_URL}${size}${path}`}
+        src={`${process.env.NEXT_PUBLIC_BASE_TMDB_IMAGE_URL || "https://image.tmdb.org/t/p/"}${size}${path}`}
         alt={title}
         width={width}
         height={height}

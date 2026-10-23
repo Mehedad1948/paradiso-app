@@ -29,6 +29,7 @@ export function readRoomFilters(
     endDate = undefined;
   }
   const together = params.get("isWatchTogether");
+  const voted = params.get("hasVoted");
   const userId = params.get("sortByUserId");
   return {
     page: positivePage(params.get("page")),
@@ -45,6 +46,7 @@ export function readRoomFilters(
     endDate,
     isWatchTogether:
       together === "true" ? true : together === "false" ? false : undefined,
+    hasVoted: voted === "true" ? true : voted === "false" ? false : undefined,
   };
 }
 export type QueryPatch = Record<string, string | number | null | undefined>;

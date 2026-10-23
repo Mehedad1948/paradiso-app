@@ -50,6 +50,11 @@ export const panelApi = {
       `${roomPath(id)}/ratings${queryString(filters)}`,
       { signal },
     ),
+  ratingSummary: (id: string, signal?: AbortSignal) =>
+    bffRequest<BackendResponse<"/rooms/{roomId}/rating/summary", "get">>(
+      `${roomPath(id)}/ratings/summary`,
+      { signal },
+    ),
   createRoom: (body: CreateRoomInputs) =>
     bffRequest<BackendResponse<"/rooms", "post"> & { imageUrl: string | null }>(
       "/rooms", { method: "POST", body: json(body) },
@@ -60,10 +65,10 @@ export const panelApi = {
     bffRequest<BackendResponse<"/rooms/join", "post">>(`${roomPath(roomId)}/join`, {
       method: "POST",
     }),
-  addMovie: ({ roomId, dbId }: addMovieToRoomInputs) =>
+  addMovie: ({ roomId, dbId, isWatchedTogether }: addMovieToRoomInputs) =>
     bffRequest<BackendResponse<"/rooms/add-movie/{id}", "post">>(`${roomPath(roomId)}/movies`, {
       method: "POST",
-      body: json({ dbId }),
+      body: json({ dbId, isWatchedTogether }),
     }),
   addCustomMovie: ({ roomId, ...body }: CustomMovieBody & { roomId: string }) =>
     bffRequest<BackendResponse<"/rooms/add-custom-movie/{id}", "post">>(

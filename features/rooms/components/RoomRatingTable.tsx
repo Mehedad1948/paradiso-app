@@ -13,7 +13,14 @@ import {
   TableHeader,
   TableRow,
 } from "@heroui/table";
-import { ChevronDown, ChevronUp, Star, Trash2 } from "lucide-react";
+import {
+  ArrowDownWideNarrow,
+  ArrowUpDown,
+  ArrowUpNarrowWide,
+  Star,
+  Trash2,
+  UsersRound,
+} from "lucide-react";
 import MoviePoster from "./MoviePoster";
 import { ratingHue } from "../lib/ratingColor";
 // Positions and timing live in CSS (nth-child); this only sets the count.
@@ -28,10 +35,62 @@ function ratingTint(average: number | null) {
     style: { "--row-hue": ratingHue(rate) } as CSSProperties,
   };
 }
+/** Column header that sorts; the active one is tinted and shows its direction. */
+function SortButton({
+  label,
+  description,
+  active,
+  order,
+  onPress,
+}: {
+  label: string;
+  description: string;
+  active: boolean;
+  order?: "asc" | "desc" | null;
+  onPress: () => void;
+}) {
+  const ascending = order === "asc";
+  const Icon = !active
+    ? ArrowUpDown
+    : ascending
+      ? ArrowUpNarrowWide
+      : ArrowDownWideNarrow;
+  return (
+    <Button
+      size="sm"
+      variant="light"
+      className={`group gap-1.5 px-2.5 font-semibold transition-colors ${
+        active
+          ? "bg-accent/10 text-accent data-[hover=true]:bg-accent/15"
+          : "text-muted data-[hover=true]:text-ink"
+      }`}
+      aria-label={
+        active
+          ? `Sorted by ${description}, ${ascending ? "lowest" : "highest"} first. Press to reverse.`
+          : `Sort by ${description}`
+      }
+      endContent={
+        <Icon
+          size={15}
+          aria-hidden="true"
+          className={
+            active
+              ? undefined
+              : "opacity-50 transition-opacity group-data-[hover=true]:opacity-100"
+          }
+        />
+      }
+      onPress={onPress}
+    >
+      {label}
+    </Button>
+  );
+}
 export default function RoomRatingTable({
   result,
   room,
   user,
+  isMember,
   filters,
   disabled,
   onSort,
@@ -42,6 +101,8 @@ export default function RoomRatingTable({
   result: PaginatedResponse<MovieWithRatings>;
   room: Room;
   user?: User;
+  /** Members are nudged about watched-together films they have not rated. */
+  isMember: boolean;
   filters: RoomRatingFilters;
   disabled: boolean;
   onSort: (userId: number) => void;
@@ -72,7 +133,9 @@ export default function RoomRatingTable({
         userId: undefined as number | undefined,
       },
     ],
-    [room.users, result.meta.totalItems],
+    // Sort state is a dependency so the header collection, which caches cells by
+    // column object, rebuilds and shows the newly active column.
+    [room.users, result.meta.totalItems, filters.sortBy, filters.sortByUserId, filters.sortOrder],
   );
   const rows = useMemo(
     () =>
@@ -81,8 +144,9 @@ export default function RoomRatingTable({
         rates: new Map(
           movie.ratings.map((rating) => [String(rating.user.id), rating.rate]),
         ),
+        awaitingMe: isMember && movie.isWatchedTogether && !movie.hasVoted,
       })),
-    [result.data],
+    [result.data, isMember],
   );
   return (
     <Table
@@ -93,38 +157,24 @@ export default function RoomRatingTable({
         {(column) => (
           <TableColumn key={column.key}>
             {column.userId !== undefined ? (
-              <Button
-                variant="light"
-                className="font-semibold text-foreground"
-                aria-label={`Sort by ${column.label}'s rating`}
-                endContent={
-                  filters.sortByUserId === String(column.userId) &&
-                  filters.sortOrder === "asc" ? (
-                    <ChevronUp className="w-4" />
-                  ) : (
-                    <ChevronDown className="w-4" />
-                  )
+              <SortButton
+                label={column.label}
+                description={`${column.label}'s rating`}
+                active={
+                  filters.sortBy === "userRate" &&
+                  filters.sortByUserId === String(column.userId)
                 }
+                order={filters.sortOrder}
                 onPress={() => onSort(column.userId!)}
-              >
-                {column.label}
-              </Button>
+              />
             ) : column.key === "average" ? (
-              <Button
-                variant="light"
-                className="font-semibold text-foreground"
-                aria-label="Sort by average rating"
-                endContent={
-                  filters.sortBy === "rate" && filters.sortOrder === "asc" ? (
-                    <ChevronUp className="w-4" />
-                  ) : (
-                    <ChevronDown className="w-4" />
-                  )
-                }
+              <SortButton
+                label={column.label}
+                description="average rating"
+                active={filters.sortBy === "rate"}
+                order={filters.sortOrder}
                 onPress={onSortAverage}
-              >
-                {column.label}
-              </Button>
+              />
             ) : (
               column.label
             )}
@@ -134,12 +184,20 @@ export default function RoomRatingTable({
       <TableBody
         items={rows}
         emptyContent={
-          filters.search ||
-          filters.startDate ||
-          filters.endDate ||
-          filters.isWatchTogether !== undefined
-            ? "No movies match the current filters."
-            : "No movies have been added yet."
+          filters.hasVoted === false &&
+          !filters.search &&
+          !filters.startDate &&
+          !filters.endDate
+            ? filters.isWatchTogether
+              ? "All caught up. You have rated every film you watched together."
+              : "All caught up. You have rated every film in this room."
+            : filters.search ||
+                filters.startDate ||
+                filters.endDate ||
+                filters.isWatchTogether !== undefined ||
+                filters.hasVoted !== undefined
+              ? "No movies match the current filters."
+              : "No movies have been added yet."
         }
       >
         {(movie) => (
@@ -162,6 +220,17 @@ export default function RoomRatingTable({
                         <span className="text-primary-500 text-sm">
                           {" "}
                           - {movie.release_date?.slice(0, 4)}
+                        </span>
+                      )}
+                      {movie.isWatchedTogether && (
+                        <span
+                          className={`mt-1 flex items-center gap-1.5 text-xs font-semibold ${
+                            movie.awaitingMe ? "text-accent" : "text-muted"
+                          }`}
+                        >
+                          <UsersRound size={13} aria-hidden="true" />
+                          Watched together
+                          {movie.awaitingMe && " · awaiting your rating"}
                         </span>
                       )}
                     </span>
@@ -187,7 +256,11 @@ export default function RoomRatingTable({
                       size="sm"
                       variant={movie.hasVoted ? "flat" : "solid"}
                       color="secondary"
-                      className="font-semibold"
+                      className={`font-semibold ${
+                        movie.awaitingMe
+                          ? "ring-2 ring-secondary/40 ring-offset-2 ring-offset-content1"
+                          : ""
+                      }`}
                       startContent={
                         <Star
                           size={15}

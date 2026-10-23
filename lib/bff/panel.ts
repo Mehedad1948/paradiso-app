@@ -338,6 +338,7 @@ export async function handlePanelRequest(request: Request, path: string[]) {
                     query.get("isWatchTogether"),
                     "isWatchTogether",
                   ),
+                  hasVoted: boolean(query.get("hasVoted"), "hasVoted"),
                 },
                 request.signal,
               ),
@@ -366,6 +367,9 @@ export async function handlePanelRequest(request: Request, path: string[]) {
             return respond(
               await rooms.addMovieToRoom(roomId, {
                 dbId: positiveInteger(data.dbId, "dbId"),
+                ...(data.isWatchedTogether === true
+                  ? { isWatchedTogether: true }
+                  : {}),
               }),
             );
           }
@@ -418,6 +422,15 @@ export async function handlePanelRequest(request: Request, path: string[]) {
           break;
       }
     }
+    if (
+      path.length === 4 &&
+      path[2] === "ratings" &&
+      path[3] === "summary" &&
+      method === "GET"
+    )
+      return respond(
+        await rooms.getRoomRatingSummary(roomId, request.signal),
+      );
     if (path.length === 4) {
       const id = identifier(path[3]);
       if (path[2] === "movies" && method === "DELETE")

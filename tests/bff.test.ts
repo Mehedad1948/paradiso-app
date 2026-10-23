@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   signIn: vi.fn(),
   joinRoom: vi.fn(),
   getRoomRatings: vi.fn(),
+  getRoomRatingSummary: vi.fn(),
   castVote: vi.fn(),
   updateRoom: vi.fn(),
   addCustomMovieToRoom: vi.fn(),
@@ -114,6 +115,37 @@ describe("BFF boundaries", () => {
       }),
       expect.any(AbortSignal),
     );
+  });
+  it("forwards the unrated filter and serves the rating summary", async () => {
+    mocks.getRoomRatings.mockResolvedValue(ok({ data: [] }));
+    await handlePanelRequest(
+      request("rooms/1/ratings?hasVoted=false&isWatchTogether=true"),
+      ["rooms", "1", "ratings"],
+    );
+    expect(mocks.getRoomRatings).toHaveBeenLastCalledWith(
+      1,
+      expect.objectContaining({ hasVoted: false, isWatchTogether: true }),
+      expect.any(AbortSignal),
+    );
+    mocks.getRoomRatingSummary.mockResolvedValue(
+      ok({ unrated: 4, unratedWatchedTogether: 2 }),
+    );
+    const response = await handlePanelRequest(
+      request("rooms/1/ratings/summary"),
+      ["rooms", "1", "ratings", "summary"],
+    );
+    expect(response.status).toBe(200);
+    expect(mocks.getRoomRatingSummary).toHaveBeenCalledWith(
+      1,
+      expect.any(AbortSignal),
+    );
+  });
+  it("rejects a malformed hasVoted filter", async () => {
+    const response = await handlePanelRequest(
+      request("rooms/1/ratings?hasVoted=maybe"),
+      ["rooms", "1", "ratings"],
+    );
+    expect(response.status).toBe(400);
   });
   it("does not leak upstream network diagnostics", async () => {
     mocks.getMe.mockResolvedValue({

@@ -48,6 +48,12 @@ export const useRoomRatings = (id: string, filters: RoomRatingFilters) => {
     }),
   });
 };
+export const useRoomRatingSummary = (id: string, enabled = true) =>
+  useQuery({
+    queryKey: panelKeys.ratingSummary(id),
+    queryFn: ({ signal }) => panelApi.ratingSummary(id, signal),
+    enabled: enabled && !!id,
+  });
 export const useMovieSearch = (query: string, enabled = true) =>
   useQuery({
     queryKey: ["movie-search", query.trim()],

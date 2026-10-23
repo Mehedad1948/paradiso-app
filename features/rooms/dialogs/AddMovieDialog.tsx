@@ -11,6 +11,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/modal";
+import { Switch } from "@heroui/switch";
 import { addToast } from "@heroui/toast";
 import { ArrowLeft, PencilLine, SearchIcon } from "lucide-react";
 import { useState } from "react";
@@ -37,6 +38,29 @@ const emptyManualMovie: Record<CustomMovieField, string> = {
   overview: "",
 };
 
+function WatchedTogetherSwitch(props: {
+  isSelected: boolean;
+  onValueChange: (value: boolean) => void;
+  isDisabled: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 rounded-xl border border-line bg-surface px-4 py-3">
+      <div className="flex flex-col">
+        <span className="text-sm font-semibold">Watched together</span>
+        <span className="text-xs text-muted">
+          Mark this movie as one the room watched together.
+        </span>
+      </div>
+      <Switch
+        {...props}
+        color="secondary"
+        size="sm"
+        aria-label="Watched together"
+      />
+    </div>
+  );
+}
+
 export default function AddMovieDialog({
   roomId,
   onClose,
@@ -48,6 +72,7 @@ export default function AddMovieDialog({
   const [query, setQuery] = useState("");
   const [selectedMovie, setSelectedMovie] = useState<DbMovie | null>(null);
   const [manualMovie, setManualMovie] = useState(emptyManualMovie);
+  const [isWatchedTogether, setIsWatchedTogether] = useState(false);
   const [errors, setErrors] = useState<CustomMovieErrors>({});
   const [debouncedQuery] = useDebounce(query, 500);
   const search = useMovieSearch(debouncedQuery);
@@ -82,7 +107,7 @@ export default function AddMovieDialog({
   const isAdding = isAddingSearched || isAddingCustom;
 
   function handleAddMovieToRoom() {
-    if (selectedMovie) execute({ dbId: selectedMovie.id, roomId });
+    if (selectedMovie) execute({ dbId: selectedMovie.id, roomId, isWatchedTogether });
   }
   function openManualForm() {
     const title = query.trim();
@@ -97,7 +122,7 @@ export default function AddMovieDialog({
       year: manualMovie.year.trim() ? Number(manualMovie.year) : undefined,
     });
     if (parsed.errors) return setErrors(parsed.errors);
-    executeCustom({ roomId, ...parsed.body });
+    executeCustom({ roomId, ...parsed.body, isWatchedTogether });
   }
   const field = (name: CustomMovieField) => ({
     name,
@@ -123,7 +148,7 @@ export default function AddMovieDialog({
       isKeyboardDismissDisabled={isAdding}
       hideCloseButton={isAdding}
     >
-      <ModalContent className="border border-line bg-elevated text-ink shadow-[0_24px_80px_rgb(0_0_0_/_16%)] [&_header]:text-2xl [&_header]:font-semibold [&_header]:tracking-[-0.04em] [&_[data-slot=body]]:text-base">
+      <ModalContent className="border border-line bg-elevated text-ink rounded-2xl shadow-[0_24px_80px_rgb(0_0_0_/_45%)] backdrop-blur-xl [&_header]:text-2xl [&_header]:font-semibold [&_header]:tracking-[-0.04em] [&_[data-slot=body]]:text-base">
         {() =>
           mode === "manual" ? (
             <form
@@ -179,6 +204,11 @@ export default function AddMovieDialog({
                   minRows={2}
                   maxLength={CUSTOM_MOVIE_LIMITS.overview}
                 />
+                <WatchedTogetherSwitch
+  isSelected={isWatchedTogether}
+  onValueChange={setIsWatchedTogether}
+  isDisabled={isAdding}
+/>
               </ModalBody>
               <ModalFooter>
                 <Button
@@ -202,14 +232,31 @@ export default function AddMovieDialog({
             </form>
           ) : (
             <>
-              <ModalHeader className="flex flex-col gap-1 mb-4">
+              <ModalHeader className="mb-2 flex flex-col gap-1">
                 Add Movie
+                <span className="text-sm font-normal tracking-normal text-muted">
+                  Search TMDb and add a film to this room.
+                </span>
               </ModalHeader>
               <ModalBody>
                 <Autocomplete
                   isDisabled={isAdding}
                   isLoading={search.isFetching}
-                  allowsEmptyCollection={false}
+                  allowsEmptyCollection
+                  menuTrigger="input"
+                  listboxProps={{ hideEmptyContent: true }}
+                  inputProps={{
+                    classNames: {
+                      inputWrapper:
+                        "rounded-xl border border-line bg-surface px-3 transition-colors data-[hover=true]:border-secondary-500/60 group-data-[focus=true]:border-secondary-500",
+                    },
+                  }}
+                  popoverProps={{
+                    classNames: {
+                      content:
+                        "border border-line bg-elevated shadow-[0_16px_48px_rgb(0_0_0_/_35%)] rounded-xl",
+                    },
+                  }}
                   startContent={
                     <SearchIcon
                       className="text-default-400"
@@ -217,7 +264,9 @@ export default function AddMovieDialog({
                       strokeWidth={2.5}
                     />
                   }
-                  variant="underlined"
+                  variant="bordered"
+                  labelPlacement="outside"
+                  placeholder="Type a title, e.g. Inception"
                   label="Search movies"
                   inputValue={query}
                   onInputChange={(value) => {
@@ -259,7 +308,7 @@ export default function AddMovieDialog({
                   <div className="w-full">
                     <div
                       className="grid grid-cols-[40px,_1fr,_auto] gap-2 p-2
-                                                     rounded-lg text-left border items-center border-secondary-500 text-secondary-500"
+                                                     rounded-xl text-left border items-center border-secondary-500/60 bg-secondary-500/10 text-secondary-500"
                     >
                       <MoviePoster
                         path={selectedMovie.poster_path}
@@ -302,18 +351,25 @@ export default function AddMovieDialog({
                     </Button>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted">
-                    Can&apos;t find it?{" "}
-                    <button
-                      type="button"
-                      disabled={isAdding}
-                      onClick={openManualForm}
-                      className="font-semibold text-secondary-500 underline-offset-4 hover:underline disabled:opacity-50"
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="text-sm text-muted">Can&apos;t find it?</p>
+                    <Button
+                      size="sm"
+                      color="secondary"
+                      variant="flat"
+                      startContent={<PencilLine size={14} />}
+                      isDisabled={isAdding}
+                      onPress={openManualForm}
                     >
                       Add manually
-                    </button>
-                  </p>
+                    </Button>
+                  </div>
                 )}
+                <WatchedTogetherSwitch
+  isSelected={isWatchedTogether}
+  onValueChange={setIsWatchedTogether}
+  isDisabled={isAdding}
+/>
               </ModalBody>
               <ModalFooter>
                 <Button

@@ -22,7 +22,8 @@ export const isEdited = (item: { createdAt: string; updatedAt: string }) =>
 export function imageSrc(path: string | null | undefined, size: "w185" | "w500" | "w780" = "w500") {
   if (!path) return null;
   if (/^https?:\/\//.test(path)) return path;
-  return `${process.env.NEXT_PUBLIC_BASE_TMDB_IMAGE_URL}${size}${path}`;
+  const base = process.env.NEXT_PUBLIC_BASE_TMDB_IMAGE_URL || "https://image.tmdb.org/t/p/";
+  return `${base}${size}${path}`;
 }
 
 /** True when the author attached their own still rather than the movie poster. */

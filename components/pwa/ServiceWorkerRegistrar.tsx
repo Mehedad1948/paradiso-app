@@ -27,10 +27,27 @@ function workerVersion(worker: ServiceWorker) {
   });
 }
 
+/** True when running as an installed app (home-screen / desktop PWA) rather than a browser tab. */
+function isInstalledApp() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.matchMedia("(display-mode: window-controls-overlay)").matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}
+
 async function promptReload(worker: ServiceWorker) {
+  // Browser tabs pick the new worker up on their own next visit; only installed apps, which can
+  // stay open for days, need a prompt.
+  if (!isInstalledApp()) return;
   if (promptedFor === worker) return;
   promptedFor = worker;
-  const version = await workerVersion(worker);
+  const [version, current] = await Promise.all([
+    workerVersion(worker),
+    navigator.serviceWorker.controller ? workerVersion(navigator.serviceWorker.controller) : null,
+  ]);
+  // Only prompt when the waiting build really differs from the one running.
+  if (version && current && version === current) return;
   addToast({
     title: "A new version of Paradiso is ready",
     description: version

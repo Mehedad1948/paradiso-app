@@ -5,7 +5,11 @@ import { useCallback, useEffect, useState } from "react";
 import { Spinner } from "@heroui/spinner";
 import { Button } from "@heroui/button";
 import { useMe } from "@/hooks/queries/useMe";
-import { useRoom, useRoomRatings } from "@/hooks/queries/useRoomQueries";
+import {
+  useRoom,
+  useRoomRatings,
+  useRoomRatingSummary,
+} from "@/hooks/queries/useRoomQueries";
 import { useChatUnread } from "@/hooks/queries/useChatQueries";
 import QueryError from "@/components/ui/QueryError";
 import ShinyText from "@/components/ui/ShinyText";
@@ -13,6 +17,8 @@ import { useRoomUrl } from "./hooks/useRoomUrl";
 import { useRoomDialog } from "./hooks/useRoomDialog";
 import RoomToolbar from "./components/RoomToolbar";
 import RoomRatingTable from "./components/RoomRatingTable";
+import RoomQuickFilters from "./components/RoomQuickFilters";
+import UnratedBanner from "./components/UnratedBanner";
 import InfiniteScrollSentinel from "./components/InfiniteScrollSentinel";
 import DialogLoading from "./components/DialogLoading";
 import Link from "next/link";
@@ -53,7 +59,14 @@ export default function RoomRoute() {
   return <RoomPage key={roomId} roomId={roomId} />;
 }
 function RoomPage({ roomId }: { roomId: string }) {
-  const { update, filters, setSearch, sortByUser, sortByAverage } = useRoomUrl();
+  const {
+    update,
+    filters,
+    setSearch,
+    sortByUser,
+    sortByAverage,
+    setQuickFilters,
+  } = useRoomUrl();
   const { dialog, open, close } = useRoomDialog();
   const room = useRoom(roomId);
   const ratings = useRoomRatings(roomId, filters);
@@ -70,14 +83,17 @@ function RoomPage({ roomId }: { roomId: string }) {
     !!room.data &&
     !!me.data &&
     (me.data.role === "admin" || room.data.owner.id === me.data.id);
-  // Chat is for members and the owner only, public room or not.
-  const canChat =
+  // Members include the owner. Only they get chat and their own unrated counts, public room or not.
+  const isMember =
     !!room.data &&
     !!me.data &&
     (room.data.owner.id === me.data.id ||
       room.data.users.some((user) => user.id === me.data!.id));
-  const chatOpen = canChat && dialog === "chat";
-  const unread = useChatUnread(roomId, { enabled: canChat, live: chatOpen });
+  const chatOpen = isMember && dialog === "chat";
+  const unread = useChatUnread(roomId, { enabled: isMember, live: chatOpen });
+  const summary = useRoomRatingSummary(roomId, isMember);
+  const watchedTogether = filters.isWatchTogether === true;
+  const unrated = filters.hasVoted === false;
   const showInWatchlist = useCallback(
     (title: string) =>
       update({ dialog: null, search: title.slice(0, 200), page: null }),
@@ -135,7 +151,7 @@ function RoomPage({ roomId }: { roomId: string }) {
             >
               Discussion
             </Button>
-            {canChat && (
+            {isMember && (
               <Button
                 className="min-h-[46px] rounded-md bg-ink text-[15px] font-semibold text-canvas"
                 startContent={<MessagesSquare size={17} aria-hidden="true" />}
@@ -148,6 +164,13 @@ function RoomPage({ roomId }: { roomId: string }) {
           </div>
         )}
       </div>
+      {isMember && summary.data && !(watchedTogether && unrated) && (
+        <UnratedBanner
+          roomId={roomId}
+          count={summary.data.unratedWatchedTogether}
+          onReview={() => setQuickFilters({ watchedTogether: true, unrated: true })}
+        />
+      )}
       <RoomToolbar
         search={filters.search || ""}
         onSearch={setSearch}
@@ -155,6 +178,16 @@ function RoomPage({ roomId }: { roomId: string }) {
         onAddMovie={() => open("add-movie")}
         disabled={disabled}
       />
+      {room.data && (
+        <RoomQuickFilters
+          watchedTogether={watchedTogether}
+          unrated={unrated}
+          unratedCount={summary.data?.unrated}
+          showUnrated={isMember}
+          disabled={disabled}
+          onChange={setQuickFilters}
+        />
+      )}
       {room.isError && (
         <QueryError error={room.error} retry={() => room.refetch()} />
       )}
@@ -175,6 +208,7 @@ function RoomPage({ roomId }: { roomId: string }) {
               result={ratings.data}
               room={room.data}
               user={me.data}
+              isMember={isMember}
               filters={filters}
               disabled={disabled}
               onSort={sortByUser}
@@ -198,7 +232,7 @@ function RoomPage({ roomId }: { roomId: string }) {
         />
       )}
       {room.data && dialog === "discussion" && (
-        <RoomDiscussion room={room.data} canPost={canChat} onClose={close} />
+        <RoomDiscussion room={room.data} canPost={isMember} onClose={close} />
       )}
       {room.data && dialog === "add-movie" && (
         <AddMovieDialog roomId={roomId} onClose={close} />

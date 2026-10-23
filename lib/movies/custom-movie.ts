@@ -4,7 +4,7 @@ export type CustomMovieBody = BackendRequestBody<
   "/rooms/add-custom-movie/{id}",
   "post"
 >;
-export type CustomMovieField = keyof CustomMovieBody;
+export type CustomMovieField = Exclude<keyof CustomMovieBody, "isWatchedTogether">;
 export type CustomMovieErrors = Partial<Record<CustomMovieField, string>>;
 
 export const CUSTOM_MOVIE_LIMITS = {
@@ -60,6 +60,7 @@ export function parseCustomMovie(
 
   const imdbLink = optional("imdbLink", "IMDb link");
   const overview = optional("overview", "Description");
+  const isWatchedTogether = input.isWatchedTogether === true;
 
   if (Object.keys(errors).length) return { body: null, errors };
   return {
@@ -68,6 +69,7 @@ export function parseCustomMovie(
       year: year as number,
       ...(imdbLink ? { imdbLink } : {}),
       ...(overview ? { overview } : {}),
+      ...(isWatchedTogether ? { isWatchedTogether } : {}),
     },
     errors: null,
   };

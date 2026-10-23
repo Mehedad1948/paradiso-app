@@ -243,6 +243,23 @@
   filter: drop-shadow(0 0 1.5px rgb(192 132 252 / 45%));
 }
 
+/* Room nudge: a soft accent wash from the left edge, eased in once. */
+.unrated-banner {
+  background-image: linear-gradient(
+    90deg,
+    hsl(var(--heroui-primary-500) / 0.09),
+    transparent 55%
+  );
+  box-shadow: inset 3px 0 0 hsl(var(--heroui-primary-500) / 0.7);
+  animation: unrated-banner-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes unrated-banner-in {
+  from { opacity: 0; transform: translateY(-6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .unrated-banner { animation: none; }
+}
+
 /* Photo-less avatar: a quiet charcoal disc lit by a soft, name-tinted glow in one corner. */
 .avatar-placeholder {
   color: hsl(var(--av-hue) 45% 90%);

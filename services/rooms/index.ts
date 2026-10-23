@@ -34,7 +34,14 @@ const roomsServices = {
         startDate: filters.startDate?.toISOString(),
         endDate: filters.endDate?.toISOString(),
         isWatchTogether: filters.isWatchTogether,
+        hasVoted: filters.hasVoted,
       },
+      signal,
+    });
+  },
+  getRoomRatingSummary(roomId: number, signal?: AbortSignal) {
+    return backendRequest("/rooms/{roomId}/rating/summary", "get", {
+      pathParams: { roomId },
       signal,
     });
   },
