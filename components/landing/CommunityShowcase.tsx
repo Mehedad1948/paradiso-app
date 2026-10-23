@@ -5,6 +5,9 @@ import type { CommunityPost } from "@/types/community";
 import ShowcaseCarousel, { type ShowcaseItem } from "./ShowcaseCarousel";
 
 const MIN_CARDS = 3;
+const MAX_CARDS = 8;
+// Reposts carry no movie of their own, so over-fetch to find enough cards.
+const FETCH_LIMIT = 40;
 
 function toItem(post: CommunityPost): ShowcaseItem | null {
   const movie = post.movie;
@@ -31,10 +34,12 @@ export default async function CommunityShowcase() {
 
   // No session token: the cached result is shared by every visitor.
   const { result } = await backendRequest("/community/posts", "get", {
-    query: { limit: 8 },
+    query: { limit: FETCH_LIMIT },
     withAuth: false,
   });
-  const items = (result?.data ?? []).flatMap((post) => toItem(post) ?? []);
+  const items = (result?.data ?? [])
+    .flatMap((post) => toItem(post) ?? [])
+    .slice(0, MAX_CARDS);
 
   return (
     <div
