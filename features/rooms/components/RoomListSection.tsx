@@ -65,15 +65,6 @@ export default function RoomListSection({
                   />
                 </div>
               ))}
-              {query.data.data.length === 0 && (
-                <div>
-                  <p className="flex min-h-[220px] items-center justify-center rounded-[10px] border border-line bg-surface p-7 text-center text-muted">
-                    {usersRoom
-                      ? "Your next movie night starts with a room."
-                      : "No rooms here yet. Be the first to start one."}
-                  </p>
-                </div>
-              )}
             </ChromaGrid>
             <PanelPagination
               page={page}

@@ -12,7 +12,7 @@ export const seo = {
   tagline: "Circle of Cinema",
   title: "Paradiso | Circle of Cinema",
   description:
-    "Find your next favorite film, gather your people, and make a night of it. Paradiso is a private screening room for friends: pick the films, share the evening, crown the winner.",
+    "Make room for good cinema. A private screening room for you and your friends.",
   keywords: [
     "Paradiso",
     "movie night",
