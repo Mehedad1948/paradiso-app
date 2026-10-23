@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-/** Stable 32-bit hash so a given name always gets the same gradient. */
+/** Stable 32-bit hash so a given name always gets the same tint. */
 function hash(seed: string) {
   let h = 2166136261;
   for (let i = 0; i < seed.length; i++) {
@@ -10,15 +10,16 @@ function hash(seed: string) {
   return h >>> 0;
 }
 
-/** Soft two-tone gradient, derived from the name, for members without a photo. */
+const CORNERS = ["0% 0%", "100% 0%", "0% 100%", "100% 100%"];
+
+/**
+ * Per-name hue and glow corner for members without a photo. Pair with the
+ * `.avatar-placeholder` class, which draws the theme-aware surface.
+ */
 export function avatarGradient(name?: string | null): CSSProperties {
   const h = hash((name ?? "").trim().toLowerCase() || "paradiso");
-  const hue = h % 360;
-  const shift = 35 + ((h >>> 9) % 40);
-  const angle = 125 + ((h >>> 17) % 50);
   return {
-    backgroundImage: `linear-gradient(${angle}deg, hsl(${hue} 62% 58%), hsl(${(hue + shift) % 360} 58% 38%))`,
-    color: "#fff",
-    textShadow: "0 1px 2px rgb(0 0 0 / 0.25)",
-  };
+    "--av-hue": h % 360,
+    "--av-spot": CORNERS[(h >>> 9) % CORNERS.length],
+  } as CSSProperties;
 }

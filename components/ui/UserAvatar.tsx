@@ -41,6 +41,7 @@ export default function UserAvatar({
       // A broken photo URL falls back to the initial instead of an empty circle.
       showFallback
       {...props}
+      className={src ? props.className : `avatar-placeholder ${props.className ?? ""}`}
       style={{
         width: px,
         height: px,
