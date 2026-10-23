@@ -39,3 +39,6 @@ yarn-error.log*
 next-env.d.ts
 # Local runtime logs and browser fixtures
 .runtime/
+
+# generated service worker (scripts/build-sw.mjs)
+/public/sw.js

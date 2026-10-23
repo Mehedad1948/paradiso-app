@@ -5,13 +5,8 @@ import { Button } from "@heroui/button";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Tab, Tabs } from "@heroui/tabs";
 import { RotateCcw, RotateCw, ZoomIn, ZoomOut } from "lucide-react";
-import {
-  NEUTRAL,
-  cssFilter,
-  renderAvatar,
-  type Adjustments,
-  type Area,
-} from "../lib/avatar-image";
+import { NEUTRAL, cssFilter, type Adjustments, type Area } from "../lib/avatar-image";
+import { renderAvatar } from "../lib/render-avatar";
 import { underlinedTabs } from "../tabs";
 import RangeSlider from "./RangeSlider";
 

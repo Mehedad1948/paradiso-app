@@ -72,6 +72,16 @@ Create-room, add-movie, invite, vote, and delete dialogs are dynamically importe
 
 The landing page WebGL effect disposes animation frames, listeners, GPU resources, and global scroll styles when hidden or unmounted so it does not continue affecting panel navigation.
 
+## Progressive Web App
+
+Paradiso installs as a standalone app (desktop and Android via the header's install button or the browser menu; iOS via Share → Add to Home Screen). `app/manifest.ts` is the web manifest; icons in `public/icons/` are generated from `public/app-icon.png` with `npm run icons:generate`.
+
+The service worker source is `sw/service-worker.js`. `npm run build` first runs `scripts/build-sw.mjs`, which writes `public/sw.js` (gitignored) with a per-build `APP_VERSION`. Its caching is conservative: hashed `/_next/static` chunks are cache-first, images are stale-while-revalidate, and documents, RSC payloads, `/api/*` and non-GET requests always hit the network, so per-user data is never cached. Offline document loads show `public/offline.html`; offline soft navigations and Server Actions are held and retried by `experimental.useOffline`, with a banner while offline. The worker registers only in production, and dev unregisters leftovers.
+
+**Shipping an update:** bump the version (`npm version patch|minor|major`), then build and deploy as usual. Every build stamps a new `APP_VERSION`, so open and installed copies detect the new worker on their next check (when the app regains focus or the connection returns, and every 30 minutes while visible). Users then see a "Reload to update to x.y.z" toast, and one tap activates it. A running tab is never swapped without consent. CI can set `APP_VERSION` explicitly. Bump `CACHE_VERSION` in `sw/service-worker.js` only when the cache layout changes, since app releases keep the existing chunk and image caches.
+
+Avatar edits (decode, rotate, crop, adjust, JPEG encode) run in a Web Worker with `OffscreenCanvas` (`features/profile/lib/render-avatar.ts`). Browsers without it fall back to the same code on the main thread.
+
 ## Verify
 
 ```powershell

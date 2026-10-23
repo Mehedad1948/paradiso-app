@@ -4,7 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "prebuild": "node scripts/build-sw.mjs",
     "build": "next build",
+    "sw:build": "node scripts/build-sw.mjs",
+    "icons:generate": "node scripts/generate-pwa-icons.mjs",
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",

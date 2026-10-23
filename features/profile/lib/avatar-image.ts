@@ -42,53 +42,80 @@ export function adjustPixels(data: Uint8ClampedArray, adjustments: Adjustments) 
   return data;
 }
 
-function loadImage(src: string) {
-  return new Promise<HTMLImageElement>((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("This image could not be read. Try another file."));
-    image.src = src;
-  });
-}
+type Context2D = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
+export type Surface = { canvas: HTMLCanvasElement | OffscreenCanvas; context: Context2D };
+type MakeSurface = (width: number, height: number) => Surface | null;
+type Source = CanvasImageSource & { width: number; height: number };
 
-/** Crops (in rotated-image pixels, as the cropper reports them), adjusts and encodes a square JPEG. */
-export async function renderAvatar(
-  src: string,
+export type AvatarRenderRequest = {
+  image: Blob;
+  crop: Area;
+  rotation: number;
+  adjustments: Adjustments;
+  size: number;
+};
+export type AvatarRenderResponse = { ok: true; blob: Blob } | { ok: false; message: string };
+
+export const UNSUPPORTED = "Image editing isn't supported in this browser.";
+export const UNREADABLE = "This image could not be read. Try another file.";
+export const UNSAVED = "The edited image could not be saved. Please try again.";
+
+/**
+ * Crops (in rotated-image pixels, as the cropper reports them) and adjusts onto a square canvas.
+ * Shared by the worker (OffscreenCanvas) and the main-thread fallback (DOM canvas).
+ */
+export function paintAvatar(
+  image: Source,
   crop: Area,
   rotation: number,
   adjustments: Adjustments,
-  size = AVATAR_OUTPUT_SIZE,
-): Promise<File> {
-  const image = await loadImage(src);
-  const radians = (rotation * Math.PI) / 180;
-  const width = Math.abs(Math.cos(radians)) * image.width + Math.abs(Math.sin(radians)) * image.height;
-  const height = Math.abs(Math.sin(radians)) * image.width + Math.abs(Math.cos(radians)) * image.height;
+  size: number,
+  makeSurface: MakeSurface,
+): Surface {
+  let source: Source = image;
+  if (rotation % 360 !== 0) {
+    const radians = (rotation * Math.PI) / 180;
+    const width = Math.abs(Math.cos(radians)) * image.width + Math.abs(Math.sin(radians)) * image.height;
+    const height = Math.abs(Math.sin(radians)) * image.width + Math.abs(Math.cos(radians)) * image.height;
+    const rotated = makeSurface(Math.round(width), Math.round(height));
+    if (!rotated) throw new Error(UNSUPPORTED);
+    rotated.context.translate(width / 2, height / 2);
+    rotated.context.rotate(radians);
+    rotated.context.drawImage(image, -image.width / 2, -image.height / 2);
+    source = rotated.canvas;
+  }
 
-  const rotated = document.createElement("canvas");
-  rotated.width = Math.round(width);
-  rotated.height = Math.round(height);
-  const source = rotated.getContext("2d");
-  if (!source) throw new Error("Image editing isn't supported in this browser.");
-  source.translate(width / 2, height / 2);
-  source.rotate(radians);
-  source.drawImage(image, -image.width / 2, -image.height / 2);
-
-  const output = document.createElement("canvas");
-  output.width = size;
-  output.height = size;
-  const context = output.getContext("2d");
-  if (!context) throw new Error("Image editing isn't supported in this browser.");
+  const output = makeSurface(size, size);
+  if (!output) throw new Error(UNSUPPORTED);
+  const { context } = output;
   context.fillStyle = "#fff"; // JPEG has no transparency.
   context.fillRect(0, 0, size, size);
   context.imageSmoothingQuality = "high";
-  context.drawImage(rotated, crop.x, crop.y, crop.width, crop.height, 0, 0, size, size);
+  context.drawImage(source, crop.x, crop.y, crop.width, crop.height, 0, 0, size, size);
   const pixels = context.getImageData(0, 0, size, size);
   adjustPixels(pixels.data, adjustments);
   context.putImageData(pixels, 0, 0);
+  return output;
+}
 
-  const blob = await new Promise<Blob | null>((resolve) =>
-    output.toBlob(resolve, "image/jpeg", 0.92),
-  );
-  if (!blob) throw new Error("The edited image could not be saved. Please try again.");
-  return new File([blob], "avatar.jpg", { type: "image/jpeg" });
+/** Worker side: decode, paint and encode entirely off the main thread. */
+export async function renderAvatarOffscreen({
+  image,
+  crop,
+  rotation,
+  adjustments,
+  size,
+}: AvatarRenderRequest): Promise<Blob> {
+  // An unknown imageOrientation value throws, which sends older engines to the fallback.
+  const bitmap = await createImageBitmap(image, { imageOrientation: "from-image" });
+  try {
+    const { canvas } = paintAvatar(bitmap, crop, rotation, adjustments, size, (width, height) => {
+      const canvas = new OffscreenCanvas(width, height);
+      const context = canvas.getContext("2d");
+      return context ? { canvas, context } : null;
+    });
+    return await (canvas as OffscreenCanvas).convertToBlob({ type: "image/jpeg", quality: 0.92 });
+  } finally {
+    bitmap.close();
+  }
 }

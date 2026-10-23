@@ -7,6 +7,8 @@ import { HeroUIProvider } from "@heroui/system";
 import { ToastProvider } from "@heroui/toast";
 import { ThemeProvider } from "next-themes";
 import NavigationProgress from "@/components/ui/NavigationProgress";
+import ServiceWorkerRegistrar from "@/components/pwa/ServiceWorkerRegistrar";
+import OfflineBanner from "@/components/pwa/OfflineBanner";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(makeQueryClient);
@@ -22,6 +24,8 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         <HeroUIProvider>
           <ToastProvider />
           <NavigationProgress />
+          <ServiceWorkerRegistrar />
+          <OfflineBanner />
           {children}
         </HeroUIProvider>
       </QueryClientProvider>

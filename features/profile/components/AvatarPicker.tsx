@@ -7,7 +7,8 @@ import { ImagePlus } from "lucide-react";
 import { AVATAR_TYPES } from "@/types/user";
 import type { AvatarDraft } from "../hooks/useAvatarDraft";
 
-const AvatarEditor = dynamic(() => import("./AvatarEditor"));
+// ssr: false gives it its own Suspense boundary, so loading it doesn't blank the sidebar.
+const AvatarEditor = dynamic(() => import("./AvatarEditor"), { ssr: false });
 /** Originals are only decoded in the browser; the edited upload is far smaller. */
 const SOURCE_MAX_BYTES = 20 * 1024 * 1024;
 

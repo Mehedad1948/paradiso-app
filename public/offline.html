@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Offline - Paradiso</title>
+    <link rel="icon" href="/icons/icon-192.png" />
+    <style>
+      :root {
+        --canvas: #f0f1f3;
+        --ink: #24262a;
+        --muted: #5f646c;
+        --line: #d5d8de;
+        --accent: #496780;
+        --on-accent: #ffffff;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --canvas: #171815;
+          --ink: #f0f1f3;
+          --muted: #a3a7ad;
+          --line: #32363c;
+          --accent: #a6bfd3;
+          --on-accent: #171815;
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        display: grid;
+        place-items: center;
+        padding: 24px max(24px, env(safe-area-inset-left));
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      main { max-width: 420px; text-align: center; }
+      img { width: 88px; height: 88px; border-radius: 22px; }
+      h1 { margin: 28px 0 8px; font-size: 28px; font-weight: 600; letter-spacing: -0.04em; }
+      p { margin: 0; color: var(--muted); line-height: 1.55; }
+      button {
+        margin-top: 28px;
+        padding: 12px 22px;
+        border: 0;
+        border-radius: 999px;
+        background: var(--accent);
+        color: var(--on-accent);
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+      .status { margin-top: 16px; font-size: 13px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="/icons/icon-192.png" alt="" />
+      <h1>You're offline</h1>
+      <p>Paradiso needs a connection to load this page. We'll pick up right where you left off as soon as you're back online.</p>
+      <button type="button" id="retry">Try again</button>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+    </main>
+    <script>
+      (function () {
+        var status = document.getElementById("status");
+        function retry() {
+          status.textContent = "Reconnecting…";
+          location.reload();
+        }
+        document.getElementById("retry").addEventListener("click", retry);
+        window.addEventListener("online", retry);
+      })();
+    </script>
+  </body>
+</html>

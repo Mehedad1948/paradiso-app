@@ -2,7 +2,10 @@
 import { useMemo, useState } from "react";
 import { Button } from "@heroui/button";
 import { Tab, Tabs } from "@heroui/tabs";
-import { KeyRound, UserRound } from "lucide-react";
+import { KeyRound, LogOut, UserRound } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAuthForm } from "@/hooks/auth/useAuthForm";
+import { authApi } from "@/lib/api/auth";
 import Sidebar, { useSidebar } from "@/components/ui/Sidebar";
 import type { CurrentUser } from "@/types/user";
 import ProfileForm from "./components/ProfileForm";
@@ -24,6 +27,8 @@ export default function ProfileSidebar({
   onClose: () => void;
 }) {
   const sidebar = useSidebar(onClose);
+  const router = useRouter();
+  const signOut = useAuthForm(authApi.signOut, true);
   const [section, setSection] = useState<Section>("profile");
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState<Record<Section, boolean>>({
@@ -46,6 +51,21 @@ export default function ProfileSidebar({
       busy={busy}
       footer={
         <>
+          <Button
+            variant="flat"
+            color="danger"
+            className="mr-auto bg-danger-500/10 font-semibold text-danger-500 hover:bg-danger-500/20"
+            startContent={!signOut.isPending && <LogOut size={16} aria-hidden="true" />}
+            isLoading={signOut.isPending}
+            isDisabled={busy || signOut.isPending}
+            onPress={() => {
+              void signOut.submit(undefined, () =>
+                router.replace("/auth/sign-in?reason=signed-out"),
+              );
+            }}
+          >
+            Sign out
+          </Button>
           <Button variant="light" isDisabled={busy} onPress={sidebar.close}>
             Cancel
           </Button>
@@ -61,6 +81,11 @@ export default function ProfileSidebar({
         </>
       }
     >
+      {signOut.error && (
+        <p role="alert" className="mb-3 text-sm text-danger-500">
+          {signOut.error}
+        </p>
+      )}
       <Tabs
         fullWidth
         variant="underlined"

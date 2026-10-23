@@ -1,5 +1,5 @@
 import "@/styles/globals.css";
-import { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import clsx from "clsx";
 
 import { siteConfig } from "@/config/site";
@@ -12,9 +12,28 @@ export const metadata: Metadata = {
     template: `%s - ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  applicationName: siteConfig.name,
   icons: {
-    icon: "/favicon.ico",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icons/icon-192.png", type: "image/png", sizes: "192x192" },
+    ],
+    apple: { url: "/icons/apple-touch-icon.png", sizes: "180x180" },
   },
+  appleWebApp: {
+    capable: true,
+    title: siteConfig.name,
+    statusBarStyle: "default",
+  },
+  formatDetection: { telephone: false },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f0f1f3" },
+    { media: "(prefers-color-scheme: dark)", color: "#171815" },
+  ],
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
