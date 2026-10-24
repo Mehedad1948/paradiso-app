@@ -125,6 +125,11 @@ export const panelApi = {
       `/invite-links/verify/${encodeURIComponent(token)}`,
       { method: "POST" },
     ),
+  acceptEmailInvite: (token: string) =>
+    bffRequest<BackendResponse<"/room-invitations/accept", "post">>(
+      "/room-invitations/accept",
+      { method: "POST", body: json({ token }) },
+    ),
   createInviteLink: (roomId: string) =>
     bffRequest<BackendResponse<"/rooms/{roomId}/invite-links", "post">>(`${roomPath(roomId)}/invite-links`, {
       method: "POST",

@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import rooms from "@/services/rooms";
 import links from "@/services/rooms/room-invite-link.service";
+import roomInvitations from "@/services/rooms/room-invitation.service";
 import users from "@/services/user";
 import auth from "@/services/auth/authServices";
 import { passwordInput, usernameInput } from "@/lib/auth/validation";
@@ -175,6 +176,12 @@ export async function handlePanelRequest(request: Request, path: string[]) {
       method === "POST"
     )
       return respond(await links.verify(text(path[2], "token", 512)));
+    if (resource === "room-invitations/accept" && method === "POST") {
+      const data = await body(request);
+      return respond(
+        await roomInvitations.accept(text(data.token, "token", 2048)),
+      );
+    }
     if (resource === "uploads" && method === "POST") {
       const form = await request.formData();
       const file = form.get("file");
