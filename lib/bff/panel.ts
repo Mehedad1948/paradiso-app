@@ -9,6 +9,7 @@ import auth from "@/services/auth/authServices";
 import { passwordInput, usernameInput } from "@/lib/auth/validation";
 import ratings from "@/services/ratings";
 import storage from "@/services/storage";
+import watchlist from "@/services/watchlist";
 import { moviesServices } from "@/services/movies";
 import { handleChatRequest } from "./chat";
 import { handleCommunityRequest } from "./community";
@@ -161,6 +162,18 @@ export async function handlePanelRequest(request: Request, path: string[]) {
     }
     if (resource === "genres" && method === "GET")
       return respond(await users.genres(request.signal));
+    if (path[0] === "watchlist" && path.length <= 2) {
+      if (path.length === 1 && method === "GET")
+        return respond(
+          await watchlist.list({ page: page(), limit: limit() }, request.signal),
+        );
+      if (path.length === 2) {
+        const movieId = identifier(path[1]);
+        if (method === "GET") return respond(await watchlist.has(movieId, request.signal));
+        if (method === "PUT") return respond(await watchlist.add(movieId));
+        if (method === "DELETE") return respond(await watchlist.remove(movieId));
+      }
+    }
     if (resource === "movies/search" && method === "GET") {
       return respond(
         await moviesServices.searchDbMovies(

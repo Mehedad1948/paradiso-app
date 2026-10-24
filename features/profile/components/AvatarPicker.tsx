@@ -81,7 +81,6 @@ export default function AvatarPicker({
           <h2 id="avatar-label" className="text-base font-semibold">
             Profile photo
           </h2>
-          <p className="text-sm text-muted">JPEG, PNG or WebP. You can crop and adjust it next.</p>
           <div className="mt-2 flex gap-1">
             <Button size="sm" variant="bordered" className="border-line" onPress={pick} isDisabled={disabled}>
               {draft.src ? "Change" : "Upload"}

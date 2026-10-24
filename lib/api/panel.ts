@@ -13,6 +13,7 @@ import type { VoteType } from "@/types/ratings";
 import type { ChangePasswordInputs, CurrentUser, UpdateMeInputs } from "@/types/user";
 import type { Invitation } from "@/types/invitations";
 import type { PaginatedResponse } from "@/types/request";
+import type { WatchlistItem } from "@/types/watchlist";
 import type { BackendResponse } from "@/types/backend";
 import type {
   RoomInviteLink,
@@ -42,6 +43,16 @@ export const panelApi = {
     bffRequest<PaginatedResponse<PanelRoomListItem>>(
       `/rooms${queryString({ usersRoom: true, page, limit: 100 })}`,
       { signal },
+    ),
+  watchlist: (page: number, limit: number, signal?: AbortSignal) =>
+    bffRequest<PaginatedResponse<WatchlistItem>>(
+      `/watchlist${queryString({ page, limit })}`,
+      { signal },
+    ),
+  removeFromWatchlist: (movieId: string) =>
+    bffRequest<BackendResponse<"/watchlist/{movieId}", "delete">>(
+      `/watchlist/${encodeURIComponent(movieId)}`,
+      { method: "DELETE" },
     ),
   room: (id: string, signal?: AbortSignal) =>
     bffRequest<PanelRoom>(roomPath(id), { signal }),

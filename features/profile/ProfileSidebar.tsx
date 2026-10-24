@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import { Button } from "@heroui/button";
 import { Tab, Tabs } from "@heroui/tabs";
-import { KeyRound, LogOut, UserRound } from "lucide-react";
+import { Bookmark, KeyRound, LogOut, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuthForm } from "@/hooks/auth/useAuthForm";
 import { authApi } from "@/lib/api/auth";
@@ -10,10 +10,12 @@ import Sidebar, { useSidebar } from "@/components/ui/Sidebar";
 import type { CurrentUser } from "@/types/user";
 import ProfileForm from "./components/ProfileForm";
 import PasswordForm from "./components/PasswordForm";
+import WatchlistPanel from "@/features/watchlist/WatchlistPanel";
 import { underlinedTabs } from "./tabs";
 
-type Section = "profile" | "password";
-const forms: Record<Section, { id: string; submit: string }> = {
+type Section = "profile" | "password" | "watchlist";
+type FormSection = Exclude<Section, "watchlist">;
+const forms: Record<FormSection, { id: string; submit: string }> = {
   profile: { id: "profile-form", submit: "Save changes" },
   password: { id: "password-form", submit: "Update password" },
 };
@@ -31,13 +33,14 @@ export default function ProfileSidebar({
   const signOut = useAuthForm(authApi.signOut, true);
   const [section, setSection] = useState<Section>("profile");
   const [busy, setBusy] = useState(false);
-  const [ready, setReady] = useState<Record<Section, boolean>>({
+  const [ready, setReady] = useState<Record<FormSection, boolean>>({
     profile: false,
     password: false,
   });
-  const form = forms[section];
+  // The watchlist has nothing to save, so it gets no submit button.
+  const form = section === "watchlist" ? null : forms[section];
   const onReady = useMemo(() => {
-    const setter = (key: Section) => (value: boolean) =>
+    const setter = (key: FormSection) => (value: boolean) =>
       setReady((current) => (current[key] === value ? current : { ...current, [key]: value }));
     return { profile: setter("profile"), password: setter("password") };
   }, []);
@@ -67,17 +70,19 @@ export default function ProfileSidebar({
             Sign out
           </Button>
           <Button variant="light" isDisabled={busy} onPress={sidebar.close}>
-            Cancel
+            {form ? "Cancel" : "Close"}
           </Button>
-          <Button
-            type="submit"
-            form={form.id}
-            className="bg-ink font-semibold text-canvas"
-            isLoading={busy}
-            isDisabled={!ready[section]}
-          >
-            {form.submit}
-          </Button>
+          {form && (
+            <Button
+              type="submit"
+              form={form.id}
+              className="bg-ink font-semibold text-canvas"
+              isLoading={busy}
+              isDisabled={!ready[section as FormSection]}
+            >
+              {form.submit}
+            </Button>
+          )}
         </>
       }
     >
@@ -112,6 +117,14 @@ export default function ProfileSidebar({
             </span>
           }
         />
+        <Tab
+          key="watchlist"
+          title={
+            <span className="flex items-center gap-2">
+              <Bookmark size={16} aria-hidden="true" /> Watchlist
+            </span>
+          }
+        />
       </Tabs>
       {/* Both stay mounted so unsaved edits survive switching tabs. */}
       <div hidden={section !== "profile"}>
@@ -131,6 +144,7 @@ export default function ProfileSidebar({
           onSaved={sidebar.close}
         />
       </div>
+      {section === "watchlist" && <WatchlistPanel />}
     </Sidebar>
   );
 }
