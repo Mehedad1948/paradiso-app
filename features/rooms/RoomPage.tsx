@@ -23,6 +23,7 @@ import RoomMembers from "./components/RoomMembers";
 import RoomMemberPills from "./components/RoomMemberPills";
 import InfiniteScrollSentinel from "./components/InfiniteScrollSentinel";
 import DialogLoading from "./components/DialogLoading";
+import RoomNoAccess, { isRoomAccessError } from "./components/RoomNoAccess";
 import Image from "next/image";
 import { posters } from "@/config/posters";
 import Link from "next/link";
@@ -108,6 +109,9 @@ function RoomPage({ roomId }: { roomId: string }) {
       update({ dialog: null, search: title.slice(0, 200), page: null }),
     [update],
   );
+  if (isRoomAccessError(room.error)) {
+    return <RoomNoAccess status={room.error.status} origin={`/rooms/${roomId}`} />;
+  }
   return (
     <div
       className="relative isolate min-h-fit"
