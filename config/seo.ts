@@ -39,9 +39,12 @@ export const seo = {
 export function pageMetadata(
   title: string,
   description: string,
-  options: { noIndex?: boolean } = {},
+  options: { noIndex?: boolean; image?: { url: string; alt?: string } } = {},
 ): Metadata {
   const socialTitle = `${title} | ${siteConfig.name}`;
+  const image = options.image
+    ? { url: options.image.url, alt: options.image.alt ?? title }
+    : seo.ogImage;
 
   return {
     title,
@@ -51,13 +54,13 @@ export function pageMetadata(
       siteName: siteConfig.name,
       title: socialTitle,
       description,
-      images: [seo.ogImage],
+      images: [image],
     },
     twitter: {
       card: "summary_large_image",
       title: socialTitle,
       description,
-      images: [seo.ogImage.url],
+      images: [image.url],
     },
     ...(options.noIndex && { robots: { index: false, follow: false } }),
   };
