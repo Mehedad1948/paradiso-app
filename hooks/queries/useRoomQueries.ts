@@ -80,6 +80,16 @@ export const useJoinRoom = (id: string, options?: MutationOptions<Message>) =>
     [panelKeys.rooms, panelKeys.room(id)],
     options,
   );
+/** Leaving drops the member's access, so every cache that depends on the room goes stale. */
+export const useLeaveRoom = (
+  id: string,
+  options?: MutationOptions<Awaited<ReturnType<typeof panelApi.leaveRoom>>>,
+) =>
+  usePanelMutation(
+    panelApi.leaveRoom,
+    [panelKeys.rooms, ["room", id]],
+    options,
+  );
 export const useAddMovie = (id: string, options?: MutationOptions<Message>) =>
   usePanelMutation(
     panelApi.addMovie,

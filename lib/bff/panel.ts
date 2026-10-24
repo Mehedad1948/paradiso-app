@@ -315,6 +315,16 @@ export async function handlePanelRequest(request: Request, path: string[]) {
             );
           }
           break;
+        case "leave":
+          if (method === "POST") {
+            const data = await body(request);
+            return respond(
+              await rooms.leaveRoom(roomId, {
+                clearVotes: boolean(data.clearVotes, "clearVotes", false),
+              }),
+            );
+          }
+          break;
         case "ratings":
           if (method === "GET") {
             const sortBy = query.get("sortBy");

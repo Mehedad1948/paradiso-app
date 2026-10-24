@@ -20,6 +20,7 @@ import RoomRatingTable from "./components/RoomRatingTable";
 import RoomQuickFilters from "./components/RoomQuickFilters";
 import UnratedBanner from "./components/UnratedBanner";
 import RoomMembers from "./components/RoomMembers";
+import RoomMenu from "./components/RoomMenu";
 import RoomMemberPills from "./components/RoomMemberPills";
 import InfiniteScrollSentinel from "./components/InfiniteScrollSentinel";
 import DialogLoading from "./components/DialogLoading";
@@ -47,6 +48,10 @@ const EditMovieDialog = dynamic(() => import("./dialogs/EditMovieDialog"), {
   loading: DialogLoading,
 });
 const DeleteMovieDialog = dynamic(() => import("./dialogs/DeleteMovieDialog"), {
+  ssr: false,
+  loading: DialogLoading,
+});
+const LeaveRoomDialog = dynamic(() => import("./dialogs/LeaveRoomDialog"), {
   ssr: false,
   loading: DialogLoading,
 });
@@ -82,6 +87,7 @@ function RoomPage({ roomId }: { roomId: string }) {
   const me = useMe();
   const [action, setAction] = useState<MovieAction>(null);
   const [showMembers, setShowMembers] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   useEffect(() => {
     setAction(null);
   }, []);
@@ -99,6 +105,8 @@ function RoomPage({ roomId }: { roomId: string }) {
     !!me.data &&
     (room.data.owner.id === me.data.id ||
       room.data.users.some((user) => user.id === me.data!.id));
+  // The owner cannot leave while there is no other admin, so the action is not offered.
+  const canLeave = isMember && room.data!.owner.id !== me.data!.id;
   const chatOpen = isMember && dialog === "chat";
   const unread = useChatUnread(roomId, { enabled: isMember, live: chatOpen });
   const summary = useRoomRatingSummary(roomId, isMember);
@@ -200,6 +208,7 @@ function RoomPage({ roomId }: { roomId: string }) {
                 Lobby
               </Button>
             )}
+            {canLeave && <RoomMenu onLeave={() => setLeaving(true)} />}
           </div>
         )}
       </div>
@@ -278,6 +287,13 @@ function RoomPage({ roomId }: { roomId: string }) {
           me={me.data}
           onClose={close}
           onShowInWatchlist={showInWatchlist}
+        />
+      )}
+      {room.data && canLeave && leaving && (
+        <LeaveRoomDialog
+          roomId={roomId}
+          roomName={room.data.name}
+          onClose={() => setLeaving(false)}
         />
       )}
       {room.data && dialog === "discussion" && (

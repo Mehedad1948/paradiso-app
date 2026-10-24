@@ -76,6 +76,11 @@ export const panelApi = {
     bffRequest<BackendResponse<"/rooms/join", "post">>(`${roomPath(roomId)}/join`, {
       method: "POST",
     }),
+  leaveRoom: ({ roomId, clearVotes }: { roomId: string; clearVotes: boolean }) =>
+    bffRequest<BackendResponse<"/rooms/{id}/leave", "post">>(`${roomPath(roomId)}/leave`, {
+      method: "POST",
+      body: json({ clearVotes }),
+    }),
   addMovie: ({ roomId, dbId, isWatchedTogether }: addMovieToRoomInputs) =>
     bffRequest<BackendResponse<"/rooms/add-movie/{id}", "post">>(`${roomPath(roomId)}/movies`, {
       method: "POST",

@@ -54,6 +54,9 @@ const roomsServices = {
   joinRoom(body: BackendRequestBody<"/rooms/join", "post">) {
     return backendRequest("/rooms/join", "post", { body });
   },
+  leaveRoom(id: number, body: BackendRequestBody<"/rooms/{id}/leave", "post">) {
+    return backendRequest("/rooms/{id}/leave", "post", { pathParams: { id }, body });
+  },
   inviteUser(roomId: number, email: string) {
     return backendRequest("/rooms/{roomId}/invitations", "post", {
       pathParams: { roomId }, body: { email },
