@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import clsx from "clsx";
 import { Tooltip } from "@heroui/tooltip";
-import { Link2, Lock, MessageCircle, Users } from "lucide-react";
+import { Lock, Users } from "lucide-react";
 import type { CommunityPost } from "@/types/community";
 import { useDeletePost } from "@/hooks/queries/useCommunityQueries";
 import type { Viewer } from "../hooks/useViewer";
@@ -15,7 +15,7 @@ import UserAvatar from "@/components/ui/UserAvatar";
 import PostMedia from "./PostMedia";
 import PostActions from "./PostActions";
 import PromotionCard from "./PromotionCard";
-import PostMenu, { copyPostLink } from "./PostMenu";
+import PostMenu from "./PostMenu";
 import ConfirmDialog from "./ConfirmDialog";
 
 const PostComposer = dynamic(() => import("./PostComposer"), { ssr: false });
@@ -72,54 +72,56 @@ function PostCard({
         onClick={open}
         aria-labelledby={`post-${post.id}-author`}
         className={clsx(
-          "grid grid-cols-[44px_minmax(0,1fr)] gap-x-3.5 px-5 py-5 sm:px-6",
+          "block px-5 py-5 sm:px-6",
           !detail &&
             "cursor-pointer transition-colors hover:bg-surface/40 motion-safe:animate-community-rise",
         )}
       >
-        <UserAvatar name={post.author.username} src={post.author.avatar} href={profileHref(post.author.id)} />
-        <div className="min-w-0">
-          <header className="flex min-w-0 items-center gap-1.5 text-[15px] leading-snug">
+        <header className="flex min-w-0 items-center gap-3">
+          <UserAvatar name={post.author.username} src={post.author.avatar} href={profileHref(post.author.id)} />
+          <div className="flex min-w-0 flex-1 flex-col leading-snug">
             <Link
               id={`post-${post.id}-author`}
               href={profileHref(post.author.id)}
-              className="truncate font-semibold hover:underline"
+              className="truncate text-[15px] font-semibold hover:underline"
             >
               {post.author.username}
             </Link>
-            <span aria-hidden="true" className="text-muted">
-              ·
-            </span>
-            <Tooltip
-              content={fullDate(post.createdAt)}
-              delay={500}
-              closeDelay={0}
-              size="sm"
-            >
-              <Link href={href} scroll={!overlay} className="shrink-0 text-muted hover:underline">
-                <time dateTime={post.createdAt}>{ago(post.createdAt)}</time>
-              </Link>
-            </Tooltip>
-            {isEdited(post) && (
+            <div className="flex min-w-0 items-center gap-1.5 text-sm text-muted">
               <Tooltip
-                content={`Edited ${fullDate(post.updatedAt)}`}
+                content={fullDate(post.createdAt)}
                 delay={500}
                 closeDelay={0}
                 size="sm"
               >
-                <span className="shrink-0 text-sm text-muted">· edited</span>
+                <Link href={href} scroll={!overlay} className="shrink-0 hover:underline">
+                  <time dateTime={post.createdAt}>{ago(post.createdAt)}</time>
+                </Link>
               </Tooltip>
-            )}
-            <span className="ml-auto pl-2">
-              <PostMenu
-                post={post}
-                viewer={viewer}
-                onEdit={() => setDialog("edit")}
-                onDelete={() => setDialog("delete")}
-                onClosed={() => (menuClosedAt.current = Date.now())}
-              />
-            </span>
-          </header>
+              {isEdited(post) && (
+                <Tooltip
+                  content={`Edited ${fullDate(post.updatedAt)}`}
+                  delay={500}
+                  closeDelay={0}
+                  size="sm"
+                >
+                  <span className="shrink-0">· edited</span>
+                </Tooltip>
+              )}
+            </div>
+          </div>
+          <span className="shrink-0 pl-2">
+            <PostMenu
+              post={post}
+              viewer={viewer}
+              onEdit={() => setDialog("edit")}
+              onDelete={() => setDialog("delete")}
+              onClosed={() => (menuClosedAt.current = Date.now())}
+            />
+          </span>
+        </header>
+
+        <div className="mt-2 min-w-0">
 
           {post.room && (
             <RoomScope
@@ -160,7 +162,7 @@ function PostCard({
             <PostMedia
               post={post}
               size={detail ? "lg" : "md"}
-              actions={<PostActions post={post} viewer={viewer} />}
+              actions={<PostActions post={post} viewer={viewer} tone="media" />}
             />
           </ViewTransition>
           {post.quotedPost && (
@@ -183,35 +185,11 @@ function PostCard({
             <PromotionCard promotion={post.promotion} viewer={viewer} />
           )}
 
-          {detail ? (
+          {detail && (
             <p className="mt-4 border-b border-line pb-4 text-[15px] text-muted">
               <time dateTime={post.createdAt}>{fullDate(post.createdAt)}</time>
               {isEdited(post) && <> · Edited {ago(post.updatedAt)}</>}
             </p>
-          ) : (
-            <footer className="-ml-2.5 mt-2.5 flex items-center gap-1 text-muted">
-              <Link
-                href={`${href}#comments`}
-                scroll={!overlay}
-                aria-label={`${post.commentCount} comments`}
-                className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full px-2.5 text-sm font-semibold transition-colors hover:bg-sky-500/10 hover:text-sky-500"
-              >
-                <MessageCircle size={18} aria-hidden="true" />
-                <span className="tabular-nums">
-                  {post.commentCount > 0
-                    ? post.commentCount.toLocaleString()
-                    : "Discuss"}
-                </span>
-              </Link>
-              <button
-                type="button"
-                onClick={() => copyPostLink(post.id)}
-                aria-label="Copy link to post"
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-emerald-500/10 hover:text-emerald-500"
-              >
-                <Link2 size={18} aria-hidden="true" />
-              </button>
-            </footer>
           )}
         </div>
       </article>
