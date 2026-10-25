@@ -18,6 +18,8 @@
     "api:check:remote": "node scripts/openapi.mjs check-remote"
   },
   "dependencies": {
+    "@dicebear/core": "^9.4.3",
+    "@dicebear/notionists": "^9.4.2",
     "@heroui/accordion": "2.2.23",
     "@heroui/alert": "2.2.20",
     "@heroui/autocomplete": "2.3.21",

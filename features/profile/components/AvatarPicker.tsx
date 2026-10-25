@@ -6,9 +6,14 @@ import { ImagePlus } from "lucide-react";
 import { AVATAR_TYPES } from "@/types/user";
 import UserAvatar from "@/components/ui/UserAvatar";
 import type { AvatarDraft } from "../hooks/useAvatarDraft";
+import type { AvatarConfig } from "../lib/avatar-builder";
 
 // ssr: false gives it its own Suspense boundary, so loading it doesn't blank the sidebar.
 const AvatarEditor = dynamic(() => import("./AvatarEditor"), { ssr: false });
+// The builder (and the DiceBear style behind it) is only fetched once someone opens it.
+const loadBuilder = () => import("./AvatarBuilder");
+const AvatarBuilder = dynamic(loadBuilder, { ssr: false });
+const preloadBuilder = () => void loadBuilder();
 /** Originals are only decoded in the browser; the edited upload is far smaller. */
 const SOURCE_MAX_BYTES = 20 * 1024 * 1024;
 
@@ -27,6 +32,9 @@ export default function AvatarPicker({
   const [editing, setEditing] = useState<string | null>(null);
   const [original, setOriginal] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // `designing` opens the builder; `design` remembers the last look so it reopens where it left off.
+  const [designing, setDesigning] = useState(false);
+  const [design, setDesign] = useState<AvatarConfig | null>(null);
   const urls = useRef(new Set<string>());
   useEffect(() => {
     const created = urls.current;
@@ -85,6 +93,29 @@ export default function AvatarPicker({
             <Button size="sm" variant="bordered" className="border-line" onPress={pick} isDisabled={disabled}>
               {draft.src ? "Change" : "Upload"}
             </Button>
+            <Button
+              size="sm"
+              variant="bordered"
+              className="border-line"
+              startContent={
+                // A static, pre-rendered illustration: no DiceBear code runs until the builder opens.
+                <img
+                  src="/avatar-design.svg"
+                  alt=""
+                  width={22}
+                  height={22}
+                  decoding="async"
+                  className="size-[22px] rounded-full"
+                />
+              }
+              onPress={() => setDesigning(true)}
+              // Start fetching the builder chunk before the click lands.
+              onMouseEnter={preloadBuilder}
+              onFocus={preloadBuilder}
+              isDisabled={disabled}
+            >
+              Create
+            </Button>
             {source && draft.src && (
               <Button size="sm" variant="light" onPress={() => setEditing(source)} isDisabled={disabled}>
                 Edit
@@ -123,6 +154,20 @@ export default function AvatarPicker({
         </p>
       )}
       {editing && <AvatarEditor source={editing} onCancel={cancel} onApply={apply} />}
+      {designing && (
+        <AvatarBuilder
+          initial={design}
+          onCancel={() => setDesigning(false)}
+          onApply={(file, config) => {
+            // A drawn avatar has no photo behind it, so there is nothing to re-edit.
+            release(original);
+            setOriginal(null);
+            setDesign(config);
+            setDesigning(false);
+            draft.choose(file);
+          }}
+        />
+      )}
     </section>
   );
 }
