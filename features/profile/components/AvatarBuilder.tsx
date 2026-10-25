@@ -154,6 +154,9 @@ export default function AvatarBuilder({
                 isDisabled={saving}
                 classNames={{
                   ...underlinedTabs,
+                  // The default wrapper is inline-flex and grows to fit every tab, so the list
+                  // would never overflow (or scroll). Pin it to the pane width instead.
+                  base: "w-full min-w-0",
                   tabList: `${underlinedTabs.tabList} w-full overflow-x-auto scrollbar-hide`,
                   tab: "h-11 px-3",
                 }}
