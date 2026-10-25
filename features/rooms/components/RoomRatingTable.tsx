@@ -22,8 +22,10 @@ import {
   Trash2,
   UsersRound,
 } from "lucide-react";
+import UserAvatar from "@/components/ui/UserAvatar";
 import MoviePoster from "./MoviePoster";
 import { ratingHue } from "../lib/ratingColor";
+import ControversyCell from "./ControversyCell";
 // Positions and timing live in CSS (nth-child); this only sets the count.
 const PILL_SPARKLES = Array.from({ length: 6 });
 /** Row tint keyed to the average: red through green, gold for 9 and up. */
@@ -40,12 +42,15 @@ function ratingTint(average: number | null) {
 function SortButton({
   label,
   description,
+  avatar,
   active,
   order,
   onPress,
 }: {
   label: string;
   description: string;
+  /** Shown beside the label on large screens only. */
+  avatar?: { name: string; src?: string | null };
   active: boolean;
   order?: "asc" | "desc" | null;
   onPress: () => void;
@@ -69,6 +74,17 @@ function SortButton({
         active
           ? `Sorted by ${description}, ${ascending ? "lowest" : "highest"} first. Press to reverse.`
           : `Sort by ${description}`
+      }
+      startContent={
+        avatar && (
+          <UserAvatar
+            name={avatar.name}
+            src={avatar.src}
+            size={22}
+            className="max-lg:hidden"
+            title={undefined}
+          />
+        )
       }
       endContent={
         <Icon
@@ -96,6 +112,7 @@ export default function RoomRatingTable({
   disabled,
   onSort,
   onSortAverage,
+  onSortControversy,
   onVote,
   onDelete,
   onEdit,
@@ -109,6 +126,7 @@ export default function RoomRatingTable({
   disabled: boolean;
   onSort: (userId: number) => void;
   onSortAverage: () => void;
+  onSortControversy: () => void;
   onVote: (movieId: string) => void;
   onDelete: (movieId: string) => void;
   onEdit: (movieId: string) => void;
@@ -119,15 +137,22 @@ export default function RoomRatingTable({
         label: `TITLE (${result.meta.totalItems || 0})`,
         key: "title",
         userId: undefined as number | undefined,
+        avatar: undefined as { name: string; src?: string | null } | undefined,
       },
       ...room.users.map((member) => ({
         label: member.username,
         key: String(member.id),
         userId: member.id,
+        avatar: { name: member.username, src: member.avatar },
       })),
       {
         label: "AVG",
         key: "average",
+        userId: undefined as number | undefined,
+      },
+      {
+        label: "DEBATE",
+        key: "controversy",
         userId: undefined as number | undefined,
       },
       {
@@ -154,7 +179,7 @@ export default function RoomRatingTable({
   return (
     <Table
       aria-label="Movies with ratings"
-      classNames={{ wrapper: "rounded-[10px] border border-line bg-elevated p-3 shadow-none [&_table]:min-w-[720px] [&_th]:bg-surface [&_th]:py-3.5 [&_th]:text-sm [&_th]:font-semibold [&_th]:text-muted [&_td]:border-b [&_td]:border-line [&_td]:py-4 [&_td]:text-[15px] [&_td]:font-medium [&_td:first-child]:min-w-[260px] [&_td:first-child]:max-w-[440px] [&_tr:last-child_td]:border-b-0" }}
+      classNames={{ wrapper: "rounded-[10px] border border-line bg-elevated p-3 shadow-none [&_table]:min-w-[860px] [&_th]:bg-surface [&_th]:py-3.5 [&_th]:text-sm [&_th]:font-semibold [&_th]:text-muted [&_td]:border-b [&_td]:border-line [&_td]:py-4 [&_td]:text-[15px] [&_td]:font-medium [&_td:first-child]:min-w-[260px] [&_td:first-child]:max-w-[440px] [&_tr:last-child_td]:border-b-0" }}
     >
       <TableHeader columns={columns}>
         {(column) => (
@@ -162,6 +187,7 @@ export default function RoomRatingTable({
             {column.userId !== undefined ? (
               <SortButton
                 label={column.label}
+                avatar={column.avatar}
                 description={`${column.label}'s rating`}
                 active={
                   filters.sortBy === "userRate" &&
@@ -177,6 +203,14 @@ export default function RoomRatingTable({
                 active={filters.sortBy === "rate"}
                 order={filters.sortOrder}
                 onPress={onSortAverage}
+              />
+            ) : column.key === "controversy" ? (
+              <SortButton
+                label={column.label}
+                description="controversy (how much raters disagree)"
+                active={filters.sortBy === "controversy"}
+                order={filters.sortOrder}
+                onPress={onSortControversy}
               />
             ) : (
               column.label
@@ -253,6 +287,8 @@ export default function RoomRatingTable({
                   ) : (
                     "-"
                   )
+                ) : columnKey === "controversy" ? (
+                  <ControversyCell variance={movie.rateVariance ?? null} />
                 ) : columnKey === "action" ? (
                   <div className="flex items-center gap-3">
                     <Button

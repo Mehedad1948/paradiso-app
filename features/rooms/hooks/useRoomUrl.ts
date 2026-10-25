@@ -60,6 +60,19 @@ export function useRoomUrl() {
       }),
     [update, filters.sortBy, filters.sortOrder],
   );
+  const sortByControversy = useCallback(
+    () =>
+      update({
+        sortBy: "controversy",
+        sortByUserId: null,
+        page: null,
+        sortOrder:
+          filters.sortBy === "controversy" && filters.sortOrder !== "asc"
+            ? "asc"
+            : "desc",
+      }),
+    [update, filters.sortBy, filters.sortOrder],
+  );
   // Both are on/off: "off" drops the param rather than asking for the opposite set.
   const setQuickFilters = useCallback(
     (patch: { watchedTogether?: boolean; unrated?: boolean }) =>
@@ -82,6 +95,7 @@ export function useRoomUrl() {
     setSearch,
     sortByUser,
     sortByAverage,
+    sortByControversy,
     setQuickFilters,
   };
 }

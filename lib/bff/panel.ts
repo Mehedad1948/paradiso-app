@@ -340,7 +340,12 @@ export async function handlePanelRequest(request: Request, path: string[]) {
           if (method === "GET") {
             const sortBy = query.get("sortBy");
             const sortOrder = query.get("sortOrder");
-            if (sortBy && sortBy !== "rate" && sortBy !== "userRate")
+            if (
+              sortBy &&
+              sortBy !== "rate" &&
+              sortBy !== "userRate" &&
+              sortBy !== "controversy"
+            )
               throw new InputError("Invalid sortBy");
             if (sortOrder && sortOrder !== "asc" && sortOrder !== "desc")
               throw new InputError("Invalid sortOrder");
@@ -358,7 +363,9 @@ export async function handlePanelRequest(request: Request, path: string[]) {
                     ? text(query.get("search"), "search", 200)
                     : undefined,
                   sortBy:
-                    sortBy === "rate" || sortBy === "userRate"
+                    sortBy === "rate" ||
+                    sortBy === "userRate" ||
+                    sortBy === "controversy"
                       ? sortBy
                       : undefined,
                   sortOrder:

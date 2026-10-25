@@ -2112,6 +2112,8 @@ export interface components {
             createdAt: string;
             addedBy: components["schemas"]["PublicUser"] | (never | null);
             averageRate: number | null;
+            /** Population variance of this room's ratings; null with fewer than 2 ratings. */
+            rateVariance: number | null;
             userSpecificRate: number | null;
             ratings: {
                 user: components["schemas"]["PublicUser"];
@@ -3976,7 +3978,7 @@ export interface operations {
                 search?: string | null;
                 isWatchTogether?: boolean | null;
                 hasVoted?: boolean | null;
-                sortBy?: "rate" | "userRate" | null;
+                sortBy?: "rate" | "userRate" | "controversy" | null;
                 sortOrder?: "asc" | "desc" | null;
                 sortByUserId?: number | null;
                 limit?: number | null;

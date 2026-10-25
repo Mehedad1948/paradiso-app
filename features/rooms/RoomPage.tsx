@@ -82,6 +82,7 @@ function RoomPage({ roomId }: { roomId: string }) {
     setSearch,
     sortByUser,
     sortByAverage,
+    sortByControversy,
     setQuickFilters,
   } = useRoomUrl();
   const { dialog, open, close } = useRoomDialog();
@@ -261,6 +262,7 @@ function RoomPage({ roomId }: { roomId: string }) {
               disabled={disabled}
               onSort={sortByUser}
               onSortAverage={sortByAverage}
+              onSortControversy={sortByControversy}
               onVote={(movieId) => setAction({ type: "vote", movieId })}
               onDelete={(movieId) => setAction({ type: "delete", movieId })}
               onEdit={(movieId) => setAction({ type: "edit", movieId })}
