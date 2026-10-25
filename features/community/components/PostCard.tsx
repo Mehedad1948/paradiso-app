@@ -1,13 +1,13 @@
 "use client";
-import { memo, useRef, useState, ViewTransition, type MouseEvent } from "react";
+import { memo, useId, useRef, useState, ViewTransition, type MouseEvent } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import clsx from "clsx";
 import { Tooltip } from "@heroui/tooltip";
-import { Lock, Users } from "lucide-react";
-import type { CommunityPost } from "@/types/community";
-import { useDeletePost } from "@/hooks/queries/useCommunityQueries";
+import { Lock, Repeat2, Users } from "lucide-react";
+import type { CommunityPost, CommunityUser } from "@/types/community";
+import { useDeletePost, usePost } from "@/hooks/queries/useCommunityQueries";
 import type { Viewer } from "../hooks/useViewer";
 import { usePostOverlay } from "../hooks/usePostOverlay";
 import { ago, fullDate, isEdited, postHref, profileHref } from "../format";
@@ -23,17 +23,52 @@ const PostComposer = dynamic(() => import("./PostComposer"), { ssr: false });
 const LONG_TEXT = 520;
 const interactive = "a, button, input, textarea, [role='menu']";
 
+type CardProps = {
+  post: CommunityPost;
+  viewer: Viewer;
+  variant?: "feed" | "detail";
+  onDeleted?: () => void;
+};
+
+/** A repost carries only a snapshot of the original; this stands in until the full post loads. */
+function snapshot(repost: CommunityPost, viewer: Viewer): CommunityPost {
+  const original = repost.quotedPost!;
+  return {
+    ...original,
+    kind: "post",
+    updatedAt: original.createdAt,
+    room: repost.room,
+    quotedPostId: null,
+    quotedPost: null,
+    promotion: null,
+    commentCount: 0,
+    likeCount: 0,
+    dislikeCount: 0,
+    repostCount: 0,
+    quoteCount: 0,
+    myReaction: null,
+    reposted: repost.author.id === viewer.me?.id,
+  };
+}
+
+/** Shows the original post, live, under a "reposted" line; likes and replies go to the original. */
+function Repost({ post, viewer, ...props }: CardProps) {
+  const original = usePost(post.quotedPost!.id, snapshot(post, viewer));
+  return <PostCard {...props} post={original.data ?? snapshot(post, viewer)} viewer={viewer} repostedBy={post.author} />;
+}
+
+function PostEntry(props: CardProps) {
+  return props.post.kind === "repost" && props.post.quotedPost ? <Repost {...props} /> : <PostCard {...props} />;
+}
+
 function PostCard({
   post,
   viewer,
   variant = "feed",
   onDeleted,
-}: {
-  post: CommunityPost;
-  viewer: Viewer;
-  variant?: "feed" | "detail";
-  onDeleted?: () => void;
-}) {
+  repostedBy,
+}: CardProps & { repostedBy?: CommunityUser }) {
+  const labelId = useId();
   const router = useRouter();
   const pathname = usePathname();
   const { closing } = usePostOverlay();
@@ -48,6 +83,8 @@ function PostCard({
   const href = postHref(post.id);
   // While this post is open over the feed, its image belongs to the overlay; names must be unique.
   const lent = !detail && pathname === href && closing !== pathname;
+  // The original may sit in the same feed; only one copy can own the shared-element name.
+  const mediaName = lent || repostedBy ? undefined : `post-media-${post.id}`;
   const long =
     !detail &&
     (post.text.length > LONG_TEXT || post.text.split("\n").length > 8);
@@ -56,32 +93,44 @@ function PostCard({
 
   // The whole card opens the post, except where the reader is clicking a control or selecting text.
   function open(event: MouseEvent<HTMLElement>) {
-    if (detail || (event.target as HTMLElement).closest(interactive)) return;
+    const target = event.target as HTMLElement;
+    if (detail || target.closest(interactive)) return;
     if (
       window.getSelection()?.toString() ||
       Date.now() - menuClosedAt.current < 400
     )
       return;
-    if (event.metaKey || event.ctrlKey) window.open(href, "_blank", "noopener");
-    else router.push(href, { scroll: !overlay });
+    // A click on the embedded post opens that post instead.
+    const to = target.closest<HTMLElement>("[data-quote-href]")?.dataset.quoteHref ?? href;
+    if (event.metaKey || event.ctrlKey) window.open(to, "_blank", "noopener");
+    else router.push(to, { scroll: !overlay });
   }
 
   return (
     <>
       <article
         onClick={open}
-        aria-labelledby={`post-${post.id}-author`}
+        aria-labelledby={labelId}
         className={clsx(
           "block px-5 py-5 sm:px-6",
           !detail &&
             "cursor-pointer transition-colors hover:bg-surface/40 motion-safe:animate-community-rise",
         )}
       >
+        {repostedBy && (
+          <p className="mb-2.5 flex items-center gap-1.5 pl-[30px] text-[13px] font-semibold text-muted">
+            <Repeat2 size={15} aria-hidden="true" className="-ml-[22px]" />
+            <Link href={profileHref(repostedBy.id)} className="truncate hover:underline">
+              {repostedBy.id === viewer.me?.id ? "You" : repostedBy.username}
+            </Link>
+            reposted
+          </p>
+        )}
         <header className="flex min-w-0 items-center gap-3">
           <UserAvatar name={post.author.username} src={post.author.avatar} href={profileHref(post.author.id)} />
           <div className="flex min-w-0 flex-1 flex-col leading-snug">
             <Link
-              id={`post-${post.id}-author`}
+              id={labelId}
               href={profileHref(post.author.id)}
               className="truncate text-[15px] font-semibold hover:underline"
             >
@@ -155,7 +204,7 @@ function PostCard({
               unmounts the named boundary, which is what lets React pair it with the other side. */}
           <ViewTransition
             key={lent ? "lent" : "own"}
-            name={lent ? undefined : `post-media-${post.id}`}
+            name={mediaName}
             share="morph"
             default="none"
           >
@@ -166,7 +215,10 @@ function PostCard({
             />
           </ViewTransition>
           {post.quotedPost && (
-            <div className="mt-3 rounded-2xl border border-line p-3">
+            <div
+              data-quote-href={postHref(post.quotedPost.id)}
+              className="mt-3 rounded-2xl border border-line p-3 transition-colors hover:border-muted/60 hover:bg-surface/40"
+            >
               <span className="text-sm font-semibold">{post.quotedPost.author.username}</span>
               {post.quotedPost.text && (
                 <p className="mt-1 line-clamp-4 whitespace-pre-wrap break-words text-[15px]">
@@ -199,7 +251,7 @@ function PostCard({
       )}
       {dialog === "delete" && (
         <ConfirmDialog
-          title="Delete recommendation?"
+          title="Delete post?"
           busy={remove.isPending}
           onClose={() => setDialog(null)}
           onConfirm={() =>
@@ -253,4 +305,4 @@ function RoomScope({
   );
 }
 
-export default memo(PostCard);
+export default memo(PostEntry);

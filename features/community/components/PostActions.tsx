@@ -4,14 +4,17 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { Facebook, Link2, MessageCircle, Share, Share2, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import dynamic from "next/dynamic";
+import { Facebook, Link2, MessageCircle, Quote, Repeat2, Share, Share2, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import type { CommunityPost } from "@/types/community";
-import { useReact } from "@/hooks/queries/useCommunityQueries";
+import { useReact, useRepost } from "@/hooks/queries/useCommunityQueries";
 import BubbleMenu, { type BubbleItem } from "@/components/ui/BubbleMenu";
 import type { Viewer } from "../hooks/useViewer";
 import { postHref } from "../format";
 import { copyPostLink } from "./PostMenu";
 import { useSignInHref } from "./SignInLink";
+
+const QuoteComposer = dynamic(() => import("./QuoteComposer"), { ssr: false });
 
 function XLogo() {
   return (
@@ -77,6 +80,12 @@ const arc: Record<Tone, { startAngle: number; endAngle: number }> = {
   surface: { startAngle: 200, endAngle: 340 },
 };
 
+// Repost and quote are just two bubbles, straight above (or below, over an image) the trigger.
+const repostArc: Record<Tone, { startAngle: number; endAngle: number }> = {
+  media: { startAngle: 60, endAngle: 120 },
+  surface: { startAngle: 240, endAngle: 300 },
+};
+
 const button =
   "relative inline-flex h-9 min-w-9 items-center justify-center gap-1.5 rounded-full px-2.5 text-[13px] font-medium tracking-wide tabular-nums transition-colors duration-200 disabled:opacity-60 [&_svg]:transition-transform [&_svg]:duration-300 [&_svg]:ease-out hover:[&_svg]:scale-110 active:[&_svg]:scale-90";
 
@@ -93,6 +102,10 @@ const hues = {
   comment: {
     media: { hover: "hover:bg-white/10 hover:text-sky-300" },
     surface: { hover: "hover:bg-sky-500/10 hover:text-sky-600 dark:hover:text-sky-400" },
+  },
+  repost: {
+    media: { hover: "hover:bg-white/10 hover:text-lime-300", on: "text-lime-300" },
+    surface: { hover: "hover:bg-lime-500/10 hover:text-lime-600 dark:hover:text-lime-400", on: "text-lime-600 dark:text-lime-400" },
   },
   share: {
     media: { hover: "hover:bg-white/10 hover:text-white" },
@@ -137,10 +150,33 @@ export default function PostActions({
   const overlay = usePathname().startsWith("/community");
   const signIn = useSignInHref();
   const react = useReact();
+  const repost = useRepost();
+  const [quoting, setQuoting] = useState(false);
   // Reacting in a room needs membership; the backend enforces it, this just hides the dead end.
   const canReact = !post.room || viewer.isMember(post.room.id);
   const liked = post.myReaction === 1;
   const disliked = post.myReaction === -1;
+
+  const shared = post.repostCount + post.quoteCount;
+  const repostItems: BubbleItem[] = [
+    {
+      key: "repost",
+      label: post.reposted ? "Undo repost" : "Repost",
+      icon: <Repeat2 size={18} />,
+      onSelect: () => repost.mutate({ postId: post.id, on: !post.reposted, me: viewer.me!.id }),
+      className: post.reposted ? hues.repost[tone].on : hues.repost[tone].hover,
+    },
+    { key: "quote", label: "Quote", icon: <Quote size={16} />, onSelect: () => setQuoting(true) },
+  ];
+  const repostIcon = (
+    <>
+      <Pop on={post.reposted}>
+        <Repeat2 size={19} strokeWidth={1.75} aria-hidden="true" />
+      </Pop>
+      {shared > 0 && <span>{shared.toLocaleString()}</span>}
+    </>
+  );
+  const repostClass = clsx(button, hues.repost[tone].hover, post.reposted && hues.repost[tone].on);
 
   function toggle(value: 1 | -1) {
     if (!viewer.signedIn) return router.push(signIn);
@@ -191,6 +227,22 @@ export default function PostActions({
         <MessageCircle size={18} strokeWidth={1.75} aria-hidden="true" />
         {post.commentCount > 0 && <span>{post.commentCount.toLocaleString()}</span>}
       </Link>
+      {canReact &&
+        (viewer.signedIn ? (
+          <BubbleMenu
+            label={`Repost or quote, ${post.repostCount} reposts, ${post.quoteCount} quotes`}
+            items={repostItems}
+            triggerClassName={repostClass}
+            bubbleClassName={clsx(bubble[tone], "transition-colors")}
+            {...repostArc[tone]}
+          >
+            {repostIcon}
+          </BubbleMenu>
+        ) : (
+          <button type="button" aria-label="Repost or quote" onClick={() => router.push(signIn)} className={repostClass}>
+            {repostIcon}
+          </button>
+        ))}
       <BubbleMenu
         label="Share post"
         items={typeof window === "undefined" ? [] : shareItems(post)}
@@ -206,6 +258,7 @@ export default function PostActions({
           )
         }
       </BubbleMenu>
+      {quoting && <QuoteComposer post={post} onClose={() => setQuoting(false)} />}
     </div>
   );
 }

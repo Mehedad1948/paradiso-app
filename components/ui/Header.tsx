@@ -4,7 +4,7 @@ import { useMe } from "@/hooks/queries/useMe";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { Clapperboard, LogIn, Popcorn } from "lucide-react";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { InstallAppButton } from "@/components/pwa/InstallAppButton";
 import { useState } from "react";
@@ -19,30 +19,36 @@ export default function Header() {
   const { data: user, isPending } = useMe();
   const [profileOpen, setProfileOpen] = useState(false);
   const pathname = usePathname();
+  const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
   const navLink = (href: string) =>
     clsx(
-      "inline-flex items-center gap-2 border-b py-1.5 transition-colors",
-      pathname === href || pathname.startsWith(`${href}/`)
-        ? "border-ink"
-        : "border-transparent text-muted hover:text-ink",
+      "group relative inline-flex h-10 items-center justify-center gap-2 px-2.5 transition-colors duration-200 max-md:w-9 max-md:px-0",
+      "after:absolute after:inset-x-2.5 after:-bottom-px after:h-0.5 after:origin-center after:rounded-full after:bg-accent after:transition-transform after:duration-200 max-md:after:inset-x-1.5",
+      isActive(href)
+        ? "text-ink after:scale-x-100"
+        : "text-muted after:scale-x-0 hover:text-ink hover:after:scale-x-50",
     );
 
   return (
-    <div className="fixed inset-x-0 top-0 z-40 bg-canvas/95 px-[4.5vw] text-ink backdrop-blur-md max-md:px-[5vw]">
-      <nav aria-label="Main navigation" className="mx-auto flex min-h-[88px] max-w-[1600px] items-center justify-between gap-6 border-b border-line max-md:min-h-20 max-md:gap-3 max-[480px]:flex-wrap max-[480px]:gap-y-3 max-[480px]:py-3.5">
-        <Logo />
+    <div className="fixed inset-x-0 top-0 z-40 bg-canvas/80 px-[4.5vw] text-ink backdrop-blur-xl max-md:px-[4vw]">
+      <nav aria-label="Main navigation" className="mx-auto flex h-[88px] max-w-[1600px] flex-nowrap items-center justify-between gap-3 border-b border-line max-md:h-[72px]">
+        <Logo className="shrink-0" />
 
-        <div className="flex items-center gap-5 text-[15px] font-semibold max-md:gap-3 max-md:text-sm max-[480px]:basis-full max-[480px]:justify-between">
-          <Link href="/community" className={navLink("/community")}>
-            Community
-          </Link>
-          <Link href="/rooms" className={navLink("/rooms")}>
-            Dashboard <ArrowUpRight size={15} aria-hidden="true" />
-          </Link>
-          <InstallAppButton />
-          <ThemeSwitch />
+        <div className="flex min-w-0 items-center gap-2 text-[15px] font-semibold max-[480px]:gap-1.5">
+          <div className="mr-1 flex items-center gap-1 max-md:mr-0 max-md:gap-0.5">
+            <Link href="/community" aria-label="Lobby" title="Lobby" aria-current={isActive("/community") ? "page" : undefined} className={navLink("/community")}>
+              <Popcorn size={20} aria-hidden="true" />
+              <span className="max-md:hidden">Lobby</span>
+            </Link>
+            <Link href="/rooms" aria-label="Rooms" title="Rooms" aria-current={isActive("/rooms") ? "page" : undefined} className={navLink("/rooms")}>
+              <Clapperboard size={20} aria-hidden="true" />
+              <span className="max-md:hidden">Rooms</span>
+            </Link>
+          </div>
+          <InstallAppButton className="max-[480px]:size-9" />
+          <ThemeSwitch className="max-[480px]:size-9" />
           {user ? (
-            <div className="flex items-center gap-2.5 max-md:gap-2 max-[480px]:ml-auto">
+            <div className="flex shrink-0 items-center">
               <button
                 type="button"
                 onClick={() => setProfileOpen(true)}
@@ -57,18 +63,23 @@ export default function Header() {
                   src={user.avatar}
                   size={40}
                   alt=""
-                  className="ring-1 ring-line transition-shadow group-hover:ring-ink/40"
+                  className="ring-2 ring-line transition-shadow group-hover:ring-accent"
                 />
-                <span className="max-w-[130px] truncate border-b border-transparent transition-colors group-hover:border-ink max-md:hidden">
+                <span className="max-w-[130px] truncate border-b border-transparent transition-colors group-hover:border-ink max-lg:hidden">
                   {user.username}
                 </span>
               </button>
             </div>
           ) : isPending ? (
-            <p>Loading…</p>
+            <span aria-label="Loading" className="size-10 animate-pulse rounded-full bg-surface max-[480px]:size-9" />
           ) : (
-            <Link href="/auth/sign-in" className="text-muted">
-              Sign in
+            <Link
+              href="/auth/sign-in"
+              aria-label="Sign in"
+              title="Sign in"
+              className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-ink text-canvas transition-opacity hover:opacity-85 max-[480px]:size-9"
+            >
+              <LogIn size={18} aria-hidden="true" />
             </Link>
           )}
         </div>

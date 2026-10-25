@@ -4,7 +4,7 @@ import { COMMUNITY_LIMITS } from "@/types/community";
 
 export function postTextError(value: string) {
   const length = value.trim().length;
-  if (!length) return "Say a few words about why it's worth watching.";
+  if (!length) return "Write something before posting.";
   if (length > COMMUNITY_LIMITS.text)
     return `Keep it under ${COMMUNITY_LIMITS.text.toLocaleString()} characters.`;
 }

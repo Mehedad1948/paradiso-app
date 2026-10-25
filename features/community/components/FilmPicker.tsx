@@ -115,7 +115,7 @@ export default function FilmPicker({
       <div className="flex items-center gap-3 rounded-[10px] border border-line bg-surface/60 p-2.5">
         <Thumb path={value.poster_path} />
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">Recommending</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">About</p>
           <p className="line-clamp-1 text-lg font-semibold leading-tight">{value.title}</p>
         </div>
         {!locked && (
@@ -137,7 +137,7 @@ export default function FilmPicker({
       <Input
         autoFocus
         aria-label="Search for a film"
-        placeholder="Which film are you recommending?"
+        placeholder="Which film is it about?"
         value={query}
         onValueChange={setQuery}
         isDisabled={disabled}

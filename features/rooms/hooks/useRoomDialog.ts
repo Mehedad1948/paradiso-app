@@ -2,7 +2,7 @@
 import { useCallback, useSyncExternalStore } from "react";
 import { useRoomUrl } from "./useRoomUrl";
 
-export type RoomDialog = "create-room" | "add-movie" | "invite" | "edit-room" | "chat" | "discussion";
+export type RoomDialog = "create-room" | "add-movie" | "invite" | "edit-room" | "chat" | "discussion" | "members";
 const legacyHashes = ["add-movie-modal", "invite-modal"];
 const event = "paradiso:dialogchange";
 function subscribe(listener: () => void) {
@@ -27,7 +27,8 @@ export function useRoomDialog() {
     current === "invite" ||
     current === "edit-room" ||
     current === "chat" ||
-    current === "discussion"
+    current === "discussion" ||
+    current === "members"
       ? current
       : params.get("addRoomModal") === "true"
         ? "create-room"

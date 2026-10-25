@@ -1,64 +1,87 @@
 "use client";
-import { useId, type CSSProperties } from "react";
-import { roundRating } from "@/lib/community/validation";
 import clsx from "clsx";
-import { formatRating, tone, verdict } from "../format";
+import { Star, X } from "lucide-react";
+import ElasticSlider from "@/components/ui/ElasticSlider";
+import { roundRating } from "@/lib/community/validation";
+import { ratingHue } from "@/features/rooms/lib/ratingColor";
+import { formatRating, verdict } from "../format";
 
-/** 0–10 in tenths: a slider for feel, arrow keys for precision, a verdict for meaning. */
+/** 0–10 in tenths, on the same elastic slider rooms use for rating a film. */
 export default function RatingInput({
   value,
   onChange,
+  onRemove,
   disabled,
 }: {
   value: number;
   onChange: (value: number) => void;
+  /** Shown as a remove button when the rating is optional. */
+  onRemove?: () => void;
   disabled?: boolean;
 }) {
-  const id = useId();
-  const percent = value * 10;
+  const perfect = value >= 10;
   return (
-    <div className="rounded-[10px] border border-line bg-surface/60 px-4 pb-3.5 pt-3">
-      <div className="flex items-end justify-between gap-4">
+    <div className="rounded-[10px] border border-line bg-surface/60 px-4 pb-4 pt-3">
+      <div className="flex items-end justify-between gap-3">
         <div>
-          <label htmlFor={id} className="text-sm font-semibold">
-            Your rating
-          </label>
-          <p className={clsx("text-sm font-semibold", tone(value).text)} aria-live="polite">
-            {verdict(value)}
-          </p>
+          <p className="text-sm font-semibold">Your rating</p>
+          <div className="flex items-baseline gap-1.5">
+            <span
+              aria-live="polite"
+              className={clsx("text-4xl font-semibold tabular-nums tracking-[-0.06em]", perfect && "rate-gold-text")}
+            >
+              {formatRating(value)}
+            </span>
+            <span className="text-base text-muted">/ 10</span>
+          </div>
         </div>
-        <output htmlFor={id} className={clsx("font-serif text-[40px] leading-none tracking-[-0.04em] transition-colors", tone(value).text)}>
-          {formatRating(value)}
-          <span className="ml-1 font-sans text-base tracking-normal text-muted">/10</span>
-        </output>
-      </div>
-      <input
-        id={id}
-        type="range"
-        min={0}
-        max={10}
-        step={0.1}
-        value={value}
-        disabled={disabled}
-        onChange={(event) => onChange(roundRating(Number(event.target.value)))}
-        aria-valuetext={`${formatRating(value)} out of 10, ${verdict(value)}`}
-        style={{ "--fill": `${percent}%`, "--tone": tone(value).fill } as CSSProperties}
-        className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-[linear-gradient(to_right,var(--tone)_var(--fill),hsl(var(--heroui-divider))_var(--fill))] disabled:cursor-not-allowed disabled:opacity-60 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-elevated [&::-moz-range-thumb]:bg-ink [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-elevated [&::-webkit-slider-thumb]:bg-ink [&::-webkit-slider-thumb]:shadow-[0_2px_8px_rgb(0_0_0_/_25%)] [&::-webkit-slider-thumb]:transition-transform active:[&::-webkit-slider-thumb]:scale-110"
-      />
-      <div aria-hidden="true" className="mt-1.5 flex justify-between px-0.5 text-[11px] tabular-nums text-muted">
-        {[0, 2, 4, 6, 8, 10].map((mark) => (
-          <button
-            key={mark}
-            type="button"
-            tabIndex={-1}
-            disabled={disabled}
-            onClick={() => onChange(mark)}
-            className="rounded px-1 transition-colors hover:text-ink"
+        <div className="flex items-center gap-1 pb-1">
+          <span
+            className={clsx(
+              "text-sm font-semibold uppercase tracking-[0.09em]",
+              perfect ? "rate-gold-text" : "text-muted",
+            )}
           >
-            {mark}
-          </button>
-        ))}
+            {verdict(value)}
+          </span>
+          {onRemove && (
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={onRemove}
+              aria-label="Remove rating"
+              className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface hover:text-ink disabled:opacity-50"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
       </div>
+      <ElasticSlider
+        className={clsx("mt-4 !w-full", perfect && "rate-gold")}
+        value={value}
+        onChange={(next) => onChange(roundRating(next))}
+        startingValue={0}
+        maxValue={10}
+        isStepped
+        stepSize={0.1}
+        ticks
+        valuePosition="bubble"
+        thickness={14}
+        activeThickness={22}
+        restOpacity={0.85}
+        maxStretch={40}
+        rangeColor={
+          perfect
+            ? "linear-gradient(100deg, #b8860b, #ffd700 30%, #fff6c2 50%, #ffd700 70%, #b8860b)"
+            : `hsl(${ratingHue(value)} 80% 55%)`
+        }
+        iconPlacement="inside"
+        leftIcon={<Star size={16} aria-hidden="true" />}
+        rightIcon={<Star size={16} className="fill-current" aria-hidden="true" />}
+        disabled={disabled}
+        ariaLabel="Your rating"
+      />
     </div>
   );
 }

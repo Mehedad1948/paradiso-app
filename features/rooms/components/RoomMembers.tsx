@@ -1,7 +1,7 @@
 "use client";
 import type { ReactNode } from "react";
 import { Tooltip } from "@heroui/tooltip";
-import { ChevronDown, Crown, UserPlus } from "lucide-react";
+import { ChevronRight, Crown, UserPlus } from "lucide-react";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { profileHref } from "@/features/community/format";
 import type { Room } from "@/types/rooms";
@@ -65,18 +65,14 @@ export default function RoomMembers({
   ownerId,
   disabled,
   onInvite,
-  expanded,
-  listId,
-  onToggle,
+  onOpenList,
 }: {
   members: Room["users"];
   ownerId: number;
   disabled: boolean;
   onInvite: () => void;
-  /** Whether the full member list below the header is open. */
-  expanded: boolean;
-  listId: string;
-  onToggle: () => void;
+  /** Opens the full member sidebar. */
+  onOpenList: () => void;
 }) {
   const hidden = members.length - SHOWN;
   return (
@@ -153,18 +149,15 @@ export default function RoomMembers({
       </ul>
       <button
         type="button"
-        aria-expanded={expanded}
-        aria-controls={listId}
-        onClick={onToggle}
-        className={`-mx-1 inline-flex items-center gap-1 rounded-full px-2 py-1 text-sm transition-colors hover:bg-ink/5 hover:text-ink ${
-          expanded ? "text-ink" : "text-muted"
-        }`}
+        aria-haspopup="dialog"
+        onClick={onOpenList}
+        className="group -mx-1 inline-flex items-center gap-1 rounded-full px-2 py-1 text-sm text-muted transition-colors hover:bg-ink/5 hover:text-ink"
       >
         {members.length === 1 ? "1 member" : `${members.length} members`}
-        <ChevronDown
+        <ChevronRight
           size={15}
           aria-hidden="true"
-          className={`transition-transform duration-300 ${expanded ? "rotate-180" : ""}`}
+          className="transition-transform duration-200 group-hover:translate-x-0.5"
         />
       </button>
     </div>

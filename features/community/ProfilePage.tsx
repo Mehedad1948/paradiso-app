@@ -86,7 +86,7 @@ function ProfilePage({ userId }: { userId: number }) {
                   startContent={<PenLine size={18} aria-hidden="true" />}
                   onPress={() => setComposing(true)}
                 >
-                  Recommend a film
+                  New post
                 </Button>
               ) : (
                 <FollowButton userId={userId} viewer={viewer} />

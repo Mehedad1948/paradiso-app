@@ -38,7 +38,7 @@ export default function RoomDiscussion({
               className="inline-flex min-h-[42px] items-center gap-2 rounded-full bg-accent px-5 text-[15px] font-semibold text-on-accent transition-opacity hover:opacity-90"
             >
               <Plus size={18} aria-hidden="true" />
-              Recommend a film
+              New post
             </button>
           </div>
         )}

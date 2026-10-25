@@ -152,12 +152,18 @@ export async function handleCommunityRequest({
     if (resource === "posts" && method === "POST") {
       auth();
       const body = await data();
+      // A film is optional, and a rating only makes sense with one.
+      if (body.rating !== undefined && body.movieId === undefined)
+        throw new InputError("Tag a film to rate it");
       const input: CreatePostInputs = {
-        movieId: uuidOf(body.movieId, "movieId"),
         text: postText(body.text),
-        rating: rating(body.rating),
+        ...(body.movieId === undefined ? {} : { movieId: uuidOf(body.movieId, "movieId") }),
+        ...(body.rating === undefined ? {} : { rating: rating(body.rating) }),
         ...(body.imageUrl === undefined ? {} : { imageUrl: imageUrl(body.imageUrl) }),
         ...(body.roomId === undefined ? {} : { roomId: positiveInteger(body.roomId, "roomId") }),
+        ...(body.quotedPostId === undefined
+          ? {}
+          : { quotedPostId: positiveInteger(body.quotedPostId, "quotedPostId") }),
         ...(body.promotedInviteToken === undefined
           ? {}
           : { promotedInviteToken: uuidOf(body.promotedInviteToken, "invite token") }),
@@ -212,6 +218,12 @@ export async function handleCommunityRequest({
         auth();
         return community.removeReaction(postId);
       }
+    }
+    if (action === "repost" && path.length === 3 && (method === "POST" || method === "DELETE")) {
+      auth();
+      return method === "POST"
+        ? mapResult(await community.repost(postId), withRoomImage)
+        : community.undoRepost(postId);
     }
     if (action === "comments") {
       if (path.length === 3 && method === "GET")

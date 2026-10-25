@@ -81,6 +81,24 @@ export const panelApi = {
       method: "POST",
       body: json({ clearVotes }),
     }),
+  kickMember: ({ roomId, userId }: { roomId: string; userId: number }) =>
+    bffRequest<BackendResponse<"/rooms/{id}/members/{userId}", "delete">>(
+      `${roomPath(roomId)}/members/${userId}`,
+      { method: "DELETE" },
+    ),
+  banMember: ({
+    roomId,
+    userId,
+    reason,
+  }: {
+    roomId: string;
+    userId: number;
+    reason?: string;
+  }) =>
+    bffRequest<BackendResponse<"/rooms/{id}/bans", "post">>(`${roomPath(roomId)}/bans`, {
+      method: "POST",
+      body: json({ userId, reason }),
+    }),
   addMovie: ({ roomId, dbId, isWatchedTogether }: addMovieToRoomInputs) =>
     bffRequest<BackendResponse<"/rooms/add-movie/{id}", "post">>(`${roomPath(roomId)}/movies`, {
       method: "POST",

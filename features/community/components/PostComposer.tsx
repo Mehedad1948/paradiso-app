@@ -8,7 +8,7 @@ import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@herou
 import { Spinner } from "@heroui/spinner";
 import { Switch } from "@heroui/switch";
 import { addToast } from "@heroui/toast";
-import { Globe2, ImagePlus, Lock, Megaphone, RefreshCw, X } from "lucide-react";
+import { Clapperboard, Globe2, ImagePlus, Lock, Megaphone, RefreshCw, Star, X } from "lucide-react";
 import {
   useCreatePost,
   useUpdatePost,
@@ -55,8 +55,9 @@ function Pill({
 }
 
 /**
- * Create or edit a recommendation. Creating offers where to post and, for
- * room owners, a room to promote; editing can change only text, rating and image.
+ * Create or edit a post. A film and a rating are optional extras; creating
+ * also offers where to post and, for room owners, a room to promote. Editing
+ * can change only text, rating and image.
  */
 export default function PostComposer({
   post,
@@ -80,7 +81,9 @@ export default function PostComposer({
   const [movie, setMovie] = useState<ResolvedMovie | null>(
     post?.movie ? { ...post.movie } : null,
   );
-  const [rating, setRating] = useState(post?.rating ?? 7);
+  const [tagFilm, setTagFilm] = useState(!!post?.movie);
+  // A rating needs a film; null means the post isn't rated.
+  const [rating, setRating] = useState<number | null>(post?.rating ?? null);
   const [text, setText] = useState(post?.text ?? "");
   const [image, setImage] = useState<{ url: string; preview: string } | null>(
     post && hasCustomImage(post) ? { url: post.imageUrl!, preview: post.imageUrl! } : null,
@@ -105,8 +108,17 @@ export default function PostComposer({
   const busy = create.isPending || update.isPending || promoting;
   const textError = postTextError(text);
   const length = text.trim().length;
-  const valid = !!movie && !textError && !ratingError(rating) && !upload.isPending;
+  const rated = movie && rating !== null ? rating : null;
+  const valid = !textError && (rated === null || !ratingError(rated)) && !upload.isPending;
+  // The backend can't clear a saved rating, so an existing one can only change.
+  const ratingRemovable = !post || post.rating === null;
   const presetRoom = viewer.rooms.find((room) => room.id === presetRoomId);
+
+  function removeFilm() {
+    setTagFilm(false);
+    setMovie(null);
+    setRating(null);
+  }
 
   function chooseImage(file: File | undefined) {
     if (!file) return;
@@ -132,12 +144,12 @@ export default function PostComposer({
     if (post) {
       const changes = {
         ...(text.trim() !== post.text ? { text: text.trim() } : {}),
-        ...(rating !== post.rating ? { rating } : {}),
+        ...(rated !== null && rated !== post.rating ? { rating: rated } : {}),
         ...(image?.url && image.url !== post.imageUrl ? { imageUrl: image.url } : {}),
       };
       if (!Object.keys(changes).length) return;
       await update.mutateAsync({ id: post.id, ...changes });
-      addToast({ title: "Recommendation updated", color: "success" });
+      addToast({ title: "Post updated", color: "success" });
       return;
     }
     let promotedInviteToken: string | undefined;
@@ -159,14 +171,14 @@ export default function PostComposer({
       }
     }
     const created = await create.mutateAsync({
-      movieId: movie!.id,
       text: text.trim(),
-      rating,
+      ...(movie ? { movieId: movie.id } : {}),
+      ...(rated !== null ? { rating: rated } : {}),
       ...(image?.url ? { imageUrl: image.url } : {}),
       ...(roomId ? { roomId } : {}),
       ...(promotedInviteToken ? { promotedInviteToken } : {}),
     });
-    addToast({ title: "Recommendation posted", color: "success" });
+    addToast({ title: "Posted", color: "success" });
     onPosted?.(created);
   }
 
@@ -185,10 +197,10 @@ export default function PostComposer({
       <ModalContent className="border border-line bg-elevated text-ink shadow-[0_24px_80px_rgb(0_0_0_/_16%)]">
         <ModalHeader className="flex flex-col gap-1 pb-2 pt-6">
           <span className="text-sm font-semibold uppercase tracking-[0.09em] text-accent">
-            {editing ? "Edit" : presetRoom ? `Post in ${presetRoom.name}` : "New recommendation"}
+            {editing ? "Edit" : presetRoom ? `Post in ${presetRoom.name}` : "New post"}
           </span>
           <span className="text-2xl font-semibold tracking-[-0.04em]">
-            {editing ? "Refine your take" : "What should we watch?"}
+            {editing ? "Refine your post" : "What's on your mind?"}
           </span>
         </ModalHeader>
         <ModalBody
@@ -197,22 +209,11 @@ export default function PostComposer({
             if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) submit().then(onClose, () => {});
           }}
         >
-          <FilmPicker
-            roomId={presetRoomId}
-            viewer={viewer}
-            value={movie}
-            onChange={setMovie}
-            locked={editing}
-            disabled={busy}
-          />
-          {touched && !movie && <p className="-mt-3 text-sm text-danger">Pick the film you&apos;re recommending.</p>}
-
-          <RatingInput value={rating} onChange={setRating} disabled={busy} />
-
           <div>
             <Textarea
-              aria-label="Why should we watch it?"
-              placeholder="Why should we watch it? No spoilers, or warn us first."
+              autoFocus={!editing}
+              aria-label="Post text"
+              placeholder="Share a take, ask for picks, talk films. No spoilers, or warn us first."
               value={text}
               onValueChange={setText}
               minRows={4}
@@ -244,6 +245,18 @@ export default function PostComposer({
                     className="font-semibold text-accent"
                   >
                     Add a still
+                  </Button>
+                )}
+                {!tagFilm && (
+                  <Button
+                    size="sm"
+                    variant="light"
+                    isDisabled={busy}
+                    startContent={<Clapperboard size={17} />}
+                    onPress={() => setTagFilm(true)}
+                    className="font-semibold text-accent"
+                  >
+                    Tag a film
                   </Button>
                 )}
               </div>
@@ -295,8 +308,52 @@ export default function PostComposer({
                 </div>
               </div>
             )}
-            {!image && <p className="mt-1 text-sm text-muted">Without a still, the film&apos;s poster is shown.</p>}
+            {!image && movie && <p className="mt-1 text-sm text-muted">Without a still, the film&apos;s poster is shown.</p>}
           </div>
+
+          {tagFilm && (
+            <section aria-label="Film" className="flex flex-col gap-3">
+              <div className="-mb-1 flex items-center justify-between gap-3">
+                <span className="text-sm font-semibold">About a film</span>
+                {!editing && (
+                  <Button size="sm" variant="light" isDisabled={busy} onPress={removeFilm} className="text-muted">
+                    Remove
+                  </Button>
+                )}
+              </div>
+              <FilmPicker
+                roomId={presetRoomId}
+                viewer={viewer}
+                value={movie}
+                onChange={(next) => {
+                  setMovie(next);
+                  // Picking a film opens the rating with it; removing the rating stays optional.
+                  if (next) setRating((current) => current ?? 7);
+                }}
+                locked={editing}
+                disabled={busy}
+              />
+              {movie &&
+                (rating === null ? (
+                  <Button
+                    variant="bordered"
+                    isDisabled={busy}
+                    startContent={<Star size={17} aria-hidden="true" />}
+                    onPress={() => setRating(7)}
+                    className="self-start border-line font-semibold"
+                  >
+                    Rate it
+                  </Button>
+                ) : (
+                  <RatingInput
+                    value={rating}
+                    onChange={setRating}
+                    onRemove={ratingRemovable ? () => setRating(null) : undefined}
+                    disabled={busy}
+                  />
+                ))}
+            </section>
+          )}
 
           {!editing && !presetRoomId && viewer.rooms.length > 0 && (
             <fieldset>

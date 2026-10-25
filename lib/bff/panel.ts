@@ -325,6 +325,17 @@ export async function handlePanelRequest(request: Request, path: string[]) {
             );
           }
           break;
+        case "bans":
+          if (method === "POST") {
+            const data = await body(request);
+            return respond(
+              await rooms.banUser(roomId, {
+                userId: positiveInteger(data.userId, "userId"),
+                ...(data.reason ? { reason: text(data.reason, "reason", 500) } : {}),
+              }),
+            );
+          }
+          break;
         case "ratings":
           if (method === "GET") {
             const sortBy = query.get("sortBy");
@@ -460,6 +471,10 @@ export async function handlePanelRequest(request: Request, path: string[]) {
     )
       return respond(
         await rooms.getRoomRatingSummary(roomId, request.signal),
+      );
+    if (path.length === 4 && path[2] === "members" && method === "DELETE")
+      return respond(
+        await rooms.kickUser(roomId, positiveInteger(path[3], "userId")),
       );
     if (path.length === 4) {
       const id = identifier(path[3]);

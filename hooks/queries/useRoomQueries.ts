@@ -90,7 +90,26 @@ export const useLeaveRoom = (
     [panelKeys.rooms, ["room", id]],
     options,
   );
-export const useAddMovie = (id: string, options?: MutationOptions<Message>) =>
+/** Removing or banning a member changes the roster and what they rated. */
+export const useKickMember = (
+  id: string,
+  options?: MutationOptions<Awaited<ReturnType<typeof panelApi.kickMember>>>,
+) =>
+  usePanelMutation(
+    panelApi.kickMember,
+    [panelKeys.room(id), panelKeys.ratings(id)],
+    options,
+  );
+export const useBanMember = (
+  id: string,
+  options?: MutationOptions<Awaited<ReturnType<typeof panelApi.banMember>>>,
+) =>
+  usePanelMutation(
+    panelApi.banMember,
+    [panelKeys.room(id), panelKeys.ratings(id)],
+    options,
+  );
+export const useAddMovie =(id: string, options?: MutationOptions<Message>) =>
   usePanelMutation(
     panelApi.addMovie,
     [panelKeys.room(id), panelKeys.ratings(id)],

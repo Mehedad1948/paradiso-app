@@ -31,7 +31,7 @@ export default function PostMenu({
   const items = [
     { key: "copy", label: "Copy link", icon: <Link2 size={17} />, run: () => copyPostLink(post.id) },
     ...(viewer.canEdit(post)
-      ? [{ key: "edit", label: "Edit recommendation", icon: <Pencil size={17} />, run: onEdit }]
+      ? [{ key: "edit", label: "Edit post", icon: <Pencil size={17} />, run: onEdit }]
       : []),
     ...(viewer.canDelete(post)
       ? [{ key: "delete", label: "Delete", icon: <Trash2 size={17} />, run: onDelete }]

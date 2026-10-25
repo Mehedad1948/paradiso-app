@@ -32,7 +32,7 @@ export default function ComposerPrompt({
   if (!viewer.me)
     return (
       <div className={clsx(frame, "justify-between max-sm:flex-col max-sm:items-start")}>
-        <p className="text-[15px] text-muted">Sign in to recommend films, join conversations and follow people.</p>
+        <p className="text-[15px] text-muted">Sign in to post, join conversations and follow people.</p>
         <SignInLink className="shrink-0">Sign in</SignInLink>
       </div>
     );

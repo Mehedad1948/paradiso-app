@@ -57,6 +57,14 @@ const roomsServices = {
   leaveRoom(id: number, body: BackendRequestBody<"/rooms/{id}/leave", "post">) {
     return backendRequest("/rooms/{id}/leave", "post", { pathParams: { id }, body });
   },
+  kickUser(id: number, userId: number) {
+    return backendRequest("/rooms/{id}/members/{userId}", "delete", {
+      pathParams: { id, userId },
+    });
+  },
+  banUser(id: number, body: BackendRequestBody<"/rooms/{id}/bans", "post">) {
+    return backendRequest("/rooms/{id}/bans", "post", { pathParams: { id }, body });
+  },
   inviteUser(roomId: number, email: string) {
     return backendRequest("/rooms/{roomId}/invitations", "post", {
       pathParams: { roomId }, body: { email },

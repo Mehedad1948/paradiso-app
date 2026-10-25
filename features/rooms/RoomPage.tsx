@@ -21,7 +21,6 @@ import RoomQuickFilters from "./components/RoomQuickFilters";
 import UnratedBanner from "./components/UnratedBanner";
 import RoomMembers from "./components/RoomMembers";
 import RoomMenu from "./components/RoomMenu";
-import RoomMemberPills from "./components/RoomMemberPills";
 import InfiniteScrollSentinel from "./components/InfiniteScrollSentinel";
 import DialogLoading from "./components/DialogLoading";
 import RoomNoAccess, { isRoomAccessError } from "./components/RoomNoAccess";
@@ -67,6 +66,10 @@ const EditRoomSidebar = dynamic(() => import("./sidebars/EditRoomSidebar"), {
   ssr: false,
   loading: DialogLoading,
 });
+const RoomMembersSidebar = dynamic(() => import("./sidebars/RoomMembersSidebar"), {
+  ssr: false,
+  loading: DialogLoading,
+});
 type MovieAction = { type: "vote" | "delete" | "edit"; movieId: string } | null;
 export default function RoomRoute() {
   const { roomId } = useParams<{ roomId: string }>();
@@ -86,7 +89,6 @@ function RoomPage({ roomId }: { roomId: string }) {
   const ratings = useRoomRatings(roomId, filters);
   const me = useMe();
   const [action, setAction] = useState<MovieAction>(null);
-  const [showMembers, setShowMembers] = useState(false);
   const [leaving, setLeaving] = useState(false);
   useEffect(() => {
     setAction(null);
@@ -173,9 +175,7 @@ function RoomPage({ roomId }: { roomId: string }) {
               ownerId={room.data.owner.id}
               disabled={disabled}
               onInvite={() => open("invite")}
-              expanded={showMembers}
-              listId="room-member-list"
-              onToggle={() => setShowMembers((shown) => !shown)}
+              onOpenList={() => open("members")}
             />
           )}
         </div>
@@ -212,15 +212,6 @@ function RoomPage({ roomId }: { roomId: string }) {
           </div>
         )}
       </div>
-      {room.data && (
-        <RoomMemberPills
-          id="room-member-list"
-          open={showMembers}
-          members={room.data.users}
-          ownerId={room.data.owner.id}
-          meId={me.data?.id}
-        />
-      )}
       {isMember && summary.data && !(watchedTogether && unrated) && (
         <UnratedBanner
           roomId={roomId}
@@ -304,6 +295,16 @@ function RoomPage({ roomId }: { roomId: string }) {
       )}
       {room.data && dialog === "invite" && (
         <InviteDialog key={roomId} roomId={roomId} onClose={close} />
+      )}
+      {room.data && dialog === "members" && (
+        <RoomMembersSidebar
+          key={roomId}
+          room={room.data}
+          meId={me.data?.id}
+          canManage={canManage}
+          onInvite={() => open("invite")}
+          onClose={close}
+        />
       )}
       {room.data && canManage && dialog === "edit-room" && (
         <EditRoomSidebar key={roomId} room={room.data} onClose={close} />

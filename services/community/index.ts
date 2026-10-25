@@ -41,6 +41,12 @@ const communityServices = {
   removeReaction(postId: number) {
     return backendRequest("/community/posts/{postId}/reaction", "delete", { pathParams: { postId } });
   },
+  repost(postId: number) {
+    return backendRequest("/community/posts/{postId}/repost", "post", { pathParams: { postId } });
+  },
+  undoRepost(postId: number) {
+    return backendRequest("/community/posts/{postId}/repost", "delete", { pathParams: { postId } });
+  },
   comments(postId: number, query: PageQuery, signal?: AbortSignal) {
     return backendRequest("/community/posts/{postId}/comments", "get", {
       pathParams: { postId }, query, signal,

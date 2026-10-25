@@ -40,6 +40,11 @@ export const communityApi = {
       `${postPath(postId)}/reaction`,
       value === null ? { method: "DELETE" } : { method: "PUT", body: json({ value }) },
     ),
+  /** Reposting is idempotent; undoing takes the original post's id. */
+  repost: ({ postId, on }: { postId: number; on: boolean; me: number }): Promise<CommunityPost | { message: string }> =>
+    on
+      ? bffRequest<CommunityPost>(`${postPath(postId)}/repost`, { method: "POST" })
+      : bffRequest<{ message: string }>(`${postPath(postId)}/repost`, { method: "DELETE" }),
   comments: (postId: number, cursor: Cursor, signal?: AbortSignal) =>
     bffRequest<CursorPage<CommunityComment>>(
       `${postPath(postId)}/comments${queryString(cursor)}`,

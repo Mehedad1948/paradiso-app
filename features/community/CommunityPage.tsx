@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import clsx from "clsx";
 import { Button } from "@heroui/button";
 import { ArrowUpRight, Film, Megaphone, PenLine, Star, Users, X } from "lucide-react";
+import SpecularBorder from "@/components/ui/SpecularBorder";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { useProfile } from "@/hooks/queries/useCommunityQueries";
 import type { FeedScope } from "@/types/community";
@@ -85,13 +86,16 @@ export default function CommunityPage() {
 
         <aside className="sticky top-[112px] flex flex-col gap-5 max-lg:hidden">
           {viewer.signedIn ? (
-            <Button
-              className="min-h-[50px] rounded-full bg-accent text-base font-semibold text-on-accent shadow-[0_10px_30px_hsl(var(--heroui-primary-500)/0.35)]"
-              startContent={<PenLine size={18} aria-hidden="true" />}
-              onPress={() => setComposing(true)}
-            >
-              Recommend a film
-            </Button>
+            <SpecularBorder radius={14} className="w-full">
+              <button
+                type="button"
+                onClick={() => setComposing(true)}
+                className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-[inherit] bg-ink/[0.04] px-6 text-base font-semibold text-ink shadow-[0_10px_24px_-14px_rgba(0,0,0,0.45)] backdrop-blur-sm transition-[background-color,transform] duration-200 hover:bg-ink/[0.08] active:scale-[0.97] motion-reduce:transition-none"
+              >
+                <PenLine size={18} aria-hidden="true" />
+                New post
+              </button>
+            </SpecularBorder>
           ) : (
             !viewer.checking && <SignInLink className="min-h-[50px] !rounded-full">Sign in to post</SignInLink>
           )}
@@ -102,7 +106,7 @@ export default function CommunityPage() {
       {viewer.signedIn && (
         <Button
           isIconOnly
-          aria-label="Recommend a film"
+          aria-label="New post"
           onPress={() => setComposing(true)}
           className="fixed bottom-6 right-5 z-40 h-14 w-14 rounded-full bg-accent text-on-accent shadow-[0_12px_32px_rgb(0_0_0_/_28%)] lg:hidden"
         >
@@ -179,7 +183,7 @@ function EmptyFeed({
       <p className="text-[15px] text-muted">{body}</p>
       {viewer.signedIn && tab === "everyone" && (
         <Button onPress={onCompose} className="mt-2 rounded-md bg-ink font-semibold text-canvas">
-          Recommend a film
+          New post
         </Button>
       )}
     </div>

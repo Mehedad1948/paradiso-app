@@ -65,6 +65,10 @@ export function PostDetail({
     }
   }, [loaded]);
 
+  // A repost has nothing of its own; its link shows the original and that discussion.
+  if (post.data?.kind === "repost" && post.data.quotedPostId)
+    return <PostDetail postId={post.data.quotedPostId} framed={framed} onDeleted={onDeleted} />;
+
   if (missing) {
     return (
       <div

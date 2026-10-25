@@ -109,9 +109,10 @@ export const useFeedHead = (scope: FeedScope, newestId: number | undefined, enab
     select: (page) => page.data.filter((post) => post.id > (newestId ?? Infinity)).length,
   });
 
-export function usePost(id: number) {
+export function usePost(id: number, placeholder?: CommunityPost) {
   const client = useQueryClient();
   return useQuery({
+    placeholderData: placeholder,
     queryKey: communityKeys.post(id),
     queryFn: ({ signal }) => communityApi.post(id, signal),
     enabled: Number.isSafeInteger(id) && id > 0,
@@ -196,6 +197,10 @@ export function useCreatePost() {
           ];
       scopes.forEach((scope) => prepend(client, communityKeys.feed(scope), post));
       client.setQueryData(communityKeys.post(post.id), post);
+      if (post.quotedPostId)
+        mapPosts(client, (item) =>
+          item.id === post.quotedPostId ? { ...item, quoteCount: item.quoteCount + 1 } : item,
+        );
       // Public-room posts also reach the global feeds; let those catch up when next shown.
       void client.invalidateQueries({ queryKey: communityKeys.feeds, refetchType: "none" });
     },
@@ -250,6 +255,39 @@ export function useReact() {
       toastError(error);
     },
     onSuccess: (counts, { postId }) => apply(postId, counts),
+  });
+}
+
+/** Optimistic repost toggle on the original; the repost itself joins or leaves the viewer's feeds. */
+export function useRepost() {
+  const client = useQueryClient();
+  const flip = (postId: number, on: boolean) =>
+    mapPosts(client, (post) =>
+      post.id === postId && post.reposted !== on
+        ? { ...post, reposted: on, repostCount: Math.max(0, post.repostCount + (on ? 1 : -1)) }
+        : post,
+    );
+  return useMutation({
+    mutationFn: communityApi.repost,
+    onMutate: ({ postId, on }) => flip(postId, on),
+    onError: (error, { postId, on }) => {
+      flip(postId, !on);
+      toastError(error);
+    },
+    onSuccess: (result, { postId, on, me }) => {
+      if (on) {
+        const repost = result as CommunityPost;
+        const scopes: FeedScope[] = repost.room
+          ? [{ kind: "room", roomId: repost.room.id }]
+          : [{ kind: "global" }, { kind: "global", authorId: me }];
+        scopes.forEach((scope) => prepend(client, communityKeys.feed(scope), repost));
+      } else {
+        mapPosts(client, (post) =>
+          post.kind === "repost" && post.quotedPostId === postId && post.author.id === me ? null : post,
+        );
+      }
+      addToast({ title: on ? "Reposted" : "Repost removed", color: "success" });
+    },
   });
 }
 
