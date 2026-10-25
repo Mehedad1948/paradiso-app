@@ -49,6 +49,16 @@ export const panelApi = {
       `/watchlist${queryString({ page, limit })}`,
       { signal },
     ),
+  inWatchlist: (movieId: string, signal?: AbortSignal) =>
+    bffRequest<BackendResponse<"/watchlist/{movieId}", "get">>(
+      `/watchlist/${encodeURIComponent(movieId)}`,
+      { signal },
+    ),
+  addToWatchlist: (movieId: string) =>
+    bffRequest<BackendResponse<"/watchlist/{movieId}", "put">>(
+      `/watchlist/${encodeURIComponent(movieId)}`,
+      { method: "PUT" },
+    ),
   removeFromWatchlist: (movieId: string) =>
     bffRequest<BackendResponse<"/watchlist/{movieId}", "delete">>(
       `/watchlist/${encodeURIComponent(movieId)}`,

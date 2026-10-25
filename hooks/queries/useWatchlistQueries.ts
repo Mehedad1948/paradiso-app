@@ -2,6 +2,7 @@
 import {
   useInfiniteQuery,
   useMutation,
+  useQuery,
   useQueryClient,
   type InfiniteData,
 } from "@tanstack/react-query";
@@ -26,6 +27,44 @@ export const useWatchlist = (enabled = true) =>
     enabled,
     select: (data) => data.pages.flatMap((page) => page.data),
   });
+
+const statusKey = (movieId: string) => [...panelKeys.watchlist, "has", movieId] as const;
+
+/** Whether the signed-in user already has this movie on their watchlist. */
+export const useInWatchlist = (movieId: string, enabled = true) =>
+  useQuery({
+    queryKey: statusKey(movieId),
+    queryFn: ({ signal }) => panelApi.inWatchlist(movieId, signal),
+    enabled,
+    staleTime: 60_000,
+    select: (data) => data.inWatchlist,
+  });
+
+/** Flips the saved state at once; a failure rolls it back. */
+export function useToggleWatchlist(movieId: string, title: string) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: (on: boolean) =>
+      on ? panelApi.addToWatchlist(movieId) : panelApi.removeFromWatchlist(movieId),
+    retry: false,
+    onMutate: async (on) => {
+      await client.cancelQueries({ queryKey: statusKey(movieId) });
+      const previous = client.getQueryData(statusKey(movieId));
+      client.setQueryData(statusKey(movieId), (data: { inWatchlist: boolean } | undefined) => ({
+        ...data,
+        inWatchlist: on,
+      }));
+      return { previous };
+    },
+    onSuccess: (_, on) =>
+      addToast({ title: on ? `${title} added to your watchlist` : `${title} removed from your watchlist`, color: "success" }),
+    onError: (error, _, context) => {
+      client.setQueryData(statusKey(movieId), context?.previous);
+      addToast({ title: error.message, color: "danger" });
+    },
+    onSettled: () => client.invalidateQueries({ queryKey: panelKeys.watchlist }),
+  });
+}
 
 /** Drops the movie from the cached list at once; a failure puts it back by refetching. */
 export function useRemoveFromWatchlist() {

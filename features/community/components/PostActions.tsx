@@ -5,9 +5,10 @@ import { useState, type ReactNode } from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { Facebook, Link2, MessageCircle, Quote, Repeat2, Share, Share2, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { BookmarkCheck, BookmarkPlus, Facebook, Link2, MessageCircle, Quote, Repeat2, Share, Share2, ThumbsDown, ThumbsUp, X } from "lucide-react";
 import type { CommunityPost } from "@/types/community";
 import { useReact, useRepost } from "@/hooks/queries/useCommunityQueries";
+import { useInWatchlist, useToggleWatchlist } from "@/hooks/queries/useWatchlistQueries";
 import BubbleMenu, { type BubbleItem } from "@/components/ui/BubbleMenu";
 import type { Viewer } from "../hooks/useViewer";
 import { postHref } from "../format";
@@ -107,6 +108,10 @@ const hues = {
     media: { hover: "hover:bg-white/10 hover:text-lime-300", on: "text-lime-300" },
     surface: { hover: "hover:bg-lime-500/10 hover:text-lime-600 dark:hover:text-lime-400", on: "text-lime-600 dark:text-lime-400" },
   },
+  watchlist: {
+    media: { hover: "hover:bg-white/10 hover:text-amber-300", on: "text-amber-300" },
+    surface: { hover: "hover:bg-amber-500/10 hover:text-amber-600 dark:hover:text-amber-400", on: "text-amber-600 dark:text-amber-400" },
+  },
   share: {
     media: { hover: "hover:bg-white/10 hover:text-white" },
     surface: { hover: "hover:bg-accent/10 hover:text-accent" },
@@ -133,6 +138,42 @@ function Pop({ on, children }: { on: boolean; children: ReactNode }) {
     >
       {children}
     </motion.span>
+  );
+}
+
+/** Saves the recommended movie to the viewer's own watchlist. */
+function WatchlistButton({
+  movie,
+  viewer,
+  tone,
+}: {
+  movie: NonNullable<CommunityPost["movie"]>;
+  viewer: Viewer;
+  tone: Tone;
+}) {
+  const router = useRouter();
+  const signIn = useSignInHref();
+  const saved = useInWatchlist(movie.id, viewer.signedIn).data === true;
+  const toggle = useToggleWatchlist(movie.id, movie.title);
+  const label = saved ? "Remove from watchlist" : "Add to watchlist";
+  return (
+    <button
+      type="button"
+      aria-pressed={saved}
+      aria-label={label}
+      title={label}
+      disabled={toggle.isPending}
+      onClick={() => (viewer.signedIn ? toggle.mutate(!saved) : router.push(signIn))}
+      className={clsx(button, hues.watchlist[tone].hover, saved && hues.watchlist[tone].on)}
+    >
+      <Pop on={saved}>
+        {saved ? (
+          <BookmarkCheck size={18} strokeWidth={1.75} aria-hidden="true" fill="currentColor" fillOpacity={0.2} />
+        ) : (
+          <BookmarkPlus size={18} strokeWidth={1.75} aria-hidden="true" />
+        )}
+      </Pop>
+    </button>
   );
 }
 
@@ -243,6 +284,7 @@ export default function PostActions({
             {repostIcon}
           </button>
         ))}
+      {post.movie && <WatchlistButton movie={post.movie} viewer={viewer} tone={tone} />}
       <BubbleMenu
         label="Share post"
         items={typeof window === "undefined" ? [] : shareItems(post)}
