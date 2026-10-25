@@ -329,7 +329,10 @@
     position: relative;
     inset: auto;
     order: -1;
-    width: 100%;
+    /* Bleed past the page's 5vw padding to the screen edges; the text keeps the padding. */
+    width: calc(100% + 10vw);
+    margin-inline: -5vw;
+    border-radius: 0;
     aspect-ratio: 16 / 8;
   }
 }

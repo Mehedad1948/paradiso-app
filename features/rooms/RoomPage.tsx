@@ -141,7 +141,7 @@ function RoomPage({ roomId }: { roomId: string }) {
         {room.data && (
           <div
             aria-hidden="true"
-            className="room-hero-art pointer-events-none absolute -top-20 bottom-0 right-0 -z-10 w-[72%] max-sm:-top-16 max-sm:w-full"
+            className="room-hero-art pointer-events-none absolute -top-20 bottom-0 right-0 -z-10 w-[72%] max-sm:-left-[5vw] max-sm:-right-[5vw] max-sm:-top-16 max-sm:w-auto"
           >
             <Image
               // Same fallback as the room's card, so the header matches the lobby.
