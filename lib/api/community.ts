@@ -73,6 +73,11 @@ export const communityApi = {
       `/community/users/suggested${queryString({ limit })}`,
       { signal },
     ),
+  searchUsers: (q: string, cursor: Cursor, signal?: AbortSignal) =>
+    bffRequest<CursorPage<CommunityUser>>(
+      `/community/users/search${queryString({ q, ...cursor })}`,
+      { signal },
+    ),
   people: (
     userId: number,
     kind: "followers" | "following",

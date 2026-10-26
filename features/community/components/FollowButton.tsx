@@ -13,12 +13,17 @@ export default function FollowButton({
 }: {
   userId: number;
   viewer: Viewer;
-  size?: "sm" | "md";
+  size?: "xs" | "sm" | "md";
 }) {
   const me = viewer.me?.id;
   const ids = useFollowingIds(me);
   const follow = useFollow(me);
-  const sizing = size === "sm" ? "min-h-[34px] min-w-[96px] px-3.5 text-sm" : "min-h-[44px] min-w-[120px] px-5 text-[15px]";
+  const sizing =
+    size === "xs"
+      ? "h-7 min-h-7 min-w-[72px] px-3 text-xs"
+      : size === "sm"
+        ? "min-h-[34px] min-w-[96px] px-3.5 text-sm"
+        : "min-h-[44px] min-w-[120px] px-5 text-[15px]";
 
   if (viewer.checking) return null;
   if (!viewer.me)

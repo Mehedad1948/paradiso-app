@@ -65,6 +65,9 @@ const communityServices = {
   suggestedUsers(limit: number, signal?: AbortSignal) {
     return backendRequest("/community/users/suggested", "get", { query: { limit }, signal });
   },
+  searchUsers(q: string, query: PageQuery, signal?: AbortSignal) {
+    return backendRequest("/community/users/search", "get", { query: { q, ...query }, signal });
+  },
   profile(userId: number, signal?: AbortSignal) {
     return backendRequest("/community/users/{userId}", "get", { pathParams: { userId }, signal });
   },

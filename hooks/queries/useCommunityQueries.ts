@@ -1,5 +1,6 @@
 "use client";
 import {
+  keepPreviousData,
   useInfiniteQuery,
   useMutation,
   useQuery,
@@ -158,6 +159,18 @@ export const useSuggestedPeople = (me: number | undefined, limit = 8) =>
     queryKey: communityKeys.suggested(me ?? 0),
     staleTime: 5 * 60_000,
     queryFn: ({ signal }) => communityApi.suggested(limit, signal).then((page) => page.data),
+  });
+
+/** Members whose username matches `q`; keeps the last results on screen while the next query loads. */
+export const useUserSearch = (me: number | undefined, q: string) =>
+  useInfiniteQuery({
+    ...infinite(
+      communityKeys.userSearch(me ?? 0, q),
+      (before, signal) => communityApi.searchUsers(q, { before, limit: 10 }, signal),
+      !!q,
+    ),
+    staleTime: 60_000,
+    placeholderData: keepPreviousData,
   });
 
 /** The backend has no isFollowing flag, so cache everyone the viewer follows. */

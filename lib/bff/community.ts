@@ -15,7 +15,7 @@ import {
   postTextError,
   ratingError,
 } from "@/lib/community/validation";
-import { InputError, positiveInteger } from "./validation";
+import { InputError, positiveInteger, text } from "./validation";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 /** How far to scan the movie library when TMDb says a film already exists. */
@@ -242,9 +242,11 @@ export async function handleCommunityRequest({
     }
   }
 
-  // Matched before users/:id, which would reject "suggested" as an id.
+  // Matched before users/:id, which would reject these names as ids.
   if (resource === "users" && rawId === "suggested" && path.length === 2 && method === "GET")
     return community.suggestedUsers(cursor().limit, signal);
+  if (resource === "users" && rawId === "search" && path.length === 2 && method === "GET")
+    return community.searchUsers(text(query.get("q"), "search", 50), cursor(), signal);
 
   if (resource === "users" && rawId) {
     const userId = positiveInteger(rawId, "userId");

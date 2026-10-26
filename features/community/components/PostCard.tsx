@@ -1,5 +1,5 @@
 "use client";
-import { memo, useId, useRef, useState, ViewTransition, type MouseEvent } from "react";
+import { memo, useId, useRef, useState, type MouseEvent } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -9,7 +9,6 @@ import { Lock, Repeat2, Users } from "lucide-react";
 import type { CommunityPost, CommunityUser } from "@/types/community";
 import { useDeletePost, usePost } from "@/hooks/queries/useCommunityQueries";
 import type { Viewer } from "../hooks/useViewer";
-import { usePostOverlay } from "../hooks/usePostOverlay";
 import { ago, fullDate, isEdited, postHref, profileHref } from "../format";
 import UserAvatar from "@/components/ui/UserAvatar";
 import PostMedia from "./PostMedia";
@@ -71,7 +70,6 @@ function PostCard({
   const labelId = useId();
   const router = useRouter();
   const pathname = usePathname();
-  const { closing } = usePostOverlay();
   // Inside the community a post opens as an overlay, so the feed underneath must not scroll.
   const overlay = pathname.startsWith("/community");
   const [dialog, setDialog] = useState<"edit" | "delete" | null>(null);
@@ -81,10 +79,6 @@ function PostCard({
   const menuClosedAt = useRef(0);
   const detail = variant === "detail";
   const href = postHref(post.id);
-  // While this post is open over the feed, its image belongs to the overlay; names must be unique.
-  const lent = !detail && pathname === href && closing !== pathname;
-  // The original may sit in the same feed; only one copy can own the shared-element name.
-  const mediaName = lent || repostedBy ? undefined : `post-media-${post.id}`;
   const long =
     !detail &&
     (post.text.length > LONG_TEXT || post.text.split("\n").length > 8);
@@ -201,20 +195,11 @@ function PostCard({
             </button>
           )}
 
-          {/* The image flies between the feed and the open post. Swapping the key when it's lent
-              unmounts the named boundary, which is what lets React pair it with the other side. */}
-          <ViewTransition
-            key={lent ? "lent" : "own"}
-            name={mediaName}
-            share="morph"
-            default="none"
-          >
-            <PostMedia
-              post={post}
-              size={detail ? "lg" : "md"}
-              actions={<PostActions post={post} viewer={viewer} tone="media" />}
-            />
-          </ViewTransition>
+          <PostMedia
+            post={post}
+            size={detail ? "lg" : "md"}
+            actions={<PostActions post={post} viewer={viewer} tone="media" />}
+          />
           {post.quotedPost && (
             <div
               data-quote-href={postHref(post.quotedPost.id)}
