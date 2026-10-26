@@ -3,9 +3,11 @@ import type {
   CommunityComment,
   CommunityPost,
   CommunityProfile,
+  CommunityRecommendation,
   CommunityUser,
   CreatePostInputs,
   CursorPage,
+  FavoriteMovie,
   FeedScope,
   ResolvedMovie,
   UpdatePostInputs,
@@ -76,6 +78,16 @@ export const communityApi = {
       `${userPath(userId)}/${kind}${queryString(cursor)}`,
       { signal },
     ),
+  recommendations: (userId: number, cursor: Cursor, signal?: AbortSignal) =>
+    bffRequest<CursorPage<CommunityRecommendation>>(
+      `${userPath(userId)}/recommendations${queryString(cursor)}`,
+      { signal },
+    ),
+  favorites: (userId: number, signal?: AbortSignal) =>
+    bffRequest<{ data: FavoriteMovie[] }>(`/favorites/users/${encodeURIComponent(userId)}`, { signal }),
+  /** Replaces the whole list; the order given is the display order. */
+  setFavorites: (movieIds: string[]) =>
+    bffRequest<{ data: FavoriteMovie[] }>("/favorites", { method: "PUT", body: json({ movieIds }) }),
   resolveMovie: (tmdbId: number) =>
     bffRequest<ResolvedMovie>("/community/movies/resolve", {
       method: "POST",

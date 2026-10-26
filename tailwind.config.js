@@ -65,12 +65,18 @@ const config = {
           "0%": { opacity: "0", transform: "translateY(6px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        // Profile posters fade up and sharpen into the grid.
+        "poster-in": {
+          "0%": { opacity: "0", transform: "translateY(10px) scale(0.98)" },
+          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
       },
       animation: {
         "cinema-reveal": "cinema-reveal 4.6s linear",
         "cinema-number": "cinema-number 4.6s step-end",
         "cinema-letter-reveal": "cinema-letter-reveal 4.6s linear",
         "community-rise": "community-rise 380ms cubic-bezier(0.2, 0.7, 0.2, 1) both",
+        "poster-in": "poster-in 500ms cubic-bezier(0.22, 1, 0.36, 1) both",
       },
     },
   },

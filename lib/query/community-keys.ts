@@ -11,6 +11,9 @@ export const communityKeys = {
   profile: (userId: number) => ["community", "profile", userId] as const,
   people: (userId: number, kind: "followers" | "following") =>
     ["community", "people", userId, kind] as const,
+  favorites: (userId: number) => ["community", "favorites", userId] as const,
+  allRecommendations: ["community", "recommendations"] as const,
+  recommendations: (userId: number) => ["community", "recommendations", userId] as const,
   followingIds: (me: number) => ["community", "following-ids", me] as const,
   myRooms: (me: number) => ["community", "my-rooms", me] as const,
 };

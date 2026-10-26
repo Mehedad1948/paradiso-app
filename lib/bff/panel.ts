@@ -10,10 +10,12 @@ import { passwordInput, usernameInput } from "@/lib/auth/validation";
 import ratings from "@/services/ratings";
 import storage from "@/services/storage";
 import watchlist from "@/services/watchlist";
+import favorites from "@/services/favorites";
 import { moviesServices } from "@/services/movies";
 import { handleChatRequest } from "./chat";
 import { handleCommunityRequest } from "./community";
 import type { RequestResult } from "@/types/request";
+import { MAX_FAVORITE_MOVIES } from "@/types/community";
 import {
   AVATAR_MAX_BYTES,
   AVATAR_TYPES,
@@ -135,6 +137,11 @@ export async function handlePanelRequest(request: Request, path: string[]) {
           signedIn,
         }),
       );
+    // A member's favorites are part of their public profile.
+    if (path.length === 3 && path[0] === "favorites" && path[1] === "users" && method === "GET")
+      return respond(
+        await favorites.listForUser(positiveInteger(path[2], "userId"), request.signal),
+      );
     if (!signedIn) throw new InputError("Sign in to continue", 401);
     const page = () => positiveInteger(query.get("page"), "page", 1);
     const limit = () => positiveInteger(query.get("limit"), "limit", 10, 100);
@@ -173,6 +180,26 @@ export async function handlePanelRequest(request: Request, path: string[]) {
         if (method === "PUT") return respond(await watchlist.add(movieId));
         if (method === "DELETE") return respond(await watchlist.remove(movieId));
       }
+    }
+    if (resource === "favorites") {
+      if (method === "GET") return respond(await favorites.list(request.signal));
+      if (method === "PUT") {
+        const ids = (await body(request)).movieIds;
+        if (
+          !Array.isArray(ids) ||
+          ids.length > MAX_FAVORITE_MOVIES ||
+          ids.some((id) => typeof id !== "string" || !uuid.test(id)) ||
+          new Set(ids).size !== ids.length
+        )
+          throw new InputError(`Choose up to ${MAX_FAVORITE_MOVIES} different films`);
+        return respond(await favorites.set(ids as string[]));
+      }
+    }
+    if (path.length === 2 && path[0] === "favorites") {
+      const movieId = identifier(path[1]);
+      if (method === "GET") return respond(await favorites.has(movieId, request.signal));
+      if (method === "PUT") return respond(await favorites.add(movieId));
+      if (method === "DELETE") return respond(await favorites.remove(movieId));
     }
     if (resource === "movies/search" && method === "GET") {
       return respond(
@@ -320,7 +347,7 @@ export async function handlePanelRequest(request: Request, path: string[]) {
             const data = await body(request);
             return respond(
               await rooms.leaveRoom(roomId, {
-                clearVotes: boolean(data.clearVotes, "clearVotes", false),
+                clearVotes: boolean(data.clearVotes, "clearVotes", false) ?? false,
               }),
             );
           }

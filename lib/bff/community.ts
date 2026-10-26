@@ -254,6 +254,8 @@ export async function handleCommunityRequest({
         return community.followers(userId, cursor(), signal);
       if (action === "following" && method === "GET")
         return community.followingUsers(userId, cursor(), signal);
+      if (action === "recommendations" && method === "GET")
+        return community.recommendations(userId, cursor(), signal);
     }
   }
   throw new InputError("Resource or method not found", 404);

@@ -81,6 +81,11 @@ const communityServices = {
       pathParams: { userId }, query, signal,
     });
   },
+  recommendations(userId: number, query: PageQuery, signal?: AbortSignal) {
+    return backendRequest("/community/users/{userId}/recommendations", "get", {
+      pathParams: { userId }, query, signal,
+    });
+  },
 };
 
 export default communityServices;

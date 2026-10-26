@@ -7,6 +7,11 @@ export type CommunityProfile = components["schemas"]["CommunityProfileResponse"]
 export type CommunityUser = components["schemas"]["PublicUser"];
 export type CommunityMovie = NonNullable<CommunityPost["movie"]>;
 export type CommunityPromotion = NonNullable<CommunityPost["promotion"]>;
+export type FavoriteMovie = components["schemas"]["FavoriteMovie"];
+export type CommunityRecommendation = components["schemas"]["CommunityRecommendation"];
+
+/** The backend keeps at most this many favorites per member. */
+export const MAX_FAVORITE_MOVIES = 10;
 
 /** Cursor page shared by every community list route. */
 export type CursorPage<T> = { data: T[]; nextCursor: number | null };

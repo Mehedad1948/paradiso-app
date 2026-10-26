@@ -136,6 +136,15 @@ export const useProfile = (userId: number) =>
     enabled: Number.isSafeInteger(userId) && userId > 0,
   });
 
+/** Posts rated 8 or higher, one per film, newest first. */
+export const useRecommendations = (userId: number) =>
+  useInfiniteQuery({
+    ...infinite(communityKeys.recommendations(userId), (before, signal) =>
+      communityApi.recommendations(userId, { before }, signal),
+    ),
+    staleTime: 60_000,
+  });
+
 export const usePeople = (userId: number, kind: "followers" | "following") =>
   useInfiniteQuery(
     infinite(communityKeys.people(userId, kind), (before, signal) =>
@@ -203,6 +212,7 @@ export function useCreatePost() {
         );
       // Public-room posts also reach the global feeds; let those catch up when next shown.
       void client.invalidateQueries({ queryKey: communityKeys.feeds, refetchType: "none" });
+      void client.invalidateQueries({ queryKey: communityKeys.recommendations(post.author.id) });
     },
   });
 }
@@ -212,7 +222,10 @@ export function useUpdatePost() {
   return useMutation({
     mutationFn: communityApi.update,
     onError: toastError,
-    onSuccess: (updated) => mapPosts(client, (post) => (post.id === updated.id ? updated : post)),
+    onSuccess: (updated) => {
+      mapPosts(client, (post) => (post.id === updated.id ? updated : post));
+      void client.invalidateQueries({ queryKey: communityKeys.recommendations(updated.author.id) });
+    },
   });
 }
 
@@ -224,6 +237,7 @@ export function useDeletePost() {
     onSuccess: (_, id) => {
       mapPosts(client, (post) => (post.id === id ? null : post));
       client.removeQueries({ queryKey: communityKeys.comments(id) });
+      void client.invalidateQueries({ queryKey: communityKeys.allRecommendations });
     },
   });
 }
