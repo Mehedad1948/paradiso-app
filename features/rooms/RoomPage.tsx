@@ -22,6 +22,7 @@ import RoomQuickFilters from "./components/RoomQuickFilters";
 import UnratedBanner from "./components/UnratedBanner";
 import RoomMembers from "./components/RoomMembers";
 import RoomMenu from "./components/RoomMenu";
+import JoinRoomButton from "./components/JoinRoomButton";
 import InfiniteScrollSentinel from "./components/InfiniteScrollSentinel";
 import DialogLoading from "./components/DialogLoading";
 import RoomNoAccess, { isRoomAccessError } from "./components/RoomNoAccess";
@@ -205,6 +206,9 @@ function RoomPage({ roomId }: { roomId: string }) {
             >
               Discussion
             </Button>
+            {!isMember && !!me.data && room.data.isPublic && (
+              <JoinRoomButton roomId={room.data.id} />
+            )}
             {isMember && (
               <Button
                 className="min-h-[46px] rounded-md bg-ink text-[15px] font-semibold text-canvas"

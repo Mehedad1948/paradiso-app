@@ -62,6 +62,9 @@ const communityServices = {
       pathParams: { postId, commentId },
     });
   },
+  suggestedUsers(limit: number, signal?: AbortSignal) {
+    return backendRequest("/community/users/suggested", "get", { query: { limit }, signal });
+  },
   profile(userId: number, signal?: AbortSignal) {
     return backendRequest("/community/users/{userId}", "get", { pathParams: { userId }, signal });
   },

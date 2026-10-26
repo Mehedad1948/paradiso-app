@@ -105,7 +105,7 @@ export default function ProfileSidebar({
           key="profile"
           title={
             <span className="flex items-center gap-2">
-              <UserRound size={16} aria-hidden="true" /> Profile
+              <UserRound size={16} aria-hidden="true" /> <span className="sr-only sm:not-sr-only">Profile</span>
             </span>
           }
         />
@@ -113,7 +113,7 @@ export default function ProfileSidebar({
           key="password"
           title={
             <span className="flex items-center gap-2">
-              <KeyRound size={16} aria-hidden="true" /> Password
+              <KeyRound size={16} aria-hidden="true" /> <span className="sr-only sm:not-sr-only">Password</span>
             </span>
           }
         />
@@ -121,7 +121,7 @@ export default function ProfileSidebar({
           key="watchlist"
           title={
             <span className="flex items-center gap-2">
-              <Bookmark size={16} aria-hidden="true" /> Watchlist
+              <Bookmark size={16} aria-hidden="true" /> <span className="sr-only sm:not-sr-only">Watchlist</span>
             </span>
           }
         />

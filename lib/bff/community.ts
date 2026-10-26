@@ -242,6 +242,10 @@ export async function handleCommunityRequest({
     }
   }
 
+  // Matched before users/:id, which would reject "suggested" as an id.
+  if (resource === "users" && rawId === "suggested" && path.length === 2 && method === "GET")
+    return community.suggestedUsers(cursor().limit, signal);
+
   if (resource === "users" && rawId) {
     const userId = positiveInteger(rawId, "userId");
     if (path.length === 2 && method === "GET") return community.profile(userId, signal);

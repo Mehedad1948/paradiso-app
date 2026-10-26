@@ -21,9 +21,11 @@ export default function RoomCard({
   const hasUnread =
     !!unread.data &&
     (unread.data.unreadCount > 0 || unread.data.mentionCount > 0);
+  // Non-members can preview a public room before joining; the Join button stays separately clickable.
+  const canPreview = !canVisit && room.isPublic;
   const card = (
     <Card
-      className={`h-full overflow-hidden rounded-[10px] border border-line bg-elevated shadow-none ${canVisit ? "transition-colors group-hover:border-muted" : ""}`}
+      className={`relative h-full overflow-hidden rounded-[10px] border border-line bg-elevated shadow-none ${canVisit || canPreview ? "transition-colors group-hover:border-muted" : ""}`}
       radius="lg"
       shadow="none"
     >
@@ -47,7 +49,18 @@ export default function RoomCard({
             {room.isPublic ? "Open to discovery" : "Your private circle"}
           </p>
           <p className="break-words text-lg font-semibold leading-[1.3]">
-            {room.name}
+            {canPreview ? (
+              // Stretched link: the whole card opens the preview, Join sits above it.
+              <Link
+                href={`/rooms/${room.id}`}
+                aria-label={`Preview ${room.name}`}
+                className="outline-none after:absolute after:inset-0 after:z-0 focus-visible:after:ring-2 focus-visible:after:ring-ink"
+              >
+                {room.name}
+              </Link>
+            ) : (
+              room.name
+            )}
           </p>
         </div>
         {canVisit ? (
@@ -60,13 +73,21 @@ export default function RoomCard({
             <ArrowUpRight size={17} />
           </span>
         ) : (
-          <JoinRoomButton roomId={room.id} />
+          <div className="relative z-10 shrink-0">
+            <JoinRoomButton roomId={room.id} />
+          </div>
         )}
       </CardFooter>
     </Card>
   );
 
-  if (!canVisit) return <BorderGlow>{card}</BorderGlow>;
+  if (!canVisit) {
+    return (
+      <BorderGlow>
+        <div className={canPreview ? "group h-full" : "h-full"}>{card}</div>
+      </BorderGlow>
+    );
+  }
 
   return (
     <BorderGlow>
