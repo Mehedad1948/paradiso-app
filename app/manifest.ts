@@ -20,8 +20,9 @@ export default function manifest(): MetadataRoute.Manifest {
     display: "standalone",
     display_override: ["standalone", "minimal-ui"],
     orientation: "any",
-    background_color: "#f0f1f3",
-    theme_color: "#f0f1f3",
+    // Must match BACKGROUND in scripts/generate-pwa-icons.mjs so the splash icon tile blends in.
+    background_color: "#171815",
+    theme_color: "#171815",
     categories: ["entertainment", "social", "lifestyle"],
     lang: "en",
     dir: "ltr",

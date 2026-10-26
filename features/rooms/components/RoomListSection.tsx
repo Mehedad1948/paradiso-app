@@ -26,6 +26,8 @@ export default function RoomListSection({
     if (query.data && !query.isPlaceholderData && page > totalPages)
       onPage(totalPages);
   }, [query.data, query.isPlaceholderData, page, totalPages, onPage]);
+  console.log('. query.data', query.data);
+  
   return (
     <section
       className="[&+section]:mt-12"

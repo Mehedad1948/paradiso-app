@@ -8,6 +8,7 @@ import { useRoomDialog } from "./hooks/useRoomDialog";
 import { positivePage } from "./state/filters";
 import RoomListSection from "./components/RoomListSection";
 import DialogLoading from "./components/DialogLoading";
+import PendingInvitations from "./invitations/PendingInvitations";
 import { Plus } from "lucide-react";
 const CreateRoomDialog = dynamic(() => import("./dialogs/CreateRoomDialog"), {
   ssr: false,
@@ -48,6 +49,7 @@ export default function RoomsPage() {
           Create a room
         </Button>
       </div>
+      <PendingInvitations enabled={!!user} />
       <RoomListSection
         usersRoom
         page={positivePage(params.get("myPage"))}

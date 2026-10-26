@@ -7,6 +7,7 @@ import type { CurrentUser, UpdateMeInputs } from "@/types/user";
 import { useAvatarDraft } from "../hooks/useAvatarDraft";
 import AvatarPicker from "./AvatarPicker";
 import GenrePicker from "./GenrePicker";
+import InvitePolicyPicker from "./InvitePolicyPicker";
 
 const sameSet = (a: string[], b: string[]) =>
   a.length === b.length && a.every((value) => b.includes(value));
@@ -29,12 +30,17 @@ export default function ProfileForm({
   const savedGenres = user.genres.map((genre) => genre.id);
   const [username, setUsername] = useState(user.username);
   const [genres, setGenres] = useState(savedGenres);
+  const savedPolicy = user.roomInvitePolicy ?? "everyone";
+  const [policy, setPolicy] = useState(savedPolicy);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const busy = uploading || update.isPending;
   const name = username.trim();
   const dirty =
-    name !== user.username || avatar.dirty || !sameSet(genres, savedGenres);
+    name !== user.username ||
+    avatar.dirty ||
+    !sameSet(genres, savedGenres) ||
+    policy !== savedPolicy;
 
   useEffect(() => onBusyChange(busy), [busy, onBusyChange]);
   useEffect(() => onReadyChange(dirty && !!name && !busy), [dirty, name, busy, onReadyChange]);
@@ -47,6 +53,7 @@ export default function ProfileForm({
       const changes: UpdateMeInputs = {};
       if (name !== user.username) changes.username = name;
       if (!sameSet(genres, savedGenres)) changes.genreIds = genres;
+      if (policy !== savedPolicy) changes.roomInvitePolicy = policy;
       if (avatar.dirty) {
         setUploading(true);
         changes.avatar = await avatar.commit();
@@ -94,6 +101,14 @@ export default function ProfileForm({
         selected={genres}
         onChange={(next) => {
           setGenres(next);
+          setError(null);
+        }}
+        disabled={busy}
+      />
+      <InvitePolicyPicker
+        value={policy}
+        onChange={(next) => {
+          setPolicy(next);
           setError(null);
         }}
         disabled={busy}

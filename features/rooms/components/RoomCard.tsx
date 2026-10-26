@@ -73,7 +73,7 @@ export default function RoomCard({
       <Link
         href={`/rooms/${room.id}`}
         aria-label={`Enter ${room.name}`}
-        className="group block rounded-[10px] outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
+        className="group block h-full rounded-[10px] outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2"
       >
         {card}
       </Link>

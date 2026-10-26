@@ -66,6 +66,7 @@ export default function RoomMembers({
   disabled,
   onInvite,
   onOpenList,
+  reviewCount = 0,
 }: {
   members: Room["users"];
   ownerId: number;
@@ -73,6 +74,8 @@ export default function RoomMembers({
   onInvite: () => void;
   /** Opens the full member sidebar. */
   onOpenList: () => void;
+  /** Invitations waiting for the owner's approval. */
+  reviewCount?: number;
 }) {
   const hidden = members.length - SHOWN;
   return (
@@ -154,6 +157,12 @@ export default function RoomMembers({
         className="group -mx-1 inline-flex items-center gap-1 rounded-full px-2 py-1 text-sm text-muted transition-colors hover:bg-ink/5 hover:text-ink"
       >
         {members.length === 1 ? "1 member" : `${members.length} members`}
+        {reviewCount > 0 && (
+          <span className="ml-1 inline-flex items-center gap-1 rounded-full bg-warning/15 px-2 py-0.5 text-xs font-semibold text-warning-700 dark:text-warning">
+            <span aria-hidden="true" className="size-1.5 rounded-full bg-warning motion-safe:animate-pulse" />
+            {reviewCount} to review
+          </span>
+        )}
         <ChevronRight
           size={15}
           aria-hidden="true"

@@ -22,9 +22,13 @@ const InviteByLink = dynamic(() => import("../invitations/InviteByLink"), {
 
 export default function InviteDialog({
   roomId,
+  isOwner = false,
+  meId,
   onClose,
 }: {
   roomId: string;
+  isOwner?: boolean;
+  meId?: number;
   onClose: () => void;
 }) {
   const [selected, setSelected] = useState("link");
@@ -72,7 +76,7 @@ export default function InviteDialog({
                   }
                 />
               </Tabs>
-              {selected === "email" && <InviteByEmail roomId={roomId} />}
+              {selected === "email" && <InviteByEmail roomId={roomId} isOwner={isOwner} meId={meId} />}
 
               {selected === "link" && <InviteByLink roomId={roomId} />}
             </ModalBody>

@@ -13,7 +13,8 @@ import { panelApi } from "@/lib/api/panel";
 import { BffError } from "@/lib/api/client";
 import { notificationKeys } from "@/lib/query/notification-keys";
 import { panelKeys } from "@/lib/query/panel-keys";
-import type { AppNotification, NotificationPage } from "@/types/notifications";
+import type { AppNotification, InlineAction, NotificationPage } from "@/types/notifications";
+import { invitationErrorMessage, isStaleInvitationError } from "./useInvitationQueries";
 
 type Pages = InfiniteData<NotificationPage, string | null>;
 type Count = { count: number; apiVersion: string };
@@ -130,7 +131,7 @@ export function useRemoveNotification() {
   });
 }
 
-const inviteMessage = (error: Error) => {
+const tokenMessage = (error: Error) => {
   if (!(error instanceof BffError)) return error.message;
   switch (error.status) {
     case 401:
@@ -146,20 +147,55 @@ const inviteMessage = (error: Error) => {
   }
 };
 
-/** Joins the room straight from the bell, then retires the notification. */
-export function useAcceptRoomInvite() {
+const done: Partial<Record<InlineAction, string>> = {
+  decline: "Invitation declined",
+  approve: "Approved — they'll get the invitation now",
+  reject: "Invitation rejected",
+};
+
+type InviteVariables = { item: AppNotification; action: InlineAction };
+
+/**
+ * Answers an invitation notification in place — join, decline, approve or reject —
+ * then retires it. Resolves with the room id so an accept can open the room.
+ */
+export function useNotificationInviteAction() {
   const client = useQueryClient();
   const markRead = useMarkNotificationsRead();
+  const retire = (item: AppNotification) => {
+    if (!item.read) markRead.mutate({ ids: [item.id] });
+  };
   return useMutation({
-    mutationFn: async (item: AppNotification) => {
-      const token = item.data.inviteToken;
-      if (!token) throw new Error("This invitation can only be opened from your email.");
-      return panelApi.acceptEmailInvite(token);
+    mutationFn: async ({ item, action }: InviteVariables): Promise<{ roomId: number | null }> => {
+      const id = item.data.invitationId;
+      if (id) {
+        const result = await panelApi.respondInvitation({ id, action });
+        return { roomId: result.room.id };
+      }
+      // Legacy email invitation: only the token can accept it, and "not now" is just dismissing.
+      if (action === "accept" && item.data.inviteToken) {
+        const result = await panelApi.acceptEmailInvite(item.data.inviteToken);
+        return { roomId: result.roomId };
+      }
+      return { roomId: item.roomId };
     },
-    onSuccess: (_, item) => {
-      if (!item.read) markRead.mutate({ ids: [item.id] });
-      client.invalidateQueries({ queryKey: panelKeys.rooms });
+    onSuccess: (_, { item, action }) => {
+      retire(item);
+      const title = item.data.invitationId ? done[action] : undefined;
+      if (title) addToast({ title, color: action === "approve" ? "success" : "default" });
     },
-    onError: (error) => addToast({ title: inviteMessage(error), color: "danger" }),
+    onError: (error, { item, action }) => {
+      // Already answered, expired or withdrawn: it will never be actionable again.
+      if (isStaleInvitationError(error)) retire(item);
+      addToast({
+        title: item.data.invitationId ? invitationErrorMessage(error, action) : tokenMessage(error),
+        color: "danger",
+      });
+    },
+    onSettled: (_, __, { action }) => {
+      client.invalidateQueries({ queryKey: panelKeys.myInvitations });
+      if (action === "accept") client.invalidateQueries({ queryKey: panelKeys.rooms });
+      client.invalidateQueries({ queryKey: ["room"], predicate: (query) => query.queryKey[2] === "invitations" });
+    },
   });
 }

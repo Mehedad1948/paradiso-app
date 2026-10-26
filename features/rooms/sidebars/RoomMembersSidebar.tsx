@@ -13,6 +13,7 @@ import HoldButton from "@/components/ui/HoldButton";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { profileHref } from "@/features/community/format";
 import { useBanMember, useKickMember } from "@/hooks/queries/useRoomQueries";
+import ApprovalQueue from "../invitations/ApprovalQueue";
 import type { PanelRoom } from "@/lib/api/panel";
 
 type Member = PanelRoom["users"][number];
@@ -27,12 +28,15 @@ export default function RoomMembersSidebar({
   room,
   meId,
   canManage,
+  canReview = false,
   onInvite,
   onClose,
 }: {
   room: PanelRoom;
   meId?: number;
   canManage: boolean;
+  /** The owner of a private room reviews members' invitations here. */
+  canReview?: boolean;
   onInvite: () => void;
   onClose: () => void;
 }) {
@@ -109,6 +113,7 @@ export default function RoomMembersSidebar({
       }
     >
       <div className="flex flex-col gap-5">
+        {canReview && <ApprovalQueue roomId={roomId} />}
         <Input
           aria-label="Search members"
           placeholder="Search members"

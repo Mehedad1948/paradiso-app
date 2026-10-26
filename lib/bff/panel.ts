@@ -15,6 +15,7 @@ import { moviesServices } from "@/services/movies";
 import { handleChatRequest } from "./chat";
 import { handleCommunityRequest } from "./community";
 import { handleNotificationsRequest } from "./notifications";
+import { handleInvitationsRequest, handleRoomInvitationsRequest } from "./invitations";
 import type { RequestResult } from "@/types/request";
 import { MAX_FAVORITE_MOVIES } from "@/types/community";
 import {
@@ -23,6 +24,7 @@ import {
   MAX_FAVORITE_GENRES,
   type UpdateMeInputs,
 } from "@/types/user";
+import { ROOM_INVITE_POLICIES, type RoomInvitePolicy } from "@/types/invitations";
 import {
   customMovieErrorsFrom,
   parseCustomMovie,
@@ -76,7 +78,7 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 /** Profile fields only; omitted fields stay unchanged on the backend. */
 function parseUpdateMe(data: Record<string, unknown>): UpdateMeInputs {
   const unknown = Object.keys(data).find(
-    (key) => !["avatar", "genreIds", "onboarded", "username"].includes(key),
+    (key) => !["avatar", "genreIds", "onboarded", "username", "roomInvitePolicy"].includes(key),
   );
   if (unknown) throw new InputError(`Unexpected field ${unknown}`);
   const update: UpdateMeInputs = {};
@@ -103,6 +105,11 @@ function parseUpdateMe(data: Record<string, unknown>): UpdateMeInputs {
   if (data.onboarded !== undefined) {
     if (data.onboarded !== true) throw new InputError("Invalid onboarded");
     update.onboarded = true;
+  }
+  if (data.roomInvitePolicy !== undefined) {
+    if (!ROOM_INVITE_POLICIES.includes(data.roomInvitePolicy as RoomInvitePolicy))
+      throw new InputError("Invalid roomInvitePolicy");
+    update.roomInvitePolicy = data.roomInvitePolicy as RoomInvitePolicy;
   }
   if (!Object.keys(update).length) throw new InputError("Nothing to update");
   return update;
@@ -157,6 +164,15 @@ export async function handlePanelRequest(request: Request, path: string[]) {
           signal: request.signal,
         }),
       );
+
+    const invitation = await handleInvitationsRequest({
+      path,
+      method,
+      query,
+      data: () => body(request),
+      signal: request.signal,
+    });
+    if (invitation) return respond(invitation);
 
     if (resource === "me" && method === "GET")
       return respond(await users.getMe(request.signal));
@@ -481,19 +497,16 @@ export async function handlePanelRequest(request: Request, path: string[]) {
             );
           }
           break;
-        case "invitations":
-          if (method === "GET")
-            return respond(
-              await rooms.invitations(roomId, page(), request.signal),
-            );
-          if (method === "POST") {
-            const data = await body(request);
-            const email = text(data.email, "email", 254);
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-              throw new InputError("Invalid email");
-            return respond(await rooms.inviteUser(roomId, email));
-          }
+        case "invitations": {
+          const result = await handleRoomInvitationsRequest(roomId, {
+            method,
+            query,
+            data: () => body(request),
+            signal: request.signal,
+          });
+          if (result) return respond(result);
           break;
+        }
         case "invite-links":
           if (method === "GET")
             return respond(

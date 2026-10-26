@@ -11,6 +11,7 @@ import {
   useRoomRatingSummary,
 } from "@/hooks/queries/useRoomQueries";
 import { useChatUnread } from "@/hooks/queries/useChatQueries";
+import { useInvitations } from "@/hooks/queries/useInvitationQueries";
 import QueryError from "@/components/ui/QueryError";
 import ShinyText from "@/components/ui/ShinyText";
 import { useRoomUrl } from "./hooks/useRoomUrl";
@@ -102,6 +103,10 @@ function RoomPage({ roomId }: { roomId: string }) {
     !!room.data &&
     !!me.data &&
     (me.data.role === "admin" || room.data.owner.id === me.data.id);
+  // Members' invitations to a private room wait for the owner; shares its cache with the sidebar queue.
+  const canReview = !!room.data && !!me.data && room.data.owner.id === me.data.id && !room.data.isPublic;
+  const approvals = useInvitations(roomId, 1, "awaiting_approval", { limit: 50, enabled: canReview });
+  const reviewCount = canReview ? (approvals.data?.meta.totalItems ?? 0) : 0;
   // Members include the owner. Only they get chat and their own unrated counts, public room or not.
   const isMember =
     !!room.data &&
@@ -177,6 +182,7 @@ function RoomPage({ roomId }: { roomId: string }) {
               disabled={disabled}
               onInvite={() => open("invite")}
               onOpenList={() => open("members")}
+              reviewCount={reviewCount}
             />
           )}
         </div>
@@ -296,7 +302,13 @@ function RoomPage({ roomId }: { roomId: string }) {
         <AddMovieDialog roomId={roomId} onClose={close} />
       )}
       {room.data && dialog === "invite" && (
-        <InviteDialog key={roomId} roomId={roomId} onClose={close} />
+        <InviteDialog
+          key={roomId}
+          roomId={roomId}
+          isOwner={!!me.data && room.data.owner.id === me.data.id}
+          meId={me.data?.id}
+          onClose={close}
+        />
       )}
       {room.data && dialog === "members" && (
         <RoomMembersSidebar
@@ -304,6 +316,7 @@ function RoomPage({ roomId }: { roomId: string }) {
           room={room.data}
           meId={me.data?.id}
           canManage={canManage}
+          canReview={canReview}
           onInvite={() => open("invite")}
           onClose={close}
         />

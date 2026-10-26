@@ -6,21 +6,23 @@ import { Check, X } from "lucide-react";
 import { Spinner } from "@heroui/spinner";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { ago, fullDate } from "@/features/community/format";
-import type { AppNotification } from "@/types/notifications";
+import type { AppNotification, InlineAction } from "@/types/notifications";
 import { describe, others, sentence } from "../describe";
 
 type Props = {
   item: AppNotification;
-  accepting: boolean;
+  /** The inline action in flight for this item, if any. */
+  acting?: InlineAction;
   onOpen: (item: AppNotification) => void;
   onRemove: (item: AppNotification) => void;
-  onAccept: (item: AppNotification) => void;
+  onAction: (item: AppNotification, action: InlineAction) => void;
 };
 
-function NotificationItem({ item, accepting, onOpen, onRemove, onAccept }: Props) {
+function NotificationItem({ item, acting, onOpen, onRemove, onAction }: Props) {
   const view = describe(item);
   const Icon = view.icon;
-  const invite = item.type === "room_invite" && !item.read;
+  const actions = view.actions;
+  const busy = !!acting;
   const row = clsx(
     "relative flex w-full items-start gap-3 rounded-2xl py-3 pl-5 pr-10 text-left outline-none transition-colors",
     "focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent",
@@ -68,24 +70,31 @@ function NotificationItem({ item, accepting, onOpen, onRemove, onAccept }: Props
         >
           {ago(item.updatedAt)}
         </time>
-        {invite && (
+        {actions && (
           <span className="mt-1.5 flex gap-2">
             <button
               type="button"
-              disabled={accepting}
-              onClick={() => onAccept(item)}
+              disabled={busy}
+              onClick={() => onAction(item, actions.primary.action)}
               className="inline-flex h-8 items-center gap-1.5 rounded-full bg-ink px-3.5 text-[13px] font-semibold text-canvas transition-opacity hover:opacity-85 disabled:opacity-60"
             >
-              {accepting ? <Spinner size="sm" color="current" classNames={{ wrapper: "size-3.5" }} /> : <Check size={14} aria-hidden="true" />}
-              Join room
+              {acting === actions.primary.action ? (
+                <Spinner size="sm" color="current" classNames={{ wrapper: "size-3.5" }} />
+              ) : (
+                <Check size={14} aria-hidden="true" />
+              )}
+              {actions.primary.label}
             </button>
             <button
               type="button"
-              disabled={accepting}
-              onClick={() => onRemove(item)}
-              className="inline-flex h-8 items-center rounded-full border border-line px-3.5 text-[13px] font-semibold text-ink transition-colors hover:bg-surface disabled:opacity-60"
+              disabled={busy}
+              onClick={() => onAction(item, actions.secondary.action)}
+              className="inline-flex h-8 items-center gap-1.5 rounded-full border border-line px-3.5 text-[13px] font-semibold text-ink transition-colors hover:bg-surface disabled:opacity-60"
             >
-              Not now
+              {acting === actions.secondary.action && (
+                <Spinner size="sm" color="current" classNames={{ wrapper: "size-3.5" }} />
+              )}
+              {actions.secondary.label}
             </button>
           </span>
         )}
@@ -108,14 +117,14 @@ function NotificationItem({ item, accepting, onOpen, onRemove, onAccept }: Props
 
   return (
     <div className="group relative">
-      {view.href && !invite ? (
+      {view.href && !actions ? (
         <Link href={view.href} onClick={() => onOpen(item)} aria-label={sentence(item)} className={row}>
           {body}
         </Link>
       ) : (
         <div className={row}>{body}</div>
       )}
-      {!invite && (
+      {!actions && (
         <button
           type="button"
           onClick={() => onRemove(item)}

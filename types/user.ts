@@ -7,7 +7,7 @@ export type UpdateUserDto = Schemas["UpdateUserDto"];
 /** Profile fields of `UpdateUserDto`; the password changes through its own route. */
 export type UpdateMeInputs = Pick<
   UpdateUserDto,
-  "avatar" | "genreIds" | "onboarded" | "username"
+  "avatar" | "genreIds" | "onboarded" | "username" | "roomInvitePolicy"
 >;
 export type ChangePasswordInputs = { currentPassword: string; newPassword: string };
 

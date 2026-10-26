@@ -65,16 +65,6 @@ const roomsServices = {
   banUser(id: number, body: BackendRequestBody<"/rooms/{id}/bans", "post">) {
     return backendRequest("/rooms/{id}/bans", "post", { pathParams: { id }, body });
   },
-  inviteUser(roomId: number, email: string) {
-    return backendRequest("/rooms/{roomId}/invitations", "post", {
-      pathParams: { roomId }, body: { email },
-    });
-  },
-  invitations(roomId: number, page = 1, signal?: AbortSignal) {
-    return backendRequest("/rooms/{roomId}/invitations", "get", {
-      pathParams: { roomId }, query: { page, limit: 5 }, signal,
-    });
-  },
   addMovieToRoom(id: number, body: AddMovieBody) {
     return backendRequest("/rooms/add-movie/{id}", "post", { pathParams: { id }, body });
   },

@@ -1,0 +1,64 @@
+"use client";
+import clsx from "clsx";
+import { motion, useReducedMotion } from "framer-motion";
+import { Ban, Globe2, UserCheck, type LucideIcon } from "lucide-react";
+import type { RoomInvitePolicy } from "@/types/invitations";
+
+const options: { value: RoomInvitePolicy; label: string; hint: string; icon: LucideIcon }[] = [
+  { value: "everyone", label: "Everyone", hint: "Anyone in a room can invite you", icon: Globe2 },
+  { value: "following", label: "People I follow", hint: "Only people you follow can invite you", icon: UserCheck },
+  { value: "nobody", label: "No one", hint: "You join rooms with links only", icon: Ban },
+];
+
+/** Who may invite the user to rooms; a three-way segmented control. */
+export default function InvitePolicyPicker({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: RoomInvitePolicy;
+  onChange: (next: RoomInvitePolicy) => void;
+  disabled?: boolean;
+}) {
+  const reduce = useReducedMotion();
+  const current = options.find((option) => option.value === value) ?? options[0];
+  return (
+    <section aria-labelledby="invite-policy-label">
+      <h2 id="invite-policy-label" className="text-base font-semibold">
+        Who can invite you to rooms
+      </h2>
+      <div role="radiogroup" aria-labelledby="invite-policy-label" className="mt-3 grid grid-cols-3 gap-1 rounded-2xl bg-surface p-1">
+        {options.map(({ value: option, label, icon: Icon }) => {
+          const active = option === value;
+          return (
+            <button
+              key={option}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              disabled={disabled}
+              onClick={() => onChange(option)}
+              className={clsx(
+                "relative flex flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-[13px] font-semibold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-60",
+                active ? "text-ink" : "text-muted hover:text-ink",
+              )}
+            >
+              {active && (
+                <motion.span
+                  layoutId="invite-policy"
+                  transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 38 }}
+                  className="absolute inset-0 rounded-xl bg-elevated shadow-sm"
+                />
+              )}
+              <Icon size={17} aria-hidden="true" className="relative" />
+              <span className="relative text-center leading-tight">{label}</span>
+            </button>
+          );
+        })}
+      </div>
+      <p className="mt-2 text-sm text-muted" aria-live="polite">
+        {current.hint}
+      </p>
+    </section>
+  );
+}

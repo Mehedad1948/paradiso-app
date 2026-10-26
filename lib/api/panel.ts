@@ -11,7 +11,12 @@ import type { MovieWithRatings } from "@/types";
 import type { CustomMovieBody } from "@/lib/movies/custom-movie";
 import type { VoteType } from "@/types/ratings";
 import type { ChangePasswordInputs, CurrentUser, UpdateMeInputs } from "@/types/user";
-import type { Invitation } from "@/types/invitations";
+import type {
+  InvitableRoom,
+  Invitation,
+  InvitationResponse,
+  InvitationStatus,
+} from "@/types/invitations";
 import type { PaginatedResponse } from "@/types/request";
 import type { WatchlistItem } from "@/types/watchlist";
 import type { BackendResponse } from "@/types/backend";
@@ -149,15 +154,39 @@ export const panelApi = {
       `/movies/search${queryString({ query })}`,
       { signal },
     ),
-  invitations: (roomId: string, page: number, signal?: AbortSignal) =>
+  invitations: (
+    roomId: string,
+    page: number,
+    signal?: AbortSignal,
+    status?: InvitationStatus,
+    limit = 5,
+  ) =>
     bffRequest<PaginatedResponse<Invitation>>(
-      `${roomPath(roomId)}/invitations${queryString({ page })}`,
+      `${roomPath(roomId)}/invitations${queryString({ page, limit, status })}`,
       { signal },
     ),
-  inviteUser: ({ roomId, email }: { roomId: string; email: string }) =>
-    bffRequest<BackendResponse<"/rooms/{roomId}/invitations", "post">>(`${roomPath(roomId)}/invitations`, {
+  inviteUser: ({ roomId, ...target }: { roomId: string | number } & ({ email: string } | { userId: number })) =>
+    bffRequest<InvitationResponse>(`${roomPath(roomId)}/invitations`, {
       method: "POST",
-      body: json({ email }),
+      body: json(target),
+    }),
+  invitableRooms: (userId: number, signal?: AbortSignal) =>
+    bffRequest<{ data: InvitableRoom[] }>(`/users/${encodeURIComponent(userId)}/invitable-rooms`, { signal }),
+  myInvitations: (
+    { page, status, limit = 10 }: { page: number; status?: InvitationStatus; limit?: number },
+    signal?: AbortSignal,
+  ) =>
+    bffRequest<PaginatedResponse<Invitation>>(
+      `/me/room-invitations${queryString({ page, limit, status })}`,
+      { signal },
+    ),
+  respondInvitation: ({ id, action }: { id: number; action: "accept" | "decline" | "approve" | "reject" }) =>
+    bffRequest<InvitationResponse>(`/room-invitations/${encodeURIComponent(id)}/${action}`, {
+      method: "POST",
+    }),
+  cancelInvitation: (id: number) =>
+    bffRequest<InvitationResponse>(`/room-invitations/${encodeURIComponent(id)}`, {
+      method: "DELETE",
     }),
   inviteLinks: (roomId: string, page: number, signal?: AbortSignal) =>
     bffRequest<PaginatedResponse<RoomInviteLink>>(

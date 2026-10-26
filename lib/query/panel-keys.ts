@@ -8,6 +8,9 @@ export const panelKeys = {
   // Nested under ratings so every vote, add and removal refreshes the counts too.
   ratingSummary: (id: string) => ["room", id, "ratings", "summary"] as const,
   invitations: (id: string) => ["room", id, "invitations"] as const,
+  invitableRooms: (userId: number) => ["invitable-rooms", userId] as const,
+  invitableRoomsAll: ["invitable-rooms"] as const,
+  myInvitations: ["my-invitations"] as const,
   links: (id: string) => ["room", id, "invite-links"] as const,
   chatUnread: (id: string) => ["room", id, "chat", "unread"] as const,
   chatPinned: (id: string) => ["room", id, "chat", "pinned"] as const,

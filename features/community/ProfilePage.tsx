@@ -15,6 +15,7 @@ import { useViewer } from "./hooks/useViewer";
 import { useHeld } from "./hooks/useHeld";
 import FeedList from "./components/FeedList";
 import FollowButton from "./components/FollowButton";
+import InviteToRoomButton from "@/features/rooms/invitations/InviteToRoomButton";
 import { FavoritesGrid, RecommendsGrid } from "./components/ProfileGrids";
 
 const PostComposer = dynamic(() => import("./components/PostComposer"), { ssr: false });
@@ -135,7 +136,7 @@ function ProfilePage({ userId }: { userId: number }) {
                 </div>
               </div>
             </div>
-            <div className="shrink-0 max-sm:w-full max-sm:[&>*]:w-full">
+            <div className="flex shrink-0 items-center gap-2.5 max-sm:w-full max-sm:[&>*]:flex-1">
               {self ? (
                 <Button
                   className="min-h-[46px] rounded-md bg-ink text-[15px] font-semibold text-canvas"
@@ -145,7 +146,12 @@ function ProfilePage({ userId }: { userId: number }) {
                   New post
                 </Button>
               ) : (
-                <FollowButton userId={userId} viewer={viewer} />
+                <>
+                  <FollowButton userId={userId} viewer={viewer} />
+                  {viewer.me && profile.data && (
+                    <InviteToRoomButton userId={userId} name={profile.data.username} />
+                  )}
+                </>
               )}
             </div>
           </div>

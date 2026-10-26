@@ -6,12 +6,12 @@ import clsx from "clsx";
 import { BellRing, CheckCheck } from "lucide-react";
 import { Spinner } from "@heroui/spinner";
 import {
-  useAcceptRoomInvite,
   useMarkNotificationsRead,
+  useNotificationInviteAction,
   useNotifications,
   useRemoveNotification,
 } from "@/hooks/queries/useNotificationQueries";
-import type { AppNotification } from "@/types/notifications";
+import type { AppNotification, InlineAction } from "@/types/notifications";
 import NotificationItem from "./components/NotificationItem";
 import { sections } from "./describe";
 
@@ -84,14 +84,14 @@ export default function NotificationPanel({ unread, onClose }: { unread: number;
   const feed = useNotifications(filter);
   const markRead = useMarkNotificationsRead();
   const remove = useRemoveNotification();
-  const accept = useAcceptRoomInvite();
+  const invite = useNotificationInviteAction();
 
   const items = useMemo(() => feed.data?.pages.flatMap((page) => page.items) ?? [], [feed.data]);
   const grouped = useMemo(() => sections(items), [items]);
 
   const { mutate: read } = markRead;
   const { mutate: dismiss } = remove;
-  const { mutate: join } = accept;
+  const { mutate: answer } = invite;
   const onOpen = useCallback(
     (item: AppNotification) => {
       if (!item.read) read({ ids: [item.id] });
@@ -100,17 +100,21 @@ export default function NotificationPanel({ unread, onClose }: { unread: number;
     [read, onClose],
   );
   const onRemove = useCallback((item: AppNotification) => dismiss(item), [dismiss]);
-  const onAccept = useCallback(
-    (item: AppNotification) =>
-      join(item, {
-        onSuccess: ({ roomId }) => {
-          onClose();
-          router.push(`/rooms/${roomId}`);
+  const onAction = useCallback(
+    (item: AppNotification, action: InlineAction) =>
+      answer(
+        { item, action },
+        {
+          onSuccess: ({ roomId }) => {
+            if (action !== "accept" || !roomId) return;
+            onClose();
+            router.push(`/rooms/${roomId}`);
+          },
         },
-      }),
-    [join, onClose, router],
+      ),
+    [answer, onClose, router],
   );
-  const accepting = accept.isPending ? accept.variables?.id : undefined;
+  const acting = invite.isPending ? invite.variables : undefined;
 
   const { hasNextPage, isFetchingNextPage, fetchNextPage } = feed;
   const loadMore = useCallback(() => {
@@ -206,10 +210,10 @@ export default function NotificationPanel({ unread, onClose }: { unread: number;
                       >
                         <NotificationItem
                           item={item}
-                          accepting={accepting === item.id}
+                          acting={acting?.item.id === item.id ? acting.action : undefined}
                           onOpen={onOpen}
                           onRemove={onRemove}
-                          onAccept={onAccept}
+                          onAction={onAction}
                         />
                       </motion.li>
                     ))}
