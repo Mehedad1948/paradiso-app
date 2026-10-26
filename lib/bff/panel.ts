@@ -14,6 +14,7 @@ import favorites from "@/services/favorites";
 import { moviesServices } from "@/services/movies";
 import { handleChatRequest } from "./chat";
 import { handleCommunityRequest } from "./community";
+import { handleNotificationsRequest } from "./notifications";
 import type { RequestResult } from "@/types/request";
 import { MAX_FAVORITE_MOVIES } from "@/types/community";
 import {
@@ -146,6 +147,16 @@ export async function handlePanelRequest(request: Request, path: string[]) {
     const page = () => positiveInteger(query.get("page"), "page", 1);
     const limit = () => positiveInteger(query.get("limit"), "limit", 10, 100);
     const resource = path.join("/");
+    if (path[0] === "notifications")
+      return respond(
+        await handleNotificationsRequest({
+          path: path.slice(1),
+          method,
+          query,
+          data: () => body(request),
+          signal: request.signal,
+        }),
+      );
 
     if (resource === "me" && method === "GET")
       return respond(await users.getMe(request.signal));

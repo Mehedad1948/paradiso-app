@@ -127,38 +127,39 @@ function PostCard({
           </p>
         )}
         <header className="flex min-w-0 items-center gap-3">
-          <UserAvatar name={post.author.username} src={post.author.avatar} href={profileHref(post.author.id)} />
-          <div className="flex min-w-0 flex-1 flex-col leading-snug">
-            <Link
-              id={labelId}
-              href={profileHref(post.author.id)}
-              className="truncate text-[15px] font-semibold hover:underline"
-            >
-              {post.author.username}
-            </Link>
-            <div className="flex min-w-0 items-center gap-1.5 text-sm text-muted">
-              <Tooltip
-                content={fullDate(post.createdAt)}
-                delay={500}
-                closeDelay={0}
-                size="sm"
-              >
-                <Link href={href} scroll={!overlay} className="shrink-0 hover:underline">
-                  <time dateTime={post.createdAt}>{ago(post.createdAt)}</time>
-                </Link>
-              </Tooltip>
-              {isEdited(post) && (
+          <Link
+            href={profileHref(post.author.id)}
+            className="group flex min-w-0 flex-1 items-center gap-3"
+          >
+            <UserAvatar name={post.author.username} src={post.author.avatar} />
+            <div className="flex min-w-0 flex-1 flex-col leading-snug">
+              <span id={labelId} className="truncate text-[15px] font-semibold group-hover:underline">
+                {post.author.username}
+              </span>
+              <div className="flex min-w-0 items-center gap-1.5 text-sm text-muted">
                 <Tooltip
-                  content={`Edited ${fullDate(post.updatedAt)}`}
+                  content={fullDate(post.createdAt)}
                   delay={500}
                   closeDelay={0}
                   size="sm"
                 >
-                  <span className="shrink-0">· edited</span>
+                  <time dateTime={post.createdAt} className="shrink-0">
+                    {ago(post.createdAt)}
+                  </time>
                 </Tooltip>
-              )}
+                {isEdited(post) && (
+                  <Tooltip
+                    content={`Edited ${fullDate(post.updatedAt)}`}
+                    delay={500}
+                    closeDelay={0}
+                    size="sm"
+                  >
+                    <span className="shrink-0">· edited</span>
+                  </Tooltip>
+                )}
+              </div>
             </div>
-          </div>
+          </Link>
           <span className="shrink-0 pl-2">
             <PostMenu
               post={post}

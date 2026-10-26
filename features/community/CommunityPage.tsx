@@ -5,16 +5,14 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import clsx from "clsx";
 import { Button } from "@heroui/button";
-import { ArrowUpRight, Film, Megaphone, PenLine, Star, Users, X } from "lucide-react";
+import { Film, Megaphone, PenLine, Star, Users, X } from "lucide-react";
 import SpecularBorder from "@/components/ui/SpecularBorder";
-import UserAvatar from "@/components/ui/UserAvatar";
-import { useProfile } from "@/hooks/queries/useCommunityQueries";
 import type { FeedScope } from "@/types/community";
 import { useViewer, type Viewer } from "./hooks/useViewer";
 import { useHeld } from "./hooks/useHeld";
 import FeedList from "./components/FeedList";
 import SignInLink from "./components/SignInLink";
-import { plural, profileHref } from "./format";
+import SuggestedPeople from "./components/SuggestedPeople";
 
 const PostComposer = dynamic(() => import("./components/PostComposer"), { ssr: false });
 
@@ -79,6 +77,7 @@ export default function CommunityPage() {
             key={JSON.stringify(scope)}
             scope={scope}
             viewer={viewer}
+            bare
             enabled={!(tab === "following" && !viewer.signedIn)}
             empty={<EmptyFeed tab={tab} movie={movieId ? movieTitle : undefined} onCompose={() => setComposing(true)} viewer={viewer} />}
           />
@@ -99,7 +98,7 @@ export default function CommunityPage() {
           ) : (
             !viewer.checking && <SignInLink className="min-h-[50px] !rounded-full">Sign in to post</SignInLink>
           )}
-          {viewer.me && <ViewerCard viewer={viewer} />}
+          {!viewer.checking && <SuggestedPeople viewer={viewer} />}
         </aside>
       </div>
 
@@ -186,32 +185,6 @@ function EmptyFeed({
           New post
         </Button>
       )}
-    </div>
-  );
-}
-
-function ViewerCard({ viewer }: { viewer: Viewer }) {
-  const me = viewer.me!;
-  const profile = useProfile(me.id);
-  return (
-    <div className="rounded-[10px] border border-line bg-elevated p-5">
-      <div className="flex items-center gap-3">
-        <UserAvatar name={viewer.self!.username} src={viewer.self!.avatar} size={48} />
-        <div className="min-w-0">
-          <p className="truncate font-semibold">{me.username}</p>
-          <p className="text-sm text-muted">
-            {profile.data
-              ? `${plural(profile.data.followersCount, "follower")} · ${profile.data.followingCount.toLocaleString()} following`
-              : " "}
-          </p>
-        </div>
-      </div>
-      <Link
-        href={profileHref(me.id)}
-        className="mt-4 inline-flex min-h-[42px] w-full items-center justify-center gap-2 rounded-md border border-line bg-surface text-[15px] font-semibold transition-opacity hover:opacity-80"
-      >
-        Your profile <ArrowUpRight size={16} aria-hidden="true" />
-      </Link>
     </div>
   );
 }

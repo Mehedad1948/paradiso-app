@@ -152,6 +152,14 @@ export const usePeople = (userId: number, kind: "followers" | "following") =>
     ),
   );
 
+/** People the viewer doesn't follow yet, most recently active first. */
+export const useSuggestedPeople = (me: number | undefined, limit = 8) =>
+  useQuery({
+    queryKey: communityKeys.suggested(me ?? 0),
+    staleTime: 5 * 60_000,
+    queryFn: ({ signal }) => communityApi.suggested(limit, signal).then((page) => page.data),
+  });
+
 /** The backend has no isFollowing flag, so cache everyone the viewer follows. */
 export const useFollowingIds = (me: number | undefined) =>
   useQuery({
@@ -378,6 +386,7 @@ export function useFollow(me: number | undefined) {
     onSettled: (_, __, { userId }) => {
       void client.invalidateQueries({ queryKey: communityKeys.people(userId, "followers") });
       if (me) void client.invalidateQueries({ queryKey: communityKeys.people(me, "following") });
+      if (me) void client.invalidateQueries({ queryKey: communityKeys.suggested(me), refetchType: "none" });
       void client.invalidateQueries({
         queryKey: communityKeys.feed({ kind: "following" }),
         refetchType: "none",

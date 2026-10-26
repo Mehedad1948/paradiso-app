@@ -10,6 +10,7 @@ import { InstallAppButton } from "@/components/pwa/InstallAppButton";
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import Logo from "@/components/ui/Logo";
+import NotificationBell from "@/features/notifications/NotificationBell";
 
 const loadProfileSidebar = () => import("@/features/profile/ProfileSidebar");
 // ssr: false gives it its own Suspense boundary, so loading the chunk never suspends the header.
@@ -47,6 +48,7 @@ export default function Header() {
           </div>
           <InstallAppButton className="max-[480px]:size-9" />
           <ThemeSwitch className="max-[480px]:size-9" />
+          {user && <NotificationBell className="max-[480px]:size-9" />}
           {user ? (
             <div className="flex shrink-0 items-center">
               <button

@@ -68,6 +68,11 @@ export const communityApi = {
     bffRequest<{ message: string }>(`${userPath(userId)}/follow`, {
       method: follow ? "PUT" : "DELETE",
     }),
+  suggested: (limit: number, signal?: AbortSignal) =>
+    bffRequest<{ data: CommunityUser[] }>(
+      `/community/users/suggested${queryString({ limit })}`,
+      { signal },
+    ),
   people: (
     userId: number,
     kind: "followers" | "following",
