@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@heroui/button";
-import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
+import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Tab, Tabs } from "@heroui/tabs";
 import { Ban, ChevronLeft, ChevronRight, Shuffle } from "lucide-react";
 import {
@@ -15,6 +15,7 @@ import {
   type PartKey,
 } from "../lib/avatar-builder";
 import { underlinedTabs } from "../tabs";
+import ResponsiveDialog from "@/components/ui/ResponsiveDialog";
 
 const optionLabel = (value: string) => value.replace(/^variant0?/, "");
 
@@ -91,60 +92,63 @@ export default function AvatarBuilder({
     }`;
 
   return (
-    <Modal
+    <ResponsiveDialog
       isOpen
       size="3xl"
-      placement="center"
       scrollBehavior="inside"
+      // A fixed sheet height lets the option grid take whatever the preview leaves over.
+      drawerClassName="h-[88dvh]"
       onClose={onCancel}
       isDismissable={!saving}
       isKeyboardDismissDisabled={saving}
       hideCloseButton={saving}
     >
       <ModalContent className="border border-line bg-elevated text-ink">
-        <ModalHeader className="flex flex-col gap-1">
-          <span className="text-2xl font-semibold tracking-[-0.04em]">Design your avatar</span>
+        <ModalHeader className="flex flex-col gap-1 pb-2 md:pb-4">
+          <span className="text-xl font-semibold md:text-2xl tracking-[-0.04em]">Design your avatar</span>
           <span className="text-sm font-normal text-muted">Mix hair, face and outfit until it feels like you.</span>
         </ModalHeader>
-        <ModalBody className="gap-6 md:flex-row">
-          <div className="flex shrink-0 flex-col items-center gap-4 md:w-[240px]">
+        <ModalBody className="min-h-0 gap-4 overflow-hidden md:flex-row md:gap-6">
+          <div className="flex shrink-0 items-center gap-4 md:w-[240px] md:flex-col">
             <img
               src={preview}
               alt="Avatar preview"
               width={240}
               height={240}
-              className="aspect-square w-48 rounded-full border border-line shadow-lg md:w-60"
+              className="aspect-square w-24 shrink-0 rounded-full border border-line shadow-lg md:w-60"
             />
-            <Button
-              size="sm"
-              variant="bordered"
-              className="border-line"
-              startContent={<Shuffle size={15} aria-hidden="true" />}
-              onPress={() => setConfig(randomConfig())}
-              isDisabled={saving}
-            >
-              Surprise me
-            </Button>
-            <div role="radiogroup" aria-label="Background colour" className="flex flex-wrap justify-center gap-2">
-              {BACKGROUNDS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  role="radio"
-                  aria-checked={config.background === color}
-                  aria-label={`Background #${color}`}
-                  disabled={saving}
-                  onClick={() => setConfig((current) => ({ ...current, background: color }))}
-                  style={{ backgroundColor: `#${color}` }}
-                  className={`size-6 rounded-full border outline-none transition focus-visible:ring-2 focus-visible:ring-accent ${
-                    config.background === color ? "border-ink ring-2 ring-ink ring-offset-2 ring-offset-elevated" : "border-line"
-                  }`}
-                />
-              ))}
+            <div className="flex min-w-0 flex-1 flex-col items-start gap-3 md:items-center">
+              <Button
+                size="sm"
+                variant="bordered"
+                className="border-line"
+                startContent={<Shuffle size={15} aria-hidden="true" />}
+                onPress={() => setConfig(randomConfig())}
+                isDisabled={saving}
+              >
+                Surprise me
+              </Button>
+              <div role="radiogroup" aria-label="Background colour" className="flex flex-wrap gap-2 md:justify-center">
+                {BACKGROUNDS.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    role="radio"
+                    aria-checked={config.background === color}
+                    aria-label={`Background #${color}`}
+                    disabled={saving}
+                    onClick={() => setConfig((current) => ({ ...current, background: color }))}
+                    style={{ backgroundColor: `#${color}` }}
+                    className={`size-6 rounded-full border outline-none transition focus-visible:ring-2 focus-visible:ring-accent ${
+                      config.background === color ? "border-ink ring-2 ring-ink ring-offset-2 ring-offset-elevated" : "border-line"
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="min-w-0 flex-1">
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
             <div ref={tabs} className="relative">
               <Tabs
                 variant="underlined"
@@ -183,7 +187,7 @@ export default function AvatarBuilder({
                 ) : null,
               )}
             </div>
-            <ul className="grid max-h-[340px] grid-cols-4 gap-2.5 overflow-y-auto overflow-x-hidden p-1 pt-4 sm:grid-cols-5">
+            <ul className="grid min-h-0 flex-1 auto-rows-min grid-cols-4 gap-2.5 overflow-y-auto overflow-x-hidden p-1 pt-4 sm:grid-cols-5 md:h-[380px] md:flex-none">
               {active.optional && (
                 <li>
                   <button
@@ -220,7 +224,7 @@ export default function AvatarBuilder({
             {error}
           </p>
         )}
-        <ModalFooter className="mt-1 border-t border-line">
+        <ModalFooter className="mt-1 border-t border-line pb-[max(1rem,env(safe-area-inset-bottom))]">
           <Button variant="light" onPress={onCancel} isDisabled={saving}>
             Cancel
           </Button>
@@ -229,6 +233,6 @@ export default function AvatarBuilder({
           </Button>
         </ModalFooter>
       </ModalContent>
-    </Modal>
+    </ResponsiveDialog>
   );
 }
