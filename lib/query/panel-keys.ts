@@ -11,6 +11,7 @@ export const panelKeys = {
   invitableRooms: (userId: number) => ["invitable-rooms", userId] as const,
   invitableRoomsAll: ["invitable-rooms"] as const,
   myInvitations: ["my-invitations"] as const,
+  sentInvitations: ["sent-invitations"] as const,
   links: (id: string) => ["room", id, "invite-links"] as const,
   chatUnread: (id: string) => ["room", id, "chat", "unread"] as const,
   chatPinned: (id: string) => ["room", id, "chat", "pinned"] as const,

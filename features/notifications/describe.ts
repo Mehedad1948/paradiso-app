@@ -1,3 +1,4 @@
+import { settingsHref } from "@/features/profile/sections";
 import { differenceInCalendarDays, isToday, isYesterday } from "date-fns";
 import {
   AtSign,
@@ -9,6 +10,7 @@ import {
   ShieldX,
   ThumbsUp,
   UserCheck,
+  UserX,
   type LucideIcon,
 } from "lucide-react";
 import { imageSrc, postHref } from "@/features/community/format";
@@ -82,6 +84,15 @@ export function describe(item: AppNotification): Described {
         verb: "accepted your invitation to",
         target: room,
         href: roomHref(item),
+        thumbnail: roomThumbnail(item),
+      };
+    case "room_invite_declined":
+      return {
+        icon: UserX,
+        tone: "bg-rose-500",
+        verb: "declined your invitation to",
+        target: room,
+        href: settingsHref("privacy"),
         thumbnail: roomThumbnail(item),
       };
     case "room_invite_rejected":

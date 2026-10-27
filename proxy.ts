@@ -27,6 +27,7 @@ export const config = {
     "/dashboard/:path*",
     "/profile/:path*",
     "/settings/:path*",
+    "/watchlist/:path*",
     "/rooms/:path*",
     "/auth/onboarding",
   ],

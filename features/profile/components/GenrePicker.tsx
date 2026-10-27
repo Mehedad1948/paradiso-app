@@ -8,10 +8,13 @@ export default function GenrePicker({
   selected,
   onChange,
   disabled,
+  labelledBy,
 }: {
   selected: string[];
   onChange: (next: string[]) => void;
   disabled?: boolean;
+  /** A heading rendered by the parent; the picker then shows only its counter. */
+  labelledBy?: string;
 }) {
   const genres = useGenres();
   const toggle = (id: string) =>
@@ -23,11 +26,15 @@ export default function GenrePicker({
           : selected,
     );
   return (
-    <section aria-labelledby="genres-label">
+    <section aria-labelledby={labelledBy ?? "genres-label"}>
       <div className="flex items-baseline justify-between">
-        <h2 id="genres-label" className="text-base font-semibold">
-          Favorite genres
-        </h2>
+        {labelledBy ? (
+          <span className="text-sm text-muted">Pick up to {MAX_FAVORITE_GENRES}</span>
+        ) : (
+          <h2 id="genres-label" className="text-base font-semibold">
+            Favorite genres
+          </h2>
+        )}
         <span className="text-sm tabular-nums text-muted" aria-live="polite">
           {selected.length}/{MAX_FAVORITE_GENRES}
         </span>
@@ -46,7 +53,7 @@ export default function GenrePicker({
           </button>
         </p>
       ) : (
-        <div className="mt-3 flex flex-wrap gap-2" role="group" aria-labelledby="genres-label">
+        <div className="mt-3 flex flex-wrap gap-2" role="group" aria-labelledby={labelledBy ?? "genres-label"}>
           {genres.data.map((genre) => {
             const active = selected.includes(genre.id);
             const full = !active && selected.length >= MAX_FAVORITE_GENRES;

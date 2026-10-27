@@ -4,6 +4,9 @@ import { backendRequest } from "../backend";
 type RoomInvitationStatus = NonNullable<
   BackendQuery<"/rooms/{roomId}/invitations", "get">
 >["status"];
+type SentInvitationStatus = NonNullable<
+  BackendQuery<"/me/sent-room-invitations", "get">
+>["status"];
 type MyInvitationStatus = NonNullable<
   BackendQuery<"/me/room-invitations", "get">
 >["status"];
@@ -52,6 +55,16 @@ const roomInvitationsService = {
     signal?: AbortSignal,
   ) {
     return backendRequest("/me/room-invitations", "get", {
+      query: { page, limit, status },
+      signal,
+    });
+  },
+  /** Invitations the signed-in user sent, across every room and status, with per-status counts. */
+  sent(
+    { page, limit, status }: { page: number; limit: number; status?: SentInvitationStatus },
+    signal?: AbortSignal,
+  ) {
+    return backendRequest("/me/sent-room-invitations", "get", {
       query: { page, limit, status },
       signal,
     });

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Clapperboard, LogIn, Popcorn } from "lucide-react";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { InstallAppButton } from "@/components/pwa/InstallAppButton";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Logo from "@/components/ui/Logo";
 import NotificationBell from "@/features/notifications/NotificationBell";
@@ -19,6 +19,19 @@ const ProfileSidebar = dynamic(loadProfileSidebar, { ssr: false });
 export default function Header() {
   const { data: user, isPending } = useMe();
   const [profileOpen, setProfileOpen] = useState(false);
+  const signedIn = !!user;
+  // Hover/focus preloading never fires before a tap on touch screens, so also fetch the menu
+  // once the browser is idle after sign-in is known.
+  useEffect(() => {
+    if (!signedIn) return;
+    // Safari < 16.4 lacks requestIdleCallback.
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(() => void loadProfileSidebar(), { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const timer = window.setTimeout(() => void loadProfileSidebar(), 2000);
+    return () => window.clearTimeout(timer);
+  }, [signedIn]);
   const pathname = usePathname();
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
   const navLink = (href: string) =>

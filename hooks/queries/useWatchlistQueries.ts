@@ -16,16 +16,28 @@ export const WATCHLIST_PAGE_SIZE = 20;
 
 type Pages = InfiniteData<PaginatedResponse<WatchlistItem>, number>;
 
+const watchlistQuery = {
+  queryKey: panelKeys.watchlist,
+  queryFn: ({ signal, pageParam }: { signal: AbortSignal; pageParam: number }) =>
+    panelApi.watchlist(pageParam, WATCHLIST_PAGE_SIZE, signal),
+  initialPageParam: 1,
+  getNextPageParam: (last: PaginatedResponse<WatchlistItem>) =>
+    last.meta.currentPage < last.meta.totalPages ? last.meta.currentPage + 1 : undefined,
+};
+
 export const useWatchlist = (enabled = true) =>
   useInfiniteQuery({
-    queryKey: panelKeys.watchlist,
-    queryFn: ({ signal, pageParam }) =>
-      panelApi.watchlist(pageParam, WATCHLIST_PAGE_SIZE, signal),
-    initialPageParam: 1,
-    getNextPageParam: (last) =>
-      last.meta.currentPage < last.meta.totalPages ? last.meta.currentPage + 1 : undefined,
+    ...watchlistQuery,
     enabled,
     select: (data) => data.pages.flatMap((page) => page.data),
+  });
+
+/** How many movies are saved, read from the first page's meta so it shares the list's cache. */
+export const useWatchlistTotal = (enabled = true) =>
+  useInfiniteQuery({
+    ...watchlistQuery,
+    enabled,
+    select: (data) => data.pages[0]?.meta.totalItems ?? 0,
   });
 
 const statusKey = (movieId: string) => [...panelKeys.watchlist, "has", movieId] as const;

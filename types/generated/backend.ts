@@ -524,6 +524,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/sent-room-invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Room invitations you sent, newest first.
+         * @description Every room and every status, including invitations awaiting approval or rejected by the owner. summary counts all of your sent invitations regardless of status and page. Cancel an open one with DELETE /room-invitations/{id}.
+         */
+        get: operations["MySentRoomInvitations_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/users/{userId}/invitable-rooms": {
         parameters: {
             query?: never;
@@ -1437,7 +1457,8 @@ export interface paths {
         delete: operations["Favorites_remove"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** Set or clear the note on one favorite movie. */
+        patch: operations["Favorites_setNote"];
         trace?: never;
     };
     "/notifications": {
@@ -1819,6 +1840,10 @@ export interface components {
         SetFavoritesDto: {
             /** @description The full favorites list in display order. Movies left out are removed. */
             movieIds: string[];
+        };
+        UpdateFavoriteNoteDto: {
+            /** @description Shown with the movie on the profile. null or blank clears it. */
+            note: string | null;
         };
         MarkNotificationsReadDto: {
             /** @description Notifications to mark read. Send this or all, not both. */
@@ -2517,6 +2542,7 @@ export interface components {
             position: number;
             /** Format: date-time */
             addedAt: string;
+            note: string | null;
             movie: components["schemas"]["Movie"];
         };
         FavoritesResponse: {
@@ -2531,7 +2557,7 @@ export interface components {
             /** Format: uuid */
             id: string;
             /** @enum {string} */
-            type: "room_invite" | "room_invite_approval" | "room_invite_accepted" | "room_invite_rejected" | "movie_added" | "chat_mention" | "post_liked" | "post_commented";
+            type: "room_invite" | "room_invite_approval" | "room_invite_accepted" | "room_invite_rejected" | "room_invite_declined" | "movie_added" | "chat_mention" | "post_liked" | "post_commented";
             read: boolean;
             /** Format: date-time */
             createdAt: string;
@@ -2663,6 +2689,22 @@ export interface components {
             data: components["schemas"]["Invitation"][];
             meta: components["schemas"]["PaginationMeta"];
             links: components["schemas"]["PaginationLinks"];
+            apiVersion: string;
+        };
+        SentInvitationsResponse: {
+            data: components["schemas"]["Invitation"][];
+            meta: components["schemas"]["PaginationMeta"];
+            links: components["schemas"]["PaginationLinks"];
+            summary: {
+                total: number;
+                awaiting_approval: number;
+                pending: number;
+                accepted: number;
+                declined: number;
+                rejected: number;
+                cancelled: number;
+                expired: number;
+            };
             apiVersion: string;
         };
         InvitableRoom: {
@@ -3990,6 +4032,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["InvitationsResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    MySentRoomInvitations_list: {
+        parameters: {
+            query?: {
+                limit?: number | null;
+                page?: number | null;
+                status?: "awaiting_approval" | "pending" | "accepted" | "declined" | "rejected" | "cancelled" | "expired";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SentInvitationsResponse"];
                 };
             };
             /** @description Error response */
@@ -6477,6 +6552,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MessageResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    Favorites_setNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                movieId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateFavoriteNoteDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FavoritesResponse"];
                 };
             };
             /** @description Error response */

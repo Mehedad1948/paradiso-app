@@ -3,6 +3,9 @@ import type { components } from "./generated/backend";
 export type Invitation = components["schemas"]["Invitation"];
 export type InvitationResponse = components["schemas"]["InvitationResponse"];
 export type InvitationStatus = Invitation["status"];
+export type SentInvitationsResponse = components["schemas"]["SentInvitationsResponse"];
+/** Counts of every invitation the user sent, by status, plus `total`. */
+export type SentInvitationsSummary = SentInvitationsResponse["summary"];
 /** @deprecated Use InvitationStatus. */
 export type InvitationStatusesType = InvitationStatus;
 export type InvitableRoom = components["schemas"]["InvitableRoom"];

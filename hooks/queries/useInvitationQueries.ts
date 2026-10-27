@@ -1,5 +1,5 @@
 "use client";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { panelApi } from "@/lib/api/panel";
 import { BffError } from "@/lib/api/client";
 import { panelKeys } from "@/lib/query/panel-keys";
@@ -35,7 +35,11 @@ export const useInviteUser = (
   id: string,
   options?: MutationOptions<InvitationResponse>,
 ) =>
-  usePanelMutation(panelApi.inviteUser, [panelKeys.invitations(id), panelKeys.invitableRoomsAll], options);
+  usePanelMutation(
+    panelApi.inviteUser,
+    [panelKeys.invitations(id), panelKeys.invitableRoomsAll, panelKeys.sentInvitations],
+    options,
+  );
 
 /** The viewer's rooms, annotated for inviting `userId`. Fetched when the picker opens. */
 export const useInvitableRooms = (userId: number, enabled = true) =>
@@ -61,6 +65,7 @@ export function useInviteToRoom(userId: number) {
         },
       );
       client.invalidateQueries({ queryKey: panelKeys.invitations(String(room.id)) });
+      client.invalidateQueries({ queryKey: panelKeys.sentInvitations });
     },
     onError: (error) => {
       // A conflict means the picker is out of date: they joined or someone else invited them.
@@ -82,6 +87,23 @@ export const useMyInvitations = (
     refetchOnWindowFocus: true,
   });
 
+/** Invitations the viewer sent, newest first, a page at a time. `summary` ignores the filter. */
+export const useSentInvitations = (status?: InvitationStatus, { limit = 5 }: { limit?: number } = {}) =>
+  useInfiniteQuery({
+    queryKey: [...panelKeys.sentInvitations, status ?? "all", limit],
+    queryFn: ({ signal, pageParam }) => panelApi.sentInvitations({ page: pageParam, status, limit }, signal),
+    initialPageParam: 1,
+    getNextPageParam: (last) =>
+      last.meta.currentPage < last.meta.totalPages ? last.meta.currentPage + 1 : undefined,
+    // Switching filters keeps the old rows (and counts) on screen until the new ones land.
+    placeholderData: (previous) => previous,
+    staleTime: 20_000,
+    select: (data) => ({
+      items: data.pages.flatMap((page) => page.data),
+      summary: data.pages[0]?.summary,
+    }),
+  });
+
 const run = ({ id, action }: { id: number; action: InvitationAction }) =>
   action === "cancel" ? panelApi.cancelInvitation(id) : panelApi.respondInvitation({ id, action });
 
@@ -92,6 +114,7 @@ export function useInvitationAction() {
     mutationFn: run,
     onSettled: (invitation, _, { action }) => {
       client.invalidateQueries({ queryKey: panelKeys.myInvitations });
+      client.invalidateQueries({ queryKey: panelKeys.sentInvitations });
       client.invalidateQueries({ queryKey: panelKeys.invitableRoomsAll });
       if (invitation) client.invalidateQueries({ queryKey: panelKeys.invitations(String(invitation.room.id)) });
       else client.invalidateQueries({ queryKey: ["room"], predicate: (query) => query.queryKey[2] === "invitations" });

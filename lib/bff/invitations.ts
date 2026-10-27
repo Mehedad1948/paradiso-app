@@ -80,7 +80,7 @@ export async function handleRoomInvitationsRequest(
 }
 
 /**
- * `/me/room-invitations`, `/room-invitations/:id[/action]` and
+ * `/me/room-invitations`, `/me/sent-room-invitations`, `/room-invitations/:id[/action]` and
  * `/users/:id/invitable-rooms`. Returns null when the path is not one of them.
  */
 export async function handleInvitationsRequest({
@@ -94,6 +94,14 @@ export async function handleInvitationsRequest({
     return mapResult(
       await invitations.mine(
         { ...paging(query), status: status(query.get("status"), INVITEE_STATUSES) },
+        signal,
+      ),
+      page,
+    );
+  if (resource === "me/sent-room-invitations" && method === "GET")
+    return mapResult(
+      await invitations.sent(
+        { ...paging(query), status: status(query.get("status"), INVITATION_STATUSES) },
         signal,
       ),
       page,

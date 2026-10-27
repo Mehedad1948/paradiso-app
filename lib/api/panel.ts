@@ -16,6 +16,7 @@ import type {
   Invitation,
   InvitationResponse,
   InvitationStatus,
+  SentInvitationsResponse,
 } from "@/types/invitations";
 import type { PaginatedResponse } from "@/types/request";
 import type { WatchlistItem } from "@/types/watchlist";
@@ -178,6 +179,14 @@ export const panelApi = {
   ) =>
     bffRequest<PaginatedResponse<Invitation>>(
       `/me/room-invitations${queryString({ page, limit, status })}`,
+      { signal },
+    ),
+  sentInvitations: (
+    { page, status, limit = 5 }: { page: number; status?: InvitationStatus; limit?: number },
+    signal?: AbortSignal,
+  ) =>
+    bffRequest<SentInvitationsResponse>(
+      `/me/sent-room-invitations${queryString({ page, limit, status })}`,
       { signal },
     ),
   respondInvitation: ({ id, action }: { id: number; action: "accept" | "decline" | "approve" | "reject" }) =>

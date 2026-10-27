@@ -4,7 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { Ban, Globe2, UserCheck, type LucideIcon } from "lucide-react";
 import type { RoomInvitePolicy } from "@/types/invitations";
 
-const options: { value: RoomInvitePolicy; label: string; hint: string; icon: LucideIcon }[] = [
+export const invitePolicyOptions: { value: RoomInvitePolicy; label: string; hint: string; icon: LucideIcon }[] = [
   { value: "everyone", label: "Everyone", hint: "Anyone in a room can invite you", icon: Globe2 },
   { value: "following", label: "People I follow", hint: "Only people you follow can invite you", icon: UserCheck },
   { value: "nobody", label: "No one", hint: "You join rooms with links only", icon: Ban },
@@ -15,20 +15,25 @@ export default function InvitePolicyPicker({
   value,
   onChange,
   disabled,
+  labelledBy,
 }: {
   value: RoomInvitePolicy;
   onChange: (next: RoomInvitePolicy) => void;
   disabled?: boolean;
+  /** A heading rendered by the parent, replacing the picker's own. */
+  labelledBy?: string;
 }) {
   const reduce = useReducedMotion();
-  const current = options.find((option) => option.value === value) ?? options[0];
+  const current = invitePolicyOptions.find((option) => option.value === value) ?? invitePolicyOptions[0];
   return (
-    <section aria-labelledby="invite-policy-label">
-      <h2 id="invite-policy-label" className="text-base font-semibold">
-        Who can invite you to rooms
-      </h2>
-      <div role="radiogroup" aria-labelledby="invite-policy-label" className="mt-3 grid grid-cols-3 gap-1 rounded-2xl bg-surface p-1">
-        {options.map(({ value: option, label, icon: Icon }) => {
+    <section aria-labelledby={labelledBy ?? "invite-policy-label"}>
+      {!labelledBy && (
+        <h2 id="invite-policy-label" className="mb-3 text-base font-semibold">
+          Who can invite you to rooms
+        </h2>
+      )}
+      <div role="radiogroup" aria-labelledby={labelledBy ?? "invite-policy-label"} className="grid grid-cols-3 gap-1 rounded-2xl bg-surface p-1">
+        {invitePolicyOptions.map(({ value: option, label, icon: Icon }) => {
           const active = option === value;
           return (
             <button

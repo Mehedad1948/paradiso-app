@@ -41,6 +41,8 @@ export default function CinemaGrid() {
   return (
     <div
       className="grid aspect-square w-[86%] grid-cols-6 grid-rows-6 justify-self-end pl-px pt-px max-[640px]:w-[76%]"
+      // Turn the grid away from the page center: the inner (left) edge recedes.
+      // style={{ transform: "perspective(1400px) rotateY(-11deg)", transformOrigin: "right center" }}
       role="group"
       aria-label="Explore iconic cinema. Hover or focus to reveal a film."
     >
