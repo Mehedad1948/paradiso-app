@@ -250,6 +250,7 @@ export default function FavoritesEditor({
           viewer={viewer}
           value={null}
           disabled={busy}
+          dropdown
           onChange={(movie) => {
             if (!movie) return;
             setFilms((list) =>
