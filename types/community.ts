@@ -12,6 +12,8 @@ export type CommunityRecommendation = components["schemas"]["CommunityRecommenda
 
 /** The backend keeps at most this many favorites per member. */
 export const MAX_FAVORITE_MOVIES = 10;
+/** A favorite's public note is trimmed and capped at this many characters. */
+export const MAX_FAVORITE_NOTE_LENGTH = 280;
 
 /** Cursor page shared by every community list route. */
 export type CursorPage<T> = { data: T[]; nextCursor: number | null };

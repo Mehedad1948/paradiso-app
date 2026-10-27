@@ -4,12 +4,13 @@ import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
 import { Heart, Pencil, Plus, Star } from "lucide-react";
 import QueryError from "@/components/ui/QueryError";
-import { useFavorites } from "@/hooks/queries/useFavoriteQueries";
+import { useFavorites, useSetFavoriteNote } from "@/hooks/queries/useFavoriteQueries";
 import { useRecommendations } from "@/hooks/queries/useCommunityQueries";
 import { MAX_FAVORITE_MOVIES } from "@/types/community";
 import { useInfiniteSentinel } from "../hooks/useInfiniteSentinel";
 import { formatRating, movieFeedHref, postHref, tone, verdict } from "../format";
 import { GridEmpty, PosterGrid, PosterGridSkeleton, PosterTile } from "./PosterGrid";
+import FavoriteNoteChip from "./FavoriteNoteChip";
 
 const year = (date: string | null) => date?.slice(0, 4);
 
@@ -26,6 +27,7 @@ export function FavoritesGrid({
   onEdit: () => void;
 }) {
   const favorites = useFavorites(userId);
+  const setNote = useSetFavoriteNote(userId);
   const list = favorites.data ?? [];
 
   if (favorites.isPending) return <PosterGridSkeleton />;
@@ -80,6 +82,14 @@ export function FavoritesGrid({
             title={item.movie.title}
             poster={item.movie.poster_path}
             caption={year(item.movie.release_date)}
+            note={item.note}
+            action={
+              <FavoriteNoteChip
+                item={item}
+                name={name}
+                onSave={self ? (note) => setNote.mutate({ movieId: item.movie.id, note }) : undefined}
+              />
+            }
             badge={
               <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-black/45 px-1.5 text-xs font-semibold tabular-nums text-white ring-1 ring-white/20 backdrop-blur-md sm:h-7 sm:min-w-7 sm:text-[13px]">
                 <span className="sr-only">Number </span>

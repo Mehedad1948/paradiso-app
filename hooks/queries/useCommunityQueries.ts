@@ -13,6 +13,7 @@ import { communityApi } from "@/lib/api/community";
 import { panelApi, type PanelRoomListItem } from "@/lib/api/panel";
 import { communityKeys } from "@/lib/query/community-keys";
 import { panelKeys } from "@/lib/query/panel-keys";
+import { patchAccountStats, refreshAccountStats } from "./useMe";
 import type {
   CommunityComment,
   CommunityPost,
@@ -386,6 +387,7 @@ export function useFollow(me: number | undefined) {
       const delta = follow ? 1 : -1;
       bump(userId, "followersCount", delta);
       if (me) bump(me, "followingCount", delta);
+      patchAccountStats(client, (stats) => ({ followingCount: Math.max(0, stats.followingCount + delta) }));
       return { previous, changed: true };
     },
     onError: (error, { userId }, context) => {
@@ -393,6 +395,7 @@ export function useFollow(me: number | undefined) {
         client.setQueryData(idsKey, context.previous);
         void client.invalidateQueries({ queryKey: communityKeys.profile(userId) });
         if (me) void client.invalidateQueries({ queryKey: communityKeys.profile(me) });
+        void refreshAccountStats(client);
       }
       toastError(error);
     },

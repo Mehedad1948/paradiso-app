@@ -7,7 +7,6 @@ import { Spinner } from "@heroui/spinner";
 import { ArrowUpRight, SearchIcon, Sparkles } from "lucide-react";
 import UserAvatar from "@/components/ui/UserAvatar";
 import {
-  useProfile,
   useSuggestedPeople,
   useUserSearch,
 } from "@/hooks/queries/useCommunityQueries";
@@ -262,7 +261,7 @@ function Highlight({ text, term }: { text: string; term: string }) {
 
 function MeRow({ viewer }: { viewer: Viewer }) {
   const me = viewer.me!;
-  const profile = useProfile(me.id);
+  const { followersCount, followingCount } = me.stats;
   return (
     <Link
       href={profileHref(me.id)}
@@ -276,9 +275,7 @@ function MeRow({ viewer }: { viewer: Viewer }) {
       <div className="min-w-0 flex-1 leading-tight">
         <p className="truncate text-sm font-semibold">{me.username}</p>
         <p className="truncate text-xs text-muted">
-          {profile.data
-            ? `${plural(profile.data.followersCount, "follower")} · ${profile.data.followingCount.toLocaleString()} following`
-            : " "}
+          {`${plural(followersCount, "follower")} · ${followingCount.toLocaleString()} following`}
         </p>
       </div>
       <ArrowUpRight

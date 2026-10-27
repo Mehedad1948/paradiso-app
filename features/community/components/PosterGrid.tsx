@@ -24,6 +24,8 @@ export function PosterTile({
   caption,
   badge,
   corner,
+  note,
+  action,
   index = 0,
 }: {
   href: string;
@@ -33,13 +35,17 @@ export function PosterTile({
   caption?: ReactNode;
   badge?: ReactNode;
   corner?: ReactNode;
+  /** A pull quote that rises with the title on hover. */
+  note?: string | null;
+  /** A control pinned to the top right, outside the link so it can be pressed on its own. */
+  action?: ReactNode;
   /** Staggers the entrance. */
   index?: number;
 }) {
   const src = imageSrc(poster, "w500");
   return (
     <li
-      className="motion-safe:animate-poster-in"
+      className="group/tile relative motion-safe:animate-poster-in"
       style={{ animationDelay: `${Math.min(index, 11) * 40}ms` }}
     >
       <Link
@@ -72,7 +78,8 @@ export function PosterTile({
 
         <span
           className={clsx(
-            "pointer-events-none absolute inset-x-0 bottom-0 flex flex-col justify-end bg-gradient-to-t from-black/85 via-black/40 to-transparent px-2.5 pb-2.5 pt-14 text-white sm:px-3.5 sm:pb-3.5",
+            "pointer-events-none absolute inset-x-0 bottom-0 flex flex-col justify-end bg-gradient-to-t px-2.5 pb-2.5 pt-14 text-white sm:px-3.5 sm:pb-3.5",
+            note ? "from-black/90 via-black/65 to-transparent" : "from-black/85 via-black/40 to-transparent",
             "transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
             "opacity-0 translate-y-2 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100",
             "max-sm:hidden",
@@ -80,12 +87,18 @@ export function PosterTile({
         >
           <span className="line-clamp-2 text-[15px] font-semibold leading-tight tracking-[-0.02em] drop-shadow">{title}</span>
           {caption && <span className="mt-1 text-xs font-medium text-white/70">{caption}</span>}
+          {note && (
+            <span className="mt-2 line-clamp-4 border-l-2 border-accent pl-2 text-[13px] italic leading-snug text-white/90">
+              {note}
+            </span>
+          )}
         </span>
         <span
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 rounded-[inherit] ring-1 ring-inset ring-white/10"
         />
       </Link>
+      {action && <div className="absolute right-1.5 top-1.5 z-10 sm:right-2.5 sm:top-2.5">{action}</div>}
     </li>
   );
 }

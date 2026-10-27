@@ -89,7 +89,7 @@ export default function AvatarPicker({
           <h2 id="avatar-label" className="text-base font-semibold">
             Profile photo
           </h2>
-          <div className="mt-2 flex gap-1">
+          <div className="mt-2 flex flex-wrap gap-1">
             <Button size="sm" variant="bordered" className="border-line" onPress={pick} isDisabled={disabled}>
               {draft.src ? "Change" : "Upload"}
             </Button>

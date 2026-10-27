@@ -9,6 +9,7 @@ import {
 import { addToast } from "@heroui/toast";
 import { panelApi } from "@/lib/api/panel";
 import { panelKeys } from "@/lib/query/panel-keys";
+import { patchAccountStats, refreshAccountStats } from "./useMe";
 import type { PaginatedResponse } from "@/types/request";
 import type { WatchlistItem } from "@/types/watchlist";
 
@@ -32,14 +33,6 @@ export const useWatchlist = (enabled = true) =>
     select: (data) => data.pages.flatMap((page) => page.data),
   });
 
-/** How many movies are saved, read from the first page's meta so it shares the list's cache. */
-export const useWatchlistTotal = (enabled = true) =>
-  useInfiniteQuery({
-    ...watchlistQuery,
-    enabled,
-    select: (data) => data.pages[0]?.meta.totalItems ?? 0,
-  });
-
 const statusKey = (movieId: string) => [...panelKeys.watchlist, "has", movieId] as const;
 
 /** Whether the signed-in user already has this movie on their watchlist. */
@@ -61,17 +54,21 @@ export function useToggleWatchlist(movieId: string, title: string) {
     retry: false,
     onMutate: async (on) => {
       await client.cancelQueries({ queryKey: statusKey(movieId) });
-      const previous = client.getQueryData(statusKey(movieId));
+      const previous = client.getQueryData<{ inWatchlist: boolean }>(statusKey(movieId));
       client.setQueryData(statusKey(movieId), (data: { inWatchlist: boolean } | undefined) => ({
         ...data,
         inWatchlist: on,
       }));
-      return { previous };
+      // Only count a real change: re-saving a saved movie must not bump the total.
+      const changed = previous?.inWatchlist !== on;
+      if (changed) patchAccountStats(client, (stats) => ({ watchlistCount: Math.max(0, stats.watchlistCount + (on ? 1 : -1)) }));
+      return { previous, changed };
     },
     onSuccess: (_, on) =>
       addToast({ title: on ? `${title} added to your watchlist` : `${title} removed from your watchlist`, color: "success" }),
     onError: (error, _, context) => {
       client.setQueryData(statusKey(movieId), context?.previous);
+      if (context?.changed) void refreshAccountStats(client);
       addToast({ title: error.message, color: "danger" });
     },
     onSettled: () => client.invalidateQueries({ queryKey: panelKeys.watchlist }),
@@ -94,8 +91,12 @@ export function useRemoveFromWatchlist() {
           })),
         },
       );
+      patchAccountStats(client, (stats) => ({ watchlistCount: Math.max(0, stats.watchlistCount - 1) }));
     },
-    onError: (error) => addToast({ title: error.message, color: "danger" }),
+    onError: (error) => {
+      void refreshAccountStats(client);
+      addToast({ title: error.message, color: "danger" });
+    },
     onSettled: () => client.invalidateQueries({ queryKey: panelKeys.watchlist }),
   });
 }

@@ -98,6 +98,12 @@ export const communityApi = {
   /** Replaces the whole list; the order given is the display order. */
   setFavorites: (movieIds: string[]) =>
     bffRequest<{ data: FavoriteMovie[] }>("/favorites", { method: "PUT", body: json({ movieIds }) }),
+  /** Sets or clears (`null`) one favorite's note; returns the whole list. */
+  setFavoriteNote: ({ movieId, note }: { movieId: string; note: string | null }) =>
+    bffRequest<{ data: FavoriteMovie[] }>(`/favorites/${encodeURIComponent(movieId)}`, {
+      method: "PATCH",
+      body: json({ note }),
+    }),
   resolveMovie: (tmdbId: number) =>
     bffRequest<ResolvedMovie>("/community/movies/resolve", {
       method: "POST",

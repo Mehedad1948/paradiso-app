@@ -17,7 +17,7 @@ import { handleCommunityRequest } from "./community";
 import { handleNotificationsRequest } from "./notifications";
 import { handleInvitationsRequest, handleRoomInvitationsRequest } from "./invitations";
 import type { RequestResult } from "@/types/request";
-import { MAX_FAVORITE_MOVIES } from "@/types/community";
+import { MAX_FAVORITE_MOVIES, MAX_FAVORITE_NOTE_LENGTH } from "@/types/community";
 import {
   AVATAR_MAX_BYTES,
   AVATAR_TYPES,
@@ -227,6 +227,14 @@ export async function handlePanelRequest(request: Request, path: string[]) {
       if (method === "GET") return respond(await favorites.has(movieId, request.signal));
       if (method === "PUT") return respond(await favorites.add(movieId));
       if (method === "DELETE") return respond(await favorites.remove(movieId));
+      if (method === "PATCH") {
+        const note = (await body(request)).note;
+        if (note !== null && typeof note !== "string") throw new InputError("Invalid note");
+        const trimmed = note?.trim() || null;
+        if (trimmed && trimmed.length > MAX_FAVORITE_NOTE_LENGTH)
+          throw new InputError(`Keep your note under ${MAX_FAVORITE_NOTE_LENGTH} characters`);
+        return respond(await favorites.setNote(movieId, trimmed));
+      }
     }
     if (resource === "movies/search" && method === "GET") {
       return respond(

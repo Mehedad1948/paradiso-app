@@ -57,7 +57,7 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <div className="mb-10 flex items-end justify-between gap-6 border-b border-line pb-9 max-lg:mb-0 max-lg:border-b-0 max-sm:flex-col max-sm:items-start max-sm:pb-7">
+      <div className="mb-10 flex min-w-0 items-end justify-between gap-6 border-b border-line pb-9 max-lg:mb-0 max-lg:border-b-0 max-sm:flex-col max-sm:items-start max-sm:pb-7">
         <div>
           <h1 className="mb-4 break-words text-[clamp(36px,4.8vw,68px)] tracking-[-0.06em] [&_em]:font-serif [&_em]:font-normal max-sm:text-[38px]">
             Make it
@@ -71,7 +71,7 @@ export default function SettingsPage() {
         {user && (
           <Link
             href={profileHref(user.id)}
-            className="group flex shrink-0 items-center gap-3 rounded-full border border-line bg-elevated py-1.5 pl-1.5 pr-5 outline-none transition-colors hover:border-ink/30 focus-visible:ring-2 focus-visible:ring-accent"
+            className="group flex min-w-0 max-w-full shrink-0 items-center gap-3 rounded-full border border-line bg-elevated py-1.5 pl-1.5 pr-5 outline-none transition-colors hover:border-ink/30 focus-visible:ring-2 focus-visible:ring-accent"
           >
             <UserAvatar name={user.username} src={user.avatar} size={44} alt="" />
             <span className="min-w-0">
@@ -89,9 +89,10 @@ export default function SettingsPage() {
         )}
       </div>
 
-      <div className="grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-14">
-        <SettingsNav />
-        <div className="flex max-w-3xl flex-col gap-8 pb-24 max-lg:pt-6">
+      <SettingsNav variant="tabs" />
+      <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-14">
+        <SettingsNav variant="rail" />
+        <div className="flex min-w-0 max-w-3xl flex-col gap-8 pb-24 max-lg:pt-6">
           {user ? (
             <>
               <Reveal index={0}>

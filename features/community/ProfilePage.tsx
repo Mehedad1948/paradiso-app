@@ -2,7 +2,7 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import clsx from "clsx";
 import { Button } from "@heroui/button";
 import { ArrowLeft, Film, Heart, PenLine, Rows3, Star, type LucideIcon } from "lucide-react";
@@ -23,6 +23,34 @@ const PeopleSidebar = dynamic(() => import("./components/PeopleSidebar"), { ssr:
 const FavoritesEditor = dynamic(() => import("./components/FavoritesEditor"), { ssr: false });
 
 type Tab = "favorites" | "recommends" | "posts";
+type People = "followers" | "following";
+
+/**
+ * The people drawer and the favorites editor live in the URL (`?people=followers`,
+ * `?edit=favorites`), so the account menu can link straight to them. Opening and closing
+ * replaces the entry, so they never pile up in history.
+ */
+function useProfileOverlays() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const raw = params.get("people");
+  const people: People | null = raw === "followers" || raw === "following" ? raw : null;
+  const editing = params.get("edit") === "favorites";
+  const set = (key: "people" | "edit", value: string | null) => {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    const query = next.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  };
+  return {
+    people,
+    setPeople: (value: People | null) => set("people", value),
+    editing,
+    setEditing: (value: boolean) => set("edit", value ? "favorites" : null),
+  };
+}
 
 const tabs: { key: Tab; label: string; icon: LucideIcon }[] = [
   { key: "favorites", label: "Favorites", icon: Heart },
@@ -91,9 +119,8 @@ function ProfilePage({ userId }: { userId: number }) {
   const viewer = useViewer();
   const profile = useProfile(userId);
   const favorites = useFavorites(userId);
-  const [people, setPeople] = useState<"followers" | "following" | null>(null);
+  const { people, setPeople, editing, setEditing } = useProfileOverlays();
   const [composing, setComposing] = useState(false);
-  const [editing, setEditing] = useState(false);
   const [tab, setTab] = useState<Tab>("favorites");
   const self = viewer.me?.id === userId;
   const missing =

@@ -1,23 +1,103 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@heroui/button";
-import { Bookmark, ChevronRight, KeyRound, LogOut, Settings2, Shield, UserRound, type LucideIcon } from "lucide-react";
+import { Bookmark, ChevronRight, Heart, KeyRound, LogOut, Settings2, Shield, UserRound, type LucideIcon } from "lucide-react";
 import { useAuthForm } from "@/hooks/auth/useAuthForm";
-import { useWatchlistTotal } from "@/hooks/queries/useWatchlistQueries";
 import { authApi } from "@/lib/api/auth";
 import { panelApi } from "@/lib/api/panel";
 import { panelKeys } from "@/lib/query/panel-keys";
 import Sidebar, { useSidebar } from "@/components/ui/Sidebar";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { profileHref } from "@/features/community/format";
+import MoviePoster from "@/features/rooms/components/MoviePoster";
+import { MAX_FAVORITE_MOVIES } from "@/types/community";
 import type { CurrentUser } from "@/types/user";
 import { invitePolicyOptions } from "./components/InvitePolicyPicker";
 import { settingsHref } from "./sections";
 
 const SHOWN_GENRES = 3;
+
+/** The first favorite posters (from `/me`), fanned out; they spread apart when the row is hovered. */
+function PosterFan({ posters }: { posters: (string | null)[] }) {
+  return (
+    <span className="flex shrink-0 items-center pr-1" aria-hidden="true">
+      {posters.map((path, index, shown) => (
+        <span
+          // Posters can repeat as null, and the list only ever changes as a whole.
+          key={index}
+          style={{ zIndex: shown.length - index, rotate: `${(index - (shown.length - 1) / 2) * 5}deg` }}
+          className="-ml-2.5 block overflow-hidden rounded-md bg-surface shadow-md ring-2 ring-elevated transition-[margin,transform] duration-300 ease-out first:ml-0 group-hover:-ml-1 group-hover:first:ml-0"
+        >
+          <MoviePoster path={path} title="" size="w92" width={26} height={39} className="h-[39px] w-[26px]" />
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/**
+ * Smoked glass: a dark translucent fill that blurs the card's glow behind it, with a faint lit
+ * top edge. Pure CSS, so the menu stays light.
+ */
+function GlassLink({ href, onNavigate, children }: { href: string; onNavigate: () => void; children: ReactNode }) {
+  return (
+    <Link
+      href={href}
+      onNavigate={onNavigate}
+      className={[
+        "group relative isolate mt-3 flex h-11 w-full items-center justify-center gap-2 overflow-hidden rounded-xl",
+        "border border-white/10 bg-zinc-900/75 text-[15px] font-semibold text-white backdrop-blur-xl backdrop-saturate-150",
+        "shadow-[inset_0_1px_0_rgb(255_255_255/0.12),0_1px_2px_rgb(0_0_0/0.15)]",
+        "dark:bg-black/40 dark:shadow-[inset_0_1px_0_rgb(255_255_255/0.08),0_1px_2px_rgb(0_0_0/0.3)]",
+        "outline-none transition-[transform,background-color,border-color] duration-300 ease-out",
+        "hover:border-white/20 hover:bg-zinc-900/85 dark:hover:bg-black/55",
+        "active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-accent",
+      ].join(" ")}
+    >
+      {/* A faint reflection on the upper half of the glass. */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-1/2 bg-gradient-to-b from-white/[0.08] to-transparent dark:from-white/[0.05]"
+      />
+      {/* A tint of the accent pooled at the bottom edge. */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-6 -bottom-6 -z-10 h-10 rounded-full bg-accent/30 opacity-60 blur-xl transition-opacity duration-300 group-hover:opacity-100"
+      />
+      {children}
+    </Link>
+  );
+}
+
+function Stat({
+  href,
+  value,
+  label,
+  onNavigate,
+}: {
+  href: string;
+  value: number;
+  label: string;
+  onNavigate: () => void;
+}) {
+  return (
+    <li>
+      <Link
+        href={href}
+        onNavigate={onNavigate}
+        className="flex flex-col items-center gap-0.5 rounded-xl px-2 py-2.5 outline-none transition-colors hover:bg-canvas/60 focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        <span className="text-lg font-semibold leading-none tabular-nums tracking-[-0.02em]">
+          {value.toLocaleString()}
+        </span>
+        <span className="text-xs font-medium text-muted">{label}</span>
+      </Link>
+    </li>
+  );
+}
 
 function MenuRow({
   href,
@@ -25,6 +105,7 @@ function MenuRow({
   title,
   hint,
   badge,
+  aside,
   onNavigate,
 }: {
   href: string;
@@ -32,6 +113,8 @@ function MenuRow({
   title: string;
   hint: string;
   badge?: number;
+  /** Replaces the count badge, e.g. with a poster preview. */
+  aside?: ReactNode;
   onNavigate: () => void;
 }) {
   const pathname = usePathname();
@@ -50,7 +133,8 @@ function MenuRow({
           <span className="block text-[15px] font-semibold leading-tight tracking-[-0.01em]">{title}</span>
           <span className="mt-0.5 block truncate text-sm font-normal text-muted">{hint}</span>
         </span>
-        {!!badge && (
+        {aside}
+        {!aside && !!badge && (
           <span className="rounded-full bg-ink px-2 py-0.5 text-xs font-semibold tabular-nums text-canvas">
             {badge > 99 ? "99+" : badge}
           </span>
@@ -77,7 +161,10 @@ export default function ProfileSidebar({
   const router = useRouter();
   const client = useQueryClient();
   const signOut = useAuthForm(authApi.signOut, true);
-  const saved = useWatchlistTotal();
+  // Every count comes with `/me`, which the header already holds: opening the menu costs nothing.
+  const { followersCount, followingCount, favoritesCount, watchlistCount, favoritePosters } = user.stats;
+  const profile = profileHref(user.id);
+  const people = (kind: "followers" | "following") => `${profile}?people=${kind}`;
   const policy = invitePolicyOptions.find((option) => option.value === user.roomInvitePolicy) ?? invitePolicyOptions[0];
   const genres = user.genres.slice(0, SHOWN_GENRES);
   const moreGenres = user.genres.length - genres.length;
@@ -128,7 +215,7 @@ export default function ProfileSidebar({
         </p>
       )}
 
-      <div className="relative isolate overflow-hidden rounded-3xl border border-line bg-surface p-5">
+      <div className="relative isolate shrink-0 overflow-hidden rounded-3xl border border-line bg-surface p-5">
         <span
           aria-hidden="true"
           className="absolute -right-16 -top-20 -z-10 size-56 rounded-full bg-accent/25 blur-3xl"
@@ -166,32 +253,46 @@ export default function ProfileSidebar({
             )}
           </div>
         </div>
-        <Button
-          as={Link}
-          href={settingsHref()}
-          onNavigate={sidebar.close}
-          fullWidth
-          className="mt-5 bg-ink font-semibold text-canvas"
-          startContent={<Settings2 size={17} aria-hidden="true" />}
-        >
+        <ul className="mt-5 grid grid-cols-3 rounded-2xl border border-line bg-elevated/70 p-1 backdrop-blur" aria-label="Your community">
+          <Stat
+            href={people("followers")}
+            value={followersCount}
+            label={followersCount === 1 ? "Follower" : "Followers"}
+            onNavigate={sidebar.close}
+          />
+          <Stat href={people("following")} value={followingCount} label="Following" onNavigate={sidebar.close} />
+          <Stat href={profile} value={favoritesCount} label="Favorites" onNavigate={sidebar.close} />
+        </ul>
+        <GlassLink href={settingsHref()} onNavigate={sidebar.close}>
+          <Settings2 size={17} aria-hidden="true" />
           Edit profile
-        </Button>
+        </GlassLink>
       </div>
 
-      <nav aria-label="Account" className="mt-5">
+      <nav aria-label="Account" className="mt-5 shrink-0">
         <ul className="-mx-3 flex flex-col gap-0.5">
+          <MenuRow
+            href={favoritesCount ? profile : `${profile}?edit=favorites`}
+            icon={Heart}
+            title="Favorite films"
+            hint={
+              favoritesCount
+                ? `${favoritesCount} of ${MAX_FAVORITE_MOVIES} picked`
+                : `Pick your top ${MAX_FAVORITE_MOVIES} for your profile`
+            }
+            aside={favoritePosters.length ? <PosterFan posters={favoritePosters} /> : undefined}
+            onNavigate={sidebar.close}
+          />
           <MenuRow
             href="/watchlist"
             icon={Bookmark}
             title="Watchlist"
             hint={
-              saved.data === undefined
-                ? "Films you've saved for later"
-                : saved.data
-                  ? `${saved.data} ${saved.data === 1 ? "film" : "films"} saved for later`
-                  : "Nothing saved yet"
+              watchlistCount
+                ? `${watchlistCount} ${watchlistCount === 1 ? "film" : "films"} saved for later`
+                : "Nothing saved yet"
             }
-            badge={saved.data}
+            badge={watchlistCount}
             onNavigate={sidebar.close}
           />
           <MenuRow
@@ -209,7 +310,7 @@ export default function ProfileSidebar({
             onNavigate={sidebar.close}
           />
           <MenuRow
-            href={profileHref(user.id)}
+            href={profile}
             icon={UserRound}
             title="Public profile"
             hint="See what others see"

@@ -19,6 +19,10 @@ const favoritesServices = {
   add(id: string) {
     return backendRequest("/favorites/{movieId}", "put", movieId(id));
   },
+  /** `null` clears the note. Returns the whole updated list. */
+  setNote(id: string, note: string | null) {
+    return backendRequest("/favorites/{movieId}", "patch", { ...movieId(id), body: { note } });
+  },
   remove(id: string) {
     return backendRequest("/favorites/{movieId}", "delete", movieId(id));
   },
