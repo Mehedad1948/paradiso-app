@@ -9,12 +9,13 @@ import CommunityShowcase from "@/components/landing/CommunityShowcase";
 import JuryReveal from "@/components/landing/JuryReveal";
 import LandingLoader from "@/components/landing/LandingLoader";
 import FilmNegatives from "@/components/landing/FilmNegatives";
+import LibraryCarousel from "@/components/landing/LibraryCarousel";
 import SpecularBorder from "@/components/ui/SpecularBorder";
 import styles from "@/components/landing/CinemaHero.module.css";
 import { fontDisplay } from "@/config/fonts";
 import { seo } from "@/config/seo";
 import { gridPosters } from "@/config/posters";
-import { libraryMoviesByTmdb } from "@/services/movies/library";
+import { libraryMoviesByTmdb, libraryShowcase } from "@/services/movies/library";
 
 // Inherits the full title, description and OG image from the root layout.
 export const metadata: Metadata = {
@@ -31,7 +32,10 @@ const verbs = [
 export default async function Home() {
   "use cache";
   cacheLife("hours");
-  const gridFilms = await libraryMoviesByTmdb(Object.values(gridPosters).map((film) => film.tmdbId));
+  const [gridFilms, shelfFilms] = await Promise.all([
+    libraryMoviesByTmdb(Object.values(gridPosters).map((film) => film.tmdbId)),
+    libraryShowcase(),
+  ]);
 
   return (
     <>
@@ -155,6 +159,33 @@ export default async function Home() {
           </Link>
         </div>
       </section>
+      {shelfFilms.length > 0 && (
+        <section
+          id="the-library"
+          className="mx-auto max-w-[1600px] scroll-mt-32 border-t border-line pt-[clamp(56px,7vw,112px)]"
+          aria-labelledby="library-title"
+        >
+          <div className="flex items-end justify-between gap-10 max-sm:flex-col max-sm:items-start max-sm:gap-6">
+            <div>
+              <span className="mb-6 block font-mono text-xs font-extrabold uppercase tracking-[0.12em] text-accent">
+                05 <span className="px-2 text-muted">/</span> The library
+              </span>
+              <h2
+                id="library-title"
+                className="text-[clamp(38px,4.8vw,76px)] font-semibold leading-[1.04] tracking-[-0.065em] [&>span]:font-serif [&>span]:font-normal [&>span]:italic [&>span]:tracking-[-0.045em]"
+              >
+                Tonight&apos;s lineup,
+                <br />
+                <span>already on the shelf.</span>
+              </h2>
+            </div>
+        
+          </div>
+          <div className="-mx-[4.5vw] max-sm:-mx-[5vw]">
+            <LibraryCarousel films={shelfFilms} />
+          </div>
+        </section>
+      )}
       <footer className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-4 py-8 text-sm font-medium text-muted max-sm:items-start max-sm:gap-5">
         <span>
           Paradiso <span className="px-3 text-muted">/</span> For the love
