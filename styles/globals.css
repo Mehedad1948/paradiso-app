@@ -519,3 +519,28 @@
 .movie-rail[data-start][data-end] {
   mask-image: linear-gradient(to right, transparent, #000 56px, #000 calc(100% - 56px), transparent);
 }
+
+/*
+ * A film's backdrop stills are 16:9, and the film page's hero is much wider than that on a desktop.
+ * There the still sits in a frame on the right, below the header: at least two thirds of the hero,
+ * or as wide as the still's own shape at full height, whichever is wider. Its left edge feathers
+ * into a blurred wash of the same still, so little of the picture is lost to the crop.
+ */
+.movie-stage {
+  container-type: size;
+}
+.movie-frame {
+  position: absolute;
+  inset: 0;
+}
+@container (min-aspect-ratio: 3 / 2) {
+  .movie-frame {
+    top: var(--hero-inset, 0px);
+    left: auto;
+    width: clamp(66.667%, calc((100cqh - var(--hero-inset, 0px)) * 16 / 9), 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 26%), linear-gradient(to bottom, transparent, #000 10%);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to right, transparent, #000 26%), linear-gradient(to bottom, transparent, #000 10%);
+    mask-composite: intersect;
+  }
+}

@@ -91,6 +91,8 @@ const config = {
       animation: {
         "movie-kenburns": "movie-kenburns 22s cubic-bezier(0.22, 1, 0.36, 1) both",
         "movie-rise": "movie-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) both",
+        // The gallery's hold clock; BackdropShow sets the duration and pauses it.
+        "movie-segment": "movie-segment 6500ms linear forwards",
         "cinema-reveal": "cinema-reveal 4.6s linear",
         "cinema-number": "cinema-number 4.6s step-end",
         "cinema-letter-reveal": "cinema-letter-reveal 4.6s linear",

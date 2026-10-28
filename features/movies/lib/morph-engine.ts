@@ -66,11 +66,15 @@ float fbm(vec2 p) {
   return v;
 }
 
-// object-fit: cover, then the Ken Burns zoom around the centre.
+// object-fit: cover with the Ken Burns zoom, framed like object-position: 50% 30%. Faces and
+// horizons sit high in film stills, so a wide hero crops mostly from the bottom.
+const float FOCUS_TOP = 0.3;
 vec2 cover(vec2 uv, vec2 res, vec2 img, float zoom) {
   float ratio = (res.x / max(res.y, 1.0)) / max(img.x / max(img.y, 1.0), 0.0001);
-  vec2 s = ratio > 1.0 ? vec2(1.0, 1.0 / ratio) : vec2(ratio, 1.0);
-  return (uv - 0.5) * s * zoom + 0.5;
+  vec2 win = (ratio > 1.0 ? vec2(1.0, 1.0 / ratio) : vec2(ratio, 1.0)) * zoom;
+  // Textures are flipped, so v runs bottom to top.
+  vec2 centre = vec2(0.5, 1.0 - (win.y * 0.5 + FOCUS_TOP * (1.0 - win.y)));
+  return (uv - 0.5) * win + centre;
 }
 
 void main() {

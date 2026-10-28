@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 import clsx from "clsx";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -50,7 +50,7 @@ function Still({ path, reverse }: { path: string; reverse?: boolean }) {
       }}
       onLoad={() => setLoaded(true)}
       className={clsx(
-        "absolute inset-0 h-full w-full select-none object-cover transition-opacity duration-1000 motion-safe:animate-movie-kenburns",
+        "absolute inset-0 h-full w-full select-none object-cover object-[50%_30%] [transform-origin:50%_30%] transition-opacity duration-1000 motion-safe:animate-movie-kenburns",
         reverse && "[animation-direction:reverse]",
         loaded ? "opacity-100" : "opacity-0",
       )}
@@ -77,12 +77,39 @@ function Crossfade({ slides, index, direction }: { slides: string[]; index: numb
   );
 }
 
-function Gallery({ slides, title }: { slides: string[]; title: string }) {
+/** A still's own colors, blurred: the wash a framed still feathers into. */
+function Ambient({ path }: { path: string }) {
+  return (
+    <AnimatePresence initial={false}>
+      <motion.img
+        key={path}
+        src={imageSrc(path, "w300") ?? undefined}
+        alt=""
+        aria-hidden="true"
+        draggable={false}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 0.6 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 1.2, ease: "easeInOut" }}
+        className="absolute inset-0 h-full w-full scale-125 select-none object-cover blur-3xl saturate-125"
+      />
+    </AnimatePresence>
+  );
+}
+
+/** Where the stills are drawn: the whole hero, or on the film page's wide screens a frame on the right (see .movie-frame). */
+function Frame({ framed, children }: { framed: boolean; children: ReactNode }) {
+  return <div className={framed ? "movie-frame" : "absolute inset-0"}>{children}</div>;
+}
+
+function Gallery({ slides, title, framed }: { slides: string[]; title: string; framed: boolean }) {
   const count = slides.length;
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<1 | -1>(1);
+  // Held only while a finger or mouse drags the stills; hovering doesn't stop the show.
   const [held, setHeld] = useState(false);
   const [moving, setMoving] = useState(false);
+  const [inView, setInView] = useState(true);
   // "pending" until we know whether WebGL is usable; the morph only runs once its first still is up.
   const [stage, setStage] = useState<"pending" | "morph" | "fade">("pending");
   const [morphReady, setMorphReady] = useState(false);
@@ -93,6 +120,16 @@ function Gallery({ slides, title }: { slides: string[]; title: string }) {
   const reduce = useReducedMotion();
 
   useEffect(() => setStage(!reduce && webglAvailable() ? "morph" : "fade"), [reduce]);
+
+  // Scrolled past, the clock waits, so the reader comes back to the still they left.
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const node = root.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.2 });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (stage !== "morph" || !host.current) return;
@@ -117,7 +154,7 @@ function Gallery({ slides, title }: { slides: string[]; title: string }) {
   }, [morphReady]);
 
   const morph = stage === "morph" && morphReady;
-  const playing = !reduce && !held && !moving && visible && stage !== "pending";
+  const playing = !reduce && !held && !moving && visible && inView && stage !== "pending";
 
   async function go(step: 1 | -1) {
     if (moving) return;
@@ -190,22 +227,27 @@ function Gallery({ slides, title }: { slides: string[]; title: string }) {
   return (
     <div
       className={clsx("group/show absolute inset-0 touch-pan-y select-none", "cursor-grab active:cursor-grabbing")}
-      onMouseEnter={() => setHeld(true)}
-      onMouseLeave={() => setHeld(false)}
+      ref={root}
       onPointerDown={down}
       onPointerMove={move}
       onPointerUp={up}
-      onPointerCancel={() => (press.current = null)}
+      onPointerCancel={() => {
+        press.current = null;
+        setHeld(false);
+      }}
     >
-      {/* The plain stills hold the frame until the WebGL stage has its first image (or instead of it). */}
-      {(stage !== "morph" || !morphReady) && <Crossfade slides={slides} index={index} direction={direction} />}
-      {stage === "morph" && (
-        <div
-          ref={host}
-          aria-hidden="true"
-          className={clsx("absolute inset-0 transition-opacity duration-700", morphReady ? "opacity-100" : "opacity-0")}
-        />
-      )}
+      {framed && <Ambient path={slides[index]} />}
+      <Frame framed={framed}>
+        {/* The plain stills hold the frame until the WebGL stage has its first image (or instead of it). */}
+        {(stage !== "morph" || !morphReady) && <Crossfade slides={slides} index={index} direction={direction} />}
+        {stage === "morph" && (
+          <div
+            ref={host}
+            aria-hidden="true"
+            className={clsx("absolute inset-0 transition-opacity duration-700", morphReady ? "opacity-100" : "opacity-0")}
+          />
+        )}
+      </Frame>
 
       <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent" />
       <span
@@ -238,7 +280,7 @@ function Gallery({ slides, title }: { slides: string[]; title: string }) {
 
       {/*
         A title-card counter: current, a hairline that fills while the still holds, total.
-        Top centre on phones; on desktop it rests in the hero's bottom-right corner, where the image
+        Top centre on phones; on desktop it rests in the hero's lower-right, above the title line, where the image
         has faded into the card, so it takes the theme's ink there.
       */}
       <div
@@ -246,7 +288,7 @@ function Gallery({ slides, title }: { slides: string[]; title: string }) {
         tabIndex={0}
         aria-label={`${title} stills, ${index + 1} of ${count}. Use the arrow keys to browse.`}
         onKeyDown={keys}
-        className="absolute left-1/2 top-[calc(var(--hero-inset,0px)+18px)] z-30 flex -translate-x-1/2 cursor-default items-center gap-2.5 rounded-full px-2 py-1 font-semibold tabular-nums text-white outline-none [text-shadow:0_1px_8px_rgb(0_0_0_/_55%)] focus-visible:ring-2 focus-visible:ring-white/60 sm:top-[calc(var(--hero-inset,0px)+22px)] md:bottom-4 md:left-auto md:right-6 md:top-auto md:translate-x-0 md:text-ink md:[text-shadow:0_0_12px_hsl(var(--hero-fade,var(--heroui-content1)))] md:focus-visible:ring-ink/40"
+        className="absolute left-1/2 top-[calc(var(--hero-inset,0px)+18px)] z-30 flex -translate-x-1/2 cursor-default items-center gap-2.5 rounded-full px-2 py-1 font-semibold tabular-nums text-white outline-none [text-shadow:0_1px_8px_rgb(0_0_0_/_55%)] focus-visible:ring-2 focus-visible:ring-white/60 sm:top-[calc(var(--hero-inset,0px)+22px)] md:bottom-14 md:left-auto md:right-6 md:top-auto md:translate-x-0 md:text-ink md:[text-shadow:0_0_12px_hsl(var(--hero-fade,var(--heroui-content1)))] md:focus-visible:ring-ink/40"
       >
         <span key={index} aria-hidden="true" className="w-[2ch] text-right text-[13px] tracking-[0.08em] motion-safe:animate-community-rise">
           {pad(index + 1)}
@@ -255,12 +297,9 @@ function Gallery({ slides, title }: { slides: string[]; title: string }) {
           <span
             key={`run-${index}`}
             onAnimationEnd={() => void go(1)}
-            className={clsx("absolute inset-0 origin-left bg-white md:bg-ink", reduce ? "scale-x-100" : "scale-x-0")}
-            style={
-              reduce
-                ? undefined
-                : { animation: `movie-segment ${HOLD_MS}ms linear forwards`, animationPlayState: playing ? "running" : "paused" }
-            }
+            // The class, not an inline animation, is what makes Tailwind ship the keyframes.
+            className={clsx("absolute inset-0 origin-left bg-white md:bg-ink", reduce ? "scale-x-100" : "scale-x-0 animate-movie-segment")}
+            style={reduce ? undefined : { animationDuration: `${HOLD_MS}ms`, animationPlayState: playing ? "running" : "paused" }}
           />
         </span>
         <span aria-hidden="true" className="w-[2ch] text-[13px] tracking-[0.08em] text-white/55 md:text-ink/45">
@@ -280,11 +319,14 @@ export default function BackdropShow({
   paths,
   poster,
   title,
+  framed = false,
 }: {
   /** Backdrop paths, the main one first; duplicates and blanks are ignored. */
   paths: (string | null | undefined)[];
   poster?: string | null;
   title: string;
+  /** On wide screens, draw the stills in a frame on the right that feathers into a wash of them. */
+  framed?: boolean;
 }) {
   const slides = Array.from(new Set(paths.filter((path): path is string => !!path)));
   const key = slides.join("|");
@@ -294,7 +336,7 @@ export default function BackdropShow({
   const wash = imageSrc(poster, "w185");
 
   return (
-    <div className="absolute inset-0">
+    <div className="movie-stage absolute inset-0">
       {/* The poster's own colors, blurred, hold the frame until a still arrives (or when there is none). */}
       {wash && (
         <img
@@ -305,10 +347,15 @@ export default function BackdropShow({
         />
       )}
       {stable.length > 1 ? (
-        <Gallery key={key} slides={stable} title={title} />
+        <Gallery key={key} slides={stable} title={title} framed={framed} />
       ) : (
         <>
-          {stable[0] && <Still path={stable[0]} />}
+          {framed && stable[0] && <Ambient path={stable[0]} />}
+          {stable[0] && (
+            <Frame framed={framed}>
+              <Still path={stable[0]} />
+            </Frame>
+          )}
           <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent" />
           <span
             aria-hidden="true"

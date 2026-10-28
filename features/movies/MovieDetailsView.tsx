@@ -11,12 +11,17 @@ import {
   Clapperboard,
   Clock3,
   ExternalLink,
+  Facebook,
+  Link2,
   MessagesSquare,
   Play,
   Popcorn,
+  Share,
   Share2,
   X,
 } from "lucide-react";
+import BubbleMenu, { type BubbleItem } from "@/components/ui/BubbleMenu";
+import { TelegramLogo, XLogo } from "@/components/ui/BrandIcons";
 import QueryError from "@/components/ui/QueryError";
 import { useMe } from "@/hooks/queries/useMe";
 import { useMovieDetails } from "@/hooks/queries/useMovieQueries";
@@ -113,22 +118,36 @@ function WatchlistButton({ movie }: { movie: MovieDetails }) {
   );
 }
 
-async function share(movie: MovieDetails) {
+function copyLink(url: string) {
+  navigator.clipboard
+    .writeText(url)
+    .then(() => addToast({ title: "Link copied", color: "success" }))
+    .catch(() => addToast({ title: "Couldn't copy the link", color: "danger" }));
+}
+
+/** The same fan of share bubbles as a post's action bar. */
+function shareItems(movie: MovieDetails): BubbleItem[] {
   const url = `${window.location.origin}${movieHref(movie.id)}`;
-  if (navigator.share) {
-    try {
-      await navigator.share({ title: movie.title, url });
-    } catch {
-      // Dismissing the share sheet is not an error.
-    }
-    return;
+  const year = releaseYear(movie.release_date);
+  const text = year ? `${movie.title} (${year})` : movie.title;
+  const u = encodeURIComponent(url);
+  const t = encodeURIComponent(text);
+  const items: BubbleItem[] = [
+    { key: "copy", label: "Copy link", icon: <Link2 size={18} />, onSelect: () => copyLink(url), className: "hover:text-emerald-500" },
+    { key: "x", label: "Share on X", icon: <XLogo />, href: `https://twitter.com/intent/tweet?text=${t}&url=${u}` },
+    { key: "facebook", label: "Share on Facebook", icon: <Facebook size={18} />, href: `https://www.facebook.com/sharer/sharer.php?u=${u}`, className: "hover:text-[#1877f2]" },
+    { key: "telegram", label: "Share on Telegram", icon: <TelegramLogo />, href: `https://t.me/share/url?url=${u}&text=${t}`, className: "hover:text-[#229ed9]" },
+  ];
+  // Desktop share sheets are thin; on phones the native one reaches every app.
+  if (typeof navigator.share === "function" && window.matchMedia("(pointer: coarse)").matches) {
+    items.push({
+      key: "more",
+      label: "More options",
+      icon: <Share size={18} />,
+      onSelect: () => navigator.share({ title: text, url }).catch(() => {}),
+    });
   }
-  try {
-    await navigator.clipboard.writeText(url);
-    addToast({ title: "Link copied", color: "success" });
-  } catch {
-    addToast({ title: "Couldn't copy the link", color: "danger" });
-  }
+  return items;
 }
 
 function Unavailable({ error, retry }: { error: Error; retry: () => void }) {
@@ -201,7 +220,8 @@ export default function MovieDetailsView({
                 ? "mx-auto aspect-video max-h-[78svh]"
                 : "aspect-video"
               : variant === "page"
-                ? "h-[clamp(400px,68svh,760px)]"
+                ? // Tall enough that wide screens crop little of a 16:9 still, never taller than the still itself.
+                  "h-[clamp(440px,min(80svh,calc(56.25vw+var(--hero-inset,0px))),980px)]"
                 : "h-[clamp(220px,40vw,380px)]",
           )}
         >
@@ -215,6 +235,7 @@ export default function MovieDetailsView({
               paths={movie?.backdrops?.length ? movie.backdrops : [movie?.backdrop_path]}
               poster={head?.poster_path}
               title={title}
+              framed={variant === "page"}
             />
           )}
         </div>
@@ -228,6 +249,19 @@ export default function MovieDetailsView({
           <div className={clsx("flex items-start justify-between gap-2", variant === "page" && "mx-auto max-w-[1080px]")}>
             <div className="pointer-events-auto flex gap-2">{start}</div>
             <div className="pointer-events-auto flex gap-2">
+              {playing && movie?.trailerKey && (
+                // Escape hatch for when YouTube refuses to play embedded (bot check, embedding disabled).
+                <a
+                  href={`https://www.youtube.com/watch?v=${encodeURIComponent(movie.trailerKey)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Watch on YouTube"
+                  title="Watch on YouTube"
+                  className="flex size-10 items-center justify-center rounded-full bg-black/35 text-white ring-1 ring-inset ring-white/20 backdrop-blur-md transition-[background-color,transform] hover:bg-black/55 active:scale-95"
+                >
+                  <ExternalLink size={18} aria-hidden="true" />
+                </a>
+              )}
               {playing && (
                 <HeroButton label="Close trailer" onPress={() => setPlaying(false)}>
                   <X size={19} aria-hidden="true" />
@@ -249,13 +283,7 @@ export default function MovieDetailsView({
         {/* Poster and title. */}
         <div className="flex items-end gap-4 sm:gap-6">
           {!playing && <Poster path={head?.poster_path} title={title} variant={variant} />}
-          <div
-            className={clsx(
-              "min-w-0 flex-1 pb-1 motion-safe:animate-movie-rise [animation-delay:80ms]",
-              // On desktop the gallery counter rests in the hero's bottom-right corner; long titles wrap before it.
-              (movie?.backdrops?.length ?? 0) > 1 && "md:pr-36",
-            )}
-          >
+          <div className="min-w-0 flex-1 pb-1 motion-safe:animate-movie-rise [animation-delay:80ms]">
             {head ? (
               <Title
                 className={clsx(
@@ -356,9 +384,18 @@ export default function MovieDetailsView({
                   <MessagesSquare size={18} aria-hidden="true" />
                   <span className="max-sm:sr-only">Community takes</span>
                 </Link>
-                <button type="button" onClick={() => void share(movie)} aria-label="Share" title="Share" className={clsx(quiet, "w-11 justify-center px-0")}>
-                  <Share2 size={18} aria-hidden="true" />
-                </button>
+                <BubbleMenu
+                  label="Share film"
+                  items={typeof window === "undefined" ? [] : shareItems(movie)}
+                  triggerClassName={clsx(quiet, "w-11 justify-center px-0 [&_svg]:shrink-0 [&_svg]:transition-transform [&_svg]:duration-300 hover:[&_svg]:scale-110")}
+                  bubbleClassName="bg-elevated text-ink shadow-[0_2px_4px_rgb(0_0_0_/_5%),0_10px_24px_-8px_rgb(0_0_0_/_25%)] transition-colors dark:bg-surface [&_svg]:h-[17px] [&_svg]:w-[17px]"
+                  // Share ends the row, so the bubbles fan up and to the right, clear of the buttons beside it.
+                  startAngle={240}
+                  endAngle={360}
+                  radius={72}
+                >
+                  {(open) => (open ? <X size={19} strokeWidth={1.75} aria-hidden="true" /> : <Share2 size={18} aria-hidden="true" />)}
+                </BubbleMenu>
                 {movie.imdbLink && movie.imdbRate == null && (
                   <a href={movie.imdbLink} target="_blank" rel="noopener noreferrer" className={quiet}>
                     IMDb <ExternalLink size={15} aria-hidden="true" />
@@ -368,7 +405,11 @@ export default function MovieDetailsView({
             </div>
 
             {(movie.tagline || movie.overview) && (
-              <section aria-label="Synopsis" className="mt-9 max-w-[64ch] motion-safe:animate-movie-rise [animation-delay:260ms]">
+              <section
+                aria-label="Synopsis"
+                // The page has the room for a wider read; the modal keeps a tighter measure.
+                className={clsx("mt-9 motion-safe:animate-movie-rise [animation-delay:260ms]", variant === "page" ? "max-w-none" : "max-w-[64ch]")}
+              >
                 {movie.tagline && (
                   <blockquote className="relative pl-5 font-serif text-[20px] italic leading-snug text-ink/90 sm:text-[23px]">
                     <span aria-hidden="true" className="absolute left-0 top-1 h-[calc(100%-8px)] w-[3px] rounded-full bg-gradient-to-b from-accent to-accent/10" />
