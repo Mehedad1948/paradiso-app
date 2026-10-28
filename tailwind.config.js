@@ -70,6 +70,11 @@ const config = {
           "0%": { transform: "scale(1.12) translate3d(0, 1.5%, 0)" },
           "100%": { transform: "scale(1.02) translate3d(0, 0, 0)" },
         },
+        // A gallery segment filling while its still is on screen.
+        "movie-segment": {
+          "0%": { transform: "scaleX(0)" },
+          "100%": { transform: "scaleX(1)" },
+        },
         // Film details settle in, one block after another.
         "movie-rise": {
           "0%": { opacity: "0", transform: "translateY(14px)" },

@@ -1,8 +1,7 @@
 import type { BackendQuery } from "@/types/backend";
 import { backendRequest } from "../backend";
 
-// The generated types say `number`, but the backend validates a movie uuid.
-const movieId = (movieId: string) => ({ pathParams: { movieId: movieId as unknown as number } });
+const movieId = (movieId: string) => ({ pathParams: { movieId } });
 
 const watchlistServices = {
   list(query: BackendQuery<"/watchlist", "get">, signal?: AbortSignal) {

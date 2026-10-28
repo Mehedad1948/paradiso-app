@@ -1551,11 +1551,28 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Comments on a movie, newest first. */
+        /** Top-level comments on a movie, newest first, with reply counts. */
         get: operations["MovieComments_list"];
         put?: never;
         /** Comment on a movie. At most 5 comments per 60 seconds; more returns 429. */
         post: operations["MovieComments_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/movies/{movieId}/comments/{commentId}/replies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Replies to a comment, oldest first. */
+        get: operations["MovieComments_listReplies"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1909,6 +1926,8 @@ export interface components {
              * @default false
              */
             spoiler: boolean;
+            /** @description Reply to this comment on the same movie. Replying to a reply joins the same thread. */
+            parentId?: number;
         };
         UpdateMovieCommentDto: {
             text?: string;
@@ -2085,10 +2104,14 @@ export interface components {
             id: number;
             /** Format: uuid */
             movieId: string;
+            /** @description The top-level comment this replies to; null for top-level comments. */
+            parentId: number | null;
             text: string;
             /** @description Hide the text behind a reveal until the reader taps it. */
             spoiler: boolean;
             author: components["schemas"]["PublicUser"];
+            /** @description Always 0 on replies. */
+            replyCount: number;
             /** Format: date-time */
             createdAt: string;
             /**
@@ -2101,10 +2124,14 @@ export interface components {
             id: number;
             /** Format: uuid */
             movieId: string;
+            /** @description The top-level comment this replies to; null for top-level comments. */
+            parentId: number | null;
             text: string;
             /** @description Hide the text behind a reveal until the reader taps it. */
             spoiler: boolean;
             author: components["schemas"]["PublicUser"];
+            /** @description Always 0 on replies. */
+            replyCount: number;
             /** Format: date-time */
             createdAt: string;
             /**
@@ -2117,8 +2144,13 @@ export interface components {
         MovieCommentPageResponse: {
             data: components["schemas"]["MovieComment"][];
             nextCursor: number | null;
-            /** @description All comments on the movie. */
+            /** @description All comments on the movie, replies included. */
             total: number;
+            apiVersion: string;
+        };
+        MovieCommentRepliesResponse: {
+            data: components["schemas"]["MovieComment"][];
+            nextCursor: number | null;
             apiVersion: string;
         };
         CommunityProfileResponse: {
@@ -6594,7 +6626,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                movieId: number;
+                movieId: string;
             };
             cookie?: never;
         };
@@ -6625,7 +6657,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                movieId: number;
+                movieId: string;
             };
             cookie?: never;
         };
@@ -6656,7 +6688,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                movieId: number;
+                movieId: string;
             };
             cookie?: never;
         };
@@ -6780,7 +6812,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                movieId: number;
+                movieId: string;
             };
             cookie?: never;
         };
@@ -6811,7 +6843,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                movieId: number;
+                movieId: string;
             };
             cookie?: never;
         };
@@ -6842,7 +6874,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                movieId: number;
+                movieId: string;
             };
             cookie?: never;
         };
@@ -6873,7 +6905,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                movieId: number;
+                movieId: string;
             };
             cookie?: never;
         };
@@ -6912,7 +6944,7 @@ export interface operations {
             };
             header?: never;
             path: {
-                movieId: number;
+                movieId: string;
             };
             cookie?: never;
         };
@@ -6943,7 +6975,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                movieId: number;
+                movieId: string;
             };
             cookie?: never;
         };
@@ -6973,12 +7005,48 @@ export interface operations {
             };
         };
     };
+    MovieComments_listReplies: {
+        parameters: {
+            query?: {
+                limit?: number;
+                /** @description Return replies newer than this cursor (a reply ID). */
+                after?: number;
+            };
+            header?: never;
+            path: {
+                movieId: string;
+                commentId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MovieCommentRepliesResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     MovieComments_remove: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                movieId: number;
+                movieId: string;
                 commentId: number;
             };
             cookie?: never;
@@ -7010,7 +7078,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                movieId: number;
+                movieId: string;
                 commentId: number;
             };
             cookie?: never;

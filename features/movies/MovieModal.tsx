@@ -56,7 +56,7 @@ function MovieOverlay({ movieId }: { movieId: string }) {
           {/* A grab handle so the sheet reads as one on phones. */}
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute left-1/2 top-2 z-30 h-1 w-10 -translate-x-1/2 rounded-full bg-white/60 md:hidden"
+            className="pointer-events-none absolute left-1/2 top-1.5 z-30 h-1 w-10 -translate-x-1/2 rounded-full bg-white/60 md:hidden"
           />
           <MovieDetailsView
             movieId={movieId}

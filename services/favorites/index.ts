@@ -1,7 +1,6 @@
 import { backendRequest } from "../backend";
 
-// The generated types say `number`, but the backend validates a movie uuid.
-const movieId = (movieId: string) => ({ pathParams: { movieId: movieId as unknown as number } });
+const movieId = (movieId: string) => ({ pathParams: { movieId } });
 
 const favoritesServices = {
   list(signal?: AbortSignal) {

@@ -25,6 +25,7 @@ import { BffError } from "@/lib/api/client";
 import { imageSrc, movieFeedHref } from "@/features/community/format";
 import { useSignInHref } from "@/features/community/components/SignInLink";
 import type { MovieDetails } from "@/types/movies";
+import BackdropShow from "./components/BackdropShow";
 import CastRail from "./components/CastRail";
 import MovieComments from "./components/MovieComments";
 import ScoreRing from "./components/ScoreRing";
@@ -49,47 +50,6 @@ export function HeroButton({ label, onPress, children, className }: { label: str
     >
       {children}
     </button>
-  );
-}
-
-function Backdrop({ backdrop, poster }: { backdrop?: string | null; poster?: string | null }) {
-  const [loaded, setLoaded] = useState(false);
-  const src = imageSrc(backdrop, "w1280");
-  const wash = imageSrc(poster, "w185");
-  return (
-    <>
-      {/* The poster's own colors, blurred, hold the frame until the still arrives (or when there is none). */}
-      {wash && (
-        <img
-          src={wash}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 -z-10 h-full w-full scale-125 object-cover opacity-80 blur-3xl saturate-150"
-        />
-      )}
-      {src && (
-        <img
-          src={src}
-          alt=""
-          aria-hidden="true"
-          decoding="async"
-          // A still cached by the browser can finish before hydration, so check on mount as well.
-          ref={(image) => {
-            if (image?.complete && image.naturalWidth) setLoaded(true);
-          }}
-          onLoad={() => setLoaded(true)}
-          className={clsx(
-            "absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 motion-safe:animate-movie-kenburns",
-            loaded ? "opacity-100" : "opacity-0",
-          )}
-        />
-      )}
-      <span aria-hidden="true" className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent" />
-      <span
-        aria-hidden="true"
-        className="absolute inset-x-0 bottom-0 h-[85%] bg-gradient-to-t from-elevated from-[8%] via-elevated/75 via-[38%] to-transparent"
-      />
-    </>
   );
 }
 
@@ -237,11 +197,18 @@ export default function MovieDetailsView({
               <TrailerFrame key="trailer" videoKey={movie.trailerKey} title={movie.title} />
             ) : null}
           </AnimatePresence>
-          {!playing && <Backdrop backdrop={movie?.backdrop_path} poster={head?.poster_path} />}
+          {!playing && (
+            <BackdropShow
+              paths={movie?.backdrops?.length ? movie.backdrops : [movie?.backdrop_path]}
+              poster={head?.poster_path}
+              title={title}
+            />
+          )}
         </div>
-        <div className="absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 p-3 sm:p-4">
-          <div className="flex gap-2">{start}</div>
-          <div className="flex gap-2">
+        {/* Clicks pass between the buttons to the gallery underneath. */}
+        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 p-3 sm:p-4">
+          <div className="pointer-events-auto flex gap-2">{start}</div>
+          <div className="pointer-events-auto flex gap-2">
             {playing && (
               <HeroButton label="Close trailer" onPress={() => setPlaying(false)}>
                 <X size={19} aria-hidden="true" />

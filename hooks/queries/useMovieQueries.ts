@@ -95,6 +95,8 @@ export function useCreateMovieComment(movieId: string) {
                     movieId,
                     text: input.text,
                     spoiler: !!input.spoiler,
+                    parentId: null,
+                    replyCount: 0,
                     author: { id: me.id, username: me.username, avatar: me.avatar ?? null },
                     createdAt: now,
                     updatedAt: now,
