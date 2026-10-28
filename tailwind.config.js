@@ -82,6 +82,11 @@ const config = {
           "0%": { opacity: "0", transform: "translateY(14px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        // A person's posters drift past behind their name; the row is doubled, so half a turn loops.
+        "person-drift": {
+          "0%": { transform: "translate3d(0, 0, 0)" },
+          "100%": { transform: "translate3d(-50%, 0, 0)" },
+        },
         // Profile posters fade up and sharpen into the grid.
         "poster-in": {
           "0%": { opacity: "0", transform: "translateY(10px) scale(0.98)" },
@@ -98,6 +103,7 @@ const config = {
         "cinema-letter-reveal": "cinema-letter-reveal 4.6s linear",
         "community-rise": "community-rise 380ms cubic-bezier(0.2, 0.7, 0.2, 1) both",
         "poster-in": "poster-in 500ms cubic-bezier(0.22, 1, 0.36, 1) both",
+        "person-drift": "person-drift 160s linear infinite",
       },
     },
   },

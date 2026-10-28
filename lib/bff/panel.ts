@@ -14,6 +14,7 @@ import favorites from "@/services/favorites";
 import { moviesServices } from "@/services/movies";
 import { movieDetails } from "@/services/movies/details";
 import { movieComments } from "@/services/movies/comments";
+import { personDetails } from "@/services/people/details";
 import { commentTextError } from "@/lib/community/validation";
 import { handleChatRequest } from "./chat";
 import { handleCommunityRequest } from "./community";
@@ -176,6 +177,9 @@ export async function handlePanelRequest(request: Request, path: string[]) {
       if (!uuid.test(path[1])) throw new InputError("Invalid movie", 404);
       return respond(await movieDetails(path[1]), "public");
     }
+    // A director's or actor's page is public, like a film's.
+    if (path.length === 2 && path[0] === "people" && method === "GET")
+      return respond(await personDetails(positiveInteger(path[1], "person")), "public");
     // Anyone may read what people said about a film; writing needs an account.
     if (path[0] === "movies" && path[2] === "comments" && (path.length === 3 || path.length === 4)) {
       if (!uuid.test(path[1])) throw new InputError("Invalid movie", 404);
@@ -289,6 +293,9 @@ export async function handlePanelRequest(request: Request, path: string[]) {
         return respond(await favorites.setNote(movieId, trimmed));
       }
     }
+    // Opening a filmography film that isn't in the library adds it, recorded as this member's.
+    if (resource === "movies/resolve" && method === "POST")
+      return respond(await moviesServices.resolve(positiveInteger((await body(request)).tmdbId, "tmdbId")));
     if (resource === "movies/search" && method === "GET") {
       return respond(
         await moviesServices.searchDbMovies(

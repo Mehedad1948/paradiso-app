@@ -4,6 +4,7 @@ export const panelKeys = {
   watchlist: ["watchlist"] as const,
   movieDetails: (id: string) => ["movie", id, "details"] as const,
   movieComments: (id: string) => ["movie", id, "comments"] as const,
+  person: (id: number) => ["person", id] as const,
   rooms: ["rooms"] as const,
   room: (id: string) => ["room", id, "detail"] as const,
   ratings: (id: string) => ["room", id, "ratings"] as const,

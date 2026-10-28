@@ -21,6 +21,7 @@ import type {
 import type { PaginatedResponse } from "@/types/request";
 import type { WatchlistItem } from "@/types/watchlist";
 import type { MovieComment, MovieCommentInput, MovieCommentPage, MovieDetails } from "@/types/movies";
+import type { Person, ResolvedMovieId } from "@/types/people";
 import type { BackendResponse } from "@/types/backend";
 import type {
   RoomInviteLink,
@@ -78,6 +79,10 @@ export const panelApi = {
       // The BFF marks these public and long-lived, so the browser cache answers repeat visits.
       cache: "default",
     }),
+  resolveMovie: (tmdbId: number) =>
+    bffRequest<ResolvedMovieId>("/movies/resolve", { method: "POST", body: json({ tmdbId }) }),
+  person: (id: number, signal?: AbortSignal) =>
+    bffRequest<Person>(`/people/${id}`, { signal, cache: "default" }),
   movieComments: (movieId: string, before: number | undefined, signal?: AbortSignal) =>
     bffRequest<MovieCommentPage>(`${moviePath(movieId)}/comments${queryString({ before, limit: 20 })}`, { signal }),
   commentOnMovie: ({ movieId, ...body }: MovieCommentInput & { movieId: string }) =>

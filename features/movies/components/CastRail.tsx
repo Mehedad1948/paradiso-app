@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { avatarGradient } from "@/components/ui/avatarGradient";
 import { imageSrc } from "@/features/community/format";
 import type { MovieCastMember } from "@/types/movies";
+import PersonLink from "@/features/people/PersonLink";
 import { initials } from "../format";
 
 function Portrait({ person }: { person: MovieCastMember }) {
@@ -34,7 +35,20 @@ function Portrait({ person }: { person: MovieCastMember }) {
   );
 }
 
-/** Top-billed cast as a row of portraits that scrolls sideways; arrows appear where it overflows. */
+function CastCard({ person }: { person: MovieCastMember }) {
+  return (
+    <>
+      <Portrait person={person} />
+      <p className="mt-2 line-clamp-2 text-[13px] font-semibold leading-tight">{person.name}</p>
+      {person.character && <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-muted">{person.character}</p>}
+    </>
+  );
+}
+
+/**
+ * Top-billed cast as a row of portraits that scrolls sideways; arrows appear where it overflows.
+ * Each portrait opens the actor's page.
+ */
 export default function CastRail({ cast }: { cast: MovieCastMember[] }) {
   const rail = useRef<HTMLUListElement>(null);
   const [edges, setEdges] = useState({ start: false, end: false });
@@ -71,14 +85,19 @@ export default function CastRail({ cast }: { cast: MovieCastMember[] }) {
       >
         {cast.map((person, index) => (
           <li
-            key={`${person.name}-${index}`}
+            key={person.id ?? `${person.name}-${index}`}
             className="group/cast w-[96px] shrink-0 snap-start motion-safe:animate-movie-rise sm:w-[108px]"
             style={{ animationDelay: `${160 + index * 45}ms` }}
           >
-            <Portrait person={person} />
-            <p className="mt-2 line-clamp-2 text-[13px] font-semibold leading-tight">{person.name}</p>
-            {person.character && (
-              <p className="mt-0.5 line-clamp-2 text-xs leading-snug text-muted">{person.character}</p>
+            {person.id != null ? (
+              <PersonLink
+                person={{ id: person.id, name: person.name }}
+                className="block rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
+              >
+                <CastCard person={person} />
+              </PersonLink>
+            ) : (
+              <CastCard person={person} />
             )}
           </li>
         ))}

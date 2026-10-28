@@ -26,4 +26,8 @@ export const moviesServices = {
   create(body: CreateMovieBody) {
     return backendRequest("/movies", "post", { body });
   },
+  /** The library's copy of a TMDb film, added first if it isn't there yet. Safe to repeat. */
+  resolve(tmdbId: number) {
+    return backendRequest("/movies/resolve", "post", { body: { tmdbId } });
+  },
 };

@@ -30,7 +30,7 @@ export default function MoviePage() {
     <div
       ref={root}
       // Pulls the backdrop up under the header (the panel layout pads for it) and fades it into the page.
-      className="mx-auto -mt-32 max-w-[1080px] text-ink [--hero-fade:var(--heroui-background)] [--hero-inset:72px] max-sm:-mt-36 md:[--hero-inset:88px]"
+      className="mx-auto -mt-32 max-w-[1280px] text-ink [--hero-fade:var(--heroui-background)] [--hero-inset:72px] max-sm:-mt-36 md:[--hero-inset:88px]"
     >
       <MovieDetailsView
         movieId={movieId}

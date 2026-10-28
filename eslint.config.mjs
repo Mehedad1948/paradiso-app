@@ -72,6 +72,8 @@ export default defineConfig([
       "app/auth/**/*.{ts,tsx}",
       "lib/api/**/*.{ts,tsx}",
     ],
+    // Layouts build page metadata on the server, from the same cached service the BFF answers with.
+    ignores: ["app/(pages)/(panel)/**/layout.tsx"],
     rules: {
       "no-restricted-imports": [
         "error",

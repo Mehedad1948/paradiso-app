@@ -4,24 +4,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { AnimatePresence } from "framer-motion";
-import { addToast } from "@heroui/toast";
 import {
   BookmarkCheck,
   BookmarkPlus,
   Clapperboard,
   Clock3,
   ExternalLink,
-  Facebook,
-  Link2,
   MessagesSquare,
   Play,
   Popcorn,
-  Share,
   Share2,
   X,
 } from "lucide-react";
-import BubbleMenu, { type BubbleItem } from "@/components/ui/BubbleMenu";
-import { TelegramLogo, XLogo } from "@/components/ui/BrandIcons";
+import BubbleMenu from "@/components/ui/BubbleMenu";
+import { shareItems } from "@/components/ui/shareItems";
 import QueryError from "@/components/ui/QueryError";
 import { useMe } from "@/hooks/queries/useMe";
 import { useMovieDetails } from "@/hooks/queries/useMovieQueries";
@@ -31,6 +27,7 @@ import { imageSrc, movieFeedHref } from "@/features/community/format";
 import { useSignInHref } from "@/features/community/components/SignInLink";
 import type { MovieDetails } from "@/types/movies";
 import BackdropShow from "./components/BackdropShow";
+import PersonLink from "@/features/people/PersonLink";
 import CastRail from "./components/CastRail";
 import MovieComments from "./components/MovieComments";
 import ScoreRing from "./components/ScoreRing";
@@ -118,36 +115,12 @@ function WatchlistButton({ movie }: { movie: MovieDetails }) {
   );
 }
 
-function copyLink(url: string) {
-  navigator.clipboard
-    .writeText(url)
-    .then(() => addToast({ title: "Link copied", color: "success" }))
-    .catch(() => addToast({ title: "Couldn't copy the link", color: "danger" }));
-}
-
-/** The same fan of share bubbles as a post's action bar. */
-function shareItems(movie: MovieDetails): BubbleItem[] {
-  const url = `${window.location.origin}${movieHref(movie.id)}`;
+function movieShareItems(movie: MovieDetails) {
   const year = releaseYear(movie.release_date);
-  const text = year ? `${movie.title} (${year})` : movie.title;
-  const u = encodeURIComponent(url);
-  const t = encodeURIComponent(text);
-  const items: BubbleItem[] = [
-    { key: "copy", label: "Copy link", icon: <Link2 size={18} />, onSelect: () => copyLink(url), className: "hover:text-emerald-500" },
-    { key: "x", label: "Share on X", icon: <XLogo />, href: `https://twitter.com/intent/tweet?text=${t}&url=${u}` },
-    { key: "facebook", label: "Share on Facebook", icon: <Facebook size={18} />, href: `https://www.facebook.com/sharer/sharer.php?u=${u}`, className: "hover:text-[#1877f2]" },
-    { key: "telegram", label: "Share on Telegram", icon: <TelegramLogo />, href: `https://t.me/share/url?url=${u}&text=${t}`, className: "hover:text-[#229ed9]" },
-  ];
-  // Desktop share sheets are thin; on phones the native one reaches every app.
-  if (typeof navigator.share === "function" && window.matchMedia("(pointer: coarse)").matches) {
-    items.push({
-      key: "more",
-      label: "More options",
-      icon: <Share size={18} />,
-      onSelect: () => navigator.share({ title: text, url }).catch(() => {}),
-    });
-  }
-  return items;
+  return shareItems({
+    url: `${window.location.origin}${movieHref(movie.id)}`,
+    text: year ? `${movie.title} (${year})` : movie.title,
+  });
 }
 
 function Unavailable({ error, retry }: { error: Error; retry: () => void }) {
@@ -192,9 +165,10 @@ export default function MovieDetailsView({
   const year = releaseYear(head?.release_date);
   const runtime = runtimeLabel(movie?.runtime);
   const original = movie?.original_title && movie.original_title !== movie.title ? movie.original_title : null;
+  // Details cached before person ids shipped have no directors list yet.
+  const directors = movie?.directors ?? [];
   const facts = movie
     ? [
-        ["Director", movie.director],
         ["Released", releaseLabel(movie.release_date)],
         ["Runtime", runtime],
         ["Original title", movie.original_title],
@@ -246,7 +220,7 @@ export default function MovieDetailsView({
             variant === "page" ? "px-[4.5vw] pt-[calc(var(--hero-inset,0px)+20px)] max-sm:px-[5vw] max-sm:pt-[calc(var(--hero-inset,0px)+12px)]" : "p-3 sm:p-4",
           )}
         >
-          <div className={clsx("flex items-start justify-between gap-2", variant === "page" && "mx-auto max-w-[1080px]")}>
+          <div className={clsx("flex items-start justify-between gap-2", variant === "page" && "mx-auto max-w-[1280px]")}>
             <div className="pointer-events-auto flex gap-2">{start}</div>
             <div className="pointer-events-auto flex gap-2">
               {playing && movie?.trailerKey && (
@@ -287,7 +261,7 @@ export default function MovieDetailsView({
             {head ? (
               <Title
                 className={clsx(
-                  "font-semibold leading-[1.04] tracking-[-0.035em] [text-wrap:balance]",
+                  "font-semibold leading-[1.04] tracking-[-0.035em] [text-wrap:pretty]",
                   variant === "page" ? "text-[28px] sm:text-[44px] lg:text-[52px]" : "text-[26px] sm:text-[38px]",
                 )}
               >
@@ -307,13 +281,33 @@ export default function MovieDetailsView({
                   </span>
                 </>
               )}
-              {movie?.director && (
+              {directors.length > 0 ? (
                 <>
                   {(year || runtime) && <Dot />}
                   <span>
-                    by <span className="font-semibold text-ink/80">{movie.director}</span>
+                    by{" "}
+                    {directors.map((director, index) => (
+                      <span key={director.id}>
+                        {index > 0 && (index === directors.length - 1 ? " & " : ", ")}
+                        <PersonLink
+                          person={director}
+                          className="font-semibold text-ink/80 underline decoration-transparent decoration-1 underline-offset-4 transition-colors hover:text-ink hover:decoration-current"
+                        >
+                          {director.name}
+                        </PersonLink>
+                      </span>
+                    ))}
                   </span>
                 </>
+              ) : (
+                movie?.director && (
+                  <>
+                    {(year || runtime) && <Dot />}
+                    <span>
+                      by <span className="font-semibold text-ink/80">{movie.director}</span>
+                    </span>
+                  </>
+                )
               )}
               {!movie && !query.isError && <Bar className="h-4 w-40" />}
             </p>
@@ -386,7 +380,7 @@ export default function MovieDetailsView({
                 </Link>
                 <BubbleMenu
                   label="Share film"
-                  items={typeof window === "undefined" ? [] : shareItems(movie)}
+                  items={typeof window === "undefined" ? [] : movieShareItems(movie)}
                   triggerClassName={clsx(quiet, "w-11 justify-center px-0 [&_svg]:shrink-0 [&_svg]:transition-transform [&_svg]:duration-300 hover:[&_svg]:scale-110")}
                   bubbleClassName="bg-elevated text-ink shadow-[0_2px_4px_rgb(0_0_0_/_5%),0_10px_24px_-8px_rgb(0_0_0_/_25%)] transition-colors dark:bg-surface [&_svg]:h-[17px] [&_svg]:w-[17px]"
                   // Share ends the row, so the bubbles fan up and to the right, clear of the buttons beside it.
@@ -407,8 +401,7 @@ export default function MovieDetailsView({
             {(movie.tagline || movie.overview) && (
               <section
                 aria-label="Synopsis"
-                // The page has the room for a wider read; the modal keeps a tighter measure.
-                className={clsx("mt-9 motion-safe:animate-movie-rise [animation-delay:260ms]", variant === "page" ? "max-w-none" : "max-w-[64ch]")}
+                className="mt-9 motion-safe:animate-movie-rise [animation-delay:260ms]"
               >
                 {movie.tagline && (
                   <blockquote className="relative pl-5 font-serif text-[20px] italic leading-snug text-ink/90 sm:text-[23px]">
