@@ -13,6 +13,8 @@ import watchlist from "@/services/watchlist";
 import favorites from "@/services/favorites";
 import { moviesServices } from "@/services/movies";
 import { movieDetails } from "@/services/movies/details";
+import { movieComments } from "@/services/movies/comments";
+import { commentTextError } from "@/lib/community/validation";
 import { handleChatRequest } from "./chat";
 import { handleCommunityRequest } from "./community";
 import { handleNotificationsRequest } from "./notifications";
@@ -122,6 +124,18 @@ function parseUpdateMe(data: Record<string, unknown>): UpdateMeInputs {
   return update;
 }
 
+/**
+ * A movie comment's text and spoiler flag. Edits send both too: the backend defaults a missing
+ * flag to false, which would quietly unmark a spoiler.
+ */
+function movieCommentInput(data: Record<string, unknown>) {
+  if (typeof data.text !== "string") throw new InputError("Invalid text");
+  const error = commentTextError(data.text);
+  if (error) throw new InputError(error);
+  if (data.spoiler !== undefined && typeof data.spoiler !== "boolean") throw new InputError("Invalid spoiler");
+  return { text: data.text.trim(), spoiler: data.spoiler === true };
+}
+
 async function body(request: Request): Promise<Record<string, unknown>> {
   try {
     const value: unknown = await request.json();
@@ -161,6 +175,33 @@ export async function handlePanelRequest(request: Request, path: string[]) {
     if (path.length === 3 && path[0] === "movies" && path[2] === "details" && method === "GET") {
       if (!uuid.test(path[1])) throw new InputError("Invalid movie", 404);
       return respond(await movieDetails(path[1]), "public");
+    }
+    // Anyone may read what people said about a film; writing needs an account.
+    if (path[0] === "movies" && path[2] === "comments" && (path.length === 3 || path.length === 4)) {
+      if (!uuid.test(path[1])) throw new InputError("Invalid movie", 404);
+      const movieId = path[1];
+      if (path.length === 3 && method === "GET")
+        return respond(
+          await movieComments.list(
+            movieId,
+            {
+              limit: positiveInteger(query.get("limit"), "limit", 20, 50),
+              before: query.has("before") ? positiveInteger(query.get("before"), "before") : undefined,
+            },
+            request.signal,
+          ),
+        );
+      if (!signedIn) throw new InputError("Sign in to continue", 401);
+      if (path.length === 3 && method === "POST") {
+        const data = await body(request);
+        return respond(await movieComments.create(movieId, movieCommentInput(data)));
+      }
+      if (path.length === 4) {
+        const commentId = positiveInteger(path[3], "commentId");
+        if (method === "PATCH")
+          return respond(await movieComments.update(movieId, commentId, movieCommentInput(await body(request))));
+        if (method === "DELETE") return respond(await movieComments.remove(movieId, commentId));
+      }
     }
     if (!signedIn) throw new InputError("Sign in to continue", 401);
     const page = () => positiveInteger(query.get("page"), "page", 1);

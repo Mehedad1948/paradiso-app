@@ -3,6 +3,7 @@ export const panelKeys = {
   genres: ["genres"] as const,
   watchlist: ["watchlist"] as const,
   movieDetails: (id: string) => ["movie", id, "details"] as const,
+  movieComments: (id: string) => ["movie", id, "comments"] as const,
   rooms: ["rooms"] as const,
   room: (id: string) => ["room", id, "detail"] as const,
   ratings: (id: string) => ["room", id, "ratings"] as const,

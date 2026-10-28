@@ -1,6 +1,5 @@
-import { Suspense, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import { connection } from "next/server";
 import { pageMetadata } from "@/config/seo";
 import { imageSrc } from "@/features/community/format";
 import { isMovieId, releaseYear } from "@/features/movies/format";
@@ -35,19 +34,6 @@ export async function generateMetadata({
   });
 }
 
-/** Renders nothing; tells Next the request-time metadata above is intentional. */
-async function RequestTime() {
-  await connection();
-  return null;
-}
-
 export default function Layout({ children }: { children: ReactNode }) {
-  return (
-    <>
-      {children}
-      <Suspense>
-        <RequestTime />
-      </Suspense>
-    </>
-  );
+  return children;
 }

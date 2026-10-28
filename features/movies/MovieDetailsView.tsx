@@ -26,6 +26,7 @@ import { imageSrc, movieFeedHref } from "@/features/community/format";
 import { useSignInHref } from "@/features/community/components/SignInLink";
 import type { MovieDetails } from "@/types/movies";
 import CastRail from "./components/CastRail";
+import MovieComments from "./components/MovieComments";
 import ScoreRing from "./components/ScoreRing";
 import TrailerFrame from "./components/TrailerFrame";
 import { movieHref, releaseLabel, releaseYear, runtimeLabel } from "./format";
@@ -401,7 +402,11 @@ export default function MovieDetailsView({
               </dl>
             )}
 
-            <p className="pb-8 pt-6 text-xs text-muted">Film data from TMDb.</p>
+            <p className="pt-6 text-xs text-muted">Film data from TMDb.</p>
+
+            <div className="pb-10 motion-safe:animate-movie-rise [animation-delay:440ms]">
+              <MovieComments movieId={movie.id} title={movie.title} />
+            </div>
           </>
         )}
       </div>

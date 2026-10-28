@@ -20,7 +20,7 @@ import type {
 } from "@/types/invitations";
 import type { PaginatedResponse } from "@/types/request";
 import type { WatchlistItem } from "@/types/watchlist";
-import type { MovieDetails } from "@/types/movies";
+import type { MovieComment, MovieCommentInput, MovieCommentPage, MovieDetails } from "@/types/movies";
 import type { BackendResponse } from "@/types/backend";
 import type {
   RoomInviteLink,
@@ -32,6 +32,7 @@ export type PanelRoom = Room & { imageUrl: string | null };
 export type PanelRoomListItem = RoomListItem & { imageUrl: string | null };
 const json = (body: unknown) => JSON.stringify(body);
 const roomPath = (id: string | number) => `/rooms/${encodeURIComponent(id)}`;
+const moviePath = (id: string) => `/movies/${encodeURIComponent(id)}`;
 
 export const panelApi = {
   me: (signal?: AbortSignal) => bffRequest<CurrentUser>("/me", { signal }),
@@ -72,11 +73,19 @@ export const panelApi = {
       { method: "DELETE" },
     ),
   movieDetails: (id: string, signal?: AbortSignal) =>
-    bffRequest<MovieDetails>(`/movies/${encodeURIComponent(id)}/details`, {
+    bffRequest<MovieDetails>(`${moviePath(id)}/details`, {
       signal,
       // The BFF marks these public and long-lived, so the browser cache answers repeat visits.
       cache: "default",
     }),
+  movieComments: (movieId: string, before: number | undefined, signal?: AbortSignal) =>
+    bffRequest<MovieCommentPage>(`${moviePath(movieId)}/comments${queryString({ before, limit: 20 })}`, { signal }),
+  commentOnMovie: ({ movieId, ...body }: MovieCommentInput & { movieId: string }) =>
+    bffRequest<MovieComment>(`${moviePath(movieId)}/comments`, { method: "POST", body: json(body) }),
+  editMovieComment: ({ movieId, commentId, ...body }: MovieCommentInput & { movieId: string; commentId: number }) =>
+    bffRequest<MovieComment>(`${moviePath(movieId)}/comments/${commentId}`, { method: "PATCH", body: json(body) }),
+  deleteMovieComment: ({ movieId, commentId }: { movieId: string; commentId: number }) =>
+    bffRequest<{ message: string }>(`${moviePath(movieId)}/comments/${commentId}`, { method: "DELETE" }),
   room: (id: string, signal?: AbortSignal) =>
     bffRequest<PanelRoom>(roomPath(id), { signal }),
   ratings: (id: string, filters: RoomRatingFilters, signal?: AbortSignal) =>
