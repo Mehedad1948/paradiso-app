@@ -223,7 +223,13 @@ export default function MovieDetailsView({
         {/* Poster and title. */}
         <div className="flex items-end gap-4 sm:gap-6">
           {!playing && <Poster path={head?.poster_path} title={title} variant={variant} />}
-          <div className="min-w-0 flex-1 pb-1 motion-safe:animate-movie-rise [animation-delay:80ms]">
+          <div
+            className={clsx(
+              "min-w-0 flex-1 pb-1 motion-safe:animate-movie-rise [animation-delay:80ms]",
+              // On desktop the gallery counter rests in the hero's bottom-right corner; long titles wrap before it.
+              (movie?.backdrops?.length ?? 0) > 1 && "md:pr-36",
+            )}
+          >
             {head ? (
               <Title
                 className={clsx(

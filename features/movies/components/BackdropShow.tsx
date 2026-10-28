@@ -1,19 +1,280 @@
 "use client";
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import clsx from "clsx";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { imageSrc } from "@/features/community/format";
 import { useDocumentVisible } from "@/features/rooms/chat/hooks/useDocumentVisible";
+import { MorphEngine } from "../lib/morph-engine";
 
-/** How long each still holds before the next one fades in. */
+/** How long each still holds before the next one arrives. */
 const HOLD_MS = 6500;
-const SWIPE_PX = 40;
+/** A drag past this share of the width, or a flick, moves to the neighbor. */
+const COMMIT_SHARE = 0.25;
+const FLICK_PX_PER_MS = 0.5;
+/** Horizontal travel before a press counts as a drag rather than a tap or a scroll. */
+const LOCK_PX = 8;
+
+const pad = (value: number) => String(value).padStart(2, "0");
 
 /**
- * The film's stills as a slow slideshow behind the hero: each one drifts (Ken Burns, alternating
- * in and out) and dissolves into the next. A glass pill of story-style segments tracks the
- * position; hovering pauses, arrows, swipes and the keyboard step through.
+ * Hero stills are requested with CORS so WebGL may read them. TMDb doesn't vary its responses by
+ * Origin, so a copy cached by a plain <img> elsewhere would fail that check; a URL of their own
+ * keeps the two apart, and the plain fallback shares it so each still downloads once.
+ */
+const stillUrl = (path: string) => `${imageSrc(path, "w1280")}?cors=1`;
+const wrap = (value: number, count: number) => ((value % count) + count) % count;
+
+function webglAvailable() {
+  try {
+    return !!document.createElement("canvas").getContext("webgl");
+  } catch {
+    return false;
+  }
+}
+
+/** A still with the slow CSS Ken Burns drift, fading in once it has loaded. */
+function Still({ path, reverse }: { path: string; reverse?: boolean }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <img
+      src={stillUrl(path)}
+      alt=""
+      aria-hidden="true"
+      decoding="async"
+      draggable={false}
+      crossOrigin="anonymous"
+      // A still cached by the browser can finish before hydration, so check on mount as well.
+      ref={(image) => {
+        if (image?.complete && image.naturalWidth) setLoaded(true);
+      }}
+      onLoad={() => setLoaded(true)}
+      className={clsx(
+        "absolute inset-0 h-full w-full select-none object-cover transition-opacity duration-1000 motion-safe:animate-movie-kenburns",
+        reverse && "[animation-direction:reverse]",
+        loaded ? "opacity-100" : "opacity-0",
+      )}
+    />
+  );
+}
+
+/** Without WebGL (or with reduced motion): stills dissolve into each other. */
+function Crossfade({ slides, index, direction }: { slides: string[]; index: number; direction: 1 | -1 }) {
+  const reduce = useReducedMotion();
+  return (
+    <AnimatePresence initial={false} custom={direction}>
+      <motion.div
+        key={slides[index]}
+        className="absolute inset-0 overflow-hidden"
+        initial={reduce ? { opacity: 0 } : { opacity: 0, x: `${direction * 3}%` }}
+        animate={{ opacity: 1, x: "0%" }}
+        exit={reduce ? { opacity: 0 } : { opacity: 0, x: `${direction * -2}%` }}
+        transition={{ opacity: { duration: reduce ? 0.2 : 1.2, ease: "easeInOut" }, x: { duration: 1.6, ease: [0.22, 1, 0.36, 1] } }}
+      >
+        <Still path={slides[index]} reverse={index % 2 === 1} />
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+function Gallery({ slides, title }: { slides: string[]; title: string }) {
+  const count = slides.length;
+  const [index, setIndex] = useState(0);
+  const [direction, setDirection] = useState<1 | -1>(1);
+  const [held, setHeld] = useState(false);
+  const [moving, setMoving] = useState(false);
+  // "pending" until we know whether WebGL is usable; the morph only runs once its first still is up.
+  const [stage, setStage] = useState<"pending" | "morph" | "fade">("pending");
+  const [morphReady, setMorphReady] = useState(false);
+  const host = useRef<HTMLDivElement>(null);
+  const engine = useRef<MorphEngine | null>(null);
+  const press = useRef<{ x: number; y: number; at: number; dragging: boolean } | null>(null);
+  const visible = useDocumentVisible();
+  const reduce = useReducedMotion();
+
+  useEffect(() => setStage(!reduce && webglAvailable() ? "morph" : "fade"), [reduce]);
+
+  useEffect(() => {
+    if (stage !== "morph" || !host.current) return;
+    const created = new MorphEngine(host.current, {
+      urls: slides.map(stillUrl),
+      onReady: () => setMorphReady(true),
+      onLost: () => setStage("fade"),
+    });
+    engine.current = created;
+    return () => {
+      created.destroy();
+      engine.current = null;
+      setMorphReady(false);
+    };
+  }, [stage, slides]);
+
+  // Stills browsed while the stage was still loading: it takes over from wherever the reader is.
+  const latest = useRef(index);
+  latest.current = index;
+  useEffect(() => {
+    if (morphReady && latest.current !== 0) engine.current?.show(latest.current);
+  }, [morphReady]);
+
+  const morph = stage === "morph" && morphReady;
+  const playing = !reduce && !held && !moving && visible && stage !== "pending";
+
+  async function go(step: 1 | -1) {
+    if (moving) return;
+    const target = wrap(index + step, count);
+    setDirection(step);
+    setIndex(target);
+    if (!morph || !engine.current) return;
+    setMoving(true);
+    await engine.current.to(target);
+    setMoving(false);
+  }
+
+  function keys(event: KeyboardEvent) {
+    if (event.key === "ArrowRight") void go(1);
+    else if (event.key === "ArrowLeft") void go(-1);
+    else return;
+    event.preventDefault();
+  }
+
+  function down(event: PointerEvent<HTMLDivElement>) {
+    if (event.button !== 0 || (event.target as HTMLElement).closest("button, [role=group]")) return;
+    press.current = { x: event.clientX, y: event.clientY, at: performance.now(), dragging: false };
+  }
+
+  function move(event: PointerEvent<HTMLDivElement>) {
+    const start = press.current;
+    if (!start) return;
+    const dx = event.clientX - start.x;
+    if (!start.dragging) {
+      if (Math.abs(dx) < LOCK_PX) return;
+      // A mostly vertical gesture is a scroll; let it go.
+      if (Math.abs(dx) < Math.abs(event.clientY - start.y)) {
+        press.current = null;
+        return;
+      }
+      if (moving) return;
+      start.dragging = true;
+      setHeld(true);
+      try {
+        event.currentTarget.setPointerCapture(event.pointerId);
+      } catch {
+        // The pointer is already gone; the drag simply ends on release.
+      }
+    }
+    // The morph follows the finger; the crossfade waits for the release.
+    if (morph) engine.current?.drag(dx / event.currentTarget.clientWidth);
+  }
+
+  async function up(event: PointerEvent<HTMLDivElement>) {
+    const start = press.current;
+    press.current = null;
+    if (!start?.dragging) return;
+    setHeld(false);
+    const dx = event.clientX - start.x;
+    const speed = Math.abs(dx) / Math.max(performance.now() - start.at, 1);
+    const commit = Math.abs(dx) > event.currentTarget.clientWidth * COMMIT_SHARE || speed > FLICK_PX_PER_MS;
+    if (!morph || !engine.current) {
+      if (commit) void go(dx < 0 ? 1 : -1);
+      return;
+    }
+    setMoving(true);
+    const landed = await engine.current.release(commit);
+    if (landed !== index) {
+      setDirection(dx < 0 ? 1 : -1);
+      setIndex(landed);
+    }
+    setMoving(false);
+  }
+
+  return (
+    <div
+      className={clsx("group/show absolute inset-0 touch-pan-y select-none", "cursor-grab active:cursor-grabbing")}
+      onMouseEnter={() => setHeld(true)}
+      onMouseLeave={() => setHeld(false)}
+      onPointerDown={down}
+      onPointerMove={move}
+      onPointerUp={up}
+      onPointerCancel={() => (press.current = null)}
+    >
+      {/* The plain stills hold the frame until the WebGL stage has its first image (or instead of it). */}
+      {(stage !== "morph" || !morphReady) && <Crossfade slides={slides} index={index} direction={direction} />}
+      {stage === "morph" && (
+        <div
+          ref={host}
+          aria-hidden="true"
+          className={clsx("absolute inset-0 transition-opacity duration-700", morphReady ? "opacity-100" : "opacity-0")}
+        />
+      )}
+
+      <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent" />
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[85%] bg-gradient-to-t from-elevated from-[8%] via-elevated/75 via-[38%] to-transparent"
+      />
+
+      {(
+        [
+          [-1, "left-3 sm:left-4", ChevronLeft, "Previous still", "group-hover/arrow:-translate-x-0.5"],
+          [1, "right-3 sm:right-4", ChevronRight, "Next still", "group-hover/arrow:translate-x-0.5"],
+        ] as const
+      ).map(([step, side, Icon, label, nudge]) => (
+        <button
+          key={step}
+          type="button"
+          onClick={() => void go(step)}
+          aria-label={label}
+          title={label}
+          className={clsx(
+            "group/arrow absolute top-[38%] z-20 flex size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/20 text-white/90 ring-1 ring-inset ring-white/15 backdrop-blur-md transition-[opacity,background-color,transform] duration-300 hover:bg-black/40 hover:text-white active:scale-95 sm:size-11",
+            // Quiet at rest, clear once the reader reaches for the stills.
+            "opacity-70 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover/show:opacity-100 focus-visible:opacity-100",
+            side,
+          )}
+        >
+          <Icon size={22} strokeWidth={1.5} aria-hidden="true" className={clsx("transition-transform duration-300", nudge)} />
+        </button>
+      ))}
+
+      {/*
+        A title-card counter: current, a hairline that fills while the still holds, total.
+        Top centre on phones; on desktop it rests in the hero's bottom-right corner, where the image
+        has faded into the card, so it takes the theme's ink there.
+      */}
+      <div
+        role="group"
+        tabIndex={0}
+        aria-label={`${title} stills, ${index + 1} of ${count}. Use the arrow keys to browse.`}
+        onKeyDown={keys}
+        className="absolute left-1/2 top-[18px] z-30 flex -translate-x-1/2 cursor-default items-center gap-2.5 rounded-full px-2 py-1 font-semibold tabular-nums text-white outline-none [text-shadow:0_1px_8px_rgb(0_0_0_/_55%)] focus-visible:ring-2 focus-visible:ring-white/60 sm:top-[22px] md:bottom-4 md:left-auto md:right-6 md:top-auto md:translate-x-0 md:text-ink md:[text-shadow:0_0_12px_hsl(var(--heroui-content1))] md:focus-visible:ring-ink/40"
+      >
+        <span key={index} aria-hidden="true" className="w-[2ch] text-right text-[13px] tracking-[0.08em] motion-safe:animate-community-rise">
+          {pad(index + 1)}
+        </span>
+        <span aria-hidden="true" className="relative block h-px w-12 overflow-hidden bg-white/35 shadow-[0_1px_6px_rgb(0_0_0_/_40%)] sm:w-16 md:bg-ink/20 md:shadow-none">
+          <span
+            key={`run-${index}`}
+            onAnimationEnd={() => void go(1)}
+            className={clsx("absolute inset-0 origin-left bg-white md:bg-ink", reduce ? "scale-x-100" : "scale-x-0")}
+            style={
+              reduce
+                ? undefined
+                : { animation: `movie-segment ${HOLD_MS}ms linear forwards`, animationPlayState: playing ? "running" : "paused" }
+            }
+          />
+        </span>
+        <span aria-hidden="true" className="w-[2ch] text-[13px] tracking-[0.08em] text-white/55 md:text-ink/45">
+          {pad(count)}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * The film's stills behind the hero. With several, they morph into each other (WebGL melt,
+ * or a dissolve without WebGL), on their own every few seconds, by chevron, keyboard, or by
+ * dragging the frame. A single still just drifts.
  */
 export default function BackdropShow({
   paths,
@@ -25,74 +286,15 @@ export default function BackdropShow({
   poster?: string | null;
   title: string;
 }) {
-  const key = paths.join("|");
-  // Keyed by content, not array identity, so a re-render doesn't restart the preloading.
-  const slides = useMemo(() => Array.from(new Set(paths.filter((path): path is string => !!path))), [key]);
-  const count = slides.length;
-  const [index, setIndex] = useState(0);
-  const [direction, setDirection] = useState<1 | -1>(1);
-  const [hovered, setHovered] = useState(false);
-  const [loaded, setLoaded] = useState<Set<string>>(() => new Set());
-  const visible = useDocumentVisible();
-  const reduce = useReducedMotion();
-  const swipe = useRef<{ x: number; y: number } | null>(null);
-
-  const current = slides[Math.min(index, count - 1)];
-  const src = current ? imageSrc(current, "w1280") : null;
+  const slides = Array.from(new Set(paths.filter((path): path is string => !!path)));
+  const key = slides.join("|");
+  const [stable, setStable] = useState(slides);
+  // Same stills, same array: the WebGL stage is rebuilt only when the list really changes.
+  if (stable.join("|") !== key) setStable(slides);
   const wash = imageSrc(poster, "w185");
-  const gallery = count > 1;
-  // The clock only runs once the still on screen has actually arrived.
-  const playing = gallery && !reduce && !hovered && visible && !!current && loaded.has(current);
-
-  const go = (step: 1 | -1) => {
-    setDirection(step);
-    setIndex((value) => (value + step + count) % count);
-  };
-  const jump = (to: number) => {
-    if (to === index) return;
-    setDirection(to > index ? 1 : -1);
-    setIndex(to);
-  };
-
-  // Fetch the next still ahead of time so the dissolve never waits on the network.
-  useEffect(() => {
-    if (!gallery) return;
-    const next = imageSrc(slides[(index + 1) % count], "w1280");
-    if (next) new Image().src = next;
-  }, [gallery, index, count, slides]);
-
-  const markLoaded = (path: string) =>
-    setLoaded((set) => (set.has(path) ? set : new Set(set).add(path)));
-
-  function keys(event: KeyboardEvent) {
-    if (event.key === "ArrowRight") go(1);
-    else if (event.key === "ArrowLeft") go(-1);
-    else return;
-    event.preventDefault();
-  }
-
-  function down(event: PointerEvent) {
-    if (event.pointerType === "mouse" || (event.target as HTMLElement).closest("button")) return;
-    swipe.current = { x: event.clientX, y: event.clientY };
-  }
-  function up(event: PointerEvent) {
-    const start = swipe.current;
-    swipe.current = null;
-    if (!start || !gallery) return;
-    const dx = event.clientX - start.x;
-    if (Math.abs(dx) > SWIPE_PX && Math.abs(dx) > Math.abs(event.clientY - start.y)) go(dx < 0 ? 1 : -1);
-  }
 
   return (
-    <div
-      // Vertical drags still scroll the sheet; horizontal ones are ours to swipe.
-      className="group/show absolute inset-0 touch-pan-y"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onPointerDown={down}
-      onPointerUp={up}
-      onPointerCancel={() => (swipe.current = null)}
-    >
+    <div className="absolute inset-0">
       {/* The poster's own colors, blurred, hold the frame until a still arrives (or when there is none). */}
       {wash && (
         <img
@@ -102,111 +304,16 @@ export default function BackdropShow({
           className="absolute inset-0 -z-10 h-full w-full scale-125 object-cover opacity-80 blur-3xl saturate-150"
         />
       )}
-
-      <AnimatePresence initial={false} custom={direction}>
-        {current && src && (
-          <motion.div
-            key={current}
-            custom={direction}
-            className="absolute inset-0 overflow-hidden"
-            initial={reduce ? { opacity: 0 } : { opacity: 0, x: `${direction * 3}%` }}
-            animate={{ opacity: current && loaded.has(current) ? 1 : 0, x: "0%" }}
-            exit={reduce ? { opacity: 0 } : { opacity: 0, x: `${direction * -2}%` }}
-            transition={{ opacity: { duration: reduce ? 0.2 : 1.2, ease: "easeInOut" }, x: { duration: 1.6, ease: [0.22, 1, 0.36, 1] } }}
-          >
-            <img
-              src={src}
-              alt=""
-              aria-hidden="true"
-              decoding="async"
-              // A still cached by the browser can finish before hydration, so check on mount as well.
-              ref={(image) => {
-                if (image?.complete && image.naturalWidth) markLoaded(current);
-              }}
-              onLoad={() => markLoaded(current)}
-              className={clsx(
-                "h-full w-full object-cover motion-safe:animate-movie-kenburns",
-                // Alternate the drift so consecutive stills don't all push the same way.
-                index % 2 === 1 && "[animation-direction:reverse]",
-              )}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent" />
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[85%] bg-gradient-to-t from-elevated from-[8%] via-elevated/75 via-[38%] to-transparent"
-      />
-
-      {gallery && (
+      {stable.length > 1 ? (
+        <Gallery key={key} slides={stable} title={title} />
+      ) : (
         <>
-          {(
-            [
-              [-1, "left-3 sm:left-4", ChevronLeft, "Previous still"],
-              [1, "right-3 sm:right-4", ChevronRight, "Next still"],
-            ] as const
-          ).map(([step, side, Icon, label]) => (
-            <button
-              key={step}
-              type="button"
-              onClick={() => go(step)}
-              aria-label={label}
-              title={label}
-              className={clsx(
-                "absolute top-[34%] z-20 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white ring-1 ring-inset ring-white/20 backdrop-blur-md transition-[opacity,transform,background-color] duration-300 hover:scale-105 hover:bg-black/50 focus-visible:opacity-100 md:flex",
-                "opacity-0 group-hover/show:opacity-100",
-                step === -1 ? "group-hover/show:translate-x-0 -translate-x-1" : "group-hover/show:translate-x-0 translate-x-1",
-                side,
-              )}
-            >
-              <Icon size={20} aria-hidden="true" />
-            </button>
-          ))}
-
-          {/* Story-style segments: one per still, the current one filling while it holds. */}
-          <div
-            role="group"
-            aria-label={`${title} stills`}
-            onKeyDown={keys}
-            className="absolute left-1/2 top-3 z-30 flex h-10 -translate-x-1/2 items-center gap-1.5 rounded-full bg-black/30 px-3.5 ring-1 ring-inset ring-white/15 backdrop-blur-md sm:top-4"
-          >
-            {slides.map((path, at) => (
-              <button
-                key={path}
-                type="button"
-                onClick={() => jump(at)}
-                aria-label={`Still ${at + 1} of ${count}`}
-                aria-current={at === index || undefined}
-                className="group/seg flex h-6 items-center"
-              >
-                <span
-                  className={clsx(
-                    "relative block h-[3px] overflow-hidden rounded-full bg-white/30 transition-[width,background-color] duration-500 group-hover/seg:bg-white/50",
-                    at === index ? "w-7 sm:w-9" : "w-3 sm:w-4",
-                  )}
-                >
-                  <span
-                    key={at === index ? `run-${index}` : "idle"}
-                    onAnimationEnd={at === index ? () => go(1) : undefined}
-                    className={clsx(
-                      "absolute inset-0 origin-left rounded-full bg-white",
-                      at < index || (at === index && reduce) ? "scale-x-100" : at === index ? "" : "scale-x-0",
-                    )}
-                    style={
-                      at === index && !reduce
-                        ? {
-                            animation: `movie-segment ${HOLD_MS}ms linear forwards`,
-                            animationPlayState: playing ? "running" : "paused",
-                          }
-                        : undefined
-                    }
-                  />
-                </span>
-              </button>
-            ))}
-          </div>
+          {stable[0] && <Still path={stable[0]} />}
+          <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent" />
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[85%] bg-gradient-to-t from-elevated from-[8%] via-elevated/75 via-[38%] to-transparent"
+          />
         </>
       )}
     </div>
