@@ -1,8 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import type { SyntheticEvent } from "react";
+import { useState, type SyntheticEvent } from "react";
+import { useRouter } from "next/navigation";
 import { gridPosters } from "@/config/posters";
+import MovieLink, { useOpenMovie } from "@/features/movies/MovieLink";
+import type { MoviePreview } from "@/features/movies/preview";
+import { useResolveMovie } from "@/hooks/queries/useCommunityQueries";
+import { useMe } from "@/hooks/queries/useMe";
+import { authHref } from "@/lib/auth/redirect";
 
 // Green and blue flow into purple, red, then yellow across the stepped grid.
 const gridLayout: (keyof typeof gridPosters | null)[][] = [
@@ -19,7 +25,7 @@ const cells = gridLayout.flatMap((columns, row) =>
   ),
 );
 
-function startReveal(button: HTMLButtonElement) {
+function startReveal(button: HTMLElement) {
   const artwork = button.querySelector("img");
   const number = button.querySelector("span");
   if (!artwork || !number) return;
@@ -33,31 +39,56 @@ function startReveal(button: HTMLButtonElement) {
   number.classList.add("animate-cinema-number");
 }
 
-function handleReveal(event: SyntheticEvent<HTMLButtonElement>) {
+function handleReveal(event: SyntheticEvent<HTMLElement>) {
   startReveal(event.currentTarget);
 }
 
-export default function CinemaGrid() {
+const cellClass =
+  "group relative -ml-px -mt-px block min-h-0 min-w-0 cursor-pointer touch-manipulation overflow-hidden border border-ink/20 bg-transparent focus-visible:z-[1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent aria-busy:cursor-progress";
+
+/**
+ * `films` holds the library's copy of each frame's film, keyed by TMDb id. A frame whose film
+ * isn't in the library yet adds it on click (signed in) and then opens it.
+ */
+export default function CinemaGrid({ films }: { films: Record<number, MoviePreview> }) {
+  const router = useRouter();
+  const openMovie = useOpenMovie();
+  const signedIn = !!useMe().data;
+  const resolve = useResolveMovie();
+  const [added, setAdded] = useState<Record<number, MoviePreview>>({});
+
+  const addAndOpen = (tmdbId: number) => {
+    if (resolve.isPending) return;
+    if (!signedIn) return router.push(authHref("sign-in", { origin: "/" }));
+    resolve.mutate(tmdbId, {
+      onSuccess: (movie) => {
+        const preview = { id: movie.id, title: movie.title, poster_path: movie.poster_path };
+        setAdded((current) => ({ ...current, [tmdbId]: preview }));
+        openMovie(preview);
+      },
+    });
+  };
+
   return (
     <div
       className="grid aspect-square w-[86%] grid-cols-6 grid-rows-6 justify-self-end pl-px pt-px max-[640px]:w-[76%]"
       // Turn the grid away from the page center: the inner (left) edge recedes.
       // style={{ transform: "perspective(1400px) rotateY(-11deg)", transformOrigin: "right center" }}
       role="group"
-      aria-label="Explore iconic cinema. Hover or focus to reveal a film."
+      aria-label="Explore iconic cinema. Hover or focus to reveal a film, select it to open its details."
     >
       {cells.map(({ row, column, poster }, index) => {
         const film = gridPosters[poster];
-        return (
-          <button
-            key={`${row}-${column}`}
-            type="button"
-            className="group relative -ml-px -mt-px min-h-0 min-w-0 cursor-pointer touch-manipulation overflow-hidden border border-ink/20 bg-transparent focus-visible:z-[1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent"
-            style={{ gridRow: row, gridColumn: column }}
-            aria-label={`Reveal ${film.title}, frame ${index + 1}`}
-            onPointerEnter={handleReveal}
-            onFocus={handleReveal}
-          >
+        const movie = films[film.tmdbId] ?? added[film.tmdbId];
+        const cell = {
+          className: cellClass,
+          style: { gridRow: row, gridColumn: column },
+          "aria-label": `${film.title}, frame ${index + 1}`,
+          onPointerEnter: handleReveal,
+          onFocus: handleReveal,
+        };
+        const content = (
+          <>
             <Image
               src={film.image}
               alt=""
@@ -72,6 +103,21 @@ export default function CinemaGrid() {
             >
               {String(index + 1).padStart(2, "0")}
             </span>
+          </>
+        );
+        return movie ? (
+          <MovieLink key={`${row}-${column}`} movie={movie} {...cell}>
+            {content}
+          </MovieLink>
+        ) : (
+          <button
+            key={`${row}-${column}`}
+            type="button"
+            {...cell}
+            aria-busy={resolve.isPending && resolve.variables === film.tmdbId}
+            onClick={() => addAndOpen(film.tmdbId)}
+          >
+            {content}
           </button>
         );
       })}

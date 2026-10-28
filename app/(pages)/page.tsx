@@ -13,6 +13,8 @@ import SpecularBorder from "@/components/ui/SpecularBorder";
 import styles from "@/components/landing/CinemaHero.module.css";
 import { fontDisplay } from "@/config/fonts";
 import { seo } from "@/config/seo";
+import { gridPosters } from "@/config/posters";
+import { libraryMoviesByTmdb } from "@/services/movies/library";
 
 // Inherits the full title, description and OG image from the root layout.
 export const metadata: Metadata = {
@@ -29,6 +31,7 @@ const verbs = [
 export default async function Home() {
   "use cache";
   cacheLife("hours");
+  const gridFilms = await libraryMoviesByTmdb(Object.values(gridPosters).map((film) => film.tmdbId));
 
   return (
     <>
@@ -99,7 +102,7 @@ export default async function Home() {
           </h2>
         </div>
         <div className="grid">
-          <CinemaGrid />
+          <CinemaGrid films={gridFilms} />
         </div>
       </section>
       <section
