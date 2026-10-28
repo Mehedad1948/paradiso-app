@@ -185,11 +185,24 @@ export default function MovieDetailsView({
   return (
     <article className="relative">
       {/* Hero: the backdrop, or the trailer once it's playing. */}
-      <div className="relative">
+      <div
+        className={clsx(
+          "relative",
+          // On the film page the backdrop runs edge to edge, from under the header, while the text keeps its column.
+          variant === "page" && "ml-[calc(50%-var(--page-width,100vw)/2)] w-[var(--page-width,100vw)]",
+          variant === "page" && playing && "pt-[var(--hero-inset,0px)]",
+        )}
+      >
         <div
           className={clsx(
             "relative isolate overflow-hidden bg-media transition-[height] duration-500",
-            playing ? "aspect-video" : variant === "page" ? "h-[clamp(240px,40vw,460px)]" : "h-[clamp(220px,40vw,380px)]",
+            playing
+              ? variant === "page"
+                ? "mx-auto aspect-video max-h-[78svh]"
+                : "aspect-video"
+              : variant === "page"
+                ? "h-[clamp(400px,68svh,760px)]"
+                : "h-[clamp(220px,40vw,380px)]",
           )}
         >
           <AnimatePresence initial={false}>
@@ -206,20 +219,33 @@ export default function MovieDetailsView({
           )}
         </div>
         {/* Clicks pass between the buttons to the gallery underneath. */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 p-3 sm:p-4">
-          <div className="pointer-events-auto flex gap-2">{start}</div>
-          <div className="pointer-events-auto flex gap-2">
-            {playing && (
-              <HeroButton label="Close trailer" onPress={() => setPlaying(false)}>
-                <X size={19} aria-hidden="true" />
-              </HeroButton>
-            )}
-            {end}
+        <div
+          className={clsx(
+            "pointer-events-none absolute inset-x-0 top-0 z-20",
+            variant === "page" ? "px-[4.5vw] pt-[calc(var(--hero-inset,0px)+20px)] max-sm:px-[5vw] max-sm:pt-[calc(var(--hero-inset,0px)+12px)]" : "p-3 sm:p-4",
+          )}
+        >
+          <div className={clsx("flex items-start justify-between gap-2", variant === "page" && "mx-auto max-w-[1080px]")}>
+            <div className="pointer-events-auto flex gap-2">{start}</div>
+            <div className="pointer-events-auto flex gap-2">
+              {playing && (
+                <HeroButton label="Close trailer" onPress={() => setPlaying(false)}>
+                  <X size={19} aria-hidden="true" />
+                </HeroButton>
+              )}
+              {end}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className={clsx("relative z-10 px-5 sm:px-8", playing ? "mt-5" : variant === "page" ? "-mt-28 sm:-mt-40" : "-mt-24 sm:-mt-36")}>
+      <div
+        className={clsx(
+          "relative z-10",
+          variant === "modal" && "px-5 sm:px-8",
+          playing ? "mt-5" : variant === "page" ? "-mt-32 sm:-mt-48" : "-mt-24 sm:-mt-36",
+        )}
+      >
         {/* Poster and title. */}
         <div className="flex items-end gap-4 sm:gap-6">
           {!playing && <Poster path={head?.poster_path} title={title} variant={variant} />}

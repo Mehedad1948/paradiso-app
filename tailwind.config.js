@@ -24,6 +24,8 @@ const config = {
         line: "hsl(var(--heroui-divider) / <alpha-value>)",
         surface: "hsl(var(--heroui-content2) / <alpha-value>)",
         elevated: "hsl(var(--heroui-content1) / <alpha-value>)",
+        // What a film's backdrop fades into: the card in the modal, the page itself on the film page.
+        "hero-fade": "hsl(var(--hero-fade, var(--heroui-content1)) / <alpha-value>)",
         media: {
           DEFAULT: "#24262a",
           foreground: "#f0f1f3",

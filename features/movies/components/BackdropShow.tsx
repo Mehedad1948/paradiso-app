@@ -210,7 +210,7 @@ function Gallery({ slides, title }: { slides: string[]; title: string }) {
       <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent" />
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[85%] bg-gradient-to-t from-elevated from-[8%] via-elevated/75 via-[38%] to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[85%] bg-gradient-to-t from-hero-fade from-[8%] via-hero-fade/75 via-[38%] to-transparent"
       />
 
       {(
@@ -246,7 +246,7 @@ function Gallery({ slides, title }: { slides: string[]; title: string }) {
         tabIndex={0}
         aria-label={`${title} stills, ${index + 1} of ${count}. Use the arrow keys to browse.`}
         onKeyDown={keys}
-        className="absolute left-1/2 top-[18px] z-30 flex -translate-x-1/2 cursor-default items-center gap-2.5 rounded-full px-2 py-1 font-semibold tabular-nums text-white outline-none [text-shadow:0_1px_8px_rgb(0_0_0_/_55%)] focus-visible:ring-2 focus-visible:ring-white/60 sm:top-[22px] md:bottom-4 md:left-auto md:right-6 md:top-auto md:translate-x-0 md:text-ink md:[text-shadow:0_0_12px_hsl(var(--heroui-content1))] md:focus-visible:ring-ink/40"
+        className="absolute left-1/2 top-[calc(var(--hero-inset,0px)+18px)] z-30 flex -translate-x-1/2 cursor-default items-center gap-2.5 rounded-full px-2 py-1 font-semibold tabular-nums text-white outline-none [text-shadow:0_1px_8px_rgb(0_0_0_/_55%)] focus-visible:ring-2 focus-visible:ring-white/60 sm:top-[calc(var(--hero-inset,0px)+22px)] md:bottom-4 md:left-auto md:right-6 md:top-auto md:translate-x-0 md:text-ink md:[text-shadow:0_0_12px_hsl(var(--hero-fade,var(--heroui-content1)))] md:focus-visible:ring-ink/40"
       >
         <span key={index} aria-hidden="true" className="w-[2ch] text-right text-[13px] tracking-[0.08em] motion-safe:animate-community-rise">
           {pad(index + 1)}
@@ -312,7 +312,7 @@ export default function BackdropShow({
           <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/50 to-transparent" />
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-[85%] bg-gradient-to-t from-elevated from-[8%] via-elevated/75 via-[38%] to-transparent"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-[85%] bg-gradient-to-t from-hero-fade from-[8%] via-hero-fade/75 via-[38%] to-transparent"
           />
         </>
       )}
