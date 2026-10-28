@@ -7,6 +7,7 @@ import { Check, Plus, Ticket } from "lucide-react";
 import { useAddMovie } from "@/hooks/queries/useRoomQueries";
 import { BffError } from "@/lib/api/client";
 import type { ChatMovieCard } from "@/types/chat";
+import MovieLink from "@/features/movies/MovieLink";
 import MoviePoster from "../../components/MoviePoster";
 import { useChat } from "../ChatContext";
 
@@ -26,24 +27,43 @@ function MovieCard({ movie }: { movie: ChatMovieCard }) {
     },
   });
   const inRoom = !!movie.movieId || added;
+  const poster = (
+    <MoviePoster
+      path={movie.posterPath}
+      title={movie.title}
+      size="w92"
+      width={56}
+      height={84}
+      className="h-[84px] w-14 shrink-0"
+    />
+  );
+  // Films already in the room have details to open.
+  const preview = movie.movieId ? { id: movie.movieId, title: movie.title, poster_path: movie.posterPath } : null;
   return (
     // A ticket stub: poster, perforation, then the details.
     <div className="relative flex w-[340px] max-w-full overflow-hidden rounded-lg border border-line bg-surface text-ink">
-      <MoviePoster
-        path={movie.posterPath}
-        title={movie.title}
-        size="w92"
-        width={56}
-        height={84}
-        className="h-[84px] w-14 shrink-0"
-      />
+      {preview ? (
+        <MovieLink movie={preview} aria-label={`${movie.title} details`} className="shrink-0 transition-opacity hover:opacity-85">
+          {poster}
+        </MovieLink>
+      ) : (
+        poster
+      )}
       <span
         aria-hidden="true"
         className="relative w-0 border-l border-dashed border-line before:absolute before:-left-[7px] before:-top-[7px] before:size-3.5 before:rounded-full before:border before:border-line before:bg-elevated after:absolute after:-bottom-[7px] after:-left-[7px] after:size-3.5 after:rounded-full after:border after:border-line after:bg-elevated"
       />
       <div className="flex min-w-0 flex-1 flex-col justify-between gap-2 px-3 py-2.5">
         <div className="min-w-0">
-          <p className="line-clamp-2 text-[15px] font-semibold leading-tight">{movie.title}</p>
+          <p className="line-clamp-2 text-[15px] font-semibold leading-tight">
+            {preview ? (
+              <MovieLink movie={preview} className="underline-offset-4 hover:underline">
+                {movie.title}
+              </MovieLink>
+            ) : (
+              movie.title
+            )}
+          </p>
           <p className="mt-0.5 text-sm text-muted">
             {movie.year || "Year unknown"}
             <span aria-hidden="true"> · </span>

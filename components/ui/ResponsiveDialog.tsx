@@ -20,7 +20,7 @@ function useMediaQuery(query: string) {
 
 type SharedProps = Pick<
   ComponentProps<typeof Modal>,
-  "isOpen" | "onClose" | "isDismissable" | "isKeyboardDismissDisabled" | "hideCloseButton"
+  "isOpen" | "onClose" | "isDismissable" | "isKeyboardDismissDisabled" | "hideCloseButton" | "backdrop"
 > & { scrollBehavior?: "inside" | "outside" };
 
 /**

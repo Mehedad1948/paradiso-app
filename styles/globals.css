@@ -502,3 +502,20 @@
     animation: none;
   }
 }
+
+/* Film details: a sideways cast rail with no scrollbar, fading out on the side that has more. */
+.movie-rail {
+  scrollbar-width: none;
+}
+.movie-rail::-webkit-scrollbar {
+  display: none;
+}
+.movie-rail[data-end] {
+  mask-image: linear-gradient(to right, #000 calc(100% - 56px), transparent);
+}
+.movie-rail[data-start] {
+  mask-image: linear-gradient(to right, transparent, #000 56px);
+}
+.movie-rail[data-start][data-end] {
+  mask-image: linear-gradient(to right, transparent, #000 56px, #000 calc(100% - 56px), transparent);
+}

@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import UserAvatar from "@/components/ui/UserAvatar";
 import MoviePoster from "./MoviePoster";
+import MovieLink from "@/features/movies/MovieLink";
 import { ratingHue } from "../lib/ratingColor";
 import ControversyCell from "./ControversyCell";
 // Positions and timing live in CSS (nth-child); this only sets the count.
@@ -243,15 +244,26 @@ export default function RoomRatingTable({
               <TableCell>
                 {columnKey === "title" ? (
                   <div className="flex items-center gap-3">
-                    <MoviePoster
-                      path={movie.poster_path}
-                      size="w92"
-                      width={36}
-                      height={54}
-                      className="rounded-lg"
-                    />
+                    <MovieLink
+                      movie={movie}
+                      aria-label={`${movie.title} details`}
+                      className="group/poster relative shrink-0 rounded-lg outline-offset-2"
+                    >
+                      <MoviePoster
+                        path={movie.poster_path}
+                        size="w92"
+                        width={36}
+                        height={54}
+                        className="rounded-lg transition-[transform,box-shadow] duration-300 group-hover/poster:-translate-y-0.5 group-hover/poster:scale-[1.06] group-hover/poster:shadow-[0_10px_24px_-8px_rgb(0_0_0_/_55%)]"
+                      />
+                    </MovieLink>
                     <span>
-                      {movie.title}
+                      <MovieLink
+                        movie={movie}
+                        className="underline-offset-4 decoration-accent/50 hover:underline"
+                      >
+                        {movie.title}
+                      </MovieLink>
                       {/* Manual movies store only the year; TMDb ones a full date. */}
                       {/^\d{4}/.test(movie.release_date || "") && (
                         <span className="text-primary-500 text-sm">

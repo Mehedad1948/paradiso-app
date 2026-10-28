@@ -5,6 +5,7 @@ import { Bookmark, Star } from "lucide-react";
 import QueryError from "@/components/ui/QueryError";
 import SwipeRow from "@/components/ui/SwipeRow";
 import MoviePoster from "@/features/rooms/components/MoviePoster";
+import MovieLink, { useOpenMovie } from "@/features/movies/MovieLink";
 import { useRemoveFromWatchlist, useWatchlist } from "@/hooks/queries/useWatchlistQueries";
 import type { WatchlistItem } from "@/types/watchlist";
 
@@ -16,6 +17,7 @@ function WatchlistRow({ item, onRemove }: { item: WatchlistItem; onRemove: (movi
   const year = movie.release_date?.slice(0, 4);
   const rating = movie.vote_average ?? movie.imdbRate;
   const genres = movie.genres.slice(0, 2).map((genre) => genre.name);
+  const openMovie = useOpenMovie();
   return (
     <SwipeRow
       label={movie.title}
@@ -27,7 +29,9 @@ function WatchlistRow({ item, onRemove }: { item: WatchlistItem; onRemove: (movi
       drawerColor="#e5484d"
       actions={[{ id: "remove", label: "Remove" }]}
       onCommit={() => onRemove(movie.id)}
-      className="mb-3 border-line"
+      // The row captures the pointer for swiping, so a tap opens the film from here.
+      onPress={() => openMovie(movie)}
+      className="mb-3 cursor-pointer border-line"
     >
       <MoviePoster
         path={movie.poster_path}
@@ -38,7 +42,12 @@ function WatchlistRow({ item, onRemove }: { item: WatchlistItem; onRemove: (movi
         className="h-[66px] w-11 shrink-0 rounded-lg shadow-md"
       />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-base font-semibold leading-tight tracking-[-0.02em]">{movie.title}</p>
+        <p className="truncate text-base font-semibold leading-tight tracking-[-0.02em]">
+          {/* Keyboard and screen-reader route to the details; pointers use the row tap above. */}
+          <MovieLink movie={movie} className="pointer-events-none rounded-sm outline-offset-2">
+            {movie.title}
+          </MovieLink>
+        </p>
         <p className="mt-1 flex items-center gap-2 text-sm font-normal text-muted">
           {year && <span>{year}</span>}
           {rating != null && rating > 0 && (

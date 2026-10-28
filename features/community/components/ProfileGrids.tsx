@@ -8,7 +8,7 @@ import { useFavorites, useSetFavoriteNote } from "@/hooks/queries/useFavoriteQue
 import { useRecommendations } from "@/hooks/queries/useCommunityQueries";
 import { MAX_FAVORITE_MOVIES } from "@/types/community";
 import { useInfiniteSentinel } from "../hooks/useInfiniteSentinel";
-import { formatRating, movieFeedHref, postHref, tone, verdict } from "../format";
+import { formatRating, postHref, tone, verdict } from "../format";
 import { GridEmpty, PosterGrid, PosterGridSkeleton, PosterTile } from "./PosterGrid";
 import FavoriteNoteChip from "./FavoriteNoteChip";
 
@@ -78,7 +78,7 @@ export function FavoritesGrid({
           <PosterTile
             key={item.movie.id}
             index={i}
-            href={movieFeedHref(item.movie)}
+            movie={item.movie}
             title={item.movie.title}
             poster={item.movie.poster_path}
             caption={year(item.movie.release_date)}

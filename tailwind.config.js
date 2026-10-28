@@ -65,6 +65,16 @@ const config = {
           "0%": { opacity: "0", transform: "translateY(6px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        // A film's backdrop drifts slowly closer while its details are open.
+        "movie-kenburns": {
+          "0%": { transform: "scale(1.12) translate3d(0, 1.5%, 0)" },
+          "100%": { transform: "scale(1.02) translate3d(0, 0, 0)" },
+        },
+        // Film details settle in, one block after another.
+        "movie-rise": {
+          "0%": { opacity: "0", transform: "translateY(14px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
         // Profile posters fade up and sharpen into the grid.
         "poster-in": {
           "0%": { opacity: "0", transform: "translateY(10px) scale(0.98)" },
@@ -72,6 +82,8 @@ const config = {
         },
       },
       animation: {
+        "movie-kenburns": "movie-kenburns 22s cubic-bezier(0.22, 1, 0.36, 1) both",
+        "movie-rise": "movie-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) both",
         "cinema-reveal": "cinema-reveal 4.6s linear",
         "cinema-number": "cinema-number 4.6s step-end",
         "cinema-letter-reveal": "cinema-letter-reveal 4.6s linear",

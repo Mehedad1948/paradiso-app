@@ -12,6 +12,7 @@ import storage from "@/services/storage";
 import watchlist from "@/services/watchlist";
 import favorites from "@/services/favorites";
 import { moviesServices } from "@/services/movies";
+import { movieDetails } from "@/services/movies/details";
 import { handleChatRequest } from "./chat";
 import { handleCommunityRequest } from "./community";
 import { handleNotificationsRequest } from "./notifications";
@@ -48,7 +49,10 @@ function imageUrl<Room extends { image?: string | null }>(room: Room) {
   };
 }
 
-function respond<T>(result: RequestResult<T>) {
+/** Film details are public and barely change, so browsers and CDNs may keep them. */
+const PUBLIC_CACHE = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800";
+
+function respond<T>(result: RequestResult<T>, cache?: "public") {
   const status = result.response.ok
     ? 200
     : result.response.status >= 400
@@ -69,7 +73,10 @@ function respond<T>(result: RequestResult<T>) {
       : result;
   return NextResponse.json(payload, {
     status,
-    headers: { "Cache-Control": "private, no-store", Vary: "Cookie" },
+    headers:
+      cache === "public" && status === 200
+        ? { "Cache-Control": PUBLIC_CACHE }
+        : { "Cache-Control": "private, no-store", Vary: "Cookie" },
   });
 }
 
@@ -150,6 +157,11 @@ export async function handlePanelRequest(request: Request, path: string[]) {
       return respond(
         await favorites.listForUser(positiveInteger(path[2], "userId"), request.signal),
       );
+    // Anyone may look a film up, signed in or not.
+    if (path.length === 3 && path[0] === "movies" && path[2] === "details" && method === "GET") {
+      if (!uuid.test(path[1])) throw new InputError("Invalid movie", 404);
+      return respond(await movieDetails(path[1]), "public");
+    }
     if (!signedIn) throw new InputError("Sign in to continue", 401);
     const page = () => positiveInteger(query.get("page"), "page", 1);
     const limit = () => positiveInteger(query.get("limit"), "limit", 10, 100);

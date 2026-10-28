@@ -50,6 +50,8 @@ export interface SwipeRowProps {
   onOpenChange?: (open: boolean) => void;
   onAction?: (action: SwipeAction) => void;
   onCommit?: (action: SwipeAction) => void;
+  /** A tap on the row that didn't drag, while its actions are closed. */
+  onPress?: () => void;
   closeOnAction?: boolean;
   haptic?: boolean;
   label?: string;
@@ -139,6 +141,7 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
   onOpenChange,
   onAction,
   onCommit,
+  onPress,
   closeOnAction = true,
   haptic = true,
   label = "List item",
@@ -337,7 +340,7 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
       if (open) {
         setOpen(false);
         settle(0);
-      }
+      } else if (e.type === "pointerup") onPress?.();
       return;
     }
     if (primary && canCommit() && ex >= commitPoint()) {

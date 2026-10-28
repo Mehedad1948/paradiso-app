@@ -20,6 +20,7 @@ import type {
 } from "@/types/invitations";
 import type { PaginatedResponse } from "@/types/request";
 import type { WatchlistItem } from "@/types/watchlist";
+import type { MovieDetails } from "@/types/movies";
 import type { BackendResponse } from "@/types/backend";
 import type {
   RoomInviteLink,
@@ -70,6 +71,12 @@ export const panelApi = {
       `/watchlist/${encodeURIComponent(movieId)}`,
       { method: "DELETE" },
     ),
+  movieDetails: (id: string, signal?: AbortSignal) =>
+    bffRequest<MovieDetails>(`/movies/${encodeURIComponent(id)}/details`, {
+      signal,
+      // The BFF marks these public and long-lived, so the browser cache answers repeat visits.
+      cache: "default",
+    }),
   room: (id: string, signal?: AbortSignal) =>
     bffRequest<PanelRoom>(roomPath(id), { signal }),
   ratings: (id: string, filters: RoomRatingFilters, signal?: AbortSignal) =>

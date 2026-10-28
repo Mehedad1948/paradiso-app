@@ -32,7 +32,8 @@ export async function apiRequest<T>(
       ...options,
       headers,
       credentials: "same-origin",
-      cache: "no-store",
+      // Private data skips the HTTP cache unless a caller opts in for public, slow-changing data.
+      cache: options.cache ?? "no-store",
     });
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") throw error;
