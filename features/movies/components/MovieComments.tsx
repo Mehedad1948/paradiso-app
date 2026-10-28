@@ -404,7 +404,7 @@ export default function MovieComments({ movieId, title }: { movieId: string; tit
         <div className="grid grid-cols-[36px_minmax(0,1fr)] gap-x-3">
           <UserAvatar name={me.username} src={me.avatar} size={36} />
           <CommentEditor
-            placeholder={`What stayed with you after ${title}?`}
+            placeholder="Add a comment…"
             submitLabel="Post"
             onSubmit={(input, restore) => create.mutate(input, { onError: () => restore(input) })}
           />
