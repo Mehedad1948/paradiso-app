@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import CreateRoomCard from "./CreateRoomCard";
-import { useRooms } from "@/hooks/queries/useRoomQueries";
+import { useMyRoomsPage, usePublicRooms } from "@/hooks/queries/useRoomQueries";
 import QueryError from "@/components/ui/QueryError";
 import { Spinner } from "@heroui/spinner";
 import RoomCard from "./RoomCard";
@@ -20,14 +20,15 @@ export default function RoomListSection({
   onCreate: () => void;
   userId?: number;
 }) {
-  const query = useRooms(usersRoom, page);
+  // Two different endpoints: the public list is shared and cached, "mine" is per-user.
+  const mine = useMyRoomsPage(page, usersRoom);
+  const open = usePublicRooms(page, !usersRoom);
+  const query = usersRoom ? mine : open;
   const totalPages = Math.max(1, query.data?.meta.totalPages || 1);
   useEffect(() => {
     if (query.data && !query.isPlaceholderData && page > totalPages)
       onPage(totalPages);
   }, [query.data, query.isPlaceholderData, page, totalPages, onPage]);
-  console.log('. query.data', query.data);
-  
   return (
     <section
       className="[&+section]:mt-12"

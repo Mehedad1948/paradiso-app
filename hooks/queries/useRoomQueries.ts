@@ -3,18 +3,61 @@ import {
   keepPreviousData,
   useInfiniteQuery,
   useQuery,
+  useQueryClient,
+  type QueryClient,
 } from "@tanstack/react-query";
+import type { CurrentUser } from "@/types/user";
 import { panelApi } from "@/lib/api/panel";
 import { panelKeys } from "@/lib/query/panel-keys";
 import type { RoomRatingFilters } from "@/types/rooms";
 import { usePanelMutation, type MutationOptions } from "./usePanelMutation";
 
-export const useRooms = (usersRoom: boolean, page = 1) =>
+export const usePublicRooms = (page = 1, enabled = true) =>
   useQuery({
-    queryKey: [...panelKeys.rooms, { usersRoom, page }],
-    queryFn: ({ signal }) => panelApi.rooms(usersRoom, page, signal),
+    queryKey: [...panelKeys.publicRooms, { page }],
+    queryFn: ({ signal }) => panelApi.publicRooms(page, signal),
+    enabled,
     placeholderData: keepPreviousData,
   });
+export const useMyRoomsPage = (page = 1, enabled = true) =>
+  useQuery({
+    queryKey: [...panelKeys.myRooms, { page }],
+    queryFn: ({ signal }) => panelApi.myRooms(page, signal, 10),
+    placeholderData: keepPreviousData,
+    enabled,
+  });
+/**
+ * The public list can be a minute stale upstream, so the viewer's own join or leave is written
+ * into it directly; refetching it right away would only bring the stale copy back.
+ */
+function patchPublicMembers(
+  client: QueryClient,
+  roomId: number,
+  joined: boolean,
+) {
+  const me = client.getQueryData<CurrentUser>(panelKeys.me);
+  if (!me) return;
+  const member = { id: me.id, username: me.username, avatar: me.avatar };
+  client.setQueriesData<Awaited<ReturnType<typeof panelApi.publicRooms>>>(
+    { queryKey: panelKeys.publicRooms },
+    (list) =>
+      list && {
+        ...list,
+        data: list.data.map((room) =>
+          room.id !== roomId
+            ? room
+            : {
+                ...room,
+                users: joined
+                  ? room.users.some((user) => user.id === me.id)
+                    ? room.users
+                    : [...room.users, member]
+                  : room.users.filter((user) => user.id !== me.id),
+              },
+        ),
+      },
+  );
+}
 export const useRoom = (id: string) =>
   useQuery({
     queryKey: panelKeys.room(id),
@@ -74,22 +117,34 @@ export const useUpdateRoom = (
     [panelKeys.rooms, panelKeys.room(id)],
     options,
   );
-export const useJoinRoom = (id: string, options?: MutationOptions<Message>) =>
-  usePanelMutation(
-    panelApi.joinRoom,
-    [panelKeys.rooms, panelKeys.room(id)],
+export const useJoinRoom = (id: string, options?: MutationOptions<Message>) => {
+  const client = useQueryClient();
+  return usePanelMutation(
+    async (roomId: number) => {
+      const result = await panelApi.joinRoom(roomId);
+      patchPublicMembers(client, roomId, true);
+      return result;
+    },
+    [panelKeys.myRooms, panelKeys.viewerRooms, panelKeys.room(id)],
     options,
   );
+};
 /** Leaving drops the member's access, so every cache that depends on the room goes stale. */
 export const useLeaveRoom = (
   id: string,
   options?: MutationOptions<Awaited<ReturnType<typeof panelApi.leaveRoom>>>,
-) =>
-  usePanelMutation(
-    panelApi.leaveRoom,
-    [panelKeys.rooms, ["room", id]],
+) => {
+  const client = useQueryClient();
+  return usePanelMutation(
+    async (input: Parameters<typeof panelApi.leaveRoom>[0]) => {
+      const result = await panelApi.leaveRoom(input);
+      patchPublicMembers(client, Number(input.roomId), false);
+      return result;
+    },
+    [panelKeys.myRooms, panelKeys.viewerRooms, ["room", id]],
     options,
   );
+};
 /** Removing or banning a member changes the roster and what they rated. */
 export const useKickMember = (
   id: string,

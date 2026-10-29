@@ -7,16 +7,24 @@ type AddCustomMovieBody = BackendRequestBody<"/rooms/add-custom-movie/{id}", "po
 type RemoveMovieBody = BackendRequestBody<"/rooms/delete-movie/{id}", "delete">;
 
 const roomsServices = {
-  getRooms({ page, limit, usersRoom = false, signal }: {
+  /** Public rooms are the same for everyone, so the visitor's session is never sent. */
+  getPublicRooms({ page, limit, signal }: {
     page: number;
     limit: number;
-    usersRoom?: boolean;
     signal?: AbortSignal;
   }) {
-    return backendRequest("/rooms", "get", {
-      query: { page, limit, usersRoom: String(usersRoom) as "true" | "false" },
+    return backendRequest("/rooms/public", "get", {
+      query: { page, limit },
       signal,
+      withAuth: false,
     });
+  },
+  getMyRooms({ page, limit, signal }: {
+    page: number;
+    limit: number;
+    signal?: AbortSignal;
+  }) {
+    return backendRequest("/rooms/mine", "get", { query: { page, limit }, signal });
   },
   getRoomById(id: number, signal?: AbortSignal) {
     return backendRequest("/rooms/{id}", "get", { pathParams: { id }, signal });

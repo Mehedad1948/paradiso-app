@@ -56,7 +56,10 @@ function imageUrl<Room extends { image?: string | null }>(room: Room) {
 /** Film details are public and barely change, so browsers and CDNs may keep them. */
 const PUBLIC_CACHE = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800";
 
-function respond<T>(result: RequestResult<T>, cache?: "public") {
+/** The public room list changes with every join, so it is kept briefly (the backend's own policy). */
+const PUBLIC_ROOMS_CACHE = "public, max-age=30, s-maxage=60, stale-while-revalidate=300";
+
+function respond<T>(result: RequestResult<T>, cache?: "public" | "rooms") {
   const status = result.response.ok
     ? 200
     : result.response.status >= 400
@@ -78,8 +81,8 @@ function respond<T>(result: RequestResult<T>, cache?: "public") {
   return NextResponse.json(payload, {
     status,
     headers:
-      cache === "public" && status === 200
-        ? { "Cache-Control": PUBLIC_CACHE }
+      cache && status === 200
+        ? { "Cache-Control": cache === "rooms" ? PUBLIC_ROOMS_CACHE : PUBLIC_CACHE }
         : { "Cache-Control": "private, no-store", Vary: "Cookie" },
   });
 }
@@ -210,26 +213,22 @@ export async function handlePanelRequest(request: Request, path: string[]) {
     }
     const page = () => positiveInteger(query.get("page"), "page", 1);
     const limit = () => positiveInteger(query.get("limit"), "limit", 10, 100);
-    // Public rooms can be browsed signed out; "my rooms" needs an account.
-    if (
-      !signedIn &&
-      path.length === 1 &&
-      path[0] === "rooms" &&
-      method === "GET" &&
-      !boolean(query.get("usersRoom"), "usersRoom", false)
-    ) {
-      const result = await rooms.getRooms({
+    // Public rooms can be browsed signed out, and are the same for everyone, so they are cacheable.
+    if (path.length === 2 && path[0] === "rooms" && path[1] === "public" && method === "GET") {
+      const result = await rooms.getPublicRooms({
         page: page(),
         limit: limit(),
-        usersRoom: false,
         signal: request.signal,
       });
-      return respond({
-        ...result,
-        result: result.result
-          ? { ...result.result, data: result.result.data.map(imageUrl) }
-          : null,
-      });
+      return respond(
+        {
+          ...result,
+          result: result.result
+            ? { ...result.result, data: result.result.data.map(imageUrl) }
+            : null,
+        },
+        "rooms",
+      );
     }
     if (!signedIn) throw new InputError("Sign in to continue", 401);
     const resource = path.join("/");
@@ -379,21 +378,21 @@ export async function handlePanelRequest(request: Request, path: string[]) {
         throw new InputError("Uploaded image has no public HTTPS address", 502);
       return respond({ ...result, result: { ...result.result, url } });
     }
+    // The caller's own rooms carry per-user data (unread counts), so they are never cached.
+    if (resource === "rooms/mine" && method === "GET") {
+      const result = await rooms.getMyRooms({
+        page: page(),
+        limit: limit(),
+        signal: request.signal,
+      });
+      return respond({
+        ...result,
+        result: result.result
+          ? { ...result.result, data: result.result.data.map(imageUrl) }
+          : null,
+      });
+    }
     if (resource === "rooms") {
-      if (method === "GET") {
-        const result = await rooms.getRooms({
-          page: page(),
-          limit: limit(),
-          usersRoom: boolean(query.get("usersRoom"), "usersRoom", false),
-          signal: request.signal,
-        });
-        return respond({
-          ...result,
-          result: result.result
-            ? { ...result.result, data: result.result.data.map(imageUrl) }
-            : null,
-        });
-      }
       if (method === "POST") {
         const data = await body(request);
         const result = await rooms.createRoom({

@@ -197,7 +197,7 @@ export const useFollowingIds = (me: number | undefined) =>
 export const useMyRooms = (me: number | undefined) =>
   useQuery({
     // Lives under the rooms key so creating or joining a room refreshes it.
-    queryKey: [...panelKeys.rooms, "community", me ?? 0],
+    queryKey: [...panelKeys.viewerRooms, me ?? 0],
     enabled: !!me,
     staleTime: 2 * 60_000,
     queryFn: async ({ signal }) => {

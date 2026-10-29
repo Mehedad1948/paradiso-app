@@ -14,7 +14,7 @@ export default async function TodaysShelf() {
       <div className="flex items-end justify-between gap-10 max-sm:flex-col max-sm:items-start max-sm:gap-6">
         <div>
           <span className="mb-6 block font-mono text-xs font-extrabold uppercase tracking-[0.12em] text-accent">
-            06 <span className="px-2 text-muted">/</span> The library
+            06 <span className="px-2 text-muted">/</span> Editors&apos; pick
           </span>
           <h2
             id="library-title"

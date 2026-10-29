@@ -3,6 +3,7 @@ import type { BackendQuery, BackendRequestBody } from "./backend";
 
 export type Room = components["schemas"]["RoomResponse"];
 export type RoomListItem = components["schemas"]["RoomListItem"];
+export type PublicRoomListItem = components["schemas"]["PublicRoomListItem"];
 
 export type CreateRoomInputs = import("./backend").BackendRequestBody<"/rooms", "post">;
 

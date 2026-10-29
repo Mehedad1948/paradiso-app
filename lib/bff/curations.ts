@@ -11,6 +11,7 @@ import {
   type CurationKey,
   type LandingGridItemInput,
 } from "@/types/curations";
+import { handleAdminToolsRequest } from "./admin";
 import { InputError, positiveInteger } from "./validation";
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -109,6 +110,9 @@ export async function handleAdminRequest({
         ) ?? null,
     };
   }
+
+  const tool = await handleAdminToolsRequest({ path, method, query, data, signal });
+  if (tool) return tool;
 
   throw new InputError("Not found", 404);
 }

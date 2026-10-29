@@ -6,6 +6,10 @@ export const panelKeys = {
   movieComments: (id: string) => ["movie", id, "comments"] as const,
   person: (id: number) => ["person", id] as const,
   rooms: ["rooms"] as const,
+  // The public list is cached for a minute upstream, so joins patch it instead of refetching it.
+  publicRooms: ["rooms", "public"] as const,
+  myRooms: ["rooms", "mine"] as const,
+  viewerRooms: ["rooms", "community"] as const,
   room: (id: string) => ["room", id, "detail"] as const,
   ratings: (id: string) => ["room", id, "ratings"] as const,
   // Nested under ratings so every vote, add and removal refreshes the counts too.

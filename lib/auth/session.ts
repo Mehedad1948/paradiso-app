@@ -55,6 +55,16 @@ export async function clearSession() {
   store.set("token", "", { ...options, maxAge: 0 });
   store.set("refreshToken", "", { ...options, maxAge: 0 });
 }
+/** The role copied into the access token when it was issued; it changes at the next sign-in. */
+export async function accessTokenRole(token: string | undefined) {
+  if (!token || !process.env.JWT_SECRET) return null;
+  try {
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET));
+    return typeof payload.role === "string" ? payload.role : null;
+  } catch {
+    return null;
+  }
+}
 export async function isAccessTokenValid(token: string | undefined) {
   if (!token || !process.env.JWT_SECRET) return false;
   try {

@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   token: "session-token" as string | undefined,
-  getRooms: vi.fn(),
+  getPublicRooms: vi.fn(),
+  getMyRooms: vi.fn(),
   getMe: vi.fn(),
   updateMe: vi.fn(),
   uploadImage: vi.fn(),
@@ -56,20 +57,43 @@ describe("BFF boundaries", () => {
     const response = await handlePanelRequest(request("rooms/1"), ["rooms", "1"]);
     expect(response.status).toBe(401);
     expect(response.headers.get("cache-control")).toBe("private, no-store");
-    expect(mocks.getRooms).not.toHaveBeenCalled();
+    expect(mocks.getMyRooms).not.toHaveBeenCalled();
   });
-  it("lets a signed-out visitor list public rooms only", async () => {
+  it("serves the public room list to a signed-out visitor with a short shared cache", async () => {
     mocks.token = undefined;
-    mocks.getRooms.mockResolvedValue(ok({ data: [], meta: {} }));
-    const open = await handlePanelRequest(request("rooms?usersRoom=false"), ["rooms"]);
-    expect(open.status).toBe(200);
-    expect(mocks.getRooms).toHaveBeenCalledWith(
-      expect.objectContaining({ usersRoom: false }),
+    mocks.getPublicRooms.mockResolvedValue(
+      ok({ data: [{ id: 1, image: "rooms/a.jpg" }], meta: {} }),
     );
-    mocks.getRooms.mockClear();
-    const mine = await handlePanelRequest(request("rooms?usersRoom=true"), ["rooms"]);
-    expect(mine.status).toBe(401);
-    expect(mocks.getRooms).not.toHaveBeenCalled();
+    const response = await handlePanelRequest(
+      request("rooms/public?page=2&limit=10"),
+      ["rooms", "public"],
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe(
+      "public, max-age=30, s-maxage=60, stale-while-revalidate=300",
+    );
+    expect(response.headers.get("vary")).toBeNull();
+    expect(mocks.getPublicRooms).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 2, limit: 10 }),
+    );
+    expect((await response.json()).result.data[0].imageUrl).toContain("rooms/a.jpg");
+  });
+  it("keeps the viewer's own rooms behind the session and out of every cache", async () => {
+    mocks.token = undefined;
+    const anonymous = await handlePanelRequest(request("rooms/mine"), ["rooms", "mine"]);
+    expect(anonymous.status).toBe(401);
+    expect(mocks.getMyRooms).not.toHaveBeenCalled();
+    mocks.token = "session-token";
+    mocks.getMyRooms.mockResolvedValue(ok({ data: [], meta: {} }));
+    const response = await handlePanelRequest(request("rooms/mine?page=1&limit=10"), [
+      "rooms",
+      "mine",
+    ]);
+    expect(response.status).toBe(200);
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(mocks.getMyRooms).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 1, limit: 10 }),
+    );
   });
   it("rejects cross-origin mutations", async () => {
     const response = await handlePanelRequest(
@@ -105,10 +129,13 @@ describe("BFF boundaries", () => {
     expect(response.status).toBe(404);
   });
   it("rejects excessive pagination", async () => {
-    const response = await handlePanelRequest(request("rooms?limit=1000000"), [
-      "rooms",
-    ]);
-    expect(response.status).toBe(400);
+    for (const list of ["public", "mine"]) {
+      const response = await handlePanelRequest(
+        request(`rooms/${list}?limit=1000000`),
+        ["rooms", list],
+      );
+      expect(response.status).toBe(400);
+    }
   });
   it("parses dates and boolean false without dropping filters", async () => {
     mocks.getRoomRatings.mockResolvedValue(ok({ data: [] }));

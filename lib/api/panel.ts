@@ -2,6 +2,7 @@ import { bffRequest, queryString } from "./client";
 import type {
   Room,
   RoomListItem,
+  PublicRoomListItem,
   CreateRoomInputs,
   UpdateRoomInputs,
   RoomRatingFilters,
@@ -31,6 +32,7 @@ import type {
 
 export type PanelRoom = Room & { imageUrl: string | null };
 export type PanelRoomListItem = RoomListItem & { imageUrl: string | null };
+export type PanelPublicRoomListItem = PublicRoomListItem & { imageUrl: string | null };
 const json = (body: unknown) => JSON.stringify(body);
 const roomPath = (id: string | number) => `/rooms/${encodeURIComponent(id)}`;
 const moviePath = (id: string) => `/movies/${encodeURIComponent(id)}`;
@@ -43,14 +45,15 @@ export const panelApi = {
     bffRequest<{ ok: true }>("/me/password", { method: "POST", body: json(body) }),
   genres: (signal?: AbortSignal) =>
     bffRequest<BackendResponse<"/genres", "get">>("/genres", { signal }),
-  rooms: (usersRoom: boolean, page: number, signal?: AbortSignal) =>
-    bffRequest<PaginatedResponse<PanelRoomListItem>>(
-      `/rooms${queryString({ usersRoom, page, limit: 10 })}`,
+  /** Open to signed-out visitors and cacheable; never send per-user data through it. */
+  publicRooms: (page: number, signal?: AbortSignal) =>
+    bffRequest<PaginatedResponse<PanelPublicRoomListItem>>(
+      `/rooms/public${queryString({ page, limit: 10 })}`,
       { signal },
     ),
-  myRooms: (page: number, signal?: AbortSignal) =>
+  myRooms: (page: number, signal?: AbortSignal, limit = 100) =>
     bffRequest<PaginatedResponse<PanelRoomListItem>>(
-      `/rooms${queryString({ usersRoom: true, page, limit: 100 })}`,
+      `/rooms/mine${queryString({ page, limit })}`,
       { signal },
     ),
   watchlist: (page: number, limit: number, signal?: AbortSignal) =>

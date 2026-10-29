@@ -2,18 +2,24 @@
 import { Card, CardFooter } from "@heroui/card";
 import Image from "next/image";
 import Link from "next/link";
-import type { PanelRoomListItem } from "@/lib/api/panel";
 import JoinRoomButton from "./JoinRoomButton";
 import { posters } from "@/config/posters";
 import { ArrowUpRight, MessagesSquare } from "lucide-react";
 import { useChatUnread } from "@/hooks/queries/useChatQueries";
 import BorderGlow from "./BorderGlow";
 import UnreadBadge from "../chat/components/UnreadBadge";
+/** What a card needs, which both the public and the viewer's own room lists provide. */
+export type RoomCardRoom = {
+  id: number;
+  name: string;
+  isPublic: boolean;
+  imageUrl: string | null;
+};
 export default function RoomCard({
   room,
   canVisit,
 }: {
-  room: PanelRoomListItem;
+  room: RoomCardRoom;
   canVisit: boolean;
 }) {
   // Visitable rooms are the ones I belong to, so their chat is readable.
