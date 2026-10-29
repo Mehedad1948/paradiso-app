@@ -84,12 +84,14 @@ export function roleLine(person: Person) {
   return Array.from(roles).slice(0, 3);
 }
 
-/** First and latest release year across every credit, upcoming films aside. */
+/** First and latest release year across every credit, upcoming films aside and nothing past the year they died. */
 export function careerSpan(person: Person) {
+  const lastYear = person.deathday ? Number(person.deathday.slice(0, 4)) : Infinity;
   const years = Object.values(person.credits)
     .flat()
     .filter((credit) => !isUpcoming(credit))
-    .map((credit) => Number(credit.release_date!.slice(0, 4)));
+    .map((credit) => Number(credit.release_date!.slice(0, 4)))
+    .filter((year) => year <= lastYear);
   return years.length ? { from: Math.min(...years), to: Math.max(...years) } : null;
 }
 

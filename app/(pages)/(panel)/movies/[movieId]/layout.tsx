@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import { pageMetadata } from "@/config/seo";
+import { brandedOgImage, pageMetadata } from "@/config/seo";
 import { imageSrc } from "@/features/community/format";
 import { isMovieId, releaseYear } from "@/features/movies/format";
 import { movieDetails } from "@/services/movies/details";
@@ -30,7 +30,7 @@ export async function generateMetadata({
   // A wide still makes the better link preview; the poster stands in without one.
   const src = imageSrc(movie.backdrop_path, "w1280") ?? imageSrc(movie.poster_path, "w780");
   return pageMetadata(year ? `${movie.title} (${year})` : movie.title, description, {
-    image: src ? { url: src, alt: movie.title } : undefined,
+    image: brandedOgImage(src, movie.title),
   });
 }
 

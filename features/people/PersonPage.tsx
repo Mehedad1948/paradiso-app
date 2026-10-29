@@ -4,6 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import clsx from "clsx";
 import { ArrowLeft, ChevronDown, ExternalLink, Share2, UserRound, X } from "lucide-react";
 import BubbleMenu from "@/components/ui/BubbleMenu";
+import PopTag from "@/components/ui/PopTag";
 import { shareItems } from "@/components/ui/shareItems";
 import QueryError from "@/components/ui/QueryError";
 import { avatarGradient } from "@/components/ui/avatarGradient";
@@ -168,12 +169,21 @@ function PersonView({ id }: { id: number }) {
   const roles = roleLine(person);
   const life = lifeLine(person);
   const span = careerSpan(person);
-  const stats: [string, number | string][] = [
-    ["Directed", person.credits.directing.length],
-    ["Roles", person.credits.acting.length],
-    ["Crew credits", person.credits.crew.length],
+  const stats: [string, number | string, string][] = [
+    ["Directed", person.credits.directing.length, "Films they directed."],
+    ["Roles", person.credits.acting.length, "Films they acted in."],
+    [
+      "Crew credits",
+      person.credits.crew.length,
+      "Films they worked on behind the camera in another role, like producer, writer or editor.",
+    ],
   ];
-  if (span) stats.push(["Career", span.from === span.to ? `${span.from}` : `${span.from}–${span.to}`]);
+  if (span)
+    stats.push([
+      "Career",
+      span.from === span.to ? `${span.from}` : `${span.from}–${span.to}`,
+      "The years of their first and latest film releases.",
+    ]);
   const shown = stats.filter(([, value]) => value);
   const glow = imageSrc(person.profile_path, "w185");
 
@@ -227,11 +237,16 @@ function PersonView({ id }: { id: number }) {
         <div className="relative mt-8 flex flex-wrap items-end justify-between gap-x-10 gap-y-6 motion-safe:animate-movie-rise [animation-delay:140ms]">
           {shown.length > 0 && (
             <dl className="flex flex-wrap gap-x-9 gap-y-4">
-              {shown.map(([label, value]) => (
-                <div key={label} className="flex flex-col-reverse">
-                  <dt className="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</dt>
-                  <dd className="text-[26px] font-semibold leading-none tracking-[-0.03em] tabular-nums sm:text-[30px]">{value}</dd>
-                </div>
+              {shown.map(([label, value, hint], index) => (
+                <PopTag key={label} bare multiline content={hint} tilt={index % 2 ? 8 : -8}>
+                  <div
+                    tabIndex={0}
+                    className="flex cursor-default flex-col-reverse rounded-md outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  >
+                    <dt className="mt-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</dt>
+                    <dd className="text-[26px] font-semibold leading-none tracking-[-0.03em] tabular-nums sm:text-[30px]">{value}</dd>
+                  </div>
+                </PopTag>
               ))}
             </dl>
           )}

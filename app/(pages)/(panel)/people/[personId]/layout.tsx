@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import { pageMetadata } from "@/config/seo";
+import { brandedOgImage, pageMetadata } from "@/config/seo";
 import { imageSrc } from "@/features/community/format";
 import { personIdFrom, roleLine } from "@/features/people/format";
 import { personDetails } from "@/services/people/details";
@@ -30,7 +30,7 @@ export async function generateMetadata({
     `${person.name}${roles.length ? `, ${roles.join(", ").toLowerCase()}` : ""}: the films, on Paradiso.`;
   const src = imageSrc(person.profile_path, "w780");
   return pageMetadata(person.name, description, {
-    image: src ? { url: src, alt: person.name } : undefined,
+    image: brandedOgImage(src, person.name, { fit: "portrait" }),
   });
 }
 

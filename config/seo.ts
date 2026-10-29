@@ -31,6 +31,26 @@ export const seo = {
 } as const;
 
 /**
+ * Social image for a page: the artwork with the "Cinema Paradiso" wordmark
+ * composited bottom-left by `/api/og`. Pass `fit: "portrait"` for portraits.
+ */
+export function brandedOgImage(
+  src: string | null | undefined,
+  alt: string,
+  options: { fit?: "portrait" } = {},
+) {
+  if (!src) return undefined;
+  const params = new URLSearchParams({ src });
+  if (options.fit) params.set("fit", options.fit);
+  return {
+    url: `/api/og?${params}`,
+    width: seo.ogImage.width,
+    height: 630,
+    alt,
+  };
+}
+
+/**
  * Metadata for an inner page. Next replaces `openGraph`/`twitter` wholesale
  * when a page defines them, so this re-attaches the shared OG image and keeps
  * every page's social card consistent. The tab title still flows through the
@@ -39,11 +59,14 @@ export const seo = {
 export function pageMetadata(
   title: string,
   description: string,
-  options: { noIndex?: boolean; image?: { url: string; alt?: string } } = {},
+  options: {
+    noIndex?: boolean;
+    image?: { url: string; alt?: string; width?: number; height?: number };
+  } = {},
 ): Metadata {
   const socialTitle = `${title} | ${siteConfig.name}`;
   const image = options.image
-    ? { url: options.image.url, alt: options.image.alt ?? title }
+    ? { ...options.image, alt: options.image.alt ?? title }
     : seo.ogImage;
 
   return {

@@ -1,7 +1,6 @@
 "use client";
-import type { ReactNode } from "react";
-import { Tooltip } from "@heroui/tooltip";
 import { ChevronRight, Crown, UserPlus } from "lucide-react";
+import Tag from "@/components/ui/PopTag";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { profileHref } from "@/features/community/format";
 import type { Room } from "@/types/rooms";
@@ -10,54 +9,6 @@ const SHOWN = 4;
 const SIZE = 38;
 // The canvas-coloured ring cuts each circle out of the one beneath it.
 const ring = "ring-[3px] ring-canvas";
-
-/** A name tag that springs up with a little tilt, alternating side to side. */
-function Tag({
-  content,
-  tilt,
-  children,
-}: {
-  content: ReactNode;
-  tilt: number;
-  children: ReactNode;
-}) {
-  return (
-    <Tooltip
-      content={content}
-      showArrow
-      delay={60}
-      closeDelay={0}
-      offset={10}
-      classNames={{
-        // Inverse pill on light pages; on dark ones a raised dark chip rather than a white flash.
-        base: "before:bg-ink dark:before:bg-surface dark:before:shadow-[1px_1px_0_0_hsl(var(--heroui-divider))]",
-        content:
-          "rounded-full bg-ink px-3 py-1.5 text-[13px] font-semibold text-canvas shadow-lg dark:border dark:border-line dark:bg-surface dark:text-ink dark:shadow-black/50",
-      }}
-      motionProps={{
-        variants: {
-          exit: {
-            opacity: 0,
-            scale: 0.5,
-            y: 8,
-            rotate: tilt,
-            transition: { duration: 0.12, ease: "easeIn" },
-          },
-          enter: {
-            opacity: 1,
-            scale: 1,
-            y: 0,
-            rotate: 0,
-            transition: { type: "spring", stiffness: 560, damping: 15 },
-          },
-        },
-      }}
-    >
-      {/* A plain element takes the trigger's ref and handlers; focus bubbles up to it. */}
-      <span className="block rounded-full">{children}</span>
-    </Tooltip>
-  );
-}
 
 /** Overlapping member faces with an invite button closing the stack. */
 export default function RoomMembers({
