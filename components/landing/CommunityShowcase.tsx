@@ -10,7 +10,7 @@ const MAX_CARDS = 8;
 const FETCH_LIMIT = 40;
 // The showcase's box, held by the fallback too so nothing shifts when the posts arrive.
 const FRAME =
-  "h-[640px] w-full max-w-[720px] justify-self-end max-lg:h-[560px] max-sm:h-[460px] max-sm:max-w-none";
+  "h-[640px] w-full max-w-[720px] justify-self-end max-lg:h-[560px] max-sm:h-[520px] max-sm:w-screen max-sm:max-w-none max-sm:justify-self-center max-sm:overflow-hidden";
 
 function toItem(post: CommunityPost): ShowcaseItem | null {
   const movie = post.movie;
