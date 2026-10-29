@@ -106,7 +106,7 @@ function PostCard({
         onClick={open}
         aria-labelledby={labelId}
         className={clsx(
-          "block px-3 py-4 sm:px-6 sm:py-5",
+          "block px-0 py-4 sm:px-6 sm:py-5",
           !detail &&
             "cursor-pointer transition-colors hover:bg-surface/40 motion-safe:animate-community-rise",
         )}

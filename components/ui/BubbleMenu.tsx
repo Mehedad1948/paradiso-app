@@ -23,6 +23,7 @@ export interface BubbleItem {
 
 const SIZE = 40;
 const GAP = 8;
+const EDGE_MARGIN = 8;
 const SPRING = { type: "spring" as const, stiffness: 520, damping: 30, mass: 0.7 };
 
 /**
@@ -51,6 +52,7 @@ export default function BubbleMenu({
   radius?: number;
 }) {
   const [open, setOpen] = useState(false);
+  const [rotation, setRotation] = useState(0);
   const root = useRef<HTMLSpanElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const bubbles = useRef<(HTMLElement | null)[]>([]);
@@ -61,10 +63,45 @@ export default function BubbleMenu({
   const stepRad = (Math.abs(step) * Math.PI) / 180;
   // Keep neighbouring bubbles from touching however many items there are.
   const r = stepRad > 0 ? Math.max(radius, (SIZE + GAP) / (2 * Math.sin(stepRad / 2))) : radius;
-  const positions = items.map((_, i) => {
-    const angle = ((startAngle + step * i) * Math.PI) / 180;
-    return { x: Math.cos(angle) * r, y: Math.sin(angle) * r };
-  });
+  const positionsAt = (rotation: number) =>
+    items.map((_, i) => {
+      const angle = ((startAngle + rotation + step * i) * Math.PI) / 180;
+      return { x: Math.cos(angle) * r, y: Math.sin(angle) * r };
+    });
+  const positions = positionsAt(rotation);
+
+  /** Turns the fan the smallest amount that keeps every bubble inside the viewport. */
+  function fitToViewport() {
+    const rect = trigger.current?.getBoundingClientRect();
+    if (!rect) return setRotation(0);
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const w = document.documentElement.clientWidth;
+    const h = window.innerHeight;
+    const edge = SIZE / 2 + EDGE_MARGIN;
+    const overflow = (turn: number) =>
+      positionsAt(turn).reduce(
+        (sum, p) =>
+          sum +
+          Math.max(0, edge - (cx + p.x)) +
+          Math.max(0, cx + p.x - (w - edge)) +
+          Math.max(0, edge - (cy + p.y)) +
+          Math.max(0, cy + p.y - (h - edge)),
+        0,
+      );
+    let best = 0;
+    let bestOverflow = overflow(0);
+    for (let turn = 10; turn <= 180 && bestOverflow > 0; turn += 10) {
+      for (const signed of [turn, -turn]) {
+        const o = overflow(signed);
+        if (o < bestOverflow) {
+          best = signed;
+          bestOverflow = o;
+        }
+      }
+    }
+    setRotation(best);
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -113,7 +150,10 @@ export default function BubbleMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={open ? menuId : undefined}
-        onClick={() => setOpen((value) => !value)}
+        onClick={() => {
+          if (!open) fitToViewport();
+          setOpen((value) => !value);
+        }}
         className={triggerClassName}
       >
         {typeof children === "function" ? children(open) : children}
