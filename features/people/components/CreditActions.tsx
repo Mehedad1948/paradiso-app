@@ -1,22 +1,22 @@
 "use client";
 import { memo, useMemo, useSyncExternalStore, type CSSProperties } from "react";
 import clsx from "clsx";
-import { BookmarkCheck, BookmarkPlus, EllipsisVertical, PenLine, Users, X } from "lucide-react";
+import { BookmarkCheckIcon, BookmarkPlusIcon, CloseIcon, MenuDotsVerticalIcon, Pen2Icon, UsersGroupRoundedIcon } from "@solar-icons/react/linear";
 import BubbleMenu, { type BubbleItem } from "@/components/ui/BubbleMenu";
 import type { PersonCredit } from "@/types/people";
 
 export type CreditAction = "watchlist" | "post" | "room";
 
 const ACTIONS = [
-  { key: "watchlist", label: "Add to watchlist", Icon: BookmarkPlus },
-  { key: "post", label: "Make a post", Icon: PenLine },
-  { key: "room", label: "Add to room", Icon: Users },
+  { key: "watchlist", label: "Add to watchlist", Icon: BookmarkPlusIcon },
+  { key: "post", label: "Make a post", Icon: Pen2Icon },
+  { key: "room", label: "Add to room", Icon: UsersGroupRoundedIcon },
 ] as const;
 
 /** The watchlist action turns into a confirmation once the film is saved. */
 function present(action: (typeof ACTIONS)[number], saved: boolean) {
   const done = action.key === "watchlist" && saved;
-  return { done, label: done ? "On your watchlist" : action.label, Icon: done ? BookmarkCheck : action.Icon };
+  return { done, label: done ? "On your watchlist" : action.label, Icon: done ? BookmarkCheckIcon : action.Icon };
 }
 
 /** Narrow screens and touch devices have no hover, so the actions move behind a ⋮ menu. */
@@ -101,7 +101,7 @@ function CreditActions({
             endAngle={270}
             radius={58}
           >
-            {(open) => (open ? <X size={16} aria-hidden="true" /> : <EllipsisVertical size={17} aria-hidden="true" />)}
+            {(open) => (open ? <CloseIcon size={16} aria-hidden="true" /> : <MenuDotsVerticalIcon size={17} aria-hidden="true" />)}
           </BubbleMenu>
         </div>
       </div>

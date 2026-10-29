@@ -12,7 +12,7 @@ import {
   ModalHeader,
 } from "@heroui/modal";
 import { addToast } from "@heroui/toast";
-import { Info, LogOut, Trash2 } from "lucide-react";
+import { InfoCircleIcon, Logout2Icon, TrashBinMinimalisticIcon } from "@solar-icons/react/linear";
 import HoldButton from "@/components/ui/HoldButton";
 import { BffError } from "@/lib/api/client";
 import { useLeaveRoom } from "@/hooks/queries/useRoomQueries";
@@ -82,7 +82,7 @@ export default function LeaveRoomDialog({
                 again. Choose what happens to the votes you cast here.
               </p>
               <p className="flex items-start gap-2 text-sm text-muted">
-                <Info size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+                <InfoCircleIcon size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
                 Votes on closed polls are kept either way. Your chat messages
                 are not deleted.
               </p>
@@ -104,7 +104,7 @@ export default function LeaveRoomDialog({
                 textColor="hsl(var(--heroui-background))"
                 fillColor="hsl(var(--heroui-primary-500))"
                 fillTextColor="#ffffff"
-                icon={<LogOut size={17} aria-hidden="true" />}
+                icon={<Logout2Icon size={17} aria-hidden="true" />}
                 doneLabel="Leaving…"
                 disabled={isPending && clearing !== false}
                 onHold={() => leave(false)}
@@ -122,7 +122,7 @@ export default function LeaveRoomDialog({
                 textColor="hsl(var(--heroui-danger))"
                 fillColor="hsl(var(--heroui-danger))"
                 fillTextColor="#ffffff"
-                icon={<Trash2 size={17} aria-hidden="true" />}
+                icon={<TrashBinMinimalisticIcon size={17} aria-hidden="true" />}
                 doneLabel="Leaving…"
                 disabled={isPending && clearing !== true}
                 onHold={() => leave(true)}

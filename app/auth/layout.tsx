@@ -1,7 +1,7 @@
 import { type ReactNode, Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeftIcon } from "@solar-icons/react/linear";
 import Logo from "@/components/ui/Logo";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { posters } from "@/config/posters";
@@ -47,7 +47,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         <div className="flex min-w-0 items-center bg-elevated p-12 max-lg:p-8 max-md:px-5 max-md:pb-9 max-md:pt-7">
           <div className="mx-auto w-full max-w-[430px] [&_h1]:mb-3 [&_h1]:text-[clamp(32px,3vw,44px)] [&_h1]:tracking-[-0.05em] [&_.text-sm]:text-[15px] [&_form]:gap-5 [&_button]:font-semibold [&_[data-slot=input-wrapper]]:border [&_[data-slot=input-wrapper]]:border-line [&_[data-slot=input-wrapper]]:bg-surface [&_[data-slot=input-wrapper]]:shadow-none">
             <Link href="/" className="mb-6 inline-flex items-center gap-2 text-[15px] text-muted hover:text-accent">
-              <ArrowLeft size={18} aria-hidden="true" /> Back to Paradiso
+              <ArrowLeftIcon size={18} aria-hidden="true" /> Back to Paradiso
             </Link>
             <Suspense fallback={<p role="status">Loading your account…</p>}>
               {children}

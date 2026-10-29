@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { differenceInHours, formatDistanceToNowStrict } from "date-fns";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Check, Globe2, Lock, Mail } from "lucide-react";
+import { CheckIcon, GlobalIcon, LetterIcon, LockIcon } from "@solar-icons/react/linear";
 import { Spinner } from "@heroui/spinner";
 import { addToast } from "@heroui/toast";
 import UserAvatar from "@/components/ui/UserAvatar";
@@ -51,7 +51,7 @@ function InvitationCard({ invitation }: { invitation: Invitation }) {
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-[17px] font-semibold tracking-[-0.02em] text-ink">{room.name}</h3>
           <p className="mt-0.5 flex items-center gap-1 text-xs text-muted">
-            {room.isPublic ? <Globe2 size={12} aria-hidden="true" /> : <Lock size={12} aria-hidden="true" />}
+            {room.isPublic ? <GlobalIcon size={12} aria-hidden="true" /> : <LockIcon size={12} aria-hidden="true" />}
             {room.isPublic ? "Public room" : "Private room"}
           </p>
           <p className="mt-2 flex items-center gap-1.5 text-[13px] text-muted">
@@ -64,7 +64,7 @@ function InvitationCard({ invitation }: { invitation: Invitation }) {
               </>
             ) : (
               <>
-                <Mail size={14} aria-hidden="true" /> Invited by email
+                <LetterIcon size={14} aria-hidden="true" /> Invited by email
               </>
             )}
           </p>
@@ -80,7 +80,7 @@ function InvitationCard({ invitation }: { invitation: Invitation }) {
           {action.isPending && answer === "accept" ? (
             <Spinner size="sm" color="current" classNames={{ wrapper: "size-4" }} />
           ) : (
-            <Check size={16} aria-hidden="true" />
+            <CheckIcon size={16} aria-hidden="true" />
           )}
           Join room
         </button>

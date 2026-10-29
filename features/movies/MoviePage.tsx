@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeftIcon } from "@solar-icons/react/linear";
 import MovieDetailsView, { HeroButton } from "./MovieDetailsView";
 
 /**
@@ -37,7 +37,7 @@ export default function MoviePage() {
         variant="page"
         start={
           <HeroButton label="Back" onPress={back}>
-            <ArrowLeft size={19} aria-hidden="true" />
+            <ArrowLeftIcon size={19} aria-hidden="true" />
           </HeroButton>
         }
       />

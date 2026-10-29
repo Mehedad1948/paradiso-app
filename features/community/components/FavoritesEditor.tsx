@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@heroui/button";
 import clsx from "clsx";
 import { AnimatePresence, motion, Reorder, useDragControls } from "framer-motion";
-import { GripVertical, MessageSquareQuote, X } from "lucide-react";
+import { ChatSquareQuoteIcon, CloseIcon, GripVerticalIcon } from "@solar-icons/react/linear";
 import Sidebar, { useSidebar } from "@/components/ui/Sidebar";
 import { normalizeNote, useSetFavorites } from "@/hooks/queries/useFavoriteQueries";
 import { MAX_FAVORITE_MOVIES, type FavoriteMovie } from "@/types/community";
@@ -73,7 +73,7 @@ function Row({
           }}
           className="flex h-9 w-6 shrink-0 cursor-grab touch-none items-center justify-center rounded text-muted transition-colors hover:text-ink active:cursor-grabbing"
         >
-          <GripVertical size={17} aria-hidden="true" />
+          <GripVerticalIcon size={17} aria-hidden="true" />
         </button>
         <span className="w-5 shrink-0 text-center text-sm font-semibold tabular-nums text-accent">{rank}</span>
         {src ? (
@@ -99,7 +99,7 @@ function Row({
             open && "bg-accent/10",
           )}
         >
-          <MessageSquareQuote size={17} aria-hidden="true" />
+          <ChatSquareQuoteIcon size={17} aria-hidden="true" />
           {written && !open && (
             <span aria-hidden="true" className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-accent ring-2 ring-elevated" />
           )}
@@ -111,7 +111,7 @@ function Row({
           onClick={onRemove}
           className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface hover:text-danger"
         >
-          <X size={17} aria-hidden="true" />
+          <CloseIcon size={17} aria-hidden="true" />
         </button>
       </div>
 

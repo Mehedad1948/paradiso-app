@@ -1,6 +1,6 @@
 "use client";
 import clsx from "clsx";
-import { CornerUpLeft } from "lucide-react";
+import { ReplyIcon } from "@solar-icons/react/linear";
 import type { ChatMessage } from "@/types/chat";
 import { useChat } from "../ChatContext";
 import { summarize } from "../format";
@@ -33,7 +33,7 @@ export default function ChatReplyQuote({
       )}
     >
       <span className="inline-flex items-center gap-1 font-semibold">
-        <CornerUpLeft size={13} aria-hidden="true" />
+        <ReplyIcon size={13} aria-hidden="true" />
         {author.id === me.id ? "You" : author.username}
       </span>
       <span className={clsx("line-clamp-2 break-words", deleted && "italic opacity-70")}>

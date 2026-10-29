@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@heroui/button";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
-import { LogOut, MoreVertical } from "lucide-react";
+import { Logout2Icon, MenuDotsVerticalIcon } from "@solar-icons/react/linear";
 
 /** Overflow menu of the room header. Only holds actions a member can take. */
 export default function RoomMenu({ onLeave }: { onLeave: () => void }) {
@@ -19,7 +19,7 @@ export default function RoomMenu({ onLeave }: { onLeave: () => void }) {
           className="min-h-[46px] min-w-[46px] rounded-md border border-line bg-surface/75 text-ink backdrop-blur-md max-sm:!flex-none"
           aria-label="Room options"
         >
-          <MoreVertical size={20} aria-hidden="true" />
+          <MenuDotsVerticalIcon size={20} aria-hidden="true" />
         </Button>
       </DropdownTrigger>
       <DropdownMenu aria-label="Room options" onAction={(key) => key === "leave" && onLeave()}>
@@ -27,7 +27,7 @@ export default function RoomMenu({ onLeave }: { onLeave: () => void }) {
           key="leave"
           color="danger"
           className="text-danger"
-          startContent={<LogOut size={17} aria-hidden="true" />}
+          startContent={<Logout2Icon size={17} aria-hidden="true" />}
           description="Stop being a member of this room"
         >
           Leave room

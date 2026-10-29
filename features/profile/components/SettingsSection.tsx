@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { LucideIcon } from "lucide-react";
+import type { Icon as SolarIcon } from "@solar-icons/react/lib/types";
 import type { SettingsSectionId } from "../sections";
 
 /** One card on the settings page. The id is its anchor, so it clears the fixed header. */
@@ -12,7 +12,7 @@ export default function SettingsSection({
   footer,
 }: {
   id: SettingsSectionId;
-  icon: LucideIcon;
+  icon: SolarIcon;
   title: string;
   description: ReactNode;
   children: ReactNode;

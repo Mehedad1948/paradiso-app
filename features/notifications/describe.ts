@@ -1,25 +1,14 @@
 import { settingsHref } from "@/features/profile/sections";
 import { differenceInCalendarDays, isToday, isYesterday } from "date-fns";
-import {
-  AtSign,
-  Clapperboard,
-  DoorOpen,
-  MessageCircle,
-  Reply,
-  ShieldCheck,
-  ShieldX,
-  ThumbsUp,
-  UserCheck,
-  UserX,
-  type LucideIcon,
-} from "lucide-react";
+import { ChatRoundIcon, ClapperboardIcon, LikeIcon, Login2Icon, MentionCircleIcon, ReplyIcon, ShieldCheckIcon, ShieldCrossIcon, UserCheckIcon, UserCrossIcon } from "@solar-icons/react/linear";
+import type { Icon as SolarIcon } from "@solar-icons/react/lib/types";
 import { imageSrc, postHref } from "@/features/community/format";
 import type { AppNotification, InlineAction } from "@/types/notifications";
 
 export type Actions = { primary: { action: InlineAction; label: string }; secondary: { action: InlineAction; label: string } };
 
 export type Described = {
-  icon: LucideIcon;
+  icon: SolarIcon;
   /** Badge colors on the actor's avatar. */
   tone: string;
   /** Rendered as: <actor>{others} {verb} <target>. */
@@ -44,7 +33,7 @@ export function describe(item: AppNotification): Described {
       // Email invitations from before invitation ids only carry the token.
       const answerable = !item.read && (!!data.invitationId || !!data.inviteToken);
       return {
-        icon: DoorOpen,
+        icon: Login2Icon,
         tone: "bg-violet-500",
         verb: "invited you to",
         target: room,
@@ -62,7 +51,7 @@ export function describe(item: AppNotification): Described {
     case "room_invite_approval": {
       const answerable = !item.read && !!data.invitationId;
       return {
-        icon: ShieldCheck,
+        icon: ShieldCheckIcon,
         tone: "bg-indigo-500",
         verb: "wants to invite someone to",
         target: room,
@@ -79,7 +68,7 @@ export function describe(item: AppNotification): Described {
     }
     case "room_invite_accepted":
       return {
-        icon: UserCheck,
+        icon: UserCheckIcon,
         tone: "bg-emerald-500",
         verb: "accepted your invitation to",
         target: room,
@@ -88,7 +77,7 @@ export function describe(item: AppNotification): Described {
       };
     case "room_invite_declined":
       return {
-        icon: UserX,
+        icon: UserCrossIcon,
         tone: "bg-rose-500",
         verb: "declined your invitation to",
         target: room,
@@ -97,7 +86,7 @@ export function describe(item: AppNotification): Described {
       };
     case "room_invite_rejected":
       return {
-        icon: ShieldX,
+        icon: ShieldCrossIcon,
         tone: "bg-zinc-500",
         verb: "didn't approve your invitation to",
         target: room,
@@ -107,7 +96,7 @@ export function describe(item: AppNotification): Described {
     case "movie_added": {
       const poster = imageSrc(data.posterUrl, "w185");
       return {
-        icon: Clapperboard,
+        icon: ClapperboardIcon,
         tone: "bg-amber-500",
         verb: item.actorCount > 1 ? "added films to" : `added ${data.movieTitle ? `“${data.movieTitle}” to` : "a film to"}`,
         target: room,
@@ -118,7 +107,7 @@ export function describe(item: AppNotification): Described {
     case "chat_mention": {
       const reply = data.reason === "reply";
       return {
-        icon: reply ? Reply : AtSign,
+        icon: reply ? ReplyIcon : MentionCircleIcon,
         tone: "bg-sky-500",
         verb: reply ? "replied to you in" : "mentioned you in",
         target: room,
@@ -128,7 +117,7 @@ export function describe(item: AppNotification): Described {
     }
     case "post_liked":
       return {
-        icon: ThumbsUp,
+        icon: LikeIcon,
         tone: "bg-rose-500",
         verb: "liked your post",
         excerpt: data.postExcerpt,
@@ -136,7 +125,7 @@ export function describe(item: AppNotification): Described {
       };
     case "post_commented":
       return {
-        icon: MessageCircle,
+        icon: ChatRoundIcon,
         tone: "bg-emerald-500",
         verb: "commented on your post",
         excerpt: data.commentExcerpt || data.postExcerpt,

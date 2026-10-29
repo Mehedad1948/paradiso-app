@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent, type ReactNode } from "react";
 import clsx from "clsx";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { AltArrowLeftIcon, AltArrowRightIcon } from "@solar-icons/react/linear";
 import { imageSrc } from "@/features/community/format";
 import { useDocumentVisible } from "@/features/rooms/chat/hooks/useDocumentVisible";
 import { MorphEngine } from "../lib/morph-engine";
@@ -257,8 +257,8 @@ function Gallery({ slides, title, framed }: { slides: string[]; title: string; f
 
       {(
         [
-          [-1, "left-3 sm:left-4", ChevronLeft, "Previous still", "group-hover/arrow:-translate-x-0.5"],
-          [1, "right-3 sm:right-4", ChevronRight, "Next still", "group-hover/arrow:translate-x-0.5"],
+          [-1, "left-3 sm:left-4", AltArrowLeftIcon, "Previous still", "group-hover/arrow:-translate-x-0.5"],
+          [1, "right-3 sm:right-4", AltArrowRightIcon, "Next still", "group-hover/arrow:translate-x-0.5"],
         ] as const
       ).map(([step, side, Icon, label, nudge]) => (
         <button

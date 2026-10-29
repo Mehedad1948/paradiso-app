@@ -1,7 +1,7 @@
 import { addToast } from "@heroui/toast";
-import { Facebook, Link2, Share } from "lucide-react";
+import { LinkRoundIcon, ShareIcon } from "@solar-icons/react/linear";
 import type { BubbleItem } from "./BubbleMenu";
-import { TelegramLogo, XLogo } from "./BrandIcons";
+import { FacebookLogo, TelegramLogo, XLogo } from "./BrandIcons";
 
 function copyLink(url: string) {
   navigator.clipboard
@@ -15,9 +15,9 @@ export function shareItems({ url, text }: { url: string; text: string }): Bubble
   const u = encodeURIComponent(url);
   const t = encodeURIComponent(text);
   const items: BubbleItem[] = [
-    { key: "copy", label: "Copy link", icon: <Link2 size={18} />, onSelect: () => copyLink(url), className: "hover:text-emerald-500" },
+    { key: "copy", label: "Copy link", icon: <LinkRoundIcon size={18} />, onSelect: () => copyLink(url), className: "hover:text-emerald-500" },
     { key: "x", label: "Share on X", icon: <XLogo />, href: `https://twitter.com/intent/tweet?text=${t}&url=${u}` },
-    { key: "facebook", label: "Share on Facebook", icon: <Facebook size={18} />, href: `https://www.facebook.com/sharer/sharer.php?u=${u}`, className: "hover:text-[#1877f2]" },
+    { key: "facebook", label: "Share on Facebook", icon: <FacebookLogo />, href: `https://www.facebook.com/sharer/sharer.php?u=${u}`, className: "hover:text-[#1877f2]" },
     { key: "telegram", label: "Share on Telegram", icon: <TelegramLogo />, href: `https://t.me/share/url?url=${u}&text=${t}`, className: "hover:text-[#229ed9]" },
   ];
   // Desktop share sheets are thin; on phones the native one reaches every app.
@@ -25,7 +25,7 @@ export function shareItems({ url, text }: { url: string; text: string }): Bubble
     items.push({
       key: "more",
       label: "More options",
-      icon: <Share size={18} />,
+      icon: <ShareIcon size={18} />,
       onSelect: () => navigator.share({ title: text, url }).catch(() => {}),
     });
   }

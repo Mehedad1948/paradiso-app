@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Lock, SearchX } from "lucide-react";
+import { ArrowLeftIcon, LockIcon, MagnifierCloseIcon } from "@solar-icons/react/linear";
 import { BffError } from "@/lib/api/client";
 import { authHref } from "@/lib/auth/redirect";
 
@@ -30,7 +30,7 @@ export function isRoomAccessError(error: unknown): error is BffError {
 
 export default function RoomNoAccess({ status, origin }: Props) {
   const { title, body } = COPY[status] ?? COPY[403];
-  const Icon = status === 404 ? SearchX : Lock;
+  const Icon = status === 404 ? MagnifierCloseIcon : LockIcon;
   return (
     <div role="alert" className="mx-auto flex max-w-[480px] flex-col items-center gap-4 py-24 text-center">
       <Icon size={40} aria-hidden="true" className="text-muted" />
@@ -49,7 +49,7 @@ export default function RoomNoAccess({ status, origin }: Props) {
           href="/rooms"
           className="inline-flex items-center gap-2 rounded-md border border-line px-5 py-3 text-[15px] font-semibold"
         >
-          <ArrowLeft size={18} aria-hidden="true" /> All rooms
+          <ArrowLeftIcon size={18} aria-hidden="true" /> All rooms
         </Link>
       </div>
     </div>

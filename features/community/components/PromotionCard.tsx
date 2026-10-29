@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@heroui/button";
 import { addToast } from "@heroui/toast";
-import { ArrowUpRight, DoorOpen } from "lucide-react";
+import { ArrowRightUpIcon, Login2Icon } from "@solar-icons/react/linear";
 import { panelApi } from "@/lib/api/panel";
 import { panelKeys } from "@/lib/query/panel-keys";
 import type { CommunityPromotion } from "@/types/community";
@@ -41,7 +41,7 @@ export default function PromotionCard({
         href={roomHref}
         className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-md border border-line bg-elevated px-3.5 text-sm font-semibold transition-opacity hover:opacity-80"
       >
-        Enter <ArrowUpRight size={15} aria-hidden="true" />
+        Enter <ArrowRightUpIcon size={15} aria-hidden="true" />
       </Link>
     );
   else if (!canJoin || !token)
@@ -72,7 +72,7 @@ export default function PromotionCard({
         <img src={room.image} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded-md object-cover" />
       ) : (
         <span aria-hidden="true" className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-media text-media-foreground/70">
-          <DoorOpen size={22} />
+          <Login2Icon size={22} />
         </span>
       )}
       <div className="min-w-0 flex-1">

@@ -2,7 +2,7 @@
 import clsx from "clsx";
 import { AvatarGroup } from "@heroui/avatar";
 import UserAvatar from "@/components/ui/UserAvatar";
-import { Check, EyeOff, Lock, Trophy, Vote } from "lucide-react";
+import { CheckIcon, ChecklistMinimalisticIcon, CupFirstIcon, EyeClosedIcon, LockIcon } from "@solar-icons/react/linear";
 import { isPollClosed } from "@/lib/chat/timeline";
 import type { ChatMessage, ChatPoll } from "@/types/chat";
 import MoviePoster from "../../components/MoviePoster";
@@ -39,17 +39,17 @@ export default function ChatPollCard({
     <div className="mt-1.5 w-[420px] max-w-full overflow-hidden rounded-[10px] border border-line bg-surface text-ink">
       <div className="flex items-center justify-between gap-3 border-b border-dashed border-line px-4 py-2.5">
         <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-accent">
-          <Vote size={14} aria-hidden="true" /> Ballot
+          <ChecklistMinimalisticIcon size={14} aria-hidden="true" /> Ballot
         </span>
         <span className="flex items-center gap-2 text-xs text-muted">
           {poll.anonymous && (
             <span className="inline-flex items-center gap-1">
-              <EyeOff size={13} aria-hidden="true" /> Anonymous
+              <EyeClosedIcon size={13} aria-hidden="true" /> Anonymous
             </span>
           )}
           {closed ? (
             <span className="inline-flex items-center gap-1 font-semibold text-ink">
-              <Lock size={13} aria-hidden="true" /> Closed
+              <LockIcon size={13} aria-hidden="true" /> Closed
             </span>
           ) : poll.closesAt ? (
             <span>Closes {closesIn(poll.closesAt)}</span>
@@ -104,7 +104,7 @@ export default function ChatPollCard({
                     closed && !option.votedByMe && "opacity-40",
                   )}
                 >
-                  {option.votedByMe && <Check size={12} strokeWidth={3.5} />}
+                  {option.votedByMe && <CheckIcon size={12} strokeWidth={3.5} />}
                 </span>
                 {option.movieId && (
                   <MoviePoster
@@ -141,7 +141,7 @@ export default function ChatPollCard({
                   )}
                 </span>
                 <span className="relative flex shrink-0 items-center gap-1.5 text-sm font-semibold tabular-nums">
-                  {winner && <Trophy size={15} className="text-warning" aria-label="Winner" />}
+                  {winner && <CupFirstIcon size={15} className="text-warning" aria-label="Winner" />}
                   {share}%
                   <span className="sr-only">, {option.votes} votes</span>
                 </span>

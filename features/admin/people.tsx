@@ -6,7 +6,7 @@ import { Input } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
 import { Switch } from "@heroui/switch";
 import { addToast } from "@heroui/toast";
-import { Search } from "lucide-react";
+import { MagnifierIcon } from "@solar-icons/react/linear";
 import { useDebounce } from "use-debounce";
 import { usePeopleSearch, usePersonPreview, useSaveCandidate } from "@/hooks/queries/useAdminQueries";
 import type { AdminPerson } from "@/lib/api/admin";
@@ -180,7 +180,7 @@ export function PersonSearch({
         placeholder="Search people by name…"
         aria-label="Person name"
         maxLength={100}
-        startContent={<Search size={18} className="text-muted" aria-hidden />}
+        startContent={<MagnifierIcon size={18} className="text-muted" aria-hidden />}
         endContent={query.isFetching ? <Spinner size="sm" /> : null}
         isClearable
         onClear={() => setTerm("")}

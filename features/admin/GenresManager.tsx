@@ -5,7 +5,7 @@ import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
 import { addToast } from "@heroui/toast";
-import { RefreshCw } from "lucide-react";
+import { RefreshIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import { useGenres } from "@/hooks/queries/useMe";
 import { useRemoveGenre, useRenameGenre, useSyncGenres } from "@/hooks/queries/useAdminQueries";
@@ -30,7 +30,7 @@ export default function GenresManager() {
             size="md"
             variant="flat"
             isLoading={sync.isPending}
-            startContent={sync.isPending ? null : <RefreshCw size={14} />}
+            startContent={sync.isPending ? null : <RefreshIcon size={14} />}
             onPress={() => sync.execute(undefined)}
           >
             Sync from TMDb

@@ -11,7 +11,7 @@ import {
 } from "@heroui/modal";
 import { useState } from "react";
 import { Tabs, Tab } from "@heroui/tabs";
-import { Link, MailsIcon } from "lucide-react";
+import { LetterIcon, LinkIcon } from "@solar-icons/react/linear";
 import { Spinner } from "@heroui/spinner";
 const InviteByEmail = dynamic(() => import("../invitations/InviteByEmail"), {
   loading: () => <Spinner label="Loading invitations" />,
@@ -61,7 +61,7 @@ export default function InviteDialog({
                   key="link"
                   title={
                     <div className="flex items-center space-x-2">
-                      <Link className="w-5" />
+                      <LinkIcon className="w-5" />
                       <span>Invite Link</span>
                     </div>
                   }
@@ -70,7 +70,7 @@ export default function InviteDialog({
                   key="email"
                   title={
                     <div className="flex items-center space-x-2">
-                      <MailsIcon className="w-5" />
+                      <LetterIcon className="w-5" />
                       <span>Email</span>
                     </div>
                   }

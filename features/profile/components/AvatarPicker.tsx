@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { Button } from "@heroui/button";
-import { ImagePlus } from "lucide-react";
+import { GalleryAddIcon } from "@solar-icons/react/linear";
 import { AVATAR_TYPES } from "@/types/user";
 import UserAvatar from "@/components/ui/UserAvatar";
 import type { AvatarDraft } from "../hooks/useAvatarDraft";
@@ -82,7 +82,7 @@ export default function AvatarPicker({
         >
           <UserAvatar src={draft.src} name={name} size="xl" className="border border-line" />
           <span className="absolute inset-0 grid place-items-center rounded-full bg-black/45 text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-            <ImagePlus size={22} aria-hidden="true" />
+            <GalleryAddIcon size={22} aria-hidden="true" />
           </span>
         </button>
         <div className="min-w-0">

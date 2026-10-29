@@ -10,7 +10,7 @@ import { positivePage } from "./state/filters";
 import RoomListSection from "./components/RoomListSection";
 import DialogLoading from "./components/DialogLoading";
 import PendingInvitations from "./invitations/PendingInvitations";
-import { Plus } from "lucide-react";
+import { AddIcon } from "@solar-icons/react/linear";
 const CreateRoomDialog = dynamic(() => import("./dialogs/CreateRoomDialog"), {
   ssr: false,
   loading: DialogLoading,
@@ -52,7 +52,7 @@ export default function RoomsPage() {
         <Button
           className="min-h-[46px] rounded-md bg-ink text-[15px] font-semibold text-canvas"
           onPress={create}
-          startContent={<Plus size={20} aria-hidden="true" />}
+          startContent={<AddIcon size={20} aria-hidden="true" />}
         >
           Create a room
         </Button>

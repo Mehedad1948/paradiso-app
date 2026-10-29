@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@heroui/button";
-import { Bookmark, ChevronRight, Heart, KeyRound, LogOut, Settings2, Shield, UserRound, type LucideIcon } from "lucide-react";
+import { AltArrowRightIcon, BookmarkIcon, HeartIcon, KeyMinimalisticIcon, Logout2Icon, SettingsIcon, ShieldIcon, UserRoundedIcon } from "@solar-icons/react/linear";
+import type { Icon as SolarIcon } from "@solar-icons/react/lib/types";
 import { useAuthForm } from "@/hooks/auth/useAuthForm";
 import { authApi } from "@/lib/api/auth";
 import { panelApi } from "@/lib/api/panel";
@@ -109,7 +110,7 @@ function MenuRow({
   onNavigate,
 }: {
   href: string;
-  icon: LucideIcon;
+  icon: SolarIcon;
   title: string;
   hint: string;
   badge?: number;
@@ -139,7 +140,7 @@ function MenuRow({
             {badge > 99 ? "99+" : badge}
           </span>
         )}
-        <ChevronRight
+        <AltArrowRightIcon
           size={18}
           aria-hidden="true"
           className="shrink-0 text-muted transition-transform duration-300 group-hover:translate-x-1 group-hover:text-ink"
@@ -192,7 +193,7 @@ export default function ProfileSidebar({
             variant="flat"
             color="danger"
             className="mr-auto bg-danger-500/10 font-semibold text-danger-500 hover:bg-danger-500/20"
-            startContent={!signOut.isPending && <LogOut size={16} aria-hidden="true" />}
+            startContent={!signOut.isPending && <Logout2Icon size={16} aria-hidden="true" />}
             isLoading={signOut.isPending}
             isDisabled={signOut.isPending}
             onPress={() => {
@@ -264,7 +265,7 @@ export default function ProfileSidebar({
           <Stat href={profile} value={favoritesCount} label="Favorites" onNavigate={sidebar.close} />
         </ul>
         <GlassLink href={settingsHref()} onNavigate={sidebar.close}>
-          <Settings2 size={17} aria-hidden="true" />
+          <SettingsIcon size={17} aria-hidden="true" />
           Edit profile
         </GlassLink>
       </div>
@@ -273,7 +274,7 @@ export default function ProfileSidebar({
         <ul className="-mx-3 flex flex-col gap-0.5">
           <MenuRow
             href={favoritesCount ? profile : `${profile}?edit=favorites`}
-            icon={Heart}
+            icon={HeartIcon}
             title="Favorite films"
             hint={
               favoritesCount
@@ -285,7 +286,7 @@ export default function ProfileSidebar({
           />
           <MenuRow
             href="/watchlist"
-            icon={Bookmark}
+            icon={BookmarkIcon}
             title="Watchlist"
             hint={
               watchlistCount
@@ -297,21 +298,21 @@ export default function ProfileSidebar({
           />
           <MenuRow
             href={settingsHref("privacy")}
-            icon={Shield}
+            icon={ShieldIcon}
             title="Privacy"
             hint={`Room invites: ${policy.label.toLowerCase()}`}
             onNavigate={sidebar.close}
           />
           <MenuRow
             href={settingsHref("security")}
-            icon={KeyRound}
+            icon={KeyMinimalisticIcon}
             title="Password & security"
             hint="Change your password"
             onNavigate={sidebar.close}
           />
           <MenuRow
             href={profile}
-            icon={UserRound}
+            icon={UserRoundedIcon}
             title="Public profile"
             hint="See what others see"
             onNavigate={sidebar.close}

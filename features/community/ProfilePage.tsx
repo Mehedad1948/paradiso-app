@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import clsx from "clsx";
 import { Button } from "@heroui/button";
-import { ArrowLeft, Film, Heart, PenLine, Rows3, Star, type LucideIcon } from "lucide-react";
+import { ArrowLeftIcon, HeartIcon, Pen2Icon, ReelIcon, Rows3Icon, StarIcon } from "@solar-icons/react/linear";
+import type { Icon as SolarIcon } from "@solar-icons/react/lib/types";
 import QueryError from "@/components/ui/QueryError";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { BffError } from "@/lib/api/client";
@@ -52,10 +53,10 @@ function useProfileOverlays() {
   };
 }
 
-const tabs: { key: Tab; label: string; icon: LucideIcon }[] = [
-  { key: "favorites", label: "Favorites", icon: Heart },
-  { key: "recommends", label: "Recommends", icon: Star },
-  { key: "posts", label: "Posts", icon: Rows3 },
+const tabs: { key: Tab; label: string; icon: SolarIcon }[] = [
+  { key: "favorites", label: "Favorites", icon: HeartIcon },
+  { key: "recommends", label: "Recommends", icon: StarIcon },
+  { key: "posts", label: "Posts", icon: Rows3Icon },
 ];
 
 export default function ProfileRoute() {
@@ -131,7 +132,7 @@ function ProfilePage({ userId }: { userId: number }) {
   return (
     <div className="mx-auto max-w-[860px]">
       <Link href="/community" className="mb-6 inline-flex items-center gap-2 text-[15px] text-muted hover:text-accent">
-        <ArrowLeft size={18} aria-hidden="true" /> Community
+        <ArrowLeftIcon size={18} aria-hidden="true" /> Community
       </Link>
 
       {missing ? (
@@ -167,7 +168,7 @@ function ProfilePage({ userId }: { userId: number }) {
               {self ? (
                 <Button
                   className="min-h-[46px] rounded-md bg-ink text-[15px] font-semibold text-canvas"
-                  startContent={<PenLine size={18} aria-hidden="true" />}
+                  startContent={<Pen2Icon size={18} aria-hidden="true" />}
                   onPress={() => setComposing(true)}
                 >
                   New post
@@ -196,7 +197,7 @@ function ProfilePage({ userId }: { userId: number }) {
                 empty={
                   <div className="mx-auto flex max-w-[340px] flex-col items-center gap-3">
                     <span className="flex h-14 w-14 items-center justify-center rounded-full bg-surface text-accent">
-                      <Film size={24} aria-hidden="true" />
+                      <ReelIcon size={24} aria-hidden="true" />
                     </span>
                     <p className="text-lg font-semibold">{self ? "Your diary is empty" : "No posts yet"}</p>
                     <p className="text-[15px] text-muted">

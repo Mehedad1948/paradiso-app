@@ -6,7 +6,7 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { addToast } from "@heroui/toast";
-import { Crown, Gavel, MoreVertical, Search, UserMinus, UserPlus, Users } from "lucide-react";
+import { CrownIcon, MagnifierIcon, MenuDotsVerticalIcon, SledgehammerIcon, UserMinusIcon, UserPlusIcon, UsersGroupRoundedIcon } from "@solar-icons/react/linear";
 import Sidebar, { useSidebar } from "@/components/ui/Sidebar";
 import { layerColors } from "@/components/ui/StaggeredDrawer";
 import HoldButton from "@/components/ui/HoldButton";
@@ -105,7 +105,7 @@ export default function RoomMembersSidebar({
         <Button
           fullWidth
           className="min-h-[44px] bg-ink font-semibold text-canvas"
-          startContent={<UserPlus size={17} aria-hidden="true" />}
+          startContent={<UserPlusIcon size={17} aria-hidden="true" />}
           onPress={onInvite}
         >
           Invite people
@@ -121,13 +121,13 @@ export default function RoomMembersSidebar({
           onValueChange={setQuery}
           isClearable
           onClear={() => setQuery("")}
-          startContent={<Search size={17} aria-hidden="true" className="text-muted" />}
+          startContent={<MagnifierIcon size={17} aria-hidden="true" className="text-muted" />}
           classNames={{ inputWrapper: "border border-line bg-surface shadow-none" }}
         />
 
         {visible.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-12 text-center text-muted">
-            <Users size={28} aria-hidden="true" />
+            <UsersGroupRoundedIcon size={28} aria-hidden="true" />
             <p className="text-[15px]">
               {query.trim() ? `No one matches “${query.trim()}”` : "No members yet"}
             </p>
@@ -179,7 +179,7 @@ export default function RoomMembersSidebar({
                         </span>
                       </Link>
                       {isOwner && (
-                        <Crown
+                        <CrownIcon
                           size={16}
                           aria-label="Room owner"
                           className="shrink-0 text-amber-400"
@@ -202,7 +202,7 @@ export default function RoomMembersSidebar({
                               aria-label={`Manage ${member.username}`}
                               className="shrink-0 text-muted"
                             >
-                              <MoreVertical size={18} aria-hidden="true" />
+                              <MenuDotsVerticalIcon size={18} aria-hidden="true" />
                             </Button>
                           </DropdownTrigger>
                           <DropdownMenu
@@ -217,7 +217,7 @@ export default function RoomMembersSidebar({
                           >
                             <DropdownItem
                               key="remove"
-                              startContent={<UserMinus size={17} aria-hidden="true" />}
+                              startContent={<UserMinusIcon size={17} aria-hidden="true" />}
                               description="They can be invited back"
                             >
                               Remove from room
@@ -226,7 +226,7 @@ export default function RoomMembersSidebar({
                               key="ban"
                               color="danger"
                               className="text-danger"
-                              startContent={<Gavel size={17} aria-hidden="true" />}
+                              startContent={<SledgehammerIcon size={17} aria-hidden="true" />}
                               description="Blocks them from rejoining"
                             >
                               Ban from room
@@ -288,9 +288,9 @@ export default function RoomMembersSidebar({
                                 fillTextColor="#ffffff"
                                 icon={
                                   asking.kind === "remove" ? (
-                                    <UserMinus size={15} aria-hidden="true" />
+                                    <UserMinusIcon size={15} aria-hidden="true" />
                                   ) : (
-                                    <Gavel size={15} aria-hidden="true" />
+                                    <SledgehammerIcon size={15} aria-hidden="true" />
                                   )
                                 }
                                 doneLabel={asking.kind === "remove" ? "Removing…" : "Banning…"}

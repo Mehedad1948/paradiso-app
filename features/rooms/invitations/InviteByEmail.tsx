@@ -6,7 +6,7 @@ import { Input } from "@heroui/input";
 import { addToast } from "@heroui/toast";
 import { Chip } from "@heroui/chip";
 import { Spinner } from "@heroui/spinner";
-import { Mail, Send, X } from "lucide-react";
+import { CloseIcon, LetterIcon, SendSquareIcon } from "@solar-icons/react/linear";
 import UserAvatar from "@/components/ui/UserAvatar";
 import QueryError from "@/components/ui/QueryError";
 import { ago, fullDate } from "@/features/community/format";
@@ -58,7 +58,7 @@ function Row({ invitation, meId }: { invitation: Invitation; meId?: number }) {
           title="Cancel invitation"
           className="flex size-8 shrink-0 items-center justify-center rounded-full text-muted outline-none transition-colors hover:bg-danger/10 hover:text-danger focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
         >
-          {cancel.isPending ? <Spinner size="sm" color="current" classNames={{ wrapper: "size-3.5" }} /> : <X size={15} aria-hidden="true" />}
+          {cancel.isPending ? <Spinner size="sm" color="current" classNames={{ wrapper: "size-3.5" }} /> : <CloseIcon size={15} aria-hidden="true" />}
         </button>
       )}
     </div>
@@ -110,7 +110,7 @@ export default function InviteByEmail({
           isRequired
           placeholder="friend@example.com"
           aria-label="Email address"
-          startContent={<Mail size={17} aria-hidden="true" className="text-muted" />}
+          startContent={<LetterIcon size={17} aria-hidden="true" className="text-muted" />}
           classNames={{ inputWrapper: "h-11 border border-line bg-surface shadow-none" }}
         />
         <Button
@@ -118,7 +118,7 @@ export default function InviteByEmail({
           isLoading={isPending}
           isDisabled={!email.trim()}
           className="h-11 shrink-0 bg-ink px-5 font-semibold text-canvas"
-          startContent={!isPending && <Send size={16} aria-hidden="true" />}
+          startContent={!isPending && <SendSquareIcon size={16} aria-hidden="true" />}
         >
           Invite
         </Button>

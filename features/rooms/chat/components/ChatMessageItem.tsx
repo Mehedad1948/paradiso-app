@@ -3,16 +3,7 @@ import { memo, useState } from "react";
 import clsx from "clsx";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { addToast } from "@heroui/toast";
-import {
-  Ban,
-  Copy,
-  Lock,
-  Pencil,
-  Pin,
-  PinOff,
-  Reply,
-  Trash2,
-} from "lucide-react";
+import { CopyIcon, ForbiddenCircleIcon, LockIcon, PenIcon, PinCircleIcon, PinIcon, ReplyIcon, TrashBinMinimalisticIcon } from "@solar-icons/react/linear";
 import { isPollClosed } from "@/lib/chat/timeline";
 import type { ChatMessage } from "@/types/chat";
 import { memberName, useChat } from "../ChatContext";
@@ -49,13 +40,13 @@ export default memo(function ChatMessageItem({
   const menu: MenuItem[] = deleted
     ? []
     : [
-        { key: "reply", label: "Reply", icon: <Reply size={16} />, run: () => chat.reply(message) },
+        { key: "reply", label: "Reply", icon: <ReplyIcon size={16} />, run: () => chat.reply(message) },
         ...(message.text
           ? [
               {
                 key: "copy",
                 label: "Copy text",
-                icon: <Copy size={16} />,
+                icon: <CopyIcon size={16} />,
                 run: () =>
                   navigator.clipboard
                     .writeText(message.text!)
@@ -65,20 +56,20 @@ export default memo(function ChatMessageItem({
             ]
           : []),
         ...(mine && !poll
-          ? [{ key: "edit", label: "Edit", icon: <Pencil size={16} />, run: () => chat.edit(message) }]
+          ? [{ key: "edit", label: "Edit", icon: <PenIcon size={16} />, run: () => chat.edit(message) }]
           : []),
         ...(canModerate
           ? [
               message.pinnedAt
-                ? { key: "unpin", label: "Unpin", icon: <PinOff size={16} />, run: () => actions.pin(message.id, false) }
-                : { key: "pin", label: "Pin to the marquee", icon: <Pin size={16} />, run: () => actions.pin(message.id, true) },
+                ? { key: "unpin", label: "Unpin", icon: <PinCircleIcon size={16} />, run: () => actions.pin(message.id, false) }
+                : { key: "pin", label: "Pin to the marquee", icon: <PinIcon size={16} />, run: () => actions.pin(message.id, true) },
             ]
           : []),
         ...(poll && canModerate && !isPollClosed(poll)
-          ? [{ key: "close", label: "Close poll", icon: <Lock size={16} />, run: () => actions.closePoll(message.id) }]
+          ? [{ key: "close", label: "Close poll", icon: <LockIcon size={16} />, run: () => actions.closePoll(message.id) }]
           : []),
         ...(canModerate
-          ? [{ key: "delete", label: "Delete", icon: <Trash2 size={16} />, danger: true, run: () => chat.requestDelete(message) }]
+          ? [{ key: "delete", label: "Delete", icon: <TrashBinMinimalisticIcon size={16} />, danger: true, run: () => chat.requestDelete(message) }]
           : []),
       ];
 
@@ -149,7 +140,7 @@ export default memo(function ChatMessageItem({
           >
             {deleted ? (
               <span className="inline-flex items-center gap-1.5 italic">
-                <Ban size={14} aria-hidden="true" /> Message deleted
+                <ForbiddenCircleIcon size={14} aria-hidden="true" /> Message deleted
               </span>
             ) : (
               <>
@@ -174,7 +165,7 @@ export default memo(function ChatMessageItem({
           <div className={clsx("mt-1 flex items-center gap-2 text-xs text-muted", mine && "flex-row-reverse")}>
             {message.pinnedAt && (
               <span className="inline-flex items-center gap-1 font-semibold text-accent">
-                <Pin size={12} aria-hidden="true" /> Pinned by {message.pinnedById === me.id ? "you" : memberName(members, message.pinnedById)}
+                <PinIcon size={12} aria-hidden="true" /> Pinned by {message.pinnedById === me.id ? "you" : memberName(members, message.pinnedById)}
               </span>
             )}
             {message.editedAt && (

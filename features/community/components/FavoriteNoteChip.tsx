@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { format } from "date-fns";
 import { Button } from "@heroui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/popover";
-import { MessageSquareQuote, Pencil, Plus } from "lucide-react";
+import { AddIcon, ChatSquareQuoteIcon, PenIcon } from "@solar-icons/react/linear";
 import { normalizeNote } from "@/hooks/queries/useFavoriteQueries";
 import type { FavoriteMovie } from "@/types/community";
 import { NoteCounter, NoteInput, NoteQuote } from "./FavoriteNote";
@@ -70,7 +70,7 @@ export default function FavoriteNoteChip({
             !note && !open && "opacity-0 focus-visible:opacity-100 group-hover/tile:opacity-100 max-sm:hidden",
           )}
         >
-          {note ? <MessageSquareQuote size={15} aria-hidden="true" /> : <Plus size={16} aria-hidden="true" />}
+          {note ? <ChatSquareQuoteIcon size={15} aria-hidden="true" /> : <AddIcon size={16} aria-hidden="true" />}
         </button>
       </PopoverTrigger>
       <PopoverContent aria-label={`Note on ${movie.title}`}>
@@ -134,7 +134,7 @@ export default function FavoriteNoteChip({
                       onClick={start}
                       className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold text-muted transition-colors hover:bg-surface hover:text-ink"
                     >
-                      <Pencil size={13} aria-hidden="true" /> Edit
+                      <PenIcon size={13} aria-hidden="true" /> Edit
                     </button>
                   )}
                 </div>

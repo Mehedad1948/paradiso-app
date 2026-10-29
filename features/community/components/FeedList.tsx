@@ -2,7 +2,7 @@
 import { useMemo, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Spinner } from "@heroui/spinner";
-import { ArrowUp, Asterisk } from "lucide-react";
+import { ArrowUpIcon, StarShineIcon } from "@solar-icons/react/linear";
 import clsx from "clsx";
 import FadeContent from "@/components/ui/FadeContent";
 import QueryError from "@/components/ui/QueryError";
@@ -68,7 +68,7 @@ export default function FeedList({
             onClick={showFresh}
             className="pointer-events-auto -mt-3 inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-on-accent shadow-[0_10px_30px_rgb(0_0_0_/_18%)] transition-transform hover:-translate-y-0.5 motion-safe:animate-community-rise"
           >
-            <ArrowUp size={16} aria-hidden="true" />
+            <ArrowUpIcon size={16} aria-hidden="true" />
             {fresh.data >= 10 ? "10+" : fresh.data} new {fresh.data === 1 ? "recommendation" : "recommendations"}
           </button>
         </div>
@@ -93,7 +93,7 @@ export default function FeedList({
           </button>
         ) : (
           <span className="inline-flex items-center gap-2">
-            <Asterisk size={15} className="text-accent" aria-hidden="true" />
+            <StarShineIcon size={15} className="text-accent" aria-hidden="true" />
             You&apos;re all caught up.
           </span>
         )}

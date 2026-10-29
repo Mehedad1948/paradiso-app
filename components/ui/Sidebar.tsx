@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useRef, type ReactNode, type RefObject } from "react";
 import { DrawerBody, DrawerFooter, DrawerHeader } from "@heroui/drawer";
-import { X } from "lucide-react";
+import { CloseIcon } from "@solar-icons/react/linear";
 import StaggeredDrawer, { type StaggeredDrawerHandle } from "./StaggeredDrawer";
 
 /** Closes a sidebar through its exit animation; falls back to `onClose` if it isn't mounted. */
@@ -62,7 +62,7 @@ export default function Sidebar({
             onClick={close}
             className="absolute right-5 top-5 rounded-full p-1.5 text-muted transition-colors hover:bg-surface hover:text-ink"
           >
-            <X size={18} aria-hidden="true" />
+            <CloseIcon size={18} aria-hidden="true" />
           </button>
         )}
       </DrawerHeader>

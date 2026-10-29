@@ -2,7 +2,7 @@
 import { memo, type ReactNode } from "react";
 import Link from "next/link";
 import clsx from "clsx";
-import { Check, X } from "lucide-react";
+import { CheckIcon, CloseIcon } from "@solar-icons/react/linear";
 import { Spinner } from "@heroui/spinner";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { ago, fullDate } from "@/features/community/format";
@@ -81,7 +81,7 @@ function NotificationItem({ item, acting, onOpen, onRemove, onAction }: Props) {
               {acting === actions.primary.action ? (
                 <Spinner size="sm" color="current" classNames={{ wrapper: "size-3.5" }} />
               ) : (
-                <Check size={14} aria-hidden="true" />
+                <CheckIcon size={14} aria-hidden="true" />
               )}
               {actions.primary.label}
             </button>
@@ -132,7 +132,7 @@ function NotificationItem({ item, acting, onOpen, onRemove, onAction }: Props) {
           title="Dismiss"
           className="absolute right-2 top-2.5 rounded-full p-1.5 text-muted outline-none transition-[opacity,color,background-color] hover:bg-surface hover:text-ink focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-accent [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100"
         >
-          <X size={15} aria-hidden="true" />
+          <CloseIcon size={15} aria-hidden="true" />
         </button>
       )}
     </div>

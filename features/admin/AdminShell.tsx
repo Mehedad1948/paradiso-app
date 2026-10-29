@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type MouseEvent, type ReactNode } from "react";
 import { Input } from "@heroui/input";
 import { Modal, ModalContent } from "@heroui/modal";
-import { Command, Home, LayoutGrid } from "lucide-react";
+import { CommandIcon, Home2Icon, WidgetIcon } from "@solar-icons/react/linear";
 import { ADMIN_TOOLS } from "./nav";
 import { hasUnsavedChanges } from "./shared";
 
@@ -50,7 +50,7 @@ export default function AdminShell({ username, children }: { username: string; c
             onClick={() => setPaletteOpen(true)}
             className="flex items-center gap-2 rounded-lg border border-line px-3 py-2 text-sm text-muted hover:bg-surface md:mt-5 md:w-full"
           >
-            <Command size={14} aria-hidden />
+            <CommandIcon size={14} aria-hidden />
             <span className="md:flex-1 md:text-left">Jump to…</span>
             <kbd className="hidden rounded bg-surface px-1.5 py-0.5 text-xs md:inline">Ctrl K</kbd>
           </button>
@@ -75,7 +75,7 @@ export default function AdminShell({ username, children }: { username: string; c
           onClick={guard}
           className="hidden items-center gap-2 px-7 py-3 text-sm text-muted hover:text-ink md:absolute md:bottom-4 md:flex"
         >
-          <Home size={15} aria-hidden /> Back to the site
+          <Home2Icon size={15} aria-hidden /> Back to the site
         </Link>
       </aside>
       <main className="min-w-0 px-4 py-6 md:px-8">
@@ -127,7 +127,7 @@ function Palette({ isOpen, onClose, onGo }: { isOpen: boolean; onClose: () => vo
                 setTerm(value);
                 setActive(0);
               }}
-              startContent={<LayoutGrid size={18} className="text-muted" aria-hidden />}
+              startContent={<WidgetIcon size={18} className="text-muted" aria-hidden />}
               onKeyDown={(event) => {
                 if (event.key === "ArrowDown") {
                   event.preventDefault();

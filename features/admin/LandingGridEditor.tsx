@@ -4,7 +4,7 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
 import { addToast } from "@heroui/toast";
-import { Plus, Trash2 } from "lucide-react";
+import { AddIcon, TrashBinMinimalisticIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import { useAdminLandingGrid, useSaveLandingGrid } from "@/hooks/queries/useCurationQueries";
 import { GRID_SLOTS, gridCells } from "@/lib/curations/grid";
@@ -192,7 +192,7 @@ function Editor({ grid }: { grid: AdminLandingGrid }) {
                   {item ? (
                     <Thumb src={src} alt="" className="h-full w-full" position={item.objectPosition} />
                   ) : (
-                    <Plus size={18} className="mx-auto text-muted" aria-hidden />
+                    <AddIcon size={18} className="mx-auto text-muted" aria-hidden />
                   )}
                   <span className="absolute left-1 top-1 rounded bg-black/65 px-1 text-xs font-medium text-white">
                     {index + 1}
@@ -237,7 +237,7 @@ function Editor({ grid }: { grid: AdminLandingGrid }) {
                     aria-label="Empty this frame"
                     onPress={() => update(slot, undefined)}
                   >
-                    <Trash2 size={15} />
+                    <TrashBinMinimalisticIcon size={15} />
                   </Button>
                 </div>
                 <Input

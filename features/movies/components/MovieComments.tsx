@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Tooltip } from "@heroui/tooltip";
 import { Spinner } from "@heroui/spinner";
-import { ArrowRight, EyeOff, Pencil, ShieldX, Sparkles, Trash2 } from "lucide-react";
+import { ArrowRightIcon, EyeClosedIcon, PenIcon, ShieldCrossIcon, StarsMinimalisticIcon, TrashBinMinimalisticIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { useMe } from "@/hooks/queries/useMe";
@@ -65,7 +65,7 @@ function SpoilerToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) 
           : "border-line text-muted hover:bg-surface hover:text-ink",
       )}
     >
-      <EyeOff size={14} aria-hidden="true" />
+      <EyeClosedIcon size={14} aria-hidden="true" />
       {on ? "Marked as spoiler" : "Spoiler"}
     </button>
   );
@@ -224,7 +224,7 @@ function CommentText({ comment, mine }: { comment: MovieComment; mine: boolean }
           className="group/reveal absolute inset-0 flex items-center justify-center rounded-xl"
         >
           <span className="inline-flex items-center gap-2 rounded-full border border-warning/30 bg-elevated/85 px-3.5 py-1.5 text-[13px] font-semibold text-ink shadow-lg backdrop-blur-md transition-transform group-hover/reveal:scale-[1.04]">
-            <EyeOff size={14} className="text-warning" aria-hidden="true" />
+            <EyeClosedIcon size={14} className="text-warning" aria-hidden="true" />
             Spoiler · tap to reveal
           </span>
         </button>
@@ -301,7 +301,7 @@ function CommentItem({
             <span className="ml-auto flex shrink-0 items-center gap-0.5 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-focus-within/comment:opacity-100 [@media(hover:hover)]:group-hover/comment:opacity-100">
               {mine && (
                 <button type="button" aria-label="Edit comment" title="Edit" onClick={() => setEditing(true)} className={clsx(iconButton, "hover:bg-surface hover:text-ink")}>
-                  <Pencil size={15} aria-hidden="true" />
+                  <PenIcon size={15} aria-hidden="true" />
                 </button>
               )}
               {canDelete && (
@@ -312,7 +312,7 @@ function CommentItem({
                   onClick={() => setConfirming(true)}
                   className={clsx(iconButton, "hover:bg-danger/10 hover:text-danger")}
                 >
-                  {mine ? <Trash2 size={15} aria-hidden="true" /> : <ShieldX size={15} aria-hidden="true" />}
+                  {mine ? <TrashBinMinimalisticIcon size={15} aria-hidden="true" /> : <ShieldCrossIcon size={15} aria-hidden="true" />}
                 </button>
               )}
             </span>
@@ -417,7 +417,7 @@ export default function MovieComments({ movieId, title }: { movieId: string; tit
                 aria-hidden="true"
                 className="grid size-10 shrink-0 place-items-center rounded-full border border-accent/30 bg-accent/10 text-accent"
               >
-                <Sparkles size={18} />
+                <StarsMinimalisticIcon size={18} />
               </span>
               <p className="text-[15px] leading-snug">
                 <span className="block font-semibold tracking-[-0.01em]">Seen it?</span>
@@ -429,7 +429,7 @@ export default function MovieComments({ movieId, title }: { movieId: string; tit
               className="group !min-h-[46px] !rounded-full border border-ink/80 !px-6 tracking-[0.01em] transition-colors duration-200 hover:!opacity-100 hover:border-accent hover:bg-accent hover:text-canvas max-sm:w-full"
             >
               Sign in
-              <ArrowRight size={16} aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-0.5" />
+              <ArrowRightIcon size={16} aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-0.5" />
             </SignInLink>
           </div>
         </div>

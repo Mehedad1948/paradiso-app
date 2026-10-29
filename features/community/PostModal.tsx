@@ -1,7 +1,7 @@
 "use client";
 import { useParams, usePathname } from "next/navigation";
 import { Modal, ModalContent, ModalHeader } from "@heroui/modal";
-import { ArrowLeft, Maximize2, X } from "lucide-react";
+import { ArrowLeftIcon, CloseIcon, MaximizeIcon } from "@solar-icons/react/linear";
 import { PostDetail } from "./PostPage";
 import { usePostOverlay } from "./hooks/usePostOverlay";
 
@@ -41,8 +41,8 @@ function PostOverlay({ postId, onClose: close }: { postId: number; onClose: () =
             aria-label="Close"
             className="flex h-10 w-10 items-center justify-center rounded-full text-ink transition-colors hover:bg-surface"
           >
-            <ArrowLeft size={20} className="sm:hidden" aria-hidden="true" />
-            <X size={20} className="max-sm:hidden" aria-hidden="true" />
+            <ArrowLeftIcon size={20} className="sm:hidden" aria-hidden="true" />
+            <CloseIcon size={20} className="max-sm:hidden" aria-hidden="true" />
           </button>
           <span className="flex-1">Recommendation</span>
           <button
@@ -53,7 +53,7 @@ function PostOverlay({ postId, onClose: close }: { postId: number; onClose: () =
             title="Open as a page"
             className="flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface hover:text-ink max-sm:hidden"
           >
-            <Maximize2 size={17} aria-hidden="true" />
+            <MaximizeIcon size={17} aria-hidden="true" />
           </button>
         </ModalHeader>
         <PostDetail postId={postId} framed={false} onDeleted={close} />

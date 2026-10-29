@@ -2,7 +2,7 @@
 import { useMemo } from "react";
 import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
-import { Heart, Pencil, Plus, Star } from "lucide-react";
+import { AddIcon, HeartIcon, PenIcon, StarIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import { useFavorites, useSetFavoriteNote } from "@/hooks/queries/useFavoriteQueries";
 import { useRecommendations } from "@/hooks/queries/useCommunityQueries";
@@ -35,7 +35,7 @@ export function FavoritesGrid({
   if (!list.length)
     return (
       <GridEmpty
-        icon={<Heart size={26} strokeWidth={1.5} aria-hidden="true" />}
+        icon={<HeartIcon size={26} strokeWidth={1.5} aria-hidden="true" />}
         title={self ? "Build your shelf" : "No favorites yet"}
         body={
           self
@@ -46,7 +46,7 @@ export function FavoritesGrid({
           self && (
             <Button
               onPress={onEdit}
-              startContent={<Plus size={18} aria-hidden="true" />}
+              startContent={<AddIcon size={18} aria-hidden="true" />}
               className="mt-2 rounded-md bg-ink font-semibold text-canvas"
             >
               Add favorites
@@ -69,7 +69,7 @@ export function FavoritesGrid({
             onClick={onEdit}
             className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-semibold text-muted transition-colors hover:bg-surface hover:text-ink"
           >
-            <Pencil size={15} aria-hidden="true" /> Edit
+            <PenIcon size={15} aria-hidden="true" /> Edit
           </button>
         )}
       </div>
@@ -106,7 +106,7 @@ export function FavoritesGrid({
               className="group flex aspect-[2/3] w-full flex-col items-center justify-center gap-2 rounded-md border border-dashed border-line text-muted transition-colors hover:border-accent hover:bg-accent/5 hover:text-accent sm:rounded-lg"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-full border border-current transition-transform duration-300 group-hover:scale-110">
-                <Plus size={20} aria-hidden="true" />
+                <AddIcon size={20} aria-hidden="true" />
               </span>
               <span className="text-sm font-semibold max-sm:text-xs">Add a film</span>
             </button>
@@ -136,7 +136,7 @@ export function RecommendsGrid({ userId, name, self }: { userId: number; name?: 
   if (!list.length)
     return (
       <GridEmpty
-        icon={<Star size={26} strokeWidth={1.5} aria-hidden="true" />}
+        icon={<StarIcon size={26} strokeWidth={1.5} aria-hidden="true" />}
         title={self ? "Nothing recommended yet" : "No recommendations yet"}
         body={
           self
@@ -161,7 +161,7 @@ export function RecommendsGrid({ userId, name, self }: { userId: number; name?: 
               <span
                 className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums shadow-[0_4px_14px_rgb(0_0_0_/_30%)] sm:text-[13px] ${tone(item.rating).badge}`}
               >
-                <Star size={12} className="fill-current" aria-hidden="true" />
+                <StarIcon size={12} className="fill-current" aria-hidden="true" />
                 <span className="sr-only">Rated </span>
                 {formatRating(item.rating)}
               </span>

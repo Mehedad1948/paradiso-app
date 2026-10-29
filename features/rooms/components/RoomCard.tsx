@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import JoinRoomButton from "./JoinRoomButton";
 import { posters } from "@/config/posters";
-import { ArrowUpRight, MessagesSquare } from "lucide-react";
+import { ArrowRightUpIcon, ChatSquare2Icon } from "@solar-icons/react/linear";
 import { useChatUnread } from "@/hooks/queries/useChatQueries";
 import BorderGlow from "./BorderGlow";
 import UnreadBadge from "../chat/components/UnreadBadge";
@@ -37,7 +37,7 @@ export default function RoomCard({
     >
       {hasUnread && (
         <span className="absolute left-3 top-3 z-10 inline-flex items-center gap-2 rounded-full bg-media/85 py-1 pl-2.5 pr-1 text-sm font-semibold text-media-foreground backdrop-blur">
-          <MessagesSquare size={15} aria-hidden="true" />
+          <ChatSquare2Icon size={15} aria-hidden="true" />
           <span className="sr-only">Lobby:</span>
           <UnreadBadge unread={unread.data!} />
         </span>
@@ -76,7 +76,7 @@ export default function RoomCard({
             className="inline-flex min-h-[46px] shrink-0 items-center gap-2 rounded-md border border-line bg-surface px-4 text-[15px] font-semibold text-ink transition-opacity group-hover:opacity-80"
           >
             Enter
-            <ArrowUpRight size={17} />
+            <ArrowRightUpIcon size={17} />
           </span>
         ) : (
           <div className="relative z-10 shrink-0">

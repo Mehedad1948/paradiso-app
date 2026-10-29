@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@heroui/button";
 import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Tab, Tabs } from "@heroui/tabs";
-import { Ban, ChevronLeft, ChevronRight, Shuffle } from "lucide-react";
+import { AltArrowLeftIcon, AltArrowRightIcon, ForbiddenCircleIcon, ShuffleIcon } from "@solar-icons/react/linear";
 import {
   BACKGROUNDS,
   DEFAULT_CONFIG,
@@ -122,7 +122,7 @@ export default function AvatarBuilder({
                 size="sm"
                 variant="bordered"
                 className="border-line"
-                startContent={<Shuffle size={15} aria-hidden="true" />}
+                startContent={<ShuffleIcon size={15} aria-hidden="true" />}
                 onPress={() => setConfig(randomConfig())}
                 isDisabled={saving}
               >
@@ -182,7 +182,7 @@ export default function AvatarBuilder({
                         : "right-0 bg-gradient-to-l from-elevated from-60% to-transparent"
                     }`}
                   >
-                    {side === "start" ? <ChevronLeft size={18} aria-hidden="true" /> : <ChevronRight size={18} aria-hidden="true" />}
+                    {side === "start" ? <AltArrowLeftIcon size={18} aria-hidden="true" /> : <AltArrowRightIcon size={18} aria-hidden="true" />}
                   </button>
                 ) : null,
               )}
@@ -198,7 +198,7 @@ export default function AvatarBuilder({
                     onClick={() => set(part, null)}
                     className={`${tile(config[part] === null)} grid w-full place-items-center text-muted`}
                   >
-                    <Ban size={22} aria-hidden="true" />
+                    <ForbiddenCircleIcon size={22} aria-hidden="true" />
                   </button>
                 </li>
               )}

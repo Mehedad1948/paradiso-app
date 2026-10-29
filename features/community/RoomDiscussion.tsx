@@ -5,7 +5,7 @@ import { useViewer } from "./hooks/useViewer";
 import FeedList from "./components/FeedList";
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import { Plus } from "lucide-react";
+import { AddIcon } from "@solar-icons/react/linear";
 
 const PostComposer = dynamic(() => import("./components/PostComposer"), { ssr: false });
 
@@ -37,7 +37,7 @@ export default function RoomDiscussion({
               onClick={() => setComposing(true)}
               className="inline-flex min-h-[42px] items-center gap-2 rounded-full bg-accent px-5 text-[15px] font-semibold text-on-accent transition-opacity hover:opacity-90"
             >
-              <Plus size={18} aria-hidden="true" />
+              <AddIcon size={18} aria-hidden="true" />
               New post
             </button>
           </div>

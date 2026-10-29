@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useDebounce } from "use-debounce";
 import { Input } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
-import { ArrowUpRight, SearchIcon, Sparkles } from "lucide-react";
+import { ArrowRightUpIcon, MagnifierIcon, StarsMinimalisticIcon } from "@solar-icons/react/linear";
 import UserAvatar from "@/components/ui/UserAvatar";
 import {
   useSuggestedPeople,
@@ -40,7 +40,7 @@ export default function SuggestedPeople({ viewer }: { viewer: Viewer }) {
             className="flex items-center gap-2 text-[17px] font-semibold tracking-tight"
           >
             Expand your circle
-            <Sparkles size={15} className="text-accent" aria-hidden="true" />
+            <StarsMinimalisticIcon size={15} className="text-accent" aria-hidden="true" />
           </h2>
           <p className="mt-0.5 text-sm text-muted">
             Fresh voices worth a follow.
@@ -60,7 +60,7 @@ export default function SuggestedPeople({ viewer }: { viewer: Viewer }) {
           spellCheck="false"
           maxLength={50}
           startContent={
-            <SearchIcon size={16} className="shrink-0 text-default-400" aria-hidden="true" />
+            <MagnifierIcon size={16} className="shrink-0 text-default-400" aria-hidden="true" />
           }
           classNames={{
             base: "mb-4",
@@ -278,7 +278,7 @@ function MeRow({ viewer }: { viewer: Viewer }) {
           {`${plural(followersCount, "follower")} · ${followingCount.toLocaleString()} following`}
         </p>
       </div>
-      <ArrowUpRight
+      <ArrowRightUpIcon
         size={16}
         aria-label="Your profile"
         className="shrink-0 text-muted transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-ink"

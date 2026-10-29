@@ -3,7 +3,7 @@ import { useState } from "react";
 import clsx from "clsx";
 import { Button } from "@heroui/button";
 import { addToast } from "@heroui/toast";
-import { Check, Plus, Ticket } from "lucide-react";
+import { AddIcon, CheckIcon, TicketIcon } from "@solar-icons/react/linear";
 import { useAddMovie } from "@/hooks/queries/useRoomQueries";
 import { BffError } from "@/lib/api/client";
 import type { ChatMovieCard } from "@/types/chat";
@@ -76,7 +76,7 @@ function MovieCard({ movie }: { movie: ChatMovieCard }) {
             onClick={() => showInWatchlist(movie.title)}
             className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-accent underline-offset-4 hover:underline"
           >
-            <Ticket size={15} aria-hidden="true" /> See it in the room
+            <TicketIcon size={15} aria-hidden="true" /> See it in the room
           </button>
         ) : movie.tmdbId ? (
           <Button
@@ -86,7 +86,7 @@ function MovieCard({ movie }: { movie: ChatMovieCard }) {
               added ? "bg-success/15 text-success" : "bg-ink text-canvas",
             )}
             startContent={
-              added ? <Check size={14} aria-hidden="true" /> : <Plus size={14} aria-hidden="true" />
+              added ? <CheckIcon size={14} aria-hidden="true" /> : <AddIcon size={14} aria-hidden="true" />
             }
             isLoading={isPending}
             isDisabled={added}

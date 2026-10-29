@@ -1,6 +1,6 @@
 "use client";
 import { Input, type InputProps } from "@heroui/input";
-import { Eye, EyeOff } from "lucide-react";
+import { EyeClosedIcon, EyeIcon } from "@solar-icons/react/linear";
 import { useState } from "react";
 
 export default function PasswordInput(props: Omit<InputProps, "type">) {
@@ -19,9 +19,9 @@ export default function PasswordInput(props: Omit<InputProps, "type">) {
           onClick={() => setVisible((v) => !v)}
         >
           {visible ? (
-            <EyeOff size={18} aria-hidden="true" />
+            <EyeClosedIcon size={18} aria-hidden="true" />
           ) : (
-            <Eye size={18} aria-hidden="true" />
+            <EyeIcon size={18} aria-hidden="true" />
           )}
         </button>
       }

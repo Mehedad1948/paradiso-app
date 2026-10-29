@@ -1,7 +1,7 @@
 "use client";
 import clsx from "clsx";
 import { Tooltip } from "@heroui/tooltip";
-import { SmilePlus } from "lucide-react";
+import { EmojiFunnyCircleIcon } from "@solar-icons/react/linear";
 import type { ChatMessage } from "@/types/chat";
 import { memberName, useChat } from "../ChatContext";
 import EmojiPicker from "./EmojiPicker";
@@ -58,7 +58,7 @@ export default function ChatReactions({
           aria-label="Add a reaction"
           className="inline-flex h-7 w-8 items-center justify-center rounded-full border border-dashed border-line text-muted transition-colors hover:border-muted hover:text-ink"
         >
-          <SmilePlus size={15} aria-hidden="true" />
+          <EmojiFunnyCircleIcon size={15} aria-hidden="true" />
         </button>
       </EmojiPicker>
     </div>

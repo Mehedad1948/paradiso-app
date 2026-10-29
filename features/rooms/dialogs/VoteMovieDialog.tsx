@@ -5,7 +5,7 @@ import { MovieWithRatings } from "@/types";
 import { Button } from "@heroui/button";
 import { Modal, ModalBody, ModalContent, ModalHeader } from "@heroui/modal";
 import { useState } from "react";
-import { Star } from "lucide-react";
+import { StarIcon } from "@solar-icons/react/linear";
 import ElasticSlider from "@/components/ui/ElasticSlider";
 import SlideToConfirm from "@/components/ui/SlideToConfirm";
 import MoviePoster from "../components/MoviePoster";
@@ -116,9 +116,9 @@ export default function VoteMovieDialog({
                           : `hsl(${ratingHue(rate)} 80% 55%)`
                       }
                       iconPlacement="inside"
-                      leftIcon={<Star size={16} aria-hidden="true" />}
+                      leftIcon={<StarIcon size={16} aria-hidden="true" />}
                       rightIcon={
-                        <Star size={16} className="fill-current" aria-hidden="true" />
+                        <StarIcon size={16} className="fill-current" aria-hidden="true" />
                       }
                       disabled={isAdding}
                       ariaLabel="Your rating"

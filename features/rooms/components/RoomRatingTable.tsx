@@ -13,15 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@heroui/table";
-import {
-  ArrowDownWideNarrow,
-  ArrowUpDown,
-  ArrowUpNarrowWide,
-  PencilLine,
-  Star,
-  Trash2,
-  UsersRound,
-} from "lucide-react";
+import { PenNewSquareIcon, SortFromBottomToTopIcon, SortFromTopToBottomIcon, SortVerticalIcon, StarIcon, TrashBinMinimalisticIcon, UsersGroupTwoRoundedIcon } from "@solar-icons/react/linear";
 import UserAvatar from "@/components/ui/UserAvatar";
 import MoviePoster from "./MoviePoster";
 import MovieLink from "@/features/movies/MovieLink";
@@ -58,10 +50,10 @@ function SortButton({
 }) {
   const ascending = order === "asc";
   const Icon = !active
-    ? ArrowUpDown
+    ? SortVerticalIcon
     : ascending
-      ? ArrowUpNarrowWide
-      : ArrowDownWideNarrow;
+      ? SortFromBottomToTopIcon
+      : SortFromTopToBottomIcon;
   return (
     <Button
       size="sm"
@@ -277,7 +269,7 @@ export default function RoomRatingTable({
                             movie.awaitingMe ? "text-accent" : "text-muted"
                           }`}
                         >
-                          <UsersRound size={13} aria-hidden="true" />
+                          <UsersGroupTwoRoundedIcon size={13} aria-hidden="true" />
                           Watched together
                           {movie.awaitingMe && " · awaiting your rating"}
                         </span>
@@ -313,7 +305,7 @@ export default function RoomRatingTable({
                           : ""
                       }`}
                       startContent={
-                        <Star
+                        <StarIcon
                           size={15}
                           aria-hidden="true"
                           className={movie.hasVoted ? "fill-current" : ""}
@@ -337,7 +329,7 @@ export default function RoomRatingTable({
                             isDisabled={disabled}
                             onPress={() => onEdit(movie.id)}
                           >
-                            <PencilLine size={16} aria-hidden="true" />
+                            <PenNewSquareIcon size={16} aria-hidden="true" />
                           </Button>
                           <Button
                             isIconOnly
@@ -349,7 +341,7 @@ export default function RoomRatingTable({
                             isDisabled={disabled}
                             onPress={() => onDelete(movie.id)}
                           >
-                            <Trash2 size={16} aria-hidden="true" />
+                            <TrashBinMinimalisticIcon size={16} aria-hidden="true" />
                           </Button>
                           </>
                       )}

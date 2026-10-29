@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@heroui/input";
 import { addToast } from "@heroui/toast";
-import { AtSign, Lock } from "lucide-react";
+import { LockIcon, MentionCircleIcon } from "@solar-icons/react/linear";
 import { useUpdateMe } from "@/hooks/queries/useMe";
 import type { CurrentUser, UpdateMeInputs } from "@/types/user";
 import { useAvatarDraft } from "../hooks/useAvatarDraft";
@@ -118,7 +118,7 @@ export default function ProfileSettings({ user }: { user: CurrentUser }) {
               isDisabled={busy}
               isInvalid={!name}
               errorMessage="Username is required"
-              startContent={<AtSign size={16} className="shrink-0 text-muted" aria-hidden="true" />}
+              startContent={<MentionCircleIcon size={16} className="shrink-0 text-muted" aria-hidden="true" />}
             />
             <Input
               label="Email"
@@ -127,7 +127,7 @@ export default function ProfileSettings({ user }: { user: CurrentUser }) {
               isReadOnly
               description="Your sign-in email can't be changed."
               classNames={{ input: "text-muted" }}
-              endContent={<Lock size={15} className="shrink-0 text-muted" aria-hidden="true" />}
+              endContent={<LockIcon size={15} className="shrink-0 text-muted" aria-hidden="true" />}
             />
           </div>
         </div>

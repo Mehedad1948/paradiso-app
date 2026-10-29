@@ -10,7 +10,7 @@ import {
 import { Input } from "@heroui/input";
 import { addToast } from "@heroui/toast";
 import { format } from "date-fns";
-import { Edit, Trash2 } from "lucide-react";
+import { PenIcon, TrashBinMinimalisticIcon } from "@solar-icons/react/linear";
 import { Key, useState } from "react";
 import {
   useUpdateInviteLink,
@@ -123,7 +123,7 @@ export default function InviteLinkItem({ link, roomId }: { link: RoomInviteLink;
               <span className="text-muted-foreground">Never</span>
             )}
             <span>
-              <Edit className="w-4" />
+              <PenIcon className="w-4" />
             </span>
           </Button>
         </DropdownTrigger>
@@ -201,7 +201,7 @@ export default function InviteLinkItem({ link, roomId }: { link: RoomInviteLink;
             <span>
               {link.maxUsage} / <span className="">{link.uses}</span>
             </span>
-            <Edit className="w-4" />
+            <PenIcon className="w-4" />
           </Button>
         ) : (
           <Button
@@ -212,7 +212,7 @@ export default function InviteLinkItem({ link, roomId }: { link: RoomInviteLink;
             className="text-muted-foreground flex items-center gap-2 w-full justify-between"
           >
             <span> Unlimited</span>
-            <Edit className="w-4" />
+            <PenIcon className="w-4" />
           </Button>
         )}
       </span>
@@ -225,7 +225,7 @@ export default function InviteLinkItem({ link, roomId }: { link: RoomInviteLink;
         variant="flat"
       >
         <span> Delete </span>
-        <Trash2 className="w-4" />
+        <TrashBinMinimalisticIcon className="w-4" />
       </Button>
     </div>
   );

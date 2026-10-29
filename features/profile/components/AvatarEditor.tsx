@@ -4,7 +4,7 @@ import Cropper from "react-easy-crop";
 import { Button } from "@heroui/button";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Tab, Tabs } from "@heroui/tabs";
-import { RotateCcw, RotateCw, ZoomIn, ZoomOut } from "lucide-react";
+import { MagnifierZoomInIcon, MagnifierZoomOutIcon, UndoLeftRoundIcon, UndoRightRoundIcon } from "@solar-icons/react/linear";
 import { NEUTRAL, cssFilter, type Adjustments, type Area } from "../lib/avatar-image";
 import { renderAvatar } from "../lib/render-avatar";
 import { underlinedTabs } from "../tabs";
@@ -135,16 +135,16 @@ export default function AvatarEditor({
                     onChange={setZoom}
                     disabled={saving}
                     valueLabel={`${Math.round(zoom * 100)}%`}
-                    start={<ZoomOut size={17} aria-hidden="true" className="shrink-0" />}
-                    end={<ZoomIn size={17} aria-hidden="true" className="shrink-0" />}
+                    start={<MagnifierZoomOutIcon size={17} aria-hidden="true" className="shrink-0" />}
+                    end={<MagnifierZoomInIcon size={17} aria-hidden="true" className="shrink-0" />}
                   />
                 </div>
                 <div className="flex shrink-0 gap-1 border-l border-line pl-3">
                   <Button isIconOnly size="sm" variant="light" aria-label="Rotate left" onPress={() => rotate(-90)} isDisabled={saving}>
-                    <RotateCcw size={17} aria-hidden="true" />
+                    <UndoLeftRoundIcon size={17} aria-hidden="true" />
                   </Button>
                   <Button isIconOnly size="sm" variant="light" aria-label="Rotate right" onPress={() => rotate(90)} isDisabled={saving}>
-                    <RotateCw size={17} aria-hidden="true" />
+                    <UndoRightRoundIcon size={17} aria-hidden="true" />
                   </Button>
                 </div>
               </div>

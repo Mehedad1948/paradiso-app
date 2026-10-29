@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import { Button } from "@heroui/button";
 import { addToast } from "@heroui/toast";
-import { LogOut } from "lucide-react";
+import { Logout2Icon } from "@solar-icons/react/linear";
 import PasswordInput from "@/components/auth/PasswordInput";
 import { useAuthForm } from "@/hooks/auth/useAuthForm";
 import { useChangePassword } from "@/hooks/queries/useMe";
@@ -169,7 +169,7 @@ export default function PasswordForm() {
             <Button
               variant="flat"
               className="bg-danger-500/10 font-semibold text-danger-500 data-[hover=true]:bg-danger-500/20"
-              startContent={!signOut.isPending && <LogOut size={16} aria-hidden="true" />}
+              startContent={!signOut.isPending && <Logout2Icon size={16} aria-hidden="true" />}
               isLoading={signOut.isPending}
               isDisabled={busy}
               onPress={() => {

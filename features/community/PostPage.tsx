@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import clsx from "clsx";
-import { ArrowLeft, Film } from "lucide-react";
+import { ArrowLeftIcon, ReelIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import { BffError } from "@/lib/api/client";
 import { usePost } from "@/hooks/queries/useCommunityQueries";
@@ -33,7 +33,7 @@ function PostPage({ postId }: { postId: number }) {
         onClick={back}
         className="mb-6 inline-flex items-center gap-2 text-[15px] text-muted hover:text-accent"
       >
-        <ArrowLeft size={18} aria-hidden="true" /> Back
+        <ArrowLeftIcon size={18} aria-hidden="true" /> Back
       </button>
       <PostDetail postId={postId} onDeleted={() => router.replace("/community")} />
     </div>
@@ -78,7 +78,7 @@ export function PostDetail({
         )}
       >
         <span className="flex h-14 w-14 items-center justify-center rounded-full bg-surface text-accent">
-          <Film size={24} aria-hidden="true" />
+          <ReelIcon size={24} aria-hidden="true" />
         </span>
         <h1 className="text-2xl">This recommendation isn&apos;t showing</h1>
         <p className="max-w-[420px] text-[15px] text-muted">

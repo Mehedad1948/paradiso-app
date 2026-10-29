@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { ArrowDown, ArrowUpRight } from "lucide-react";
+import { ArrowDownIcon, ArrowRightUpIcon } from "@solar-icons/react/linear";
 import { LogoMark } from "@/components/ui/Logo";
 import type { Metadata } from "next";
 import ParadisoWordmark from "@/components/landing/ParadisoWordmark";
@@ -65,7 +65,7 @@ export default function Home() {
             </p>
             <SpecularBorder radius={14} className="max-sm:w-full">
               <Link href="/rooms" className="flex w-full items-center justify-between gap-11 rounded-[inherit] bg-ink/[0.04] px-6 py-4 text-[15px] font-semibold text-ink shadow-[0_10px_24px_-14px_rgba(0,0,0,0.45)] backdrop-blur-sm transition-[background-color,transform] duration-200 hover:bg-ink/[0.08] active:scale-[0.97] [&>svg]:transition-transform hover:[&>svg]:translate-x-0.5 hover:[&>svg]:-translate-y-0.5 motion-reduce:transition-none">
-                Enter dashboard <ArrowUpRight size={21} aria-hidden="true" />
+                Enter dashboard <ArrowRightUpIcon size={21} aria-hidden="true" />
               </Link>
             </SpecularBorder>
           </div>
@@ -134,7 +134,7 @@ export default function Home() {
             href="/community"
             className="inline-flex items-center gap-5 border-b border-line pb-2 text-[15px] font-semibold [&>svg]:transition-transform hover:[&>svg]:translate-x-0.5 hover:[&>svg]:-translate-y-0.5"
           >
-            Join the conversation <ArrowUpRight size={18} aria-hidden="true" />
+            Join the conversation <ArrowRightUpIcon size={18} aria-hidden="true" />
           </Link>
         </div>
         <Suspense fallback={<CommunityShowcaseFallback />}>
@@ -157,7 +157,7 @@ export default function Home() {
             <em>shared.</em>
           </p>
           <Link href="/rooms" className="inline-flex items-center gap-5 border-b border-line pb-2 text-[15px] font-semibold [&>svg]:transition-transform hover:[&>svg]:translate-x-0.5 hover:[&>svg]:-translate-y-0.5">
-            Find your room <ArrowUpRight size={18} aria-hidden="true" />
+            Find your room <ArrowRightUpIcon size={18} aria-hidden="true" />
           </Link>
         </div>
       </section>
@@ -173,7 +173,7 @@ export default function Home() {
           of cinema.
         </span>
         <a href="#landing" className="inline-flex items-center gap-2 [&>svg]:rotate-180">
-          Back to the opening <ArrowDown size={14} aria-hidden="true" />
+          Back to the opening <ArrowDownIcon size={14} aria-hidden="true" />
         </a>
       </footer>
       </div>

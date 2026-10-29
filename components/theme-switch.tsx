@@ -1,6 +1,6 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
+import { MoonIcon, SunIcon } from "@solar-icons/react/linear";
 import { useTheme } from "next-themes";
 import type { SwitchProps } from "@heroui/switch";
 import clsx from "clsx";
@@ -21,8 +21,8 @@ export function ThemeSwitch({ className, classNames }: ThemeSwitchProps) {
       title="Toggle light and dark mode"
       onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
     >
-      <Moon size={20} className="dark:hidden" aria-hidden="true" />
-      <Sun size={20} className="hidden dark:block" aria-hidden="true" />
+      <MoonIcon size={20} className="dark:hidden" aria-hidden="true" />
+      <SunIcon size={20} className="hidden dark:block" aria-hidden="true" />
     </button>
   );
 }

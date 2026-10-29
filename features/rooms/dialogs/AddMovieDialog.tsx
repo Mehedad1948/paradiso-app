@@ -13,7 +13,7 @@ import {
 } from "@heroui/modal";
 import { Switch } from "@heroui/switch";
 import { addToast } from "@heroui/toast";
-import { ArrowLeft, PencilLine, SearchIcon } from "lucide-react";
+import { ArrowLeftIcon, MagnifierIcon, PenNewSquareIcon } from "@solar-icons/react/linear";
 import { useState } from "react";
 import { useDebounce } from "use-debounce";
 import {
@@ -165,7 +165,7 @@ export default function AddMovieDialog({
                   isDisabled={isAdding}
                   onPress={() => setMode("search")}
                 >
-                  <ArrowLeft size={20} />
+                  <ArrowLeftIcon size={20} />
                 </Button>
                 <div className="flex flex-col">
                   Add Movie Manually
@@ -258,7 +258,7 @@ export default function AddMovieDialog({
                     },
                   }}
                   startContent={
-                    <SearchIcon
+                    <MagnifierIcon
                       className="text-default-400"
                       size={20}
                       strokeWidth={2.5}
@@ -343,7 +343,7 @@ export default function AddMovieDialog({
                     <Button
                       color="secondary"
                       variant="flat"
-                      startContent={<PencilLine size={16} />}
+                      startContent={<PenNewSquareIcon size={16} />}
                       isDisabled={isAdding}
                       onPress={openManualForm}
                     >
@@ -357,7 +357,7 @@ export default function AddMovieDialog({
                       size="sm"
                       color="secondary"
                       variant="flat"
-                      startContent={<PencilLine size={14} />}
+                      startContent={<PenNewSquareIcon size={14} />}
                       isDisabled={isAdding}
                       onPress={openManualForm}
                     >

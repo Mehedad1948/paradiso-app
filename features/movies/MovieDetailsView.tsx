@@ -4,17 +4,7 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { AnimatePresence } from "framer-motion";
-import {
-  BookmarkCheck,
-  BookmarkPlus,
-  Clapperboard,
-  Clock3,
-  ExternalLink,
-  MessagesSquare,
-  Play,
-  Share2,
-  X,
-} from "lucide-react";
+import { BookmarkCheckIcon, BookmarkPlusIcon, ChatSquare2Icon, ClapperboardIcon, ClockCircleIcon, CloseIcon, PlayIcon, ShareCircleIcon, SquareArrowRightUpIcon } from "@solar-icons/react/linear";
 import BubbleMenu from "@/components/ui/BubbleMenu";
 import { shareItems } from "@/components/ui/shareItems";
 import QueryError from "@/components/ui/QueryError";
@@ -105,9 +95,9 @@ function WatchlistButton({ movie }: { movie: MovieDetails }) {
       className={clsx(quiet, "max-sm:w-11 max-sm:justify-center max-sm:px-0", saved && "border-accent/40 bg-accent/10 text-accent hover:bg-accent/15")}
     >
       {saved ? (
-        <BookmarkCheck size={18} aria-hidden="true" fill="currentColor" fillOpacity={0.2} />
+        <BookmarkCheckIcon size={18} aria-hidden="true" fill="currentColor" fillOpacity={0.2} />
       ) : (
-        <BookmarkPlus size={18} aria-hidden="true" />
+        <BookmarkPlusIcon size={18} aria-hidden="true" />
       )}
       <span className="max-sm:sr-only">{saved ? "On your watchlist" : "Watchlist"}</span>
     </button>
@@ -127,7 +117,7 @@ function Unavailable({ error, retry }: { error: Error; retry: () => void }) {
   return (
     <div className="flex flex-col items-center gap-3 py-10 text-center">
       <span className="flex size-16 items-center justify-center rounded-full border border-line text-accent">
-        <Clapperboard size={26} aria-hidden="true" />
+        <ClapperboardIcon size={26} aria-hidden="true" />
       </span>
       <p className="text-lg font-semibold tracking-[-0.02em]">This film slipped out of the archive</p>
       <p className="max-w-[340px] text-[15px] text-muted">We couldn&apos;t find its details. It may have been removed.</p>
@@ -232,12 +222,12 @@ export default function MovieDetailsView({
                   title="Watch on YouTube"
                   className="flex size-10 items-center justify-center rounded-full bg-black/35 text-white ring-1 ring-inset ring-white/20 backdrop-blur-md transition-[background-color,transform] hover:bg-black/55 active:scale-95"
                 >
-                  <ExternalLink size={18} aria-hidden="true" />
+                  <SquareArrowRightUpIcon size={18} aria-hidden="true" />
                 </a>
               )}
               {playing && (
                 <HeroButton label="Close trailer" onPress={() => setPlaying(false)}>
-                  <X size={19} aria-hidden="true" />
+                  <CloseIcon size={19} aria-hidden="true" />
                 </HeroButton>
               )}
               {end}
@@ -276,7 +266,7 @@ export default function MovieDetailsView({
                 <>
                   {year && <Dot />}
                   <span className="inline-flex items-center gap-1">
-                    <Clock3 size={14} aria-hidden="true" /> {runtime}
+                    <ClockCircleIcon size={14} aria-hidden="true" /> {runtime}
                   </span>
                 </>
               )}
@@ -367,14 +357,14 @@ export default function MovieDetailsView({
                     className={clsx(action, "bg-ink pl-3.5 text-canvas shadow-[0_10px_30px_-10px_rgb(0_0_0_/_60%)] hover:opacity-90")}
                   >
                     <span className="flex size-6 items-center justify-center rounded-full bg-canvas/15">
-                      <Play size={13} aria-hidden="true" className="translate-x-px fill-current" />
+                      <PlayIcon size={13} aria-hidden="true" className="translate-x-px fill-current" />
                     </span>
                     {playing ? "Hide trailer" : "Play trailer"}
                   </button>
                 )}
                 <WatchlistButton movie={movie} />
                 <Link href={movieFeedHref(movie)} className={clsx(quiet, "max-sm:w-11 max-sm:justify-center max-sm:px-0")}>
-                  <MessagesSquare size={18} aria-hidden="true" />
+                  <ChatSquare2Icon size={18} aria-hidden="true" />
                   <span className="max-sm:sr-only">Community takes</span>
                 </Link>
                 <BubbleMenu
@@ -387,11 +377,11 @@ export default function MovieDetailsView({
                   endAngle={360}
                   radius={72}
                 >
-                  {(open) => (open ? <X size={19} strokeWidth={1.75} aria-hidden="true" /> : <Share2 size={18} aria-hidden="true" />)}
+                  {(open) => (open ? <CloseIcon size={19} strokeWidth={1.75} aria-hidden="true" /> : <ShareCircleIcon size={18} aria-hidden="true" />)}
                 </BubbleMenu>
                 {movie.imdbLink && movie.imdbRate == null && (
                   <a href={movie.imdbLink} target="_blank" rel="noopener noreferrer" className={quiet}>
-                    IMDb <ExternalLink size={15} aria-hidden="true" />
+                    IMDb <SquareArrowRightUpIcon size={15} aria-hidden="true" />
                   </a>
                 )}
               </div>

@@ -9,9 +9,9 @@ import React, {
   type ReactNode,
 } from "react";
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from "framer-motion";
-import { Trash2 } from "lucide-react";
+import { TrashBinMinimalisticIcon } from "@solar-icons/react/linear";
 
-// Adapted from React Bits' SwipeRow (framer-motion, lucide icons, Tailwind 3 syntax).
+// Adapted from React Bits' SwipeRow (framer-motion, Solar icons, Tailwind 3 syntax).
 const HYST = 10;
 const FLICK = 110;
 const DECEL = 0.998;
@@ -471,7 +471,7 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
               >
                 <span className={actionLabel}>
                   <span className="inline-flex">
-                    {primary.icon ?? <Trash2 size={20} strokeWidth={2} aria-hidden="true" />}
+                    {primary.icon ?? <TrashBinMinimalisticIcon size={20} strokeWidth={2} aria-hidden="true" />}
                   </span>
                   <span>{primary.label}</span>
                 </span>

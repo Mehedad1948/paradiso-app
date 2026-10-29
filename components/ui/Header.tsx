@@ -4,7 +4,7 @@ import { useMe } from "@/hooks/queries/useMe";
 import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import Link from "next/link";
-import { LogIn } from "lucide-react";
+import { Login2Icon } from "@solar-icons/react/linear";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { InstallAppButton } from "@/components/pwa/InstallAppButton";
 import { useEffect, useState } from "react";
@@ -124,7 +124,7 @@ export default function Header() {
               title="Sign in"
               className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-ink text-canvas transition-opacity hover:opacity-85 max-[480px]:size-9"
             >
-              <LogIn size={18} aria-hidden="true" />
+              <Login2Icon size={18} aria-hidden="true" />
             </Link>
           )}
         </div>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import clsx from "clsx";
 import { Tooltip } from "@heroui/tooltip";
-import { Lock, Repeat2, Users } from "lucide-react";
+import { LockIcon, RepeatIcon, UsersGroupRoundedIcon } from "@solar-icons/react/linear";
 import type { CommunityPost, CommunityUser } from "@/types/community";
 import { useDeletePost, usePost } from "@/hooks/queries/useCommunityQueries";
 import type { Viewer } from "../hooks/useViewer";
@@ -113,7 +113,7 @@ function PostCard({
       >
         {repostedBy && (
           <p className="mb-2.5 flex items-center gap-1.5 pl-[30px] text-[13px] font-semibold text-muted">
-            <Repeat2 size={15} aria-hidden="true" className="-ml-[22px]" />
+            <RepeatIcon size={15} aria-hidden="true" className="-ml-[22px]" />
             <Link href={profileHref(repostedBy.id)} className="truncate hover:underline">
               {repostedBy.id === viewer.me?.id ? "You" : repostedBy.username}
             </Link>
@@ -265,9 +265,9 @@ function RoomScope({
   const content = (
     <>
       {member ? (
-        <Users size={13} aria-hidden="true" />
+        <UsersGroupRoundedIcon size={13} aria-hidden="true" />
       ) : (
-        <Lock size={13} aria-hidden="true" />
+        <LockIcon size={13} aria-hidden="true" />
       )}
       <span className="truncate">In {room.name}</span>
     </>

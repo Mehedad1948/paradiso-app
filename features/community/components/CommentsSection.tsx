@@ -6,7 +6,7 @@ import { Button } from "@heroui/button";
 import { Textarea } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
 import { Tooltip } from "@heroui/tooltip";
-import { MessageCircle, Trash2 } from "lucide-react";
+import { ChatRoundIcon, TrashBinMinimalisticIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import {
   useComments,
@@ -120,7 +120,7 @@ function CommentItem({
               onClick={() => setConfirming(true)}
               className="ml-auto inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-danger/10 hover:text-danger"
             >
-              <Trash2 size={16} />
+              <TrashBinMinimalisticIcon size={16} />
             </button>
           )}
         </div>
@@ -176,7 +176,7 @@ export default function CommentsSection({ post, viewer }: { post: CommunityPost;
         </div>
       ) : !list.length ? (
         <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
-          <MessageCircle size={26} className="text-muted" aria-hidden="true" />
+          <ChatRoundIcon size={26} className="text-muted" aria-hidden="true" />
           <p className="font-semibold">No replies yet</p>
           <p className="text-[15px] text-muted">Seen it too? Say what you thought.</p>
         </div>

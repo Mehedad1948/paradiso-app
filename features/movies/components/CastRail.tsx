@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { AltArrowLeftIcon, AltArrowRightIcon } from "@solar-icons/react/linear";
 import { avatarGradient } from "@/components/ui/avatarGradient";
 import { imageSrc } from "@/features/community/format";
 import type { MovieCastMember } from "@/types/movies";
@@ -104,8 +104,8 @@ export default function CastRail({ cast }: { cast: MovieCastMember[] }) {
       </ul>
       {(
         [
-          [-1, edges.start, "left-1 sm:left-3", ChevronLeft, "Earlier cast"],
-          [1, edges.end, "right-1 sm:right-3", ChevronRight, "More cast"],
+          [-1, edges.start, "left-1 sm:left-3", AltArrowLeftIcon, "Earlier cast"],
+          [1, edges.end, "right-1 sm:right-3", AltArrowRightIcon, "More cast"],
         ] as const
       ).map(([direction, visible, side, Icon, label]) => (
         <button

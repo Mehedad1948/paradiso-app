@@ -5,12 +5,12 @@ import { useState, type ReactNode } from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { BookmarkCheck, BookmarkPlus, Facebook, Link2, MessageCircle, Quote, Repeat2, Share, Share2, ThumbsDown, ThumbsUp, X } from "lucide-react";
+import { BookmarkCheckIcon, BookmarkPlusIcon, ChatRoundIcon, CloseIcon, DislikeIcon, LikeIcon, LinkRoundIcon, QuoteIcon, RepeatIcon, ShareCircleIcon, ShareIcon } from "@solar-icons/react/linear";
 import type { CommunityPost } from "@/types/community";
 import { useReact, useRepost } from "@/hooks/queries/useCommunityQueries";
 import { useInWatchlist, useToggleWatchlist } from "@/hooks/queries/useWatchlistQueries";
 import BubbleMenu, { type BubbleItem } from "@/components/ui/BubbleMenu";
-import { TelegramLogo, XLogo } from "@/components/ui/BrandIcons";
+import { FacebookLogo, TelegramLogo, XLogo } from "@/components/ui/BrandIcons";
 import type { Viewer } from "../hooks/useViewer";
 import { postHref } from "../format";
 import { copyPostLink } from "./PostMenu";
@@ -26,9 +26,9 @@ function shareItems(post: CommunityPost): BubbleItem[] {
   const u = encodeURIComponent(url);
   const t = encodeURIComponent(text);
   const items: BubbleItem[] = [
-    { key: "copy", label: "Copy link", icon: <Link2 size={18} />, onSelect: () => copyPostLink(post.id), className: "hover:text-emerald-500" },
+    { key: "copy", label: "Copy link", icon: <LinkRoundIcon size={18} />, onSelect: () => copyPostLink(post.id), className: "hover:text-emerald-500" },
     { key: "x", label: "Share on X", icon: <XLogo />, href: `https://twitter.com/intent/tweet?text=${t}&url=${u}` },
-    { key: "facebook", label: "Share on Facebook", icon: <Facebook size={18} />, href: `https://www.facebook.com/sharer/sharer.php?u=${u}`, className: "hover:text-[#1877f2]" },
+    { key: "facebook", label: "Share on Facebook", icon: <FacebookLogo />, href: `https://www.facebook.com/sharer/sharer.php?u=${u}`, className: "hover:text-[#1877f2]" },
     { key: "telegram", label: "Share on Telegram", icon: <TelegramLogo />, href: `https://t.me/share/url?url=${u}&text=${t}`, className: "hover:text-[#229ed9]" },
   ];
   // Desktop share sheets are thin; on phones the native one reaches every app.
@@ -36,7 +36,7 @@ function shareItems(post: CommunityPost): BubbleItem[] {
     items.push({
       key: "more",
       label: "More options",
-      icon: <Share size={18} />,
+      icon: <ShareIcon size={18} />,
       onSelect: () => navigator.share({ title: text, url }).catch(() => {}),
     });
   }
@@ -153,9 +153,9 @@ function WatchlistButton({
     >
       <Pop on={saved}>
         {saved ? (
-          <BookmarkCheck size={18} strokeWidth={1.75} aria-hidden="true" fill="currentColor" fillOpacity={0.2} />
+          <BookmarkCheckIcon size={18} strokeWidth={1.75} aria-hidden="true" fill="currentColor" fillOpacity={0.2} />
         ) : (
-          <BookmarkPlus size={18} strokeWidth={1.75} aria-hidden="true" />
+          <BookmarkPlusIcon size={18} strokeWidth={1.75} aria-hidden="true" />
         )}
       </Pop>
     </button>
@@ -185,16 +185,16 @@ export default function PostActions({
     {
       key: "repost",
       label: post.reposted ? "Undo repost" : "Repost",
-      icon: <Repeat2 size={18} />,
+      icon: <RepeatIcon size={18} />,
       onSelect: () => repost.mutate({ postId: post.id, on: !post.reposted, me: viewer.me!.id }),
       className: post.reposted ? hues.repost[tone].on : hues.repost[tone].hover,
     },
-    { key: "quote", label: "Quote", icon: <Quote size={16} />, onSelect: () => setQuoting(true) },
+    { key: "quote", label: "Quote", icon: <QuoteIcon size={16} />, onSelect: () => setQuoting(true) },
   ];
   const repostIcon = (
     <>
       <Pop on={post.reposted}>
-        <Repeat2 size={19} strokeWidth={1.75} aria-hidden="true" />
+        <RepeatIcon size={19} strokeWidth={1.75} aria-hidden="true" />
       </Pop>
       {shared > 0 && <span>{shared.toLocaleString()}</span>}
     </>
@@ -222,7 +222,7 @@ export default function PostActions({
             className={clsx(button, hues.like[tone].hover, liked && hues.like[tone].on)}
           >
             <Pop on={liked}>
-              <ThumbsUp size={18} strokeWidth={1.75} aria-hidden="true" fill={liked ? "currentColor" : "none"} />
+              <LikeIcon size={18} strokeWidth={1.75} aria-hidden="true" fill={liked ? "currentColor" : "none"} />
             </Pop>
             {post.likeCount > 0 && <span>{post.likeCount.toLocaleString()}</span>}
           </button>
@@ -234,7 +234,7 @@ export default function PostActions({
             className={clsx(button, hues.dislike[tone].hover, disliked && hues.dislike[tone].on)}
           >
             <Pop on={disliked}>
-              <ThumbsDown size={18} strokeWidth={1.75} aria-hidden="true" fill={disliked ? "currentColor" : "none"} />
+              <DislikeIcon size={18} strokeWidth={1.75} aria-hidden="true" fill={disliked ? "currentColor" : "none"} />
             </Pop>
             {post.dislikeCount > 0 && <span>{post.dislikeCount.toLocaleString()}</span>}
           </button>
@@ -247,7 +247,7 @@ export default function PostActions({
         aria-label={`${post.commentCount} comments`}
         className={clsx(button, hues.comment[tone].hover)}
       >
-        <MessageCircle size={18} strokeWidth={1.75} aria-hidden="true" />
+        <ChatRoundIcon size={18} strokeWidth={1.75} aria-hidden="true" />
         {post.commentCount > 0 && <span>{post.commentCount.toLocaleString()}</span>}
       </Link>
       {canReact &&
@@ -278,9 +278,9 @@ export default function PostActions({
       >
         {(open) =>
           open ? (
-            <X size={18} strokeWidth={1.75} aria-hidden="true" />
+            <CloseIcon size={18} strokeWidth={1.75} aria-hidden="true" />
           ) : (
-            <Share2 size={18} strokeWidth={1.75} aria-hidden="true" />
+            <ShareCircleIcon size={18} strokeWidth={1.75} aria-hidden="true" />
           )
         }
       </BubbleMenu>

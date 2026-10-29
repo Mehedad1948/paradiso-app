@@ -1,13 +1,14 @@
 "use client";
 import clsx from "clsx";
 import { motion, useReducedMotion } from "framer-motion";
-import { Ban, Globe2, UserCheck, type LucideIcon } from "lucide-react";
+import { ForbiddenCircleIcon, GlobalIcon, UserCheckIcon } from "@solar-icons/react/linear";
+import type { Icon as SolarIcon } from "@solar-icons/react/lib/types";
 import type { RoomInvitePolicy } from "@/types/invitations";
 
-export const invitePolicyOptions: { value: RoomInvitePolicy; label: string; hint: string; icon: LucideIcon }[] = [
-  { value: "everyone", label: "Everyone", hint: "Anyone in a room can invite you", icon: Globe2 },
-  { value: "following", label: "People I follow", hint: "Only people you follow can invite you", icon: UserCheck },
-  { value: "nobody", label: "No one", hint: "You join rooms with links only", icon: Ban },
+export const invitePolicyOptions: { value: RoomInvitePolicy; label: string; hint: string; icon: SolarIcon }[] = [
+  { value: "everyone", label: "Everyone", hint: "Anyone in a room can invite you", icon: GlobalIcon },
+  { value: "following", label: "People I follow", hint: "Only people you follow can invite you", icon: UserCheckIcon },
+  { value: "nobody", label: "No one", hint: "You join rooms with links only", icon: ForbiddenCircleIcon },
 ];
 
 /** Who may invite the user to rooms; a three-way segmented control. */

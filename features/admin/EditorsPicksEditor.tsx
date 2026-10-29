@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
 import { addToast } from "@heroui/toast";
-import { ArrowDown, ArrowUp, ChevronsUp, GripVertical, X } from "lucide-react";
+import { ArrowDownIcon, ArrowUpIcon, CloseIcon, DoubleAltArrowUpIcon, GripVerticalIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import { useAdminEditorsPicks, useSaveEditorsPicks } from "@/hooks/queries/useCurationQueries";
 import {
@@ -87,7 +87,7 @@ function Editor({ picks }: { picks: AdminEditorsPicks }) {
                     over === index && dragging !== index ? "border-primary" : "border-transparent"
                   } ${dragging === index ? "opacity-40" : ""}`}
                 >
-                  <GripVertical size={16} className="shrink-0 cursor-grab text-muted" aria-hidden />
+                  <GripVerticalIcon size={16} className="shrink-0 cursor-grab text-muted" aria-hidden />
                   <span className="w-6 shrink-0 text-right text-sm tabular-nums text-muted">{index + 1}</span>
                   <Thumb src={imageSrc(film.poster_path, "w92")} alt="" className="h-14 w-10 shrink-0 rounded" />
                   <span className="min-w-0 flex-1">
@@ -98,13 +98,13 @@ function Editor({ picks }: { picks: AdminEditorsPicks }) {
                   </span>
                   <span className="flex shrink-0 gap-1">
                     <Button isIconOnly size="sm" variant="light" aria-label={`Move ${film.title} to the top`} isDisabled={index === 0} onPress={() => move(index, 0)}>
-                      <ChevronsUp size={15} />
+                      <DoubleAltArrowUpIcon size={15} />
                     </Button>
                     <Button isIconOnly size="sm" variant="light" aria-label={`Move ${film.title} up`} isDisabled={index === 0} onPress={() => move(index, index - 1)}>
-                      <ArrowUp size={15} />
+                      <ArrowUpIcon size={15} />
                     </Button>
                     <Button isIconOnly size="sm" variant="light" aria-label={`Move ${film.title} down`} isDisabled={index === films.length - 1} onPress={() => move(index, index + 1)}>
-                      <ArrowDown size={15} />
+                      <ArrowDownIcon size={15} />
                     </Button>
                     <Button
                       isIconOnly
@@ -114,7 +114,7 @@ function Editor({ picks }: { picks: AdminEditorsPicks }) {
                       aria-label={`Remove ${film.title}`}
                       onPress={() => setFilms((current) => current.filter((value) => value.id !== film.id))}
                     >
-                      <X size={15} />
+                      <CloseIcon size={15} />
                     </Button>
                   </span>
                 </li>

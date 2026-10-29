@@ -1,6 +1,6 @@
 "use client";
 import clsx from "clsx";
-import { Star, X } from "lucide-react";
+import { CloseIcon, StarIcon } from "@solar-icons/react/linear";
 import ElasticSlider from "@/components/ui/ElasticSlider";
 import { roundRating } from "@/lib/community/validation";
 import { ratingHue } from "@/features/rooms/lib/ratingColor";
@@ -52,7 +52,7 @@ export default function RatingInput({
               aria-label="Remove rating"
               className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface hover:text-ink disabled:opacity-50"
             >
-              <X size={16} />
+              <CloseIcon size={16} />
             </button>
           )}
         </div>
@@ -77,8 +77,8 @@ export default function RatingInput({
             : `hsl(${ratingHue(value)} 80% 55%)`
         }
         iconPlacement="inside"
-        leftIcon={<Star size={16} aria-hidden="true" />}
-        rightIcon={<Star size={16} className="fill-current" aria-hidden="true" />}
+        leftIcon={<StarIcon size={16} aria-hidden="true" />}
+        rightIcon={<StarIcon size={16} className="fill-current" aria-hidden="true" />}
         disabled={disabled}
         ariaLabel="Your rating"
       />

@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
-import { SearchIcon, Plus, UserPlus } from "lucide-react";
+import { AddIcon, MagnifierIcon, UserPlusIcon } from "@solar-icons/react/linear";
 import { useDebouncedSearch } from "../hooks/useDebouncedSearch";
 export default function RoomToolbar({
   search,
@@ -28,12 +28,12 @@ export default function RoomToolbar({
         onValueChange={change}
         isClearable
         onClear={() => change("")}
-        startContent={<SearchIcon className="text-default-400" size={20} />}
+        startContent={<MagnifierIcon className="text-default-400" size={20} />}
       />
       <div className="flex items-center gap-3">
         <Button
           className="min-h-[46px] rounded-md border border-line bg-surface text-[15px] font-semibold text-ink"
-          startContent={<UserPlus size={18} aria-hidden="true" />}
+          startContent={<UserPlusIcon size={18} aria-hidden="true" />}
           isDisabled={disabled}
           onPress={onInvite}
         >
@@ -41,7 +41,7 @@ export default function RoomToolbar({
         </Button>
         <Button
           className="min-h-[46px] rounded-md bg-ink text-[15px] font-semibold text-canvas"
-          startContent={<Plus size={18} aria-hidden="true" />}
+          startContent={<AddIcon size={18} aria-hidden="true" />}
           isDisabled={disabled}
           onPress={onAddMovie}
         >

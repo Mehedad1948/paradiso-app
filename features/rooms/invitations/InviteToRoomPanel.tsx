@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Check, Clock3, DoorOpen, Globe2, Lock, Search, ShieldCheck } from "lucide-react";
+import { CheckIcon, ClockCircleIcon, GlobalIcon, LockIcon, Login2Icon, MagnifierIcon, ShieldCheckIcon } from "@solar-icons/react/linear";
 import { Spinner } from "@heroui/spinner";
 import { addToast } from "@heroui/toast";
 import { BffError } from "@/lib/api/client";
@@ -45,7 +45,7 @@ function Skeleton() {
   );
 }
 
-function State({ icon: Icon, children, tone = "muted" }: { icon: typeof Check; children: string; tone?: "muted" | "success" | "warning" }) {
+function State({ icon: Icon, children, tone = "muted" }: { icon: typeof CheckIcon; children: string; tone?: "muted" | "success" | "warning" }) {
   return (
     <span
       className={clsx(
@@ -79,7 +79,7 @@ function RoomRow({
   const reduce = useReducedMotion();
   const done = room.isMember || room.hasPendingInvite || !!sent;
   const meta = room.isPublic ? "Public" : room.requiresApproval ? "Private · owner approves" : "Private";
-  const MetaIcon = room.isPublic ? Globe2 : room.requiresApproval ? ShieldCheck : Lock;
+  const MetaIcon = room.isPublic ? GlobalIcon : room.requiresApproval ? ShieldCheckIcon : LockIcon;
 
   return (
     <li
@@ -121,7 +121,7 @@ function RoomRow({
       <AnimatePresence initial={false} mode="popLayout">
         {room.isMember ? (
           <motion.span key="member" initial={false}>
-            <State icon={Check}>Member</State>
+            <State icon={CheckIcon}>Member</State>
           </motion.span>
         ) : sent || room.hasPendingInvite ? (
           <motion.span
@@ -131,11 +131,11 @@ function RoomRow({
             transition={{ type: "spring", stiffness: 520, damping: 30 }}
           >
             {sent === "awaiting_approval" ? (
-              <State icon={Clock3} tone="warning">Awaiting owner</State>
+              <State icon={ClockCircleIcon} tone="warning">Awaiting owner</State>
             ) : sent ? (
-              <State icon={Check} tone="success">Invited</State>
+              <State icon={CheckIcon} tone="success">Invited</State>
             ) : (
-              <State icon={Clock3}>Invited</State>
+              <State icon={ClockCircleIcon}>Invited</State>
             )}
           </motion.span>
         ) : (
@@ -215,7 +215,7 @@ export default function InviteToRoomPanel({ userId, name }: { userId: number; na
 
       {sorted.length > 6 && (
         <label className="mx-4 mb-2 flex h-10 items-center gap-2 rounded-full border border-line bg-surface px-3.5 focus-within:ring-2 focus-within:ring-accent">
-          <Search size={16} aria-hidden="true" className="shrink-0 text-muted" />
+          <MagnifierIcon size={16} aria-hidden="true" className="shrink-0 text-muted" />
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -244,7 +244,7 @@ export default function InviteToRoomPanel({ userId, name }: { userId: number; na
           <div className="flex flex-col items-center px-8 pb-8 pt-4 text-center">
             <span className="relative mb-4 flex size-16 items-center justify-center">
               <span className="absolute inset-0 rounded-full bg-accent/10" />
-              <DoorOpen size={24} className="relative text-accent" aria-hidden="true" />
+              <Login2Icon size={24} className="relative text-accent" aria-hidden="true" />
             </span>
             <p className="text-[15px] font-semibold">No rooms to share yet</p>
             <p className="mt-1 text-sm text-muted">Create or join a room, then bring {name} along.</p>
@@ -276,7 +276,7 @@ export default function InviteToRoomPanel({ userId, name }: { userId: number; na
 
       {approvals && (
         <p className="flex items-start gap-2 border-t border-line px-5 py-3 text-xs text-muted">
-          <ShieldCheck size={14} aria-hidden="true" className="mt-px shrink-0" />
+          <ShieldCheckIcon size={14} aria-hidden="true" className="mt-px shrink-0" />
           In private rooms you don&apos;t own, the owner approves your invitation before {name} sees it.
         </p>
       )}

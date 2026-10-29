@@ -1,4 +1,4 @@
-import { ArrowUpRight } from "lucide-react";
+import { ArrowRightUpIcon } from "@solar-icons/react/linear";
 import { departmentTitle } from "@/features/people/format";
 import PersonLink from "@/features/people/PersonLink";
 import type { FeaturedArtist } from "@/types/featured";
@@ -51,7 +51,7 @@ export default function ArtistOfTheDay({
           person={person}
           className="mt-5 inline-flex items-center gap-5 border-b border-line pb-2 text-[15px] font-semibold [&>svg]:transition-transform hover:[&>svg]:-translate-y-0.5 hover:[&>svg]:translate-x-0.5"
         >
-          Explore their work <ArrowUpRight size={18} aria-hidden="true" />
+          Explore their work <ArrowRightUpIcon size={18} aria-hidden="true" />
         </PersonLink>
       </div>
 

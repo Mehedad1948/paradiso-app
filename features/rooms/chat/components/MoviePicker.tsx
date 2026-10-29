@@ -3,7 +3,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/popover";
 import { Input } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
-import { Check, SearchIcon } from "lucide-react";
+import { CheckIcon, MagnifierIcon } from "@solar-icons/react/linear";
 import { useDebounce } from "use-debounce";
 import { useMovieSearch } from "@/hooks/queries/useRoomQueries";
 import type { ChatMovieMention } from "@/types/chat";
@@ -45,7 +45,7 @@ function Row({
         <span className="line-clamp-1 text-[15px] font-medium">{title}</span>
         <span className="block text-xs text-muted">{detail}</span>
       </span>
-      {selected && <Check size={16} className="shrink-0 text-accent" aria-label="Attached" />}
+      {selected && <CheckIcon size={16} className="shrink-0 text-accent" aria-label="Attached" />}
     </button>
   );
 }
@@ -100,7 +100,7 @@ export default function MoviePicker({
               value={query}
               onValueChange={setQuery}
               classNames={{ inputWrapper: "border border-line bg-surface shadow-none", input: "text-[15px]" }}
-              startContent={<SearchIcon size={16} className="text-default-400" />}
+              startContent={<MagnifierIcon size={16} className="text-default-400" />}
             />
           </div>
           <div className="max-h-80 overflow-y-auto p-2">

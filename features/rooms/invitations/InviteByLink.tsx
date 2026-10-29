@@ -4,7 +4,7 @@ import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
 import PanelPagination from "../components/PanelPagination";
 import { addToast } from "@heroui/toast";
-import { Copy, Link } from "lucide-react";
+import { CopyIcon, LinkIcon } from "@solar-icons/react/linear";
 import InviteLinkItem from "./InviteLinkItem";
 import CopierButton from "@/components/utils/CopierButton";
 import { useEffect, useState } from "react";
@@ -50,7 +50,7 @@ export default function InviteByLink({ roomId }: { roomId: string }) {
             size="sm"
             color="primary"
           >
-            Create New Invite Link <Link className="w-4" />
+            Create New Invite Link <LinkIcon className="w-4" />
           </Button>
         </div>
       )}
@@ -76,7 +76,7 @@ export default function InviteByLink({ roomId }: { roomId: string }) {
                     aria-label="Copy invitation link"
                     className="flex items-center gap-2 mb-4 text-primary-500"
                   >
-                    <Copy className="w-4" /> Copy invitation link
+                    <CopyIcon className="w-4" /> Copy invitation link
                   </CopierButton>
                   <InviteLinkItem link={item} roomId={roomId} />
                 </AccordionItem>
@@ -92,7 +92,7 @@ export default function InviteByLink({ roomId }: { roomId: string }) {
             size="sm"
             color="primary"
           >
-            Create Invite Link <Link className="w-4" />
+            Create Invite Link <LinkIcon className="w-4" />
           </Button>
         )}
       </div>

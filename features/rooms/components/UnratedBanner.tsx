@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Button } from "@heroui/button";
-import { Clapperboard, X } from "lucide-react";
+import { ClapperboardIcon, CloseIcon } from "@solar-icons/react/linear";
 
 const storageKey = (roomId: string) => `paradiso:unrated-nudge:${roomId}`;
 function readDismissed(roomId: string) {
@@ -57,7 +57,7 @@ export default function UnratedBanner({
         aria-hidden="true"
         className="grid size-11 shrink-0 place-items-center rounded-full bg-accent/10 text-accent"
       >
-        <Clapperboard size={20} />
+        <ClapperboardIcon size={20} />
       </span>
       <div className="min-w-0 flex-1">
         <p className="text-[15px] font-semibold text-ink [&_em]:font-serif [&_em]:text-[17px] [&_em]:font-normal">
@@ -88,7 +88,7 @@ export default function UnratedBanner({
             setDismissed(count);
           }}
         >
-          <X size={17} aria-hidden="true" />
+          <CloseIcon size={17} aria-hidden="true" />
         </Button>
       </div>
     </section>

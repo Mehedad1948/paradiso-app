@@ -1,6 +1,6 @@
 "use client";
 import clsx from "clsx";
-import { Check } from "lucide-react";
+import { CheckIcon } from "@solar-icons/react/linear";
 import { useGenres } from "@/hooks/queries/useMe";
 import { MAX_FAVORITE_GENRES } from "@/types/user";
 
@@ -72,7 +72,7 @@ export default function GenrePicker({
                   full && "opacity-40",
                 )}
               >
-                {active && <Check size={14} strokeWidth={2.5} aria-hidden="true" />}
+                {active && <CheckIcon size={14} strokeWidth={2.5} aria-hidden="true" />}
                 {genre.name}
               </button>
             );

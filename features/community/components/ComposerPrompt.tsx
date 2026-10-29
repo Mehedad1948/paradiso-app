@@ -2,7 +2,7 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import clsx from "clsx";
-import { Clapperboard, ImagePlus, Star } from "lucide-react";
+import { ClapperboardIcon, GalleryAddIcon, StarIcon } from "@solar-icons/react/linear";
 import UserAvatar from "@/components/ui/UserAvatar";
 import type { Viewer } from "../hooks/useViewer";
 import SignInLink from "./SignInLink";
@@ -50,9 +50,9 @@ export default function ComposerPrompt({
         </button>
         <div className="flex items-center gap-0.5 max-md:hidden" aria-hidden="true">
           {[
-            { Icon: Clapperboard, tint: "text-sky-500 hover:bg-sky-500/10" },
-            { Icon: Star, tint: "text-amber-500 hover:bg-amber-500/10" },
-            { Icon: ImagePlus, tint: "text-emerald-500 hover:bg-emerald-500/10" },
+            { Icon: ClapperboardIcon, tint: "text-sky-500 hover:bg-sky-500/10" },
+            { Icon: StarIcon, tint: "text-amber-500 hover:bg-amber-500/10" },
+            { Icon: GalleryAddIcon, tint: "text-emerald-500 hover:bg-emerald-500/10" },
           ].map(({ Icon, tint }, index) => (
             <button
               key={index}

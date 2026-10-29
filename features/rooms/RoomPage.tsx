@@ -29,7 +29,7 @@ import RoomNoAccess, { isRoomAccessError } from "./components/RoomNoAccess";
 import Image from "next/image";
 import { posters } from "@/config/posters";
 import Link from "next/link";
-import { ArrowLeft, MessagesSquare, NotebookPen, Pencil } from "lucide-react";
+import { ArrowLeftIcon, ChatSquare2Icon, NotebookIcon, PenIcon } from "@solar-icons/react/linear";
 import UnreadBadge from "./chat/components/UnreadBadge";
 import { wallpaperGlow } from "./lib/wallpaper";
 const AddMovieDialog = dynamic(() => import("./dialogs/AddMovieDialog"), {
@@ -141,7 +141,7 @@ function RoomPage({ roomId }: { roomId: string }) {
         style={{ backgroundImage: wallpaperGlow(0.75) }}
       />
       <Link href="/rooms" className="mb-6 inline-flex items-center gap-2 text-[15px] text-muted hover:text-accent">
-        <ArrowLeft size={18} aria-hidden="true" /> All rooms
+        <ArrowLeftIcon size={18} aria-hidden="true" /> All rooms
       </Link>
       {/* The min height gives the cover room to breathe; the text and actions stay pinned to the bottom. */}
       <div className="relative isolate mb-10 flex min-h-[clamp(340px,30vw,460px)] items-end justify-between gap-6 pb-9 max-sm:mb-7 max-sm:min-h-0 max-sm:flex-col max-sm:items-start max-sm:pb-7">
@@ -193,7 +193,7 @@ function RoomPage({ roomId }: { roomId: string }) {
             {canManage && (
               <Button
                 className="min-h-[46px] rounded-md border border-line bg-surface/75 text-[15px] font-semibold text-ink backdrop-blur-md"
-                startContent={<Pencil size={17} aria-hidden="true" />}
+                startContent={<PenIcon size={17} aria-hidden="true" />}
                 isDisabled={room.isError}
                 onPress={() => open("edit-room")}
               >
@@ -202,7 +202,7 @@ function RoomPage({ roomId }: { roomId: string }) {
             )}
             <Button
               className="min-h-[46px] rounded-md border border-line bg-surface/75 text-[15px] font-semibold text-ink backdrop-blur-md"
-              startContent={<NotebookPen size={17} aria-hidden="true" />}
+              startContent={<NotebookIcon size={17} aria-hidden="true" />}
               onPress={() => open("discussion")}
             >
               Discussion
@@ -213,7 +213,7 @@ function RoomPage({ roomId }: { roomId: string }) {
             {isMember && (
               <Button
                 className="min-h-[46px] rounded-md bg-ink text-[15px] font-semibold text-canvas"
-                startContent={<MessagesSquare size={17} aria-hidden="true" />}
+                startContent={<ChatSquare2Icon size={17} aria-hidden="true" />}
                 endContent={unread.data && <UnreadBadge unread={unread.data} />}
                 onPress={() => open("chat")}
               >

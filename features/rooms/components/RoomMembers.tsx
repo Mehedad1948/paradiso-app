@@ -1,5 +1,5 @@
 "use client";
-import { ChevronRight, Crown, UserPlus } from "lucide-react";
+import { AltArrowRightIcon, CrownIcon, UserPlusIcon } from "@solar-icons/react/linear";
 import Tag from "@/components/ui/PopTag";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { profileHref } from "@/features/community/format";
@@ -44,7 +44,7 @@ export default function RoomMembers({
               content={
                 <span className="flex items-center gap-1.5">
                   {member.id === ownerId && (
-                    <Crown
+                    <CrownIcon
                       size={13}
                       aria-label="Room owner"
                       className="text-amber-400"
@@ -96,7 +96,7 @@ export default function RoomMembers({
               className={`grid place-items-center rounded-full border border-dashed border-ink/30 bg-canvas text-muted transition-colors hover:border-accent hover:bg-accent/10 hover:text-accent disabled:pointer-events-none disabled:opacity-50 ${ring}`}
               style={{ width: SIZE, height: SIZE }}
             >
-              <UserPlus size={16} aria-hidden="true" />
+              <UserPlusIcon size={16} aria-hidden="true" />
             </button>
           </Tag>
         </li>
@@ -114,7 +114,7 @@ export default function RoomMembers({
             {reviewCount} to review
           </span>
         )}
-        <ChevronRight
+        <AltArrowRightIcon
           size={15}
           aria-hidden="true"
           className="transition-transform duration-200 group-hover:translate-x-0.5"

@@ -2,7 +2,7 @@
 import { Button } from "@heroui/button";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { addToast } from "@heroui/toast";
-import { Link2, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { LinkRoundIcon, MenuDotsIcon, PenIcon, TrashBinMinimalisticIcon } from "@solar-icons/react/linear";
 import type { CommunityPost } from "@/types/community";
 import type { Viewer } from "../hooks/useViewer";
 import { postHref } from "../format";
@@ -29,12 +29,12 @@ export default function PostMenu({
   onClosed?: () => void;
 }) {
   const items = [
-    { key: "copy", label: "Copy link", icon: <Link2 size={17} />, run: () => copyPostLink(post.id) },
+    { key: "copy", label: "Copy link", icon: <LinkRoundIcon size={17} />, run: () => copyPostLink(post.id) },
     ...(viewer.canEdit(post)
-      ? [{ key: "edit", label: "Edit post", icon: <Pencil size={17} />, run: onEdit }]
+      ? [{ key: "edit", label: "Edit post", icon: <PenIcon size={17} />, run: onEdit }]
       : []),
     ...(viewer.canDelete(post)
-      ? [{ key: "delete", label: "Delete", icon: <Trash2 size={17} />, run: onDelete }]
+      ? [{ key: "delete", label: "Delete", icon: <TrashBinMinimalisticIcon size={17} />, run: onDelete }]
       : []),
   ];
   return (
@@ -52,7 +52,7 @@ export default function PostMenu({
           aria-label="Post options"
           className="-my-1 -mr-2 text-muted data-[hover=true]:text-ink"
         >
-          <MoreHorizontal size={19} />
+          <MenuDotsIcon size={19} />
         </Button>
       </DropdownTrigger>
       <DropdownMenu

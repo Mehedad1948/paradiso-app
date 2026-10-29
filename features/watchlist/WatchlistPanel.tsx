@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
-import { Bookmark, Star } from "lucide-react";
+import { BookmarkIcon, StarIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import SwipeRow from "@/components/ui/SwipeRow";
 import MoviePoster from "@/features/rooms/components/MoviePoster";
@@ -52,7 +52,7 @@ function WatchlistRow({ item, onRemove }: { item: WatchlistItem; onRemove: (movi
           {year && <span>{year}</span>}
           {rating != null && rating > 0 && (
             <span className="flex items-center gap-1">
-              <Star size={13} className="fill-warning-500 text-warning-500" aria-hidden="true" />
+              <StarIcon size={13} className="fill-warning-500 text-warning-500" aria-hidden="true" />
               {rating.toFixed(1)}
             </span>
           )}
@@ -82,7 +82,7 @@ export default function WatchlistPanel() {
     return (
       <div className="flex flex-col items-center gap-3 py-16 text-center">
         <span className="rounded-full bg-surface p-4 text-muted">
-          <Bookmark size={28} aria-hidden="true" />
+          <BookmarkIcon size={28} aria-hidden="true" />
         </span>
         <p className="text-lg font-semibold tracking-[-0.03em]">Nothing saved yet</p>
         <p className="max-w-64 text-sm font-normal text-muted">

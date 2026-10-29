@@ -6,7 +6,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Button } from "@heroui/button";
 import { addToast } from "@heroui/toast";
-import { Mail, Send, X } from "lucide-react";
+import { CloseIcon, LetterIcon, SendSquareIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import UserAvatar from "@/components/ui/UserAvatar";
 import RoomThumb from "@/features/rooms/invitations/RoomThumb";
@@ -124,7 +124,7 @@ function InvitationRow({ invitation }: { invitation: Invitation }) {
             <UserAvatar name={invitee.username} src={invitee.avatar} size={22} alt="" />
           ) : (
             <span className="grid size-[22px] place-items-center rounded-full bg-surface text-muted">
-              <Mail size={12} aria-hidden="true" />
+              <LetterIcon size={12} aria-hidden="true" />
             </span>
           )}
         </span>
@@ -167,7 +167,7 @@ function InvitationRow({ invitation }: { invitation: Invitation }) {
             )
           }
         >
-          <X size={16} aria-hidden="true" />
+          <CloseIcon size={16} aria-hidden="true" />
         </Button>
       )}
     </div>
@@ -219,7 +219,7 @@ export default function SentInvitations() {
       ) : !summary?.total ? (
         <div className="flex items-center gap-4 rounded-2xl border border-dashed border-line px-5 py-6">
           <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-surface text-muted">
-            <Send size={18} aria-hidden="true" />
+            <SendSquareIcon size={18} aria-hidden="true" />
           </span>
           <div>
             <p className="text-sm font-semibold">No invitations yet</p>

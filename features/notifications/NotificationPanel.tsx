@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import clsx from "clsx";
-import { BellRing, CheckCheck } from "lucide-react";
+import { BellRingIcon, CheckReadIcon } from "@solar-icons/react/linear";
 import { Spinner } from "@heroui/spinner";
 import {
   useMarkNotificationsRead,
@@ -62,7 +62,7 @@ function Empty({ filter }: { filter: Filter }) {
       <span className="relative mb-5 flex size-20 items-center justify-center">
         <span className="absolute inset-0 rounded-full bg-accent/10" />
         <span className="absolute inset-3 rounded-full bg-accent/15" />
-        <BellRing size={28} className="relative text-accent" aria-hidden="true" />
+        <BellRingIcon size={28} className="relative text-accent" aria-hidden="true" />
       </span>
       <p className="text-[15px] font-semibold text-ink">
         {filter === "unread" ? "You're all caught up" : "Nothing here yet"}
@@ -140,7 +140,7 @@ export default function NotificationPanel({ unread, onClose }: { unread: number;
           disabled={unread === 0}
           className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[13px] font-semibold text-muted transition-colors hover:bg-surface hover:text-ink disabled:pointer-events-none disabled:opacity-40"
         >
-          <CheckCheck size={16} aria-hidden="true" />
+          <CheckReadIcon size={16} aria-hidden="true" />
           Mark all read
         </button>
       </header>

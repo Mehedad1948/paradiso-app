@@ -5,7 +5,7 @@ import { Button } from "@heroui/button";
 import { Input, Textarea } from "@heroui/input";
 import { Switch } from "@heroui/switch";
 import { addToast } from "@heroui/toast";
-import { ImageUp, Trash2 } from "lucide-react";
+import { GallerySendIcon, TrashBinMinimalisticIcon } from "@solar-icons/react/linear";
 import Sidebar, { useSidebar } from "@/components/ui/Sidebar";
 import { layerColors } from "@/components/ui/StaggeredDrawer";
 import { useUpdateRoom, useUploadImage } from "@/hooks/queries/useRoomQueries";
@@ -117,7 +117,7 @@ export default function EditRoomSidebar({
               size="sm"
               variant="bordered"
               className="cursor-pointer border-line"
-              startContent={<ImageUp size={16} aria-hidden="true" />}
+              startContent={<GallerySendIcon size={16} aria-hidden="true" />}
               isDisabled={busy}
             >
               {isUploading ? "Uploading..." : "Change image"}
@@ -137,7 +137,7 @@ export default function EditRoomSidebar({
                 size="sm"
                 variant="light"
                 color="danger"
-                startContent={<Trash2 size={16} aria-hidden="true" />}
+                startContent={<TrashBinMinimalisticIcon size={16} aria-hidden="true" />}
                 isDisabled={busy}
                 onPress={() => {
                   setPreview(null);

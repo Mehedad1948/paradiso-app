@@ -5,7 +5,7 @@ import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Switch } from "@heroui/switch";
-import { Check, Plus, X } from "lucide-react";
+import { AddIcon, CheckIcon, CloseIcon } from "@solar-icons/react/linear";
 import { CHAT_LIMITS, type ChatPollInputs } from "@/types/chat";
 import MoviePoster from "../../components/MoviePoster";
 import { useChat } from "../ChatContext";
@@ -136,7 +136,7 @@ export default function PollComposerDialog({
                       <MoviePoster path={movie.poster_path} size="w92" width={56} height={84} className="h-[84px] w-14" />
                       {chosen && (
                         <span className="absolute right-1 top-1 flex size-5 items-center justify-center rounded-full bg-accent text-on-accent">
-                          <Check size={12} strokeWidth={3} />
+                          <CheckIcon size={12} strokeWidth={3} />
                         </span>
                       )}
                     </button>
@@ -180,7 +180,7 @@ export default function PollComposerDialog({
                     onClick={() => setOptions((current) => current.filter((entry) => entry.key !== item.key))}
                     className="flex size-9 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface hover:text-ink disabled:opacity-30"
                   >
-                    <X size={16} />
+                    <CloseIcon size={16} />
                   </button>
                 </div>
               );
@@ -191,7 +191,7 @@ export default function PollComposerDialog({
                 size="sm"
                 variant="light"
                 className="w-fit font-semibold"
-                startContent={<Plus size={16} />}
+                startContent={<AddIcon size={16} />}
                 onPress={() => setOptions((current) => [...current, option()])}
               >
                 Add option

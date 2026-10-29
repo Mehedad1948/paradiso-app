@@ -1,6 +1,6 @@
 "use client";
 import type { ReactNode } from "react";
-import { CircleDashed, UsersRound } from "lucide-react";
+import { CircleDashedIcon, UsersGroupTwoRoundedIcon } from "@solar-icons/react/linear";
 
 function FilterChip({
   active,
@@ -60,7 +60,7 @@ export default function RoomQuickFilters({
         active={watchedTogether}
         disabled={disabled}
         onToggle={() => onChange({ watchedTogether: !watchedTogether })}
-        icon={<UsersRound size={15} aria-hidden="true" />}
+        icon={<UsersGroupTwoRoundedIcon size={15} aria-hidden="true" />}
       >
         Watched together
       </FilterChip>
@@ -69,7 +69,7 @@ export default function RoomQuickFilters({
           active={unrated}
           disabled={disabled}
           onToggle={() => onChange({ unrated: !unrated })}
-          icon={<CircleDashed size={15} aria-hidden="true" />}
+          icon={<CircleDashedIcon size={15} aria-hidden="true" />}
         >
           Unrated by me
           {unratedCount !== undefined && (

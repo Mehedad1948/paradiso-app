@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
-import { Lock } from "lucide-react";
+import { LockIcon } from "@solar-icons/react/linear";
 import { authApi } from "@/lib/api/auth";
 import { useAuthForm } from "@/hooks/auth/useAuthForm";
 import { startResetCooldown, useResendCooldown } from "@/hooks/auth/useResendCooldown";
@@ -79,7 +79,7 @@ export default function AuthFlow({ initialView, reason }: { initialView: "sign-i
       >
         {eyebrow && (
           <p className="mb-3 inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-sm font-medium text-accent">
-            <Lock size={14} aria-hidden="true" /> {eyebrow}
+            <LockIcon size={14} aria-hidden="true" /> {eyebrow}
           </p>
         )}
         {view === "sign-in" && <SignInView flow={flow} />}

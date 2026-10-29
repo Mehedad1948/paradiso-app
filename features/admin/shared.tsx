@@ -5,7 +5,7 @@ import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
 import { addToast } from "@heroui/toast";
-import { Search } from "lucide-react";
+import { MagnifierIcon } from "@solar-icons/react/linear";
 import { useDebounce } from "use-debounce";
 import { useImportFilm, useTmdbSearch } from "@/hooks/queries/useAdminQueries";
 import { useLibrarySearch } from "@/hooks/queries/useCurationQueries";
@@ -250,7 +250,7 @@ export function MoviePicker({
         placeholder={source === "library" ? "Search the library by title…" : "Search TMDb by title…"}
         aria-label="Film title"
         maxLength={100}
-        startContent={<Search size={18} className="text-muted" aria-hidden />}
+        startContent={<MagnifierIcon size={18} className="text-muted" aria-hidden />}
         endContent={loading ? <Spinner size="sm" /> : null}
         isClearable
         onClear={() => setTerm("")}

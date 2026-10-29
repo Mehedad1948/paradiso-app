@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import clsx from "clsx";
-import { ArrowLeft, ChevronDown, ExternalLink, Share2, UserRound, X } from "lucide-react";
+import { AltArrowDownIcon, ArrowLeftIcon, CloseIcon, ShareCircleIcon, SquareArrowRightUpIcon, UserRoundedIcon } from "@solar-icons/react/linear";
 import BubbleMenu from "@/components/ui/BubbleMenu";
 import PopTag from "@/components/ui/PopTag";
 import { shareItems } from "@/components/ui/shareItems";
@@ -101,7 +101,7 @@ function Biography({ person }: { person: Person }) {
           className="mt-3 inline-flex items-center gap-1 rounded-full text-[14px] font-semibold text-accent hover:opacity-80"
         >
           {open ? "Show less" : "Read more"}
-          <ChevronDown size={16} aria-hidden="true" className={clsx("transition-transform duration-300", open && "rotate-180")} />
+          <AltArrowDownIcon size={16} aria-hidden="true" className={clsx("transition-transform duration-300", open && "rotate-180")} />
         </button>
       )}
     </section>
@@ -114,7 +114,7 @@ function Missing({ error, retry }: { error?: Error; retry?: () => void }) {
   return (
     <div className="flex flex-col items-center gap-3 py-16 text-center">
       <span className="flex size-16 items-center justify-center rounded-full border border-line text-accent">
-        <UserRound size={26} aria-hidden="true" />
+        <UserRoundedIcon size={26} aria-hidden="true" />
       </span>
       <p className="text-lg font-semibold tracking-[-0.02em]">No one by that name in the archive</p>
       <p className="max-w-[340px] text-[15px] text-muted">We couldn&apos;t find this person. The link may be mistyped.</p>
@@ -258,7 +258,7 @@ function PersonView({ id }: { id: number }) {
                 rel="noopener noreferrer"
                 className={quiet}
               >
-                IMDb <ExternalLink size={15} aria-hidden="true" />
+                IMDb <SquareArrowRightUpIcon size={15} aria-hidden="true" />
               </a>
             )}
             <BubbleMenu
@@ -271,7 +271,7 @@ function PersonView({ id }: { id: number }) {
               endAngle={300}
               radius={72}
             >
-              {(open) => (open ? <X size={18} strokeWidth={1.75} aria-hidden="true" /> : <Share2 size={17} aria-hidden="true" />)}
+              {(open) => (open ? <CloseIcon size={18} strokeWidth={1.75} aria-hidden="true" /> : <ShareCircleIcon size={17} aria-hidden="true" />)}
             </BubbleMenu>
           </div>
         </div>
@@ -326,7 +326,7 @@ export default function PersonPage() {
     >
       <div className="relative z-10">
         <HeroButton label="Back" onPress={back}>
-          <ArrowLeft size={19} aria-hidden="true" />
+          <ArrowLeftIcon size={19} aria-hidden="true" />
         </HeroButton>
       </div>
       {id == null ? <Missing /> : <PersonView key={id} id={id} />}

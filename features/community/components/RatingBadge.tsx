@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { Star } from "lucide-react";
+import { StarIcon } from "@solar-icons/react/linear";
 import { formatRating, tone, verdict } from "../format";
 
 /** The personal score as a colored pill: star, number, verdict. */
@@ -23,7 +23,7 @@ export default function RatingBadge({
         className,
       )}
     >
-      <Star size={size === "lg" ? 17 : 15} className="fill-current" aria-hidden="true" />
+      <StarIcon size={size === "lg" ? 17 : 15} className="fill-current" aria-hidden="true" />
       <span className="tabular-nums">{formatRating(value)}</span>
       <span className="font-medium opacity-80">/10</span>
       <span aria-hidden="true" className={clsx("border-l border-white/40 pl-1.5 font-medium", size === "md" && "max-[420px]:hidden")}>

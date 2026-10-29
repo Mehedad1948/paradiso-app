@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Check, ShieldCheck, X } from "lucide-react";
+import { CheckIcon, CloseIcon, ShieldCheckIcon } from "@solar-icons/react/linear";
 import { Spinner } from "@heroui/spinner";
 import { addToast } from "@heroui/toast";
 import UserAvatar from "@/components/ui/UserAvatar";
@@ -69,7 +69,7 @@ function Row({ invitation }: { invitation: Invitation }) {
           title="Reject"
           className="flex size-9 items-center justify-center rounded-full border border-line text-muted outline-none transition-colors hover:border-danger/40 hover:bg-danger/10 hover:text-danger focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
         >
-          {action.isPending && answer === "reject" ? <Spinner size="sm" color="current" classNames={{ wrapper: "size-4" }} /> : <X size={17} aria-hidden="true" />}
+          {action.isPending && answer === "reject" ? <Spinner size="sm" color="current" classNames={{ wrapper: "size-4" }} /> : <CloseIcon size={17} aria-hidden="true" />}
         </button>
         <button
           type="button"
@@ -79,7 +79,7 @@ function Row({ invitation }: { invitation: Invitation }) {
           title="Approve"
           className="flex size-9 items-center justify-center rounded-full bg-ink text-canvas outline-none transition-opacity hover:opacity-85 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:opacity-50"
         >
-          {action.isPending && answer === "approve" ? <Spinner size="sm" color="current" classNames={{ wrapper: "size-4" }} /> : <Check size={17} aria-hidden="true" />}
+          {action.isPending && answer === "approve" ? <Spinner size="sm" color="current" classNames={{ wrapper: "size-4" }} /> : <CheckIcon size={17} aria-hidden="true" />}
         </button>
       </div>
     </div>
@@ -110,7 +110,7 @@ export default function ApprovalQueue({ roomId }: { roomId: string }) {
               id="approval-queue-title"
               className="flex items-center gap-2 px-3.5 pb-1 pt-3 text-[13px] font-semibold text-ink"
             >
-              <ShieldCheck size={16} aria-hidden="true" className="text-warning-600 dark:text-warning" />
+              <ShieldCheckIcon size={16} aria-hidden="true" className="text-warning-600 dark:text-warning" />
               Waiting for your approval
               <span className="ml-auto rounded-full bg-warning/20 px-2 py-0.5 text-[11px] font-bold tabular-nums text-warning-700 dark:text-warning">
                 {total}

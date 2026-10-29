@@ -1,6 +1,6 @@
 "use client";
 
-import { Download } from "lucide-react";
+import { DownloadMinimalisticIcon } from "@solar-icons/react/linear";
 import { addToast } from "@heroui/toast";
 import clsx from "clsx";
 
@@ -36,7 +36,7 @@ export function InstallAppButton({ className }: { className?: string }) {
         className,
       )}
     >
-      <Download size={20} aria-hidden="true" />
+      <DownloadMinimalisticIcon size={20} aria-hidden="true" />
     </button>
   );
 }

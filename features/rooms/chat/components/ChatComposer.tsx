@@ -3,7 +3,7 @@ import { forwardRef, useImperativeHandle, useLayoutEffect, useRef, useState } fr
 import clsx from "clsx";
 import { Button } from "@heroui/button";
 import { Tooltip } from "@heroui/tooltip";
-import { Clapperboard, CornerUpLeft, Pencil, SendHorizontal, Smile, Vote, X } from "lucide-react";
+import { ChecklistMinimalisticIcon, ClapperboardIcon, CloseIcon, PenIcon, ReplyIcon, SendSquareIcon, SmileCircleIcon } from "@solar-icons/react/linear";
 import { insertMention, mentionQueryAt, mentionedUserIds } from "@/lib/chat/mentions";
 import { CHAT_LIMITS, type ChatMessage } from "@/types/chat";
 import MoviePoster from "../../components/MoviePoster";
@@ -175,9 +175,9 @@ export default forwardRef<
       {mode && (
         <div className="mb-2 flex items-center gap-3 rounded-lg bg-surface px-3 py-2 text-sm">
           {editing ? (
-            <Pencil size={16} className="shrink-0 text-accent" aria-hidden="true" />
+            <PenIcon size={16} className="shrink-0 text-accent" aria-hidden="true" />
           ) : (
-            <CornerUpLeft size={16} className="shrink-0 text-accent" aria-hidden="true" />
+            <ReplyIcon size={16} className="shrink-0 text-accent" aria-hidden="true" />
           )}
           <span className="min-w-0 flex-1">
             <span className="block font-semibold">
@@ -193,7 +193,7 @@ export default forwardRef<
             onClick={() => onModeChange(null)}
             className="flex size-7 items-center justify-center rounded-md text-muted hover:bg-elevated hover:text-ink"
           >
-            <X size={16} />
+            <CloseIcon size={16} />
           </button>
         </div>
       )}
@@ -209,7 +209,7 @@ export default forwardRef<
                 onClick={() => setAttachments((current) => current.filter((entry) => entry.key !== item.key))}
                 className="flex size-5 items-center justify-center rounded text-muted hover:text-ink"
               >
-                <X size={14} />
+                <CloseIcon size={14} />
               </button>
             </span>
           ))}
@@ -258,19 +258,19 @@ export default forwardRef<
               }
             >
               <button type="button" aria-label="Share a film" title="Share a film" className={toolClass}>
-                <Clapperboard size={19} />
+                <ClapperboardIcon size={19} />
               </button>
             </MoviePicker>
             <Tooltip content="Start a poll" delay={400} closeDelay={0}>
               <button type="button" aria-label="Start a poll" className={toolClass} onClick={onOpenPoll}>
-                <Vote size={19} />
+                <ChecklistMinimalisticIcon size={19} />
               </button>
             </Tooltip>
           </>
         )}
         <EmojiPicker label="Insert an emoji" placement="top-start" onPick={insertAtCaret}>
           <button type="button" aria-label="Insert an emoji" className={clsx(toolClass, "max-sm:hidden")}>
-            <Smile size={19} />
+            <SmileCircleIcon size={19} />
           </button>
         </EmojiPicker>
         <textarea
@@ -296,7 +296,7 @@ export default forwardRef<
           onPress={submit}
           className="size-9 min-w-9 shrink-0 rounded-lg bg-ink text-canvas"
         >
-          <SendHorizontal size={18} aria-hidden="true" />
+          <SendSquareIcon size={18} aria-hidden="true" />
         </Button>
       </div>
       <div className="mt-1.5 flex justify-between gap-3 px-1 text-xs text-muted">

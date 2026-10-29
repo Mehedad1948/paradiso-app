@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import clsx from "clsx";
 import { AnimatePresence, motion, useAnimate, useReducedMotion } from "framer-motion";
-import { Bell } from "lucide-react";
+import { BellIcon } from "@solar-icons/react/linear";
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/popover";
 import { useQueryClient } from "@tanstack/react-query";
 import { useUnreadNotificationCount } from "@/hooks/queries/useNotificationQueries";
@@ -80,7 +80,7 @@ export default function NotificationBell({ className }: { className?: string }) 
           )}
         >
           <span ref={bell} className="inline-flex origin-[50%_15%]">
-            <Bell size={20} aria-hidden="true" strokeWidth={unread ? 2.25 : 2} />
+            <BellIcon size={20} aria-hidden="true" strokeWidth={unread ? 2.25 : 2} />
           </span>
           <AnimatePresence>
             {unread > 0 && (

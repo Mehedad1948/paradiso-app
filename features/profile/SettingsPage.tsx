@@ -2,7 +2,7 @@
 import { useEffect, type ReactNode } from "react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowRightUpIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { profileHref } from "@/features/community/format";
@@ -78,7 +78,7 @@ export default function SettingsPage() {
               <span className="block max-w-[180px] truncate text-sm font-semibold">{user.username}</span>
               <span className="flex items-center gap-1 text-xs font-normal text-muted transition-colors group-hover:text-ink">
                 View public profile
-                <ArrowUpRight
+                <ArrowRightUpIcon
                   size={13}
                   aria-hidden="true"
                   className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"

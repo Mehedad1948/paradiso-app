@@ -2,7 +2,7 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import clsx from "clsx";
-import { DoorOpen } from "lucide-react";
+import { Login2Icon } from "@solar-icons/react/linear";
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/popover";
 
 const loadPanel = () => import("./InviteToRoomPanel");
@@ -47,7 +47,7 @@ export default function InviteToRoomButton({
             className,
           )}
         >
-          <DoorOpen size={18} aria-hidden="true" />
+          <Login2Icon size={18} aria-hidden="true" />
           Invite to room
         </button>
       </PopoverTrigger>

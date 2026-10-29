@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { ChevronDown, Pin, PinOff } from "lucide-react";
+import { AltArrowDownIcon, PinCircleIcon, PinIcon } from "@solar-icons/react/linear";
 import type { ChatMessage } from "@/types/chat";
 import { useChat } from "../ChatContext";
 import { summarize } from "../format";
@@ -21,7 +21,7 @@ export default function ChatPinnedBar({ pinned }: { pinned: ChatMessage[] }) {
         aria-label={`Pinned message from ${current.author.username}. Show in chat`}
       >
         <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-warning/20 text-warning">
-          <Pin size={16} aria-hidden="true" />
+          <PinIcon size={16} aria-hidden="true" />
         </span>
         <span className="min-w-0">
           <span className="block text-[11px] font-semibold uppercase tracking-[0.09em] text-warning">
@@ -41,7 +41,7 @@ export default function ChatPinnedBar({ pinned }: { pinned: ChatMessage[] }) {
           onClick={() => actions.pin(current.id, false)}
           className="flex w-11 items-center justify-center text-muted transition-colors hover:text-ink"
         >
-          <PinOff size={16} />
+          <PinCircleIcon size={16} />
         </button>
       )}
       {pinned.length > 1 && (
@@ -52,7 +52,7 @@ export default function ChatPinnedBar({ pinned }: { pinned: ChatMessage[] }) {
           onClick={() => setIndex((value) => (value + 1) % pinned.length)}
           className="flex w-11 items-center justify-center border-l border-line text-muted transition-colors hover:text-ink"
         >
-          <ChevronDown size={18} />
+          <AltArrowDownIcon size={18} />
         </button>
       )}
     </div>

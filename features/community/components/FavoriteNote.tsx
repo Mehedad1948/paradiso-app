@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, type KeyboardEvent } from "react";
 import clsx from "clsx";
-import { Quote } from "lucide-react";
+import { QuoteIcon } from "@solar-icons/react/linear";
 import { MAX_FAVORITE_NOTE_LENGTH } from "@/types/community";
 
 const RING = 2 * Math.PI * 9;
@@ -100,7 +100,7 @@ export function NoteInput({
         className,
       )}
     >
-      <Quote
+      <QuoteIcon
         size={14}
         aria-hidden="true"
         className="pointer-events-none absolute left-3 top-3 fill-current text-accent/50"

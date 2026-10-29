@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { ModalBody, ModalContent, ModalHeader } from "@heroui/modal";
-import { ChevronDown, Maximize2, X } from "lucide-react";
+import { AltArrowDownIcon, CloseIcon, MaximizeIcon } from "@solar-icons/react/linear";
 import ResponsiveDialog from "@/components/ui/ResponsiveDialog";
 import { useMovieDetails } from "@/hooks/queries/useMovieQueries";
 import MovieDetailsView, { HeroButton } from "./MovieDetailsView";
@@ -69,11 +69,11 @@ function MovieOverlay({ movieId }: { movieId: string }) {
                   onPress={() => window.location.reload()}
                   className="max-md:hidden"
                 >
-                  <Maximize2 size={16} aria-hidden="true" />
+                  <MaximizeIcon size={16} aria-hidden="true" />
                 </HeroButton>
                 <HeroButton label="Close" onPress={close}>
-                  <ChevronDown size={20} aria-hidden="true" className="md:hidden" />
-                  <X size={19} aria-hidden="true" className="max-md:hidden" />
+                  <AltArrowDownIcon size={20} aria-hidden="true" className="md:hidden" />
+                  <CloseIcon size={19} aria-hidden="true" className="max-md:hidden" />
                 </HeroButton>
               </>
             }

@@ -6,7 +6,7 @@ import { AvatarGroup } from "@heroui/avatar";
 import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
 import { addToast } from "@heroui/toast";
-import { ArrowDown, Clapperboard, Vote, X } from "lucide-react";
+import { ArrowDownIcon, ChecklistMinimalisticIcon, ClapperboardIcon, CloseIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import { useChatPinned, useChatUnread } from "@/hooks/queries/useChatQueries";
 import { chatApi } from "@/lib/api/chat";
@@ -293,7 +293,7 @@ export default function RoomChat({
               onClick={onClose}
               className="flex size-9 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface hover:text-ink"
             >
-              <X size={20} />
+              <CloseIcon size={20} />
             </button>
           </div>
         </header>
@@ -352,7 +352,7 @@ export default function RoomChat({
                       {roomMovies.size > 1 && (
                         <Button
                           className="min-h-[46px] rounded-md bg-ink text-[15px] font-semibold text-canvas"
-                          startContent={<Vote size={18} aria-hidden="true" />}
+                          startContent={<ChecklistMinimalisticIcon size={18} aria-hidden="true" />}
                           onPress={() => setPoll("watch")}
                         >
                           What do we watch?
@@ -360,7 +360,7 @@ export default function RoomChat({
                       )}
                       <Button
                         className="min-h-[46px] rounded-md border border-line bg-surface text-[15px] font-semibold text-ink"
-                        startContent={<Clapperboard size={18} aria-hidden="true" />}
+                        startContent={<ClapperboardIcon size={18} aria-hidden="true" />}
                         onPress={() => composer.current?.focus()}
                       >
                         Say hello
@@ -397,7 +397,7 @@ export default function RoomChat({
                 unseen ? "border-transparent bg-ink text-canvas" : "border-line bg-elevated text-ink",
               )}
             >
-              <ArrowDown size={16} aria-hidden="true" />
+              <ArrowDownIcon size={16} aria-hidden="true" />
               {unseen ? `${unseen} new ${unseen === 1 ? "message" : "messages"}` : "Back to now"}
             </button>
           )}

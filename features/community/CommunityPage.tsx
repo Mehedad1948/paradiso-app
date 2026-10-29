@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import clsx from "clsx";
 import { Button } from "@heroui/button";
-import { Film, Megaphone, PenLine, Star, Users, X } from "lucide-react";
+import { CloseIcon, Pen2Icon, ReelIcon, StarIcon, UsersGroupRoundedIcon, VolumeLoudIcon } from "@solar-icons/react/linear";
 import SpecularBorder from "@/components/ui/SpecularBorder";
 import type { FeedScope } from "@/types/community";
 import { useViewer, type Viewer } from "./hooks/useViewer";
@@ -61,7 +61,7 @@ export default function CommunityPage() {
                   href="/community"
                   className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-1.5 text-sm font-semibold transition-colors hover:border-muted"
                 >
-                  <X size={15} aria-hidden="true" /> Clear
+                  <CloseIcon size={15} aria-hidden="true" /> Clear
                 </Link>
               </div>
             ) : (
@@ -91,7 +91,7 @@ export default function CommunityPage() {
                 onClick={() => setComposing(true)}
                 className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-[inherit] bg-ink/[0.04] px-6 text-base font-semibold text-ink shadow-[0_10px_24px_-14px_rgba(0,0,0,0.45)] backdrop-blur-sm transition-[background-color,transform] duration-200 hover:bg-ink/[0.08] active:scale-[0.97] motion-reduce:transition-none"
               >
-                <PenLine size={18} aria-hidden="true" />
+                <Pen2Icon size={18} aria-hidden="true" />
                 New post
               </button>
             </SpecularBorder>
@@ -111,7 +111,7 @@ export default function CommunityPage() {
           onPress={() => setComposing(true)}
           className="fixed bottom-6 right-5 z-40 h-14 w-14 rounded-full bg-accent text-on-accent shadow-[0_12px_32px_rgb(0_0_0_/_28%)] lg:hidden"
         >
-          <PenLine size={22} />
+          <Pen2Icon size={22} />
         </Button>
       )}
       {composing && <PostComposer onClose={() => setComposing(false)} />}
@@ -178,7 +178,7 @@ function EmptyFeed({
   return (
     <div className="mx-auto flex max-w-[360px] flex-col items-center gap-3">
       <span className="flex h-14 w-14 items-center justify-center rounded-full bg-surface text-accent">
-        <Film size={24} aria-hidden="true" />
+        <ReelIcon size={24} aria-hidden="true" />
       </span>
       <p className="text-lg font-semibold tracking-[-0.02em]">{title}</p>
       <p className="text-[15px] text-muted">{body}</p>
@@ -193,10 +193,10 @@ function EmptyFeed({
 
 function GuideCard() {
   const steps = [
-    { icon: Star, title: "Rate it out of ten", body: "Your own score, to one decimal. Room votes stay separate." },
-    { icon: PenLine, title: "Say why", body: "A few honest lines beat a plot summary. Warn before spoilers." },
-    { icon: Users, title: "Keep it close", body: "Post to a room and only its members see it." },
-    { icon: Megaphone, title: "Promote your room", body: "Own a room? Attach an invite so readers can join." },
+    { icon: StarIcon, title: "Rate it out of ten", body: "Your own score, to one decimal. Room votes stay separate." },
+    { icon: Pen2Icon, title: "Say why", body: "A few honest lines beat a plot summary. Warn before spoilers." },
+    { icon: UsersGroupRoundedIcon, title: "Keep it close", body: "Post to a room and only its members see it." },
+    { icon: VolumeLoudIcon, title: "Promote your room", body: "Own a room? Attach an invite so readers can join." },
   ];
   return (
     <div className="rounded-[10px] border border-line bg-surface/60 p-5">

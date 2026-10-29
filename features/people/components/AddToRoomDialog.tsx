@@ -6,7 +6,7 @@ import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@herou
 import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
 import { addToast } from "@heroui/toast";
-import { Check, Globe2, Lock } from "lucide-react";
+import { CheckIcon, GlobalIcon, LockIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import { useMyRooms } from "@/hooks/queries/useCommunityQueries";
 import { useMe } from "@/hooks/queries/useMe";
@@ -75,15 +75,15 @@ export default function AddToRoomDialog({ credit, onClose }: { credit: PersonCre
                       className="flex min-h-[52px] w-full items-center gap-3 rounded-xl border border-line bg-surface px-4 text-left text-[15px] font-semibold transition-colors hover:border-muted disabled:cursor-default disabled:opacity-70"
                     >
                       {room.isPublic ? (
-                        <Globe2 size={16} aria-hidden="true" className="shrink-0 text-muted" />
+                        <GlobalIcon size={16} aria-hidden="true" className="shrink-0 text-muted" />
                       ) : (
-                        <Lock size={16} aria-hidden="true" className="shrink-0 text-muted" />
+                        <LockIcon size={16} aria-hidden="true" className="shrink-0 text-muted" />
                       )}
                       <span className="min-w-0 flex-1 truncate">{room.name}</span>
                       {pending === room.id ? (
                         <Spinner size="sm" />
                       ) : done ? (
-                        <Check size={18} aria-label="Added" className="shrink-0 text-accent" />
+                        <CheckIcon size={18} aria-label="Added" className="shrink-0 text-accent" />
                       ) : null}
                     </button>
                   </li>

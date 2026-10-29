@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import clsx from "clsx";
 import { Input } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
-import { SearchIcon, X } from "lucide-react";
+import { CloseIcon, MagnifierIcon } from "@solar-icons/react/linear";
 import { useDebounce } from "use-debounce";
 import { useMovieSearch, useRoom } from "@/hooks/queries/useRoomQueries";
 import { useResolveMovie } from "@/hooks/queries/useCommunityQueries";
@@ -143,7 +143,7 @@ export default function FilmPicker({
             aria-label="Choose a different film"
             className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface hover:text-ink disabled:opacity-50"
           >
-            <X size={18} />
+            <CloseIcon size={18} />
           </button>
         )}
       </div>
@@ -169,7 +169,7 @@ export default function FilmPicker({
         }}
         isDisabled={disabled}
         classNames={{ inputWrapper: "min-h-[48px] border border-line bg-surface shadow-none", input: "text-base" }}
-        startContent={<SearchIcon size={19} className="text-default-400" />}
+        startContent={<MagnifierIcon size={19} className="text-default-400" />}
         endContent={search.isFetching && <Spinner size="sm" />}
       />
       {showResults && (

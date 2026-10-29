@@ -8,7 +8,7 @@ import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@herou
 import { Spinner } from "@heroui/spinner";
 import { Switch } from "@heroui/switch";
 import { addToast } from "@heroui/toast";
-import { Clapperboard, Globe2, ImagePlus, Lock, Megaphone, RefreshCw, Star, X } from "lucide-react";
+import { ClapperboardIcon, CloseIcon, GalleryAddIcon, GlobalIcon, LockIcon, RefreshIcon, StarIcon, VolumeLoudIcon } from "@solar-icons/react/linear";
 import {
   useCreatePost,
   useUpdatePost,
@@ -243,7 +243,7 @@ export default function PostComposer({
                     size="sm"
                     variant="light"
                     isDisabled={busy}
-                    startContent={<ImagePlus size={17} />}
+                    startContent={<GalleryAddIcon size={17} />}
                     onPress={() => fileInput.current?.click()}
                     className="font-semibold text-accent"
                   >
@@ -255,7 +255,7 @@ export default function PostComposer({
                     size="sm"
                     variant="light"
                     isDisabled={busy}
-                    startContent={<Clapperboard size={17} />}
+                    startContent={<ClapperboardIcon size={17} />}
                     onPress={() => setTagFilm(true)}
                     className="font-semibold text-accent"
                   >
@@ -290,7 +290,7 @@ export default function PostComposer({
                     onPress={() => fileInput.current?.click()}
                     className="bg-media/80 text-media-foreground backdrop-blur"
                   >
-                    <RefreshCw size={15} />
+                    <RefreshIcon size={15} />
                   </Button>
                   {/* The backend can't clear a saved image, so only a new upload can be removed. */}
                   {(!editing || image.url !== post?.imageUrl) && (
@@ -305,7 +305,7 @@ export default function PostComposer({
                       }
                       className="bg-media/80 text-media-foreground backdrop-blur"
                     >
-                      <X size={16} />
+                      <CloseIcon size={16} />
                     </Button>
                   )}
                 </div>
@@ -341,7 +341,7 @@ export default function PostComposer({
                   <Button
                     variant="bordered"
                     isDisabled={busy}
-                    startContent={<Star size={17} aria-hidden="true" />}
+                    startContent={<StarIcon size={17} aria-hidden="true" />}
                     onPress={() => setRating(7)}
                     className="self-start border-line font-semibold"
                   >
@@ -363,11 +363,11 @@ export default function PostComposer({
               <legend className="mb-2 text-sm font-semibold">Who can see it</legend>
               <div role="radiogroup" aria-label="Who can see it" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
                 <Pill selected={roomId === null} onSelect={() => setRoomId(null)} disabled={busy}>
-                  <Globe2 size={15} aria-hidden="true" /> Everyone
+                  <GlobalIcon size={15} aria-hidden="true" /> Everyone
                 </Pill>
                 {viewer.rooms.map((room) => (
                   <Pill key={room.id} selected={roomId === room.id} onSelect={() => setRoomId(room.id)} disabled={busy}>
-                    {room.isPublic ? <Globe2 size={15} aria-hidden="true" /> : <Lock size={15} aria-hidden="true" />}
+                    {room.isPublic ? <GlobalIcon size={15} aria-hidden="true" /> : <LockIcon size={15} aria-hidden="true" />}
                     <span className="truncate">{room.name}</span>
                   </Pill>
                 ))}
@@ -386,7 +386,7 @@ export default function PostComposer({
             <div className="rounded-[10px] border border-line bg-surface/60 p-4">
               <Switch size="sm" isSelected={promote} onValueChange={setPromote} isDisabled={busy}>
                 <span className="inline-flex items-center gap-2 text-[15px] font-semibold">
-                  <Megaphone size={16} aria-hidden="true" /> Promote one of your rooms
+                  <VolumeLoudIcon size={16} aria-hidden="true" /> Promote one of your rooms
                 </span>
               </Switch>
               {promote && (
