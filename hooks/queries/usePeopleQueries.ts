@@ -30,16 +30,16 @@ export function usePrefetchPerson() {
 }
 
 /**
- * Opens a film from a filmography. Most of a filmography isn't in the library yet, so the film is
- * added first, which needs an account; the credit then remembers its new id for the next click.
+ * Finds a credit's film in the library, adding it first when it isn't there yet (which needs an
+ * account). The credit remembers its new id, so the next use skips the request.
  */
-export function useOpenCredit(personId: number) {
-  const router = useRouter();
+export function useResolveCredit(personId: number) {
   const client = useQueryClient();
   const resolve = useMutation({
-    mutationFn: (credit: PersonCredit) => panelApi.resolveMovie(credit.tmdbId),
+    mutationFn: async (credit: PersonCredit) => credit.movieId ?? (await panelApi.resolveMovie(credit.tmdbId)).id,
     retry: false,
-    onSuccess: ({ id }, credit) => {
+    onSuccess: (id, credit) => {
+      if (credit.movieId) return;
       client.setQueryData<Person>(panelKeys.person(personId), (person) => {
         if (!person) return person;
         const link = (credits: PersonCredit[]) =>
@@ -54,17 +54,26 @@ export function useOpenCredit(personId: number) {
         };
       });
       rememberMoviePreview({ id, title: credit.title, poster_path: credit.poster_path, release_date: credit.release_date });
-      router.push(movieHref(id), { scroll: false });
     },
     onError: (error) => addToast({ title: error.message, color: "danger" }),
   });
+  return { resolve: resolve.mutateAsync, resolving: resolve.isPending ? resolve.variables?.tmdbId : undefined };
+}
+
+/**
+ * Opens a film from a filmography. Most of a filmography isn't in the library yet, so the film is
+ * added first, which needs an account; the credit then remembers its new id for the next click.
+ */
+export function useOpenCredit(personId: number) {
+  const router = useRouter();
+  const { resolve, resolving } = useResolveCredit(personId);
 
   const open = useAuthAction(
     (credit: PersonCredit) => {
-      if (!resolve.isPending) resolve.mutate(credit);
+      if (resolving === undefined) resolve(credit).then((id) => router.push(movieHref(id), { scroll: false }), () => {});
     },
     { reason: "Sign in to open this film. It isn't on Paradiso yet, and opening it adds it." },
   );
 
-  return { open, opening: resolve.isPending ? resolve.variables?.tmdbId : undefined };
+  return { open, opening: resolving };
 }

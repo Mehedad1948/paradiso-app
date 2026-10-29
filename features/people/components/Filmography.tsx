@@ -1,29 +1,45 @@
 "use client";
-import { useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import clsx from "clsx";
 import { Popcorn } from "lucide-react";
 import { Spinner } from "@heroui/spinner";
+import { useAuthAction } from "@/components/auth/gate";
 import { imageSrc, tone } from "@/features/community/format";
 import MovieLink from "@/features/movies/MovieLink";
 import { releaseYear, scoreLabel } from "@/features/movies/format";
-import { useOpenCredit } from "@/hooks/queries/usePeopleQueries";
+import { useMe } from "@/hooks/queries/useMe";
+import { useOpenCredit, useResolveCredit } from "@/hooks/queries/usePeopleQueries";
+import { useAddToWatchlist } from "@/hooks/queries/useWatchlistQueries";
+import type { ResolvedMovie } from "@/types/community";
 import type { Person, PersonCredit } from "@/types/people";
 import { creditRole, groupCredits, topRated } from "../format";
+import CreditActions, { useCompactActions, warmCreditDialogs, type CreditAction } from "./CreditActions";
 
-const LibraryMark = ({ className }: { className?: string }) => (
-  <span aria-hidden="true" className={clsx("block size-2 rounded-full bg-accent ring-2 ring-white/80 dark:ring-black/50", className)} />
-);
+// Only opened by an action, so neither is part of the page's own download.
+const PostComposer = dynamic(() => import("@/features/community/components/PostComposer"), { ssr: false });
+const AddToRoomDialog = dynamic(() => import("./AddToRoomDialog"), { ssr: false });
 
-function CreditCard({
+const CreditCard = memo(function CreditCard({
   credit,
   index,
   opening,
+  compact,
+  saved,
+  warm,
   onOpen,
+  onAction,
 }: {
   credit: PersonCredit;
   index: number;
+  /** Working on the film: resolving it, or carrying out an action. */
   opening: boolean;
+  compact: boolean;
+  saved: boolean;
+  /** Fetch what the actions open, ahead of the first one. */
+  warm: boolean;
   onOpen: (credit: PersonCredit) => void;
+  onAction: (action: CreditAction, credit: PersonCredit) => void;
 }) {
   const [failed, setFailed] = useState(false);
   const src = imageSrc(credit.poster_path, "w300");
@@ -56,12 +72,6 @@ function CreditCard({
             {scoreLabel(rating)}
           </span>
         )}
-        {credit.movieId && (
-          <span title="On Paradiso" className="absolute right-2 top-2">
-            <LibraryMark />
-            <span className="sr-only">On Paradiso</span>
-          </span>
-        )}
         {opening && (
           <span className="absolute inset-0 grid place-items-center bg-black/45 backdrop-blur-[2px]">
             <Spinner size="sm" color="white" />
@@ -78,9 +88,15 @@ function CreditCard({
   );
 
   const card =
-    "group/credit block w-full rounded-xl text-left outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-4 focus-visible:ring-offset-background";
+    "block w-full rounded-xl text-left outline-none focus-visible:ring-2 focus-visible:ring-accent/60 focus-visible:ring-offset-4 focus-visible:ring-offset-background";
   return (
-    <li className="motion-safe:animate-poster-in" style={{ animationDelay: `${Math.min(index, 14) * 35}ms` }}>
+    <li
+      // The group is the item, not its link: the actions are the link's siblings, and either one hovered or focused reveals them.
+      // Raised while one is focused so a fanned-out menu clears the cards after it.
+      className="group/credit relative motion-safe:animate-poster-in focus-within:z-20"
+      style={{ animationDelay: `${Math.min(index, 14) * 35}ms` }}
+      onPointerEnter={warm ? warmCreditDialogs : undefined}
+    >
       {credit.movieId ? (
         <MovieLink
           movie={{ id: credit.movieId, title: credit.title, poster_path: credit.poster_path, release_date: credit.release_date }}
@@ -93,9 +109,10 @@ function CreditCard({
           {body}
         </button>
       )}
+      <CreditActions credit={credit} compact={compact} saved={saved} busy={opening} onAction={onAction} />
     </li>
   );
-}
+});
 
 const plural = (count: number) => `${count} ${count === 1 ? "film" : "films"}`;
 
@@ -113,10 +130,41 @@ const SHOWN = 20;
  */
 export default function Filmography({ person }: { person: Person }) {
   const { open, opening } = useOpenCredit(person.id);
-  const all = useMemo(() => filmsOf(person), [person]);
-  const films = useMemo(() => topRated(all, SHOWN), [all]);
+  const { resolve } = useResolveCredit(person.id);
+  const addToWatchlist = useAddToWatchlist();
+  const signedIn = !!useMe().data;
+  const compact = useCompactActions();
+  // Film being worked on by an action, films saved this visit (asking the server per card would cost a request each),
+  // and the dialogs an action can open.
+  const [acting, setActing] = useState<number | null>(null);
+  const [saved, setSaved] = useState<ReadonlySet<number>>(() => new Set());
+  const [posting, setPosting] = useState<ResolvedMovie | null>(null);
+  const [roomFor, setRoomFor] = useState<PersonCredit | null>(null);
+
+  // A room takes the TMDb id as it is; a post and the watchlist need the film in the library first.
+  const act = useAuthAction(
+    async (action: CreditAction, credit: PersonCredit) => {
+      if (action === "room") return setRoomFor(credit);
+      setActing(credit.tmdbId);
+      try {
+        const id = await resolve(credit);
+        if (action === "post") {
+          setPosting({ id, dbId: credit.tmdbId, title: credit.title, poster_path: credit.poster_path });
+        } else {
+          await addToWatchlist.mutateAsync({ movieId: id, title: credit.title });
+          setSaved((current) => new Set(current).add(credit.tmdbId));
+        }
+      } catch {
+        // Both requests already tell the viewer what went wrong.
+      } finally {
+        setActing(null);
+      }
+    },
+    { reason: "Sign in to save films, post about them or add them to your rooms" },
+  );
+  const onAction = useCallback((action: CreditAction, credit: PersonCredit) => void act(action, credit), [act]);
+  const films = useMemo(() => topRated(filmsOf(person), SHOWN), [person]);
   const groups = useMemo(() => groupCredits(films), [films]);
-  const inLibrary = films.some((credit) => credit.movieId);
 
   if (!films.length) return null;
   const id = `person-${person.id}-films`;
@@ -127,14 +175,6 @@ export default function Filmography({ person }: { person: Person }) {
         <h2 id={`${id}-title`} className="text-[26px] font-semibold tracking-[-0.03em] sm:text-[32px]">
           Filmography
         </h2>
-        <p className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-muted">
-          {all.length > films.length && <span>The {films.length} best rated of {plural(all.length)}</span>}
-          {inLibrary && (
-            <span className="inline-flex items-center gap-2">
-              <LibraryMark className="ring-0" /> On Paradiso
-            </span>
-          )}
-        </p>
       </div>
 
       <div className="mt-8 space-y-12">
@@ -161,14 +201,20 @@ export default function Filmography({ person }: { person: Person }) {
                   key={credit.tmdbId}
                   credit={credit}
                   index={index}
-                  opening={opening === credit.tmdbId}
+                  opening={opening === credit.tmdbId || acting === credit.tmdbId}
+                  compact={compact}
+                  saved={saved.has(credit.tmdbId)}
+                  warm={signedIn}
                   onOpen={open}
+                  onAction={onAction}
                 />
               ))}
             </ul>
           </section>
         ))}
       </div>
+      {posting && <PostComposer movie={posting} onClose={() => setPosting(null)} />}
+      {roomFor && <AddToRoomDialog credit={roomFor} onClose={() => setRoomFor(null)} />}
     </section>
   );
 }

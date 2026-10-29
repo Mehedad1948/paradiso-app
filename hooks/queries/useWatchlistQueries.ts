@@ -75,6 +75,25 @@ export function useToggleWatchlist(movieId: string, title: string) {
   });
 }
 
+/**
+ * Saves a film without needing to know beforehand whether it's saved (the call is idempotent), for
+ * lists of many films where asking each one's state would cost a request per row.
+ */
+export function useAddToWatchlist() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: ({ movieId }: { movieId: string; title: string }) => panelApi.addToWatchlist(movieId),
+    retry: false,
+    onSuccess: (_, { movieId, title }) => {
+      client.setQueryData(statusKey(movieId), { inWatchlist: true });
+      void client.invalidateQueries({ queryKey: panelKeys.watchlist });
+      void refreshAccountStats(client);
+      addToast({ title: `${title} added to your watchlist`, color: "success" });
+    },
+    onError: (error) => addToast({ title: error.message, color: "danger" }),
+  });
+}
+
 /** Drops the movie from the cached list at once; a failure puts it back by refetching. */
 export function useRemoveFromWatchlist() {
   const client = useQueryClient();

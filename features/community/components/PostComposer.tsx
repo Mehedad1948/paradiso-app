@@ -62,12 +62,15 @@ function Pill({
 export default function PostComposer({
   post,
   roomId: presetRoomId,
+  movie: presetMovie,
   onClose,
   onPosted,
 }: {
   post?: CommunityPost;
   /** Post into this room; the audience can't be changed. */
   roomId?: number;
+  /** Start with this film tagged, for posts begun from a film. */
+  movie?: ResolvedMovie;
   onClose: () => void;
   onPosted?: (post: CommunityPost) => void;
 }) {
@@ -79,9 +82,9 @@ export default function PostComposer({
   const upload = useUploadPostImage();
 
   const [movie, setMovie] = useState<ResolvedMovie | null>(
-    post?.movie ? { ...post.movie } : null,
+    post?.movie ? { ...post.movie } : (presetMovie ?? null),
   );
-  const [tagFilm, setTagFilm] = useState(!!post?.movie);
+  const [tagFilm, setTagFilm] = useState(!!(post?.movie ?? presetMovie));
   // A rating needs a film; null means the post isn't rated.
   const [rating, setRating] = useState<number | null>(post?.rating ?? null);
   const [text, setText] = useState(post?.text ?? "");

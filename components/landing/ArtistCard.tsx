@@ -24,12 +24,6 @@ const SHEEN: CSSProperties = {
   background:
     "linear-gradient(105deg, transparent calc(var(--sx, 35%) - 24%), rgba(255,255,255,0.5) var(--sx, 35%), transparent calc(var(--sx, 35%) + 24%))",
 };
-// The light that follows the cursor.
-const GLARE: CSSProperties = {
-  background:
-    "radial-gradient(circle at var(--mx, 30%) var(--my, 20%), rgba(255,255,255,0.4), rgba(255,255,255,0) 52%)",
-};
-
 const dayLabel = (artist: FeaturedArtist) =>
   artist.isToday ? "Today" : format(parseISO(artist.date), "MMM d");
 
@@ -49,9 +43,6 @@ export default function ArtistCard({ artist, active, eager }: Props) {
     if (!card || event.pointerType === "touch") return;
     const box = card.getBoundingClientRect();
     const x = ((event.clientX - box.left) / Math.max(1, box.width)) * 100;
-    const y = ((event.clientY - box.top) / Math.max(1, box.height)) * 100;
-    card.style.setProperty("--mx", `${x.toFixed(1)}%`);
-    card.style.setProperty("--my", `${y.toFixed(1)}%`);
     card.style.setProperty("--sx", `${(110 - x * 0.9).toFixed(1)}%`);
   };
 
@@ -132,7 +123,7 @@ export default function ArtistCard({ artist, active, eager }: Props) {
         )}
       </div>
 
-      {/* Glass: a static gloss, then the cursor-driven sheen and glare, which only show on hover. */}
+      {/* Glass: a static gloss, then the cursor-driven sheen, which only shows on hover. */}
       <span
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/[0.16] via-transparent to-transparent to-30% mix-blend-soft-light"
@@ -141,11 +132,6 @@ export default function ArtistCard({ artist, active, eager }: Props) {
         aria-hidden="true"
         style={SHEEN}
         className="pointer-events-none absolute inset-0 opacity-0 mix-blend-soft-light transition-opacity duration-300 group-hover/art:opacity-100"
-      />
-      <span
-        aria-hidden="true"
-        style={GLARE}
-        className="pointer-events-none absolute inset-0 opacity-0 mix-blend-overlay transition-opacity duration-300 group-hover/art:opacity-100"
       />
       <span aria-hidden="true" style={RIM} className="pointer-events-none absolute inset-0 rounded-[inherit]" />
 
