@@ -88,8 +88,8 @@ describe("BFF community", () => {
     expect((await call("community/posts/1/comments", "POST", { text: "hi" })).status).toBe(401);
     expect((await call("community/users/2/follow", "PUT")).status).toBe(401);
     expect(mocks.community.create).not.toHaveBeenCalled();
-    // Rooms stay behind the session.
-    expect((await call("rooms")).status).toBe(401);
+    // A room itself stays behind the session (only the public list is open).
+    expect((await call("rooms/1")).status).toBe(401);
   });
 
   it("rebuilds a post from known fields and mirrors the backend rules", async () => {

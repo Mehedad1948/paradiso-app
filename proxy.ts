@@ -28,7 +28,8 @@ export const config = {
     "/profile/:path*",
     "/settings/:path*",
     "/watchlist/:path*",
-    "/rooms/:path*",
+    // The /rooms list itself is open (public rooms); each room page stays behind sign-in.
+    "/rooms/:path+",
     "/auth/onboarding",
   ],
 };

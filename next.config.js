@@ -1,3 +1,5 @@
+const imageHosts = require("./config/image-hosts.json");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   cacheComponents: true,
@@ -23,36 +25,14 @@ const nextConfig = {
     ];
   },
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "image.tmdb.org",
-        port: "",
-        pathname: "/**",
-        search: "",
-      },
-      {
-        protocol: "https",
-        hostname: "heroui.com",
-        port: "",
-        pathname: "/**",
-        search: "",
-      },
-      {
-        protocol: "https",
-        hostname: "nestjsblog.storage.iran.liara.space",
-        port: "",
-        pathname: "/**",
-        search: "",
-      },
-      {
-        protocol: "https",
-        hostname: "pub-7c22c849b63641bba4367e1fd6be5ef1.r2.dev",
-        port: "",
-        pathname: "/**",
-        search: "",
-      },
-    ],
+    // Shared with the landing grid, which serves any other host unoptimized instead of failing.
+    remotePatterns: imageHosts.map((hostname) => ({
+      protocol: "https",
+      hostname,
+      port: "",
+      pathname: "/**",
+      search: "",
+    })),
   },
 };
 

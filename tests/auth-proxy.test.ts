@@ -29,6 +29,15 @@ it("passes an opaque refresh token to backend renewal rather than verifying it w
   expect(redirect.searchParams.get("refresh")).toBe("true");
   expect(redirect.searchParams.get("reason")).toBe("session-expired");
 });
+it("keeps the rooms list out of the proxy matcher but guards each room", async () => {
+  const { config } = await import("@/proxy");
+  const matches = (path: string) =>
+    config.matcher.some((m) =>
+      new RegExp(`^${m.replace(/:path\*/, ".*").replace(/:path\+/, ".+")}$`).test(path),
+    );
+  expect(matches("/rooms")).toBe(false);
+  expect(matches("/rooms/3")).toBe(true);
+});
 it("allows a valid access session through", async () => {
   const token = await new SignJWT({ sub: "1" })
     .setProtectedHeader({ alg: "HS256" })

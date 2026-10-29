@@ -44,8 +44,8 @@ export default function Header() {
     );
 
   return (
-    <div className="fixed inset-x-0 top-0 z-40 bg-canvas/80 px-[4.5vw] text-ink backdrop-blur-xl max-md:px-[4vw]">
-      <nav aria-label="Main navigation" className="mx-auto flex h-[88px] max-w-[1600px] flex-nowrap items-center justify-between gap-3 border-b border-line max-md:h-[72px]">
+    <div className="fixed inset-x-0 top-0 z-40 border-b border-line bg-canvas/80 px-[4.5vw] text-ink backdrop-blur-xl max-md:px-[4vw]">
+      <nav aria-label="Main navigation" className="mx-auto flex h-[88px] max-w-[1600px] flex-nowrap items-center justify-between gap-3 max-md:h-[72px]">
         <Logo className="shrink-0" />
 
         <div className="flex min-w-0 items-center gap-2 text-[15px] font-semibold max-[480px]:gap-1.5">

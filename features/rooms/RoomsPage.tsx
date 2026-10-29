@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import { useCallback } from "react";
 import { Button } from "@heroui/button";
 import { useMe } from "@/hooks/queries/useMe";
+import { useAuthGate } from "@/components/auth/gate";
 import { useRoomUrl } from "./hooks/useRoomUrl";
 import { useRoomDialog } from "./hooks/useRoomDialog";
 import { positivePage } from "./state/filters";
@@ -26,7 +27,14 @@ export default function RoomsPage() {
     (page: number) => update({ allPage: page === 1 ? null : page }),
     [update],
   );
-  const create = useCallback(() => open("create-room"), [open]);
+  const { signedIn, open: openAuth } = useAuthGate();
+  const create = useCallback(
+    () =>
+      signedIn
+        ? open("create-room")
+        : openAuth({ reason: "Sign in to create a room" }),
+    [signedIn, open, openAuth],
+  );
   return (
     <div>
       <div className="mb-10 flex items-end justify-between gap-6 border-b border-line pb-9 max-sm:mb-7 max-sm:flex-col max-sm:items-start max-sm:pb-7 max-sm:[&>button]:w-full">
@@ -50,13 +58,15 @@ export default function RoomsPage() {
         </Button>
       </div>
       <PendingInvitations enabled={!!user} />
-      <RoomListSection
-        usersRoom
-        page={positivePage(params.get("myPage"))}
-        onPage={setMyPage}
-        onCreate={create}
-        userId={user?.id}
-      />
+      {signedIn && (
+        <RoomListSection
+          usersRoom
+          page={positivePage(params.get("myPage"))}
+          onPage={setMyPage}
+          onCreate={create}
+          userId={user?.id}
+        />
+      )}
       <RoomListSection
         usersRoom={false}
         page={positivePage(params.get("allPage"))}

@@ -143,7 +143,8 @@ function RoomPage({ roomId }: { roomId: string }) {
       <Link href="/rooms" className="mb-6 inline-flex items-center gap-2 text-[15px] text-muted hover:text-accent">
         <ArrowLeft size={18} aria-hidden="true" /> All rooms
       </Link>
-      <div className="relative isolate mb-10 flex items-end justify-between gap-6 pb-9 max-sm:mb-7 max-sm:flex-col max-sm:items-start max-sm:pb-7">
+      {/* The min height gives the cover room to breathe; the text and actions stay pinned to the bottom. */}
+      <div className="relative isolate mb-10 flex min-h-[clamp(340px,30vw,460px)] items-end justify-between gap-6 pb-9 max-sm:mb-7 max-sm:min-h-0 max-sm:flex-col max-sm:items-start max-sm:pb-7">
         {room.data && (
           <div
             aria-hidden="true"

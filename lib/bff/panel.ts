@@ -17,6 +17,7 @@ import { movieComments } from "@/services/movies/comments";
 import { personDetails } from "@/services/people/details";
 import { commentTextError } from "@/lib/community/validation";
 import { handleChatRequest } from "./chat";
+import { handleAdminRequest } from "./curations";
 import { handleCommunityRequest } from "./community";
 import { handleNotificationsRequest } from "./notifications";
 import { handleInvitationsRequest, handleRoomInvitationsRequest } from "./invitations";
@@ -207,10 +208,41 @@ export async function handlePanelRequest(request: Request, path: string[]) {
         if (method === "DELETE") return respond(await movieComments.remove(movieId, commentId));
       }
     }
-    if (!signedIn) throw new InputError("Sign in to continue", 401);
     const page = () => positiveInteger(query.get("page"), "page", 1);
     const limit = () => positiveInteger(query.get("limit"), "limit", 10, 100);
+    // Public rooms can be browsed signed out; "my rooms" needs an account.
+    if (
+      !signedIn &&
+      path.length === 1 &&
+      path[0] === "rooms" &&
+      method === "GET" &&
+      !boolean(query.get("usersRoom"), "usersRoom", false)
+    ) {
+      const result = await rooms.getRooms({
+        page: page(),
+        limit: limit(),
+        usersRoom: false,
+        signal: request.signal,
+      });
+      return respond({
+        ...result,
+        result: result.result
+          ? { ...result.result, data: result.result.data.map(imageUrl) }
+          : null,
+      });
+    }
+    if (!signedIn) throw new InputError("Sign in to continue", 401);
     const resource = path.join("/");
+    if (path[0] === "admin")
+      return respond(
+        await handleAdminRequest({
+          path: path.slice(1),
+          method,
+          query,
+          data: () => body(request),
+          signal: request.signal,
+        }),
+      );
     if (path[0] === "notifications")
       return respond(
         await handleNotificationsRequest({

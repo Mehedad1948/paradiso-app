@@ -3,27 +3,12 @@
 import Image from "next/image";
 import { useState, type SyntheticEvent } from "react";
 import { useRouter } from "next/navigation";
-import { gridPosters } from "@/config/posters";
 import MovieLink, { useOpenMovie } from "@/features/movies/MovieLink";
 import type { MoviePreview } from "@/features/movies/preview";
 import { useResolveMovie } from "@/hooks/queries/useCommunityQueries";
 import { useMe } from "@/hooks/queries/useMe";
 import { authHref } from "@/lib/auth/redirect";
-
-// Green and blue flow into purple, red, then yellow across the stepped grid.
-const gridLayout: (keyof typeof gridPosters | null)[][] = [
-  [null, null, "treeOfLife", "wingsOfDesire", "rearWindow", "laLaLand"],
-  [null, "divingBell", "oceanHeaven", "walterMitty", "johnWick", "her"],
-  ["matrix", "stalker", "parisTexas", "trumanShow", "goodTime", "colorsRed"],
-  [null, "treeOfLife", "memento", "livesOfOthers", "vertigo", "amelie"],
-  [null, null, "stalag17", "dune", "fantasticMrFox", "killBill"],
-  [null, null, null, "taxiDriver", "twelveAngryMen", "fantasticMrFox"],
-];
-const cells = gridLayout.flatMap((columns, row) =>
-  columns.flatMap((poster, column) =>
-    poster ? [{ row: row + 1, column: column + 1, poster }] : [],
-  ),
-);
+import type { GridCell } from "@/lib/curations/grid";
 
 function startReveal(button: HTMLElement) {
   const artwork = button.querySelector("img");
@@ -43,14 +28,14 @@ function handleReveal(event: SyntheticEvent<HTMLElement>) {
   startReveal(event.currentTarget);
 }
 
-const cellClass =
-  "group relative -ml-px -mt-px block min-h-0 min-w-0 cursor-pointer touch-manipulation overflow-hidden border border-ink/20 bg-transparent focus-visible:z-[1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent aria-busy:cursor-progress";
+const frameClass = "relative -ml-px -mt-px block min-h-0 min-w-0 overflow-hidden border border-ink/20";
+const cellClass = `${frameClass} group cursor-pointer touch-manipulation bg-transparent focus-visible:z-[1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent aria-busy:cursor-progress`;
 
 /**
- * `films` holds the library's copy of each frame's film, keyed by TMDb id. A frame whose film
- * isn't in the library yet adds it on click (signed in) and then opens it.
+ * The curated frames, one film each. A built-in frame (shown while the curation can't be read)
+ * has no library copy at hand, so it adds its film on click (signed in) and then opens it.
  */
-export default function CinemaGrid({ films }: { films: Record<number, MoviePreview> }) {
+export default function CinemaGrid({ cells }: { cells: GridCell[] }) {
   const router = useRouter();
   const openMovie = useOpenMovie();
   const signedIn = !!useMe().data;
@@ -77,45 +62,58 @@ export default function CinemaGrid({ films }: { films: Record<number, MoviePrevi
       role="group"
       aria-label="Explore iconic cinema. Hover or focus to reveal a film, select it to open its details."
     >
-      {cells.map(({ row, column, poster }, index) => {
-        const film = gridPosters[poster];
-        const movie = films[film.tmdbId] ?? added[film.tmdbId];
+      {cells.map(({ slot, row, column, art, movie: curated, tmdbId }) => {
+        const number = (
+          <span
+            className="absolute bottom-[7px] left-2 font-mono text-[9px] leading-none text-ink/30 motion-reduce:group-hover:invisible motion-reduce:group-focus-visible:invisible motion-reduce:animate-none"
+            aria-hidden="true"
+          >
+            {String(slot + 1).padStart(2, "0")}
+          </span>
+        );
+        const style = { gridRow: row, gridColumn: column };
+        const movie = curated ?? (tmdbId ? added[tmdbId] : undefined);
+        // A slot the admin left empty keeps its frame, without art or a film.
+        if (!art || (!movie && !tmdbId))
+          return (
+            <div key={slot} className={frameClass} style={style} aria-hidden="true">
+              {number}
+            </div>
+          );
         const cell = {
           className: cellClass,
-          style: { gridRow: row, gridColumn: column },
-          "aria-label": `${film.title}, frame ${index + 1}`,
+          style,
+          "aria-label": `${art.title}, frame ${slot + 1}`,
           onPointerEnter: handleReveal,
           onFocus: handleReveal,
         };
         const content = (
           <>
             <Image
-              src={film.image}
+              src={art.src}
               alt=""
               fill
               sizes="(max-width: 640px) 12vw, 7vw"
+              unoptimized={!art.optimizable}
               className="invisible -translate-x-full object-cover motion-reduce:group-hover:visible motion-reduce:group-hover:translate-x-0 motion-reduce:group-focus-visible:visible motion-reduce:group-focus-visible:translate-x-0 motion-reduce:animate-none"
-              style={{ objectPosition: film.position }}
+              style={{ objectPosition: art.position }}
             />
-            <span
-              className="absolute bottom-[7px] left-2 font-mono text-[9px] leading-none text-ink/30 motion-reduce:group-hover:invisible motion-reduce:group-focus-visible:invisible motion-reduce:animate-none"
-              aria-hidden="true"
-            >
-              {String(index + 1).padStart(2, "0")}
-            </span>
+            {number}
           </>
         );
-        return movie ? (
-          <MovieLink key={`${row}-${column}`} movie={movie} {...cell}>
-            {content}
-          </MovieLink>
-        ) : (
+        if (movie)
+          return (
+            <MovieLink key={slot} movie={movie} {...cell}>
+              {content}
+            </MovieLink>
+          );
+        return (
           <button
-            key={`${row}-${column}`}
+            key={slot}
             type="button"
             {...cell}
-            aria-busy={resolve.isPending && resolve.variables === film.tmdbId}
-            onClick={() => addAndOpen(film.tmdbId)}
+            aria-busy={resolve.isPending && resolve.variables === tmdbId}
+            onClick={() => tmdbId && addAndOpen(tmdbId)}
           >
             {content}
           </button>

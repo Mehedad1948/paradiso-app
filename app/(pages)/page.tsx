@@ -1,24 +1,20 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { ArrowDown, ArrowUpRight } from "lucide-react";
 import { LogoMark } from "@/components/ui/Logo";
-import { cacheLife } from "next/cache";
 import type { Metadata } from "next";
 import ParadisoWordmark from "@/components/landing/ParadisoWordmark";
-import CinemaGrid from "@/components/landing/CinemaGrid";
-import CommunityShowcase from "@/components/landing/CommunityShowcase";
+import CuratedGrid, { CuratedGridFallback } from "@/components/landing/CuratedGrid";
+import CommunityShowcase, { CommunityShowcaseFallback } from "@/components/landing/CommunityShowcase";
 import JuryReveal from "@/components/landing/JuryReveal";
 import LandingLoader from "@/components/landing/LandingLoader";
 import FilmNegatives from "@/components/landing/FilmNegatives";
-import LibraryCarousel from "@/components/landing/LibraryCarousel";
 import SpecularBorder from "@/components/ui/SpecularBorder";
 import styles from "@/components/landing/CinemaHero.module.css";
 import { fontDisplay } from "@/config/fonts";
 import { seo } from "@/config/seo";
-import { gridPosters } from "@/config/posters";
-import { libraryMoviesByTmdb, libraryShowcase } from "@/services/movies/library";
-import { artistGist, featuredArtists } from "@/services/featured/artists";
-import { untilNextFeaturedDay } from "@/services/featured/ttl";
-import ArtistOfTheDay from "@/components/landing/ArtistOfTheDay";
+import TodaysArtist from "@/components/landing/TodaysArtist";
+import TodaysShelf from "@/components/landing/TodaysShelf";
 
 // Inherits the full title, description and OG image from the root layout.
 export const metadata: Metadata = {
@@ -32,19 +28,13 @@ const verbs = [
   { word: "Judge", rest: "the winner", indent: "5cqi", accent: true },
 ];
 
-export default async function Home() {
-  "use cache";
-  const [gridFilms, shelfFilms, artists] = await Promise.all([
-    libraryMoviesByTmdb(Object.values(gridPosters).map((film) => film.tmdbId)),
-    libraryShowcase(),
-    featuredArtists(),
-  ]);
-  // The page holds today's artist, so it is dropped at the UTC rollover instead of lingering for
-  // the rest of the hour. Without an answer from the backend it retries within minutes.
-  const gist = artists[0] ? await artistGist(artists[0].person.id) : null;
-  if (artists.length) cacheLife(untilNextFeaturedDay());
-  else cacheLife("minutes");
-
+/**
+ * Each data section is cached on its own lifetime (grid and picks until an admin save, the artist
+ * until the UTC rollover, community posts for minutes), so one going stale never refetches the
+ * others. All of them are prerendered into the page; the boundaries only matter on a cold cache,
+ * where the upper sections stream first and the rest follow.
+ */
+export default function Home() {
   return (
     <>
       {/* Outside the isolated page wrapper so it stacks above the fixed header. */}
@@ -114,7 +104,9 @@ export default async function Home() {
           </h2>
         </div>
         <div className="grid">
-          <CinemaGrid films={gridFilms} />
+          <Suspense fallback={<CuratedGridFallback />}>
+            <CuratedGrid />
+          </Suspense>
         </div>
       </section>
       <section
@@ -145,7 +137,9 @@ export default async function Home() {
             Join the conversation <ArrowUpRight size={18} aria-hidden="true" />
           </Link>
         </div>
-        <CommunityShowcase />
+        <Suspense fallback={<CommunityShowcaseFallback />}>
+          <CommunityShowcase />
+        </Suspense>
       </section>
       <section
         id="the-experience"
@@ -167,34 +161,12 @@ export default async function Home() {
           </Link>
         </div>
       </section>
-      <ArtistOfTheDay artists={artists} gist={gist} />
-      {shelfFilms.length > 0 && (
-        <section
-          id="the-library"
-          className="mx-auto max-w-[1600px] scroll-mt-32 border-t border-line pt-[clamp(56px,7vw,112px)]"
-          aria-labelledby="library-title"
-        >
-          <div className="flex items-end justify-between gap-10 max-sm:flex-col max-sm:items-start max-sm:gap-6">
-            <div>
-              <span className="mb-6 block font-mono text-xs font-extrabold uppercase tracking-[0.12em] text-accent">
-                06 <span className="px-2 text-muted">/</span> The library
-              </span>
-              <h2
-                id="library-title"
-                className="text-[clamp(38px,4.8vw,76px)] font-semibold leading-[1.04] tracking-[-0.065em] [&>span]:font-serif [&>span]:font-normal [&>span]:italic [&>span]:tracking-[-0.045em]"
-              >
-                Tonight&apos;s lineup,
-                <br />
-                <span>already on the shelf.</span>
-              </h2>
-            </div>
-        
-          </div>
-          <div className="-mx-[4.5vw] max-sm:-mx-[5vw]">
-            <LibraryCarousel films={shelfFilms} />
-          </div>
-        </section>
-      )}
+      <Suspense>
+        <TodaysArtist />
+      </Suspense>
+      <Suspense>
+        <TodaysShelf />
+      </Suspense>
       <footer className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-4 py-8 text-sm font-medium text-muted max-sm:items-start max-sm:gap-5">
         <span>
           Paradiso <span className="px-3 text-muted">/</span> For the love

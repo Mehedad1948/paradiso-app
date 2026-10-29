@@ -53,9 +53,22 @@ beforeEach(() => {
 describe("BFF boundaries", () => {
   it("rejects an unauthenticated request without touching backend services", async () => {
     mocks.token = undefined;
-    const response = await handlePanelRequest(request("rooms"), ["rooms"]);
+    const response = await handlePanelRequest(request("rooms/1"), ["rooms", "1"]);
     expect(response.status).toBe(401);
     expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(mocks.getRooms).not.toHaveBeenCalled();
+  });
+  it("lets a signed-out visitor list public rooms only", async () => {
+    mocks.token = undefined;
+    mocks.getRooms.mockResolvedValue(ok({ data: [], meta: {} }));
+    const open = await handlePanelRequest(request("rooms?usersRoom=false"), ["rooms"]);
+    expect(open.status).toBe(200);
+    expect(mocks.getRooms).toHaveBeenCalledWith(
+      expect.objectContaining({ usersRoom: false }),
+    );
+    mocks.getRooms.mockClear();
+    const mine = await handlePanelRequest(request("rooms?usersRoom=true"), ["rooms"]);
+    expect(mine.status).toBe(401);
     expect(mocks.getRooms).not.toHaveBeenCalled();
   });
   it("rejects cross-origin mutations", async () => {

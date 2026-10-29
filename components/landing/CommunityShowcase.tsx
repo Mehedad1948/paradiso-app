@@ -8,6 +8,9 @@ const MIN_CARDS = 3;
 const MAX_CARDS = 8;
 // Reposts carry no movie of their own, so over-fetch to find enough cards.
 const FETCH_LIMIT = 40;
+// The showcase's box, held by the fallback too so nothing shifts when the posts arrive.
+const FRAME =
+  "h-[640px] w-full max-w-[720px] justify-self-end max-lg:h-[560px] max-sm:h-[460px] max-sm:max-w-none";
 
 function toItem(post: CommunityPost): ShowcaseItem | null {
   const movie = post.movie;
@@ -43,11 +46,15 @@ export default async function CommunityShowcase() {
 
   return (
     <div
-      className="h-[640px] w-full max-w-[720px] justify-self-end max-lg:h-[560px] max-sm:h-[460px] max-sm:max-w-none"
+      className={FRAME}
       role={items.length >= MIN_CARDS ? "region" : undefined}
       aria-label="Latest posts from the Paradiso community"
     >
       {items.length >= MIN_CARDS && <ShowcaseCarousel items={items} />}
     </div>
   );
+}
+
+export function CommunityShowcaseFallback() {
+  return <div className={FRAME} aria-hidden="true" />;
 }
