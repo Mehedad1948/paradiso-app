@@ -145,6 +145,7 @@
 }
 
 .actions {
+  margin-top: clamp(2px, 1vh, 10px);
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
