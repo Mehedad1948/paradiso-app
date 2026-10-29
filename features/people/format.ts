@@ -93,15 +93,34 @@ export function careerSpan(person: Person) {
   return years.length ? { from: Math.min(...years), to: Math.max(...years) } : null;
 }
 
-export type CreditOrder = "newest" | "rated";
 export type CreditGroup = { key: string; label: string; credits: PersonCredit[] };
 
 const byDate = (a: PersonCredit, b: PersonCredit) => (a.release_date ?? "").localeCompare(b.release_date ?? "");
-const byRating = (a: PersonCredit, b: PersonCredit) => (b.vote_average ?? 0) - (a.vote_average ?? 0);
+// A film's average pulled towards a typical score until enough people have rated it, so a 10.0 from
+// three votes doesn't outrank a 7.4 from over a thousand.
+const PRIOR_VOTES = 50;
+const PRIOR_SCORE = 6;
+const weightedRating = ({ vote_average, vote_count }: PersonCredit) => {
+  if (vote_average == null) return 0;
+  // A backend deployed before vote_count existed sends none.
+  const votes = vote_count ?? 0;
+  return (vote_average * votes + PRIOR_SCORE * PRIOR_VOTES) / (votes + PRIOR_VOTES);
+};
+const byRating = (a: PersonCredit, b: PersonCredit) => weightedRating(b) - weightedRating(a);
 
-/** Upcoming films, then decades newest first; or one list, best rated first. */
-export function groupCredits(credits: PersonCredit[], order: CreditOrder): CreditGroup[] {
-  if (order === "rated") return [{ key: "rated", label: "", credits: [...credits].sort(byRating) }];
+/** Below this many votes a score is noise: a 10.0 from three people doesn't make a film their best. */
+const MIN_VOTES = 20;
+
+/** The best rated few by plain TMDb score, counting only films enough people have rated. */
+export const topRated = (credits: PersonCredit[], count: number) =>
+  credits
+    // Responses cached before vote counts shipped have none; let those films compete on score alone.
+    .filter((credit) => (credit.vote_count ?? MIN_VOTES) >= MIN_VOTES)
+    .sort(byRating)
+    .slice(0, count);
+
+/** Upcoming films, then decades newest first. */
+export function groupCredits(credits: PersonCredit[]): CreditGroup[] {
   const upcoming = credits.filter(isUpcoming).sort(byDate);
   const released = credits
     .filter((credit) => !isUpcoming(credit))

@@ -425,7 +425,7 @@ export default function MovieDetailsView({
             )}
 
             {facts.length > 0 && (
-              <dl className="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line motion-safe:animate-movie-rise [animation-delay:380ms] sm:grid-cols-4">
+              <dl className="mt-10 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-line bg-line motion-safe:animate-movie-rise [animation-delay:380ms] sm:grid-cols-3">
                 {facts.map(([label, value]) => (
                   <div key={label} className="bg-elevated px-4 py-3.5">
                     <dt className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</dt>
