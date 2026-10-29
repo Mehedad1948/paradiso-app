@@ -1,0 +1,94 @@
+.wrap {
+  display: flex;
+  min-height: 60svh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+}
+
+.title {
+  font-size: clamp(2.75rem, 8vw, 5.5rem);
+  line-height: 1.1;
+  padding: 0 0.2em;
+  color: transparent;
+  background-image: linear-gradient(
+    100deg,
+    rgb(255 255 255 / 0.28) 0%,
+    rgb(255 255 255 / 0.28) 38%,
+    #fff 50%,
+    rgb(255 255 255 / 0.28) 62%,
+    rgb(255 255 255 / 0.28) 100%
+  );
+  background-size: 250% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  animation:
+    shimmer 2.4s ease-in-out infinite,
+    reveal 1.2s ease-out both,
+    glow 2.4s ease-in-out infinite;
+}
+
+.line {
+  height: 1px;
+  width: min(14rem, 50vw);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.7), transparent);
+  transform-origin: center;
+  animation: line 2.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    letter-spacing: 0.08em;
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    letter-spacing: 0;
+    filter: blur(0);
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    text-shadow: 0 0 0 transparent;
+  }
+  50% {
+    text-shadow: 0 0 28px rgb(255 255 255 / 0.25);
+  }
+}
+
+@keyframes line {
+  0%,
+  100% {
+    transform: scaleX(0.3);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title,
+  .line {
+    animation: none;
+  }
+  .title {
+    background-position: 0 0;
+    color: rgb(255 255 255 / 0.85);
+    background-image: none;
+  }
+}

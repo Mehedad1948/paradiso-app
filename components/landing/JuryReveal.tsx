@@ -57,7 +57,7 @@ export default function JuryReveal() {
   return (
     <div
       ref={containerRef}
-      className="group relative min-h-[350px] overflow-hidden bg-media after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-b after:from-transparent after:from-40% after:to-black/75 max-sm:min-h-[280px]"
+      className="group relative min-h-[350px] touch-pan-y overflow-hidden bg-media after:pointer-events-none after:absolute after:inset-0 after:bg-gradient-to-b after:from-transparent after:from-40% after:to-black/75 max-sm:min-h-[280px]"
     >
       <div className="absolute inset-0 transition-transform duration-[1200ms] ease-in-out group-hover:scale-[1.04] motion-reduce:transition-none">
         <Image

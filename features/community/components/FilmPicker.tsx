@@ -1,9 +1,10 @@
 "use client";
+import { LogoMark } from "@/components/ui/Logo";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import clsx from "clsx";
 import { Input } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
-import { Popcorn, SearchIcon, X } from "lucide-react";
+import { SearchIcon, X } from "lucide-react";
 import { useDebounce } from "use-debounce";
 import { useMovieSearch, useRoom } from "@/hooks/queries/useRoomQueries";
 import { useResolveMovie } from "@/hooks/queries/useCommunityQueries";
@@ -19,7 +20,7 @@ function Thumb({ path }: { path: string | null }) {
     <img src={src} alt="" loading="lazy" className="h-[54px] w-9 shrink-0 rounded object-cover" />
   ) : (
     <span aria-hidden="true" className="flex h-[54px] w-9 shrink-0 items-center justify-center rounded bg-media text-media-foreground/60">
-      <Popcorn size={15} />
+      <LogoMark className="w-4" />
     </span>
   );
 }

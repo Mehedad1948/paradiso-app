@@ -29,6 +29,16 @@ export default function LibraryCarousel({ films }: { films: Film[] }) {
   const openMovie = useOpenMovie();
   const prefetch = usePrefetchMovieDetails();
   const settle = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const [narrow, setNarrow] = useState(false);
+
+  // The liquid lens is tuned for wide shelves; on a phone it wraps the posters into waves.
+  useEffect(() => {
+    const query = window.matchMedia("(max-width: 639px)");
+    const update = () => setNarrow(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
 
   const items = useMemo(
     () =>
@@ -91,6 +101,7 @@ export default function LibraryCarousel({ films }: { films: Film[] }) {
           gap={14}
           radius={3}
           squeeze={0.18}
+          {...(narrow ? { bend: 0.08, tilt: 12, reach: 0.5, lensWidth: 1, lensHeight: 1, dispersion: 0.1 } : {})}
           focusOnClick={false}
           captureWheel={false}
           label="Films in the Paradiso library. Use the arrow keys to browse and Enter to open a film."

@@ -1,4 +1,5 @@
 "use client";
+import { LogoMark } from "@/components/ui/Logo";
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import clsx from "clsx";
@@ -11,7 +12,6 @@ import {
   ExternalLink,
   MessagesSquare,
   Play,
-  Popcorn,
   Share2,
   X,
 } from "lucide-react";
@@ -68,7 +68,7 @@ function Poster({ path, title, variant }: { path?: string | null; title: string;
         <img src={src} alt={`${title} poster`} decoding="async" onError={() => setFailed(true)} className="h-full w-full object-cover" />
       ) : (
         <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-700 via-media to-media text-media-foreground/50">
-          <Popcorn size={32} aria-hidden="true" />
+          <LogoMark className="w-9" />
         </span>
       )}
       <span aria-hidden="true" className="pointer-events-none absolute inset-0 rounded-[inherit] ring-1 ring-inset ring-white/15" />
@@ -99,16 +99,17 @@ function WatchlistButton({ movie }: { movie: MovieDetails }) {
     <button
       type="button"
       aria-pressed={saved}
+      aria-label={saved ? "On your watchlist" : "Add to watchlist"}
       disabled={toggle.isPending}
       onClick={toggleSaved}
-      className={clsx(quiet, saved && "border-accent/40 bg-accent/10 text-accent hover:bg-accent/15")}
+      className={clsx(quiet, "max-sm:w-11 max-sm:justify-center max-sm:px-0", saved && "border-accent/40 bg-accent/10 text-accent hover:bg-accent/15")}
     >
       {saved ? (
         <BookmarkCheck size={18} aria-hidden="true" fill="currentColor" fillOpacity={0.2} />
       ) : (
         <BookmarkPlus size={18} aria-hidden="true" />
       )}
-      {saved ? "On your watchlist" : "Watchlist"}
+      <span className="max-sm:sr-only">{saved ? "On your watchlist" : "Watchlist"}</span>
     </button>
   );
 }
@@ -372,7 +373,7 @@ export default function MovieDetailsView({
                   </button>
                 )}
                 <WatchlistButton movie={movie} />
-                <Link href={movieFeedHref(movie)} className={quiet}>
+                <Link href={movieFeedHref(movie)} className={clsx(quiet, "max-sm:w-11 max-sm:justify-center max-sm:px-0")}>
                   <MessagesSquare size={18} aria-hidden="true" />
                   <span className="max-sm:sr-only">Community takes</span>
                 </Link>

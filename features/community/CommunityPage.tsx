@@ -48,9 +48,9 @@ export default function CommunityPage() {
   return (
     <div>
       <h1 className="sr-only">Community</h1>
-      <div className="-mt-6 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px]">
+      <div className="-mt-6 grid items-start max-sm:-mt-14 gap-10 lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px]">
         <section aria-label="Recommendations" className="min-w-0">
-          <div className="sticky top-[88px] z-30 -mx-1 mb-5 bg-canvas/95 px-1 pt-1 backdrop-blur-md max-md:top-20 max-[480px]:static">
+          <div className="sticky top-[88px] z-30 -mx-1 mb-5 max-sm:mb-2 bg-canvas/95 px-1 pt-1 backdrop-blur-md max-md:top-20 max-[480px]:static">
             {movieId ? (
               <div className="flex items-center justify-between gap-4 border-b border-line pb-3.5">
                 <p className="min-w-0 text-[15px]">

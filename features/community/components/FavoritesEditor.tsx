@@ -1,9 +1,10 @@
 "use client";
+import { LogoMark } from "@/components/ui/Logo";
 import { useState } from "react";
 import { Button } from "@heroui/button";
 import clsx from "clsx";
 import { AnimatePresence, motion, Reorder, useDragControls } from "framer-motion";
-import { GripVertical, MessageSquareQuote, Popcorn, X } from "lucide-react";
+import { GripVertical, MessageSquareQuote, X } from "lucide-react";
 import Sidebar, { useSidebar } from "@/components/ui/Sidebar";
 import { normalizeNote, useSetFavorites } from "@/hooks/queries/useFavoriteQueries";
 import { MAX_FAVORITE_MOVIES, type FavoriteMovie } from "@/types/community";
@@ -79,7 +80,7 @@ function Row({
           <img src={src} alt="" loading="lazy" className="h-[60px] w-10 shrink-0 rounded object-cover" />
         ) : (
           <span aria-hidden="true" className="flex h-[60px] w-10 shrink-0 items-center justify-center rounded bg-media text-media-foreground/60">
-            <Popcorn size={15} />
+            <LogoMark className="w-4" />
           </span>
         )}
         <span className="min-w-0 flex-1">

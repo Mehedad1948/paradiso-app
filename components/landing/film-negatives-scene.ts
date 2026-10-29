@@ -420,6 +420,10 @@ export async function createFilmNegativesScene(
     const halfWidth = halfHeight * camera.aspect;
     const direction = strip.reverse ? -1 : 1;
     const span = 1.25 * halfWidth;
+    // The path spans the screen width, so on a tall, narrow screen the same
+    // waves pack into a short run and turn steep. Calm them to match; wide
+    // screens (aspect 1.6 and up) keep the full motion.
+    const calm = THREE.MathUtils.clamp(camera.aspect / 1.6, 0.25, 1);
 
     for (let i = 0; i <= SEGMENTS; i++) {
       const s = i / SEGMENTS;
@@ -429,7 +433,7 @@ export async function createFilmNegativesScene(
       }
       let z = strip.z;
       for (const [amplitude, frequency, speed, phase] of strip.depth) {
-        z += amplitude * Math.sin(Math.PI * 2 * frequency * s + speed * time + phase);
+        z += amplitude * calm * Math.sin(Math.PI * 2 * frequency * s + speed * time + phase);
       }
       path[i * 3] = direction * (s * 2 - 1) * span;
       path[i * 3 + 1] = y * halfHeight;
@@ -449,7 +453,7 @@ export async function createFilmNegativesScene(
       // across its face through the depth waves, then twists slowly about
       // the tangent as a loose strip would.
       const s = i / SEGMENTS;
-      const twist = twistAmp * Math.sin(Math.PI * 2 * twistFreq * s + twistSpeed * time + twistPhase);
+      const twist = twistAmp * calm * Math.sin(Math.PI * 2 * twistFreq * s + twistSpeed * time + twistPhase);
       side.copy(up).addScaledVector(tangent, -tangent.dot(up)).normalize();
       lift.crossVectors(tangent, side).normalize();
       width.copy(side).multiplyScalar(Math.cos(twist)).addScaledVector(lift, Math.sin(twist));

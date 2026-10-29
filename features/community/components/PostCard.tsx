@@ -106,7 +106,7 @@ function PostCard({
         onClick={open}
         aria-labelledby={labelId}
         className={clsx(
-          "block px-5 py-5 sm:px-6",
+          "block px-3 py-4 sm:px-6 sm:py-5",
           !detail &&
             "cursor-pointer transition-colors hover:bg-surface/40 motion-safe:animate-community-rise",
         )}
@@ -195,11 +195,7 @@ function PostCard({
             </button>
           )}
 
-          <PostMedia
-            post={post}
-            size={detail ? "lg" : "md"}
-            actions={<PostActions post={post} viewer={viewer} tone="media" />}
-          />
+          <PostMedia post={post} size={detail ? "lg" : "md"} />
           {post.quotedPost && (
             <div
               data-quote-href={postHref(post.quotedPost.id)}
@@ -214,11 +210,10 @@ function PostCard({
               <PostMedia post={post.quotedPost} size="md" />
             </div>
           )}
-          {!post.movie && !post.imageUrl && (
-            <div className="mt-3 flex">
-              <PostActions post={post} viewer={viewer} />
-            </div>
-          )}
+          {/* One fixed place for the actions, whatever the post carries. */}
+          <div className="mt-2 flex">
+            <PostActions post={post} viewer={viewer} />
+          </div>
           {post.promotion && (
             <PromotionCard promotion={post.promotion} viewer={viewer} />
           )}

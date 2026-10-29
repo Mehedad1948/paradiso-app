@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import clsx from "clsx";
-import { Popcorn } from "lucide-react";
+import { LogoMark } from "@/components/ui/Logo";
 import MovieLink from "@/features/movies/MovieLink";
 import type { MoviePreview } from "@/features/movies/preview";
 import { imageSrc } from "../format";
@@ -62,7 +62,7 @@ export function PosterTile({
         />
       ) : (
         <span className="flex h-full w-full flex-col items-center justify-center gap-3 bg-gradient-to-br from-primary-700 via-media to-media p-3 text-center text-media-foreground/50">
-          <Popcorn size={28} aria-hidden="true" />
+          <LogoMark className="w-8" />
           <span className="line-clamp-3 text-sm font-semibold text-white/80">{title}</span>
         </span>
       )}

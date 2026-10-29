@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import clsx from "clsx";
-import { Popcorn } from "lucide-react";
+import { LogoMark } from "@/components/ui/Logo";
 
 /** TMDb poster, or a placeholder for manually added movies without one or when the image fails to load. */
 export default function MoviePoster({
@@ -44,7 +44,7 @@ export default function MoviePoster({
         className,
       )}
     >
-      <Popcorn className="h-1/2 max-h-12 w-1/2 max-w-12" />
+      <LogoMark className="w-1/3 max-w-10" />
     </div>
   );
 }

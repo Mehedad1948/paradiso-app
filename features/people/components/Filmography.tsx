@@ -2,7 +2,7 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import clsx from "clsx";
-import { Popcorn } from "lucide-react";
+import { LogoMark } from "@/components/ui/Logo";
 import { Spinner } from "@heroui/spinner";
 import { useAuthAction } from "@/components/auth/gate";
 import { imageSrc, tone } from "@/features/community/format";
@@ -61,7 +61,7 @@ const CreditCard = memo(function CreditCard({
           />
         ) : (
           <span className="flex h-full w-full flex-col items-center justify-center gap-2 bg-gradient-to-br from-primary-700/80 via-media to-media p-3 text-center text-media-foreground/60">
-            <Popcorn size={22} aria-hidden="true" />
+            <LogoMark className="w-6" />
             <span className="line-clamp-3 text-[11.5px] font-medium leading-snug">{credit.title}</span>
           </span>
         )}

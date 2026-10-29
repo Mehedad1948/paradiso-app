@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Tooltip } from "@heroui/tooltip";
 import { Spinner } from "@heroui/spinner";
-import { EyeOff, Pencil, ShieldX, Sparkles, Trash2 } from "lucide-react";
+import { ArrowRight, EyeOff, Pencil, ShieldX, Sparkles, Trash2 } from "lucide-react";
 import QueryError from "@/components/ui/QueryError";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { useMe } from "@/hooks/queries/useMe";
@@ -410,15 +410,27 @@ export default function MovieComments({ movieId, title }: { movieId: string; tit
           />
         </div>
       ) : (
-        <div className="relative overflow-hidden rounded-2xl border border-line bg-gradient-to-br from-accent/10 via-surface/40 to-transparent px-5 py-4">
-          <div className="flex items-center justify-between gap-4 max-sm:flex-col max-sm:items-start">
-            <p className="flex items-center gap-2 text-[15px]">
-              <Sparkles size={17} className="text-accent" aria-hidden="true" />
-              <span>
-                <span className="font-semibold">Seen it?</span> <span className="text-muted">Sign in to say what you thought.</span>
+        <div className="relative overflow-hidden rounded-2xl border border-line bg-gradient-to-br from-accent/10 via-surface/40 to-transparent p-5 max-sm:p-4">
+          <div className="flex items-center justify-between gap-5 max-sm:flex-col max-sm:items-stretch max-sm:gap-4">
+            <div className="flex items-center gap-3.5">
+              <span
+                aria-hidden="true"
+                className="grid size-10 shrink-0 place-items-center rounded-full border border-accent/30 bg-accent/10 text-accent"
+              >
+                <Sparkles size={18} />
               </span>
-            </p>
-            <SignInLink reason="Sign in to say what you thought">Sign in</SignInLink>
+              <p className="text-[15px] leading-snug">
+                <span className="block font-semibold tracking-[-0.01em]">Seen it?</span>
+                <span className="text-muted">Sign in to say what you thought.</span>
+              </p>
+            </div>
+            <SignInLink
+              reason="Sign in to say what you thought"
+              className="group !min-h-[46px] !rounded-full border border-ink/80 !px-6 tracking-[0.01em] transition-colors duration-200 hover:!opacity-100 hover:border-accent hover:bg-accent hover:text-canvas max-sm:w-full"
+            >
+              Sign in
+              <ArrowRight size={16} aria-hidden="true" className="transition-transform duration-200 group-hover:translate-x-0.5" />
+            </SignInLink>
           </div>
         </div>
       )}

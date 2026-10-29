@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import clsx from "clsx";
-import { Popcorn } from "lucide-react";
+import { LogoMark } from "@/components/ui/Logo";
 import type { CommunityPost } from "@/types/community";
 import MovieLink from "@/features/movies/MovieLink";
 import RatingBadge from "./RatingBadge";
@@ -74,7 +74,7 @@ export default function PostMedia({
           </div>
         ) : (
           <div className="flex aspect-[16/9] items-center justify-center bg-gradient-to-br from-primary-700 via-media to-media text-media-foreground/40">
-            <Popcorn size={48} aria-hidden="true" />
+            <LogoMark className="w-14" />
           </div>
         )}
       </MovieLink>

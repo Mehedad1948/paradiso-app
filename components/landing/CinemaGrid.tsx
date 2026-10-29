@@ -65,7 +65,7 @@ export default function CinemaGrid({ cells }: { cells: GridCell[] }) {
       {cells.map(({ slot, row, column, art, movie: curated, tmdbId }) => {
         const number = (
           <span
-            className="absolute bottom-[7px] left-2 font-mono text-[9px] leading-none text-ink/30 motion-reduce:group-hover:invisible motion-reduce:group-focus-visible:invisible motion-reduce:animate-none"
+            className="absolute bottom-[7px] left-2 max-[640px]:hidden font-mono text-[9px] leading-none text-ink/30 motion-reduce:group-hover:invisible motion-reduce:group-focus-visible:invisible motion-reduce:animate-none"
             aria-hidden="true"
           >
             {String(slot + 1).padStart(2, "0")}
@@ -95,7 +95,7 @@ export default function CinemaGrid({ cells }: { cells: GridCell[] }) {
               fill
               sizes="(max-width: 640px) 12vw, 7vw"
               unoptimized={!art.optimizable}
-              className="invisible -translate-x-full object-cover motion-reduce:group-hover:visible motion-reduce:group-hover:translate-x-0 motion-reduce:group-focus-visible:visible motion-reduce:group-focus-visible:translate-x-0 motion-reduce:animate-none"
+              className="invisible -translate-x-full object-cover max-[640px]:!visible max-[640px]:!translate-x-0 max-[640px]:!animate-none motion-reduce:group-hover:visible motion-reduce:group-hover:translate-x-0 motion-reduce:group-focus-visible:visible motion-reduce:group-focus-visible:translate-x-0 motion-reduce:animate-none"
               style={{ objectPosition: art.position }}
             />
             {number}

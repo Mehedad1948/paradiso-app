@@ -49,7 +49,8 @@ type Tone = "media" | "surface";
 const bar: Record<Tone, string> = {
   media:
     "rounded-full p-1 bg-black/35 text-white/90 backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_0_rgb(255_255_255_/_14%),0_12px_32px_-12px_rgb(0_0_0_/_60%)]",
-  surface: "-ml-2 text-muted",
+  // Spread evenly across the row so every action keeps its slot, with or without counts.
+  surface: "-ml-2 w-full max-w-[26rem] justify-between text-muted",
 };
 
 // The share bubbles float, so they keep a soft shadow but no outline.
@@ -73,7 +74,7 @@ const repostArc: Record<Tone, { startAngle: number; endAngle: number }> = {
 };
 
 const button =
-  "relative inline-flex h-9 min-w-9 items-center justify-center gap-1.5 rounded-full px-2.5 text-[13px] font-medium tracking-wide tabular-nums transition-colors duration-200 disabled:opacity-60 [&_svg]:transition-transform [&_svg]:duration-300 [&_svg]:ease-out hover:[&_svg]:scale-110 active:[&_svg]:scale-90";
+  "relative inline-flex h-9 min-w-9 shrink-0 items-center justify-center gap-1.5 rounded-full px-2 text-[13px] font-medium tracking-wide tabular-nums transition-colors duration-200 disabled:opacity-60 [&_svg]:transition-transform [&_svg]:duration-300 [&_svg]:ease-out hover:[&_svg]:scale-110 active:[&_svg]:scale-90";
 
 // Each action takes its own color on hover and when it's yours.
 const hues = {
@@ -171,8 +172,7 @@ export default function PostActions({
   viewer: Viewer;
   tone?: Tone;
 }) {
-  const overlay = usePathname().startsWith("/community");
-  const react = useReact();
+  const overlay = usePathname().startsWith("/community");  const react = useReact();
   const repost = useRepost();
   const [quoting, setQuoting] = useState(false);
   // Reacting in a room needs membership; the backend enforces it, this just hides the dead end.
@@ -238,7 +238,7 @@ export default function PostActions({
             </Pop>
             {post.dislikeCount > 0 && <span>{post.dislikeCount.toLocaleString()}</span>}
           </button>
-          <span aria-hidden="true" className="mx-1.5 h-1 w-1 rounded-full bg-current opacity-30" />
+          <span aria-hidden="true" className="h-1 w-1 shrink-0 rounded-full bg-current opacity-30" />
         </>
       )}
       <Link
