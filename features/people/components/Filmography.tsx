@@ -105,7 +105,7 @@ function filmsOf({ knownForDepartment, credits }: Person) {
   return credits.acting.length ? credits.acting : credits.directing;
 }
 
-const SHOWN = 15;
+const SHOWN = 20;
 
 /**
  * The person's best rated films, laid out as a career: decade by decade, newest first, with the
