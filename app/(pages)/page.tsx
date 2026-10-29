@@ -16,6 +16,9 @@ import { fontDisplay } from "@/config/fonts";
 import { seo } from "@/config/seo";
 import { gridPosters } from "@/config/posters";
 import { libraryMoviesByTmdb, libraryShowcase } from "@/services/movies/library";
+import { artistGist, featuredArtists } from "@/services/featured/artists";
+import { untilNextFeaturedDay } from "@/services/featured/ttl";
+import ArtistOfTheDay from "@/components/landing/ArtistOfTheDay";
 
 // Inherits the full title, description and OG image from the root layout.
 export const metadata: Metadata = {
@@ -31,11 +34,16 @@ const verbs = [
 
 export default async function Home() {
   "use cache";
-  cacheLife("hours");
-  const [gridFilms, shelfFilms] = await Promise.all([
+  const [gridFilms, shelfFilms, artists] = await Promise.all([
     libraryMoviesByTmdb(Object.values(gridPosters).map((film) => film.tmdbId)),
     libraryShowcase(),
+    featuredArtists(),
   ]);
+  // The page holds today's artist, so it is dropped at the UTC rollover instead of lingering for
+  // the rest of the hour. Without an answer from the backend it retries within minutes.
+  const gist = artists[0] ? await artistGist(artists[0].person.id) : null;
+  if (artists.length) cacheLife(untilNextFeaturedDay());
+  else cacheLife("minutes");
 
   return (
     <>
@@ -159,6 +167,7 @@ export default async function Home() {
           </Link>
         </div>
       </section>
+      <ArtistOfTheDay artists={artists} gist={gist} />
       {shelfFilms.length > 0 && (
         <section
           id="the-library"
@@ -168,7 +177,7 @@ export default async function Home() {
           <div className="flex items-end justify-between gap-10 max-sm:flex-col max-sm:items-start max-sm:gap-6">
             <div>
               <span className="mb-6 block font-mono text-xs font-extrabold uppercase tracking-[0.12em] text-accent">
-                05 <span className="px-2 text-muted">/</span> The library
+                06 <span className="px-2 text-muted">/</span> The library
               </span>
               <h2
                 id="library-title"

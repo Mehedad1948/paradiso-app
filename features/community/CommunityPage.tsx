@@ -96,7 +96,9 @@ export default function CommunityPage() {
               </button>
             </SpecularBorder>
           ) : (
-            !viewer.checking && <SignInLink className="min-h-[50px] !rounded-full">Sign in to post</SignInLink>
+            !viewer.checking && <SignInLink className="min-h-[50px] !rounded-full" reason="Sign in to post">
+              Sign in to post
+            </SignInLink>
           )}
           {!viewer.checking && <SuggestedPeople viewer={viewer} />}
         </aside>

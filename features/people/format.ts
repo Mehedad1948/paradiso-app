@@ -66,6 +66,10 @@ const jobTitles: Record<string, string> = {
   Editor: "Editor",
 };
 
+/** TMDb's department as a job title: "Directing" → "Director". Unknown departments pass through. */
+export const departmentTitle = (department?: string | null) =>
+  department ? (departmentTitles[department] ?? department) : null;
+
 /** "Director · Screenwriter · Producer": what they're known for first, then what else they keep doing. */
 export function roleLine(person: Person) {
   const roles = new Set<string>();

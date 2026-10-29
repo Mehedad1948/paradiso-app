@@ -92,6 +92,8 @@ function ProgressBar() {
       if (!(anchor instanceof HTMLAnchorElement)) return;
       if (anchor.target && anchor.target !== "_self") return;
       if (anchor.hasAttribute("download")) return;
+      // Links that open a dialog instead of navigating (see AuthGate) must not start the bar.
+      if (anchor.hasAttribute("data-no-progress")) return;
       if (anchor.origin !== window.location.origin) return;
       startRef.current(anchor.href);
     };

@@ -1,7 +1,6 @@
 "use client";
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { AnimatePresence } from "framer-motion";
 import {
@@ -24,7 +23,7 @@ import { useMovieDetails } from "@/hooks/queries/useMovieQueries";
 import { useInWatchlist, useToggleWatchlist } from "@/hooks/queries/useWatchlistQueries";
 import { BffError } from "@/lib/api/client";
 import { imageSrc, movieFeedHref } from "@/features/community/format";
-import { useSignInHref } from "@/features/community/components/SignInLink";
+import { useAuthAction } from "@/components/auth/gate";
 import type { MovieDetails } from "@/types/movies";
 import BackdropShow from "./components/BackdropShow";
 import PersonLink from "@/features/people/PersonLink";
@@ -92,17 +91,16 @@ const action =
 const quiet = `${action} border border-line bg-elevated/60 text-ink backdrop-blur hover:bg-surface`;
 
 function WatchlistButton({ movie }: { movie: MovieDetails }) {
-  const router = useRouter();
-  const signIn = useSignInHref();
   const signedIn = !!useMe().data;
   const saved = useInWatchlist(movie.id, signedIn).data === true;
   const toggle = useToggleWatchlist(movie.id, movie.title);
+  const toggleSaved = useAuthAction(() => toggle.mutate(!saved), { reason: "Sign in to save films to your watchlist" });
   return (
     <button
       type="button"
       aria-pressed={saved}
       disabled={toggle.isPending}
-      onClick={() => (signedIn ? toggle.mutate(!saved) : router.push(signIn))}
+      onClick={toggleSaved}
       className={clsx(quiet, saved && "border-accent/40 bg-accent/10 text-accent hover:bg-accent/15")}
     >
       {saved ? (

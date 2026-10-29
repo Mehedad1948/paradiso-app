@@ -28,7 +28,7 @@ export default function FollowButton({
   if (viewer.checking) return null;
   if (!viewer.me)
     return (
-      <SignInLink className={clsx("!min-h-0", sizing)} variant="solid">
+      <SignInLink className={clsx("!min-h-0", sizing)} variant="solid" reason="Sign in to follow people">
         Follow
       </SignInLink>
     );

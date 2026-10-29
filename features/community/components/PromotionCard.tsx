@@ -51,7 +51,9 @@ export default function PromotionCard({
       </span>
     );
   else if (!viewer.signedIn)
-    action = <SignInLink className="shrink-0 !min-h-[40px] !px-3.5 text-sm">Sign in to join</SignInLink>;
+    action = <SignInLink className="shrink-0 !min-h-[40px] !px-3.5 text-sm" reason="Sign in to join this room">
+        Sign in to join
+      </SignInLink>;
   else
     action = (
       <Button

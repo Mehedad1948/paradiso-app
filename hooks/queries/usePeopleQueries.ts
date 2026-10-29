@@ -5,11 +5,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { addToast } from "@heroui/toast";
 import { panelApi } from "@/lib/api/panel";
 import { panelKeys } from "@/lib/query/panel-keys";
-import { useSignInHref } from "@/features/community/components/SignInLink";
+import { useAuthAction } from "@/components/auth/gate";
 import { movieHref } from "@/features/movies/format";
 import { rememberMoviePreview } from "@/features/movies/preview";
 import type { Person, PersonCredit } from "@/types/people";
-import { useMe } from "./useMe";
 
 /** A filmography changes slowly; an hour also lets newly added library films show up. */
 const PERSON_STALE = 60 * 60_000;
@@ -37,8 +36,6 @@ export function usePrefetchPerson() {
 export function useOpenCredit(personId: number) {
   const router = useRouter();
   const client = useQueryClient();
-  const signedIn = !!useMe().data;
-  const signIn = useSignInHref();
   const resolve = useMutation({
     mutationFn: (credit: PersonCredit) => panelApi.resolveMovie(credit.tmdbId),
     retry: false,
@@ -62,14 +59,11 @@ export function useOpenCredit(personId: number) {
     onError: (error) => addToast({ title: error.message, color: "danger" }),
   });
 
-  const open = useCallback(
+  const open = useAuthAction(
     (credit: PersonCredit) => {
-      if (resolve.isPending) return;
-      if (signedIn) return resolve.mutate(credit);
-      addToast({ title: "Sign in to open this film", description: "It isn't on Paradiso yet; opening it adds it." });
-      router.push(signIn);
+      if (!resolve.isPending) resolve.mutate(credit);
     },
-    [resolve, signedIn, signIn, router],
+    { reason: "Sign in to open this film. It isn't on Paradiso yet, and opening it adds it." },
   );
 
   return { open, opening: resolve.isPending ? resolve.variables?.tmdbId : undefined };

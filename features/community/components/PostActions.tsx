@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
@@ -14,7 +14,7 @@ import { TelegramLogo, XLogo } from "@/components/ui/BrandIcons";
 import type { Viewer } from "../hooks/useViewer";
 import { postHref } from "../format";
 import { copyPostLink } from "./PostMenu";
-import { useSignInHref } from "./SignInLink";
+import { AuthGate, useAuthAction } from "@/components/auth/gate";
 
 const QuoteComposer = dynamic(() => import("./QuoteComposer"), { ssr: false });
 
@@ -136,10 +136,9 @@ function WatchlistButton({
   viewer: Viewer;
   tone: Tone;
 }) {
-  const router = useRouter();
-  const signIn = useSignInHref();
   const saved = useInWatchlist(movie.id, viewer.signedIn).data === true;
   const toggle = useToggleWatchlist(movie.id, movie.title);
+  const toggleSaved = useAuthAction(() => toggle.mutate(!saved), { reason: "Sign in to save films to your watchlist" });
   const label = saved ? "Remove from watchlist" : "Add to watchlist";
   return (
     <button
@@ -148,7 +147,7 @@ function WatchlistButton({
       aria-label={label}
       title={label}
       disabled={toggle.isPending}
-      onClick={() => (viewer.signedIn ? toggle.mutate(!saved) : router.push(signIn))}
+      onClick={toggleSaved}
       className={clsx(button, hues.watchlist[tone].hover, saved && hues.watchlist[tone].on)}
     >
       <Pop on={saved}>
@@ -172,9 +171,7 @@ export default function PostActions({
   viewer: Viewer;
   tone?: Tone;
 }) {
-  const router = useRouter();
   const overlay = usePathname().startsWith("/community");
-  const signIn = useSignInHref();
   const react = useReact();
   const repost = useRepost();
   const [quoting, setQuoting] = useState(false);
@@ -204,10 +201,10 @@ export default function PostActions({
   );
   const repostClass = clsx(button, hues.repost[tone].hover, post.reposted && hues.repost[tone].on);
 
-  function toggle(value: 1 | -1) {
-    if (!viewer.signedIn) return router.push(signIn);
-    react.mutate({ postId: post.id, value: post.myReaction === value ? null : value });
-  }
+  const toggle = useAuthAction(
+    (value: 1 | -1) => react.mutate({ postId: post.id, value: post.myReaction === value ? null : value }),
+    { reason: "Sign in to react to posts" },
+  );
 
   return (
     <div
@@ -265,9 +262,11 @@ export default function PostActions({
             {repostIcon}
           </BubbleMenu>
         ) : (
-          <button type="button" aria-label="Repost or quote" onClick={() => router.push(signIn)} className={repostClass}>
-            {repostIcon}
-          </button>
+          <AuthGate reason="Sign in to repost or quote">
+            <button type="button" aria-label="Repost or quote" className={repostClass}>
+              {repostIcon}
+            </button>
+          </AuthGate>
         ))}
       {post.movie && <WatchlistButton movie={post.movie} viewer={viewer} tone={tone} />}
       <BubbleMenu

@@ -37,7 +37,7 @@ function CommentBox({ post, viewer }: { post: CommunityPost; viewer: Viewer }) {
     return (
       <div className="flex items-center justify-between gap-4 px-5 py-4 sm:px-6 max-sm:flex-col max-sm:items-start">
         <p className="text-[15px] text-muted">Sign in to join the conversation.</p>
-        <SignInLink>Sign in</SignInLink>
+        <SignInLink reason="Sign in to join the conversation">Sign in</SignInLink>
       </div>
     );
   if (!viewer.canComment(post))

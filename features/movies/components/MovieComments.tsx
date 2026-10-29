@@ -418,7 +418,7 @@ export default function MovieComments({ movieId, title }: { movieId: string; tit
                 <span className="font-semibold">Seen it?</span> <span className="text-muted">Sign in to say what you thought.</span>
               </span>
             </p>
-            <SignInLink>Sign in</SignInLink>
+            <SignInLink reason="Sign in to say what you thought">Sign in</SignInLink>
           </div>
         </div>
       )}

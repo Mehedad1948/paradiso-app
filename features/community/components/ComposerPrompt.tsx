@@ -33,7 +33,7 @@ export default function ComposerPrompt({
     return (
       <div className={clsx(frame, "justify-between max-sm:flex-col max-sm:items-start")}>
         <p className="text-[15px] text-muted">Sign in to post, join conversations and follow people.</p>
-        <SignInLink className="shrink-0">Sign in</SignInLink>
+        <SignInLink className="shrink-0" reason="Sign in to post">Sign in</SignInLink>
       </div>
     );
 
