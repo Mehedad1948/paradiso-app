@@ -13,6 +13,13 @@ const communityServices = {
   feed(query: FeedQuery, signal?: AbortSignal) {
     return backendRequest("/community/posts", "get", { query, signal });
   },
+  /** The signed-out view of the global feed: no session is sent, so the answer is the same for everyone. */
+  publicFeed(query: FeedQuery, signal?: AbortSignal) {
+    return backendRequest("/community/posts", "get", { query, signal, withAuth: false });
+  },
+  publicPost(postId: number, signal?: AbortSignal) {
+    return backendRequest(postPath, "get", { pathParams: { postId }, signal, withAuth: false });
+  },
   following(query: FeedQuery, signal?: AbortSignal) {
     return backendRequest("/community/following", "get", { query, signal });
   },

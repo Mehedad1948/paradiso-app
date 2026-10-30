@@ -1,5 +1,7 @@
 import "server-only";
+import { revalidateTag } from "next/cache";
 import community from "@/services/community";
+import { communityPostsTag, publicFeed, publicPost } from "@/services/community/public";
 import { moviesServices } from "@/services/movies";
 import type { RequestResult } from "@/types/request";
 import {
@@ -62,6 +64,12 @@ function withRoomImage<T extends Pick<CommunityPost, "promotion">>(post: T): T {
 
 function mapResult<T, R>(result: RequestResult<T>, map: (value: T) => R): RequestResult<R> {
   return { ...result, result: result.result ? map(result.result) : null };
+}
+
+/** A new, edited, deleted or reposted post drops the cached signed-out feeds on their next read. */
+function postsChanged<T>(result: RequestResult<T>) {
+  if (result.response.ok) revalidateTag(communityPostsTag, { expire: 0 });
+  return result;
 }
 
 const page = <T extends { data: CommunityPost[] }>(value: T) => ({
@@ -148,7 +156,7 @@ export async function handleCommunityRequest({
 
   if (path.length === 1) {
     if (resource === "posts" && method === "GET")
-      return mapResult(await community.feed(filters(), signal), page);
+      return mapResult(await (signedIn ? community.feed(filters(), signal) : publicFeed(filters(), signal)), page);
     if (resource === "posts" && method === "POST") {
       auth();
       const body = await data();
@@ -168,7 +176,7 @@ export async function handleCommunityRequest({
           ? {}
           : { promotedInviteToken: uuidOf(body.promotedInviteToken, "invite token") }),
       };
-      return mapResult(await community.create(input), withRoomImage);
+      return mapResult(postsChanged(await community.create(input)), withRoomImage);
     }
     if (resource === "following" && method === "GET") {
       auth();
@@ -190,10 +198,11 @@ export async function handleCommunityRequest({
   if (resource === "posts" && rawId) {
     const postId = positiveInteger(rawId, "postId");
     if (path.length === 2) {
-      if (method === "GET") return mapResult(await community.post(postId, signal), withRoomImage);
+      if (method === "GET")
+        return mapResult(await (signedIn ? community.post(postId, signal) : publicPost(postId, signal)), withRoomImage);
       if (method === "DELETE") {
         auth();
-        return community.delete(postId);
+        return postsChanged(await community.delete(postId));
       }
       if (method === "PATCH") {
         auth();
@@ -204,7 +213,7 @@ export async function handleCommunityRequest({
           ...(body.imageUrl === undefined ? {} : { imageUrl: imageUrl(body.imageUrl) }),
         };
         if (!Object.keys(input).length) throw new InputError("Nothing to update");
-        return mapResult(await community.update(postId, input), withRoomImage);
+        return mapResult(postsChanged(await community.update(postId, input)), withRoomImage);
       }
     }
     if (action === "reaction" && path.length === 3) {
@@ -222,8 +231,8 @@ export async function handleCommunityRequest({
     if (action === "repost" && path.length === 3 && (method === "POST" || method === "DELETE")) {
       auth();
       return method === "POST"
-        ? mapResult(await community.repost(postId), withRoomImage)
-        : community.undoRepost(postId);
+        ? mapResult(postsChanged(await community.repost(postId)), withRoomImage)
+        : postsChanged(await community.undoRepost(postId));
     }
     if (action === "comments") {
       if (path.length === 3 && method === "GET")

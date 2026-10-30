@@ -2,14 +2,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   token: "session-token" as string | undefined,
+  revalidateTag: vi.fn(),
   community: {
     feed: vi.fn(),
+    publicFeed: vi.fn(),
+    publicPost: vi.fn(),
     following: vi.fn(),
     roomFeed: vi.fn(),
     post: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
+    repost: vi.fn(),
+    undoRepost: vi.fn(),
     comments: vi.fn(),
     comment: vi.fn(),
     deleteComment: vi.fn(),
@@ -23,6 +28,11 @@ const mocks = vi.hoisted(() => ({
   storage: { uploadImage: vi.fn() },
 }));
 vi.mock("server-only", () => ({}));
+vi.mock("next/cache", () => ({
+  revalidateTag: mocks.revalidateTag,
+  cacheLife: vi.fn(),
+  cacheTag: vi.fn(),
+}));
 vi.mock("next/headers", () => ({
   cookies: async () => ({
     get: () => (mocks.token ? { value: mocks.token } : undefined),
@@ -64,21 +74,67 @@ function call(path: string, method = "GET", body?: unknown) {
 }
 beforeEach(() => {
   mocks.token = "session-token";
+  vi.clearAllMocks();
   process.env.AWS_BASE_URL = "https://cdn.example/";
 });
 
 describe("BFF community", () => {
   it("serves feeds to anonymous readers with bounded cursors", async () => {
     mocks.token = undefined;
-    mocks.community.feed.mockResolvedValue(ok({ data: [], nextCursor: null }));
+    mocks.community.publicFeed.mockResolvedValue(ok({ data: [], nextCursor: null }));
     const response = await call(`community/posts?before=40&authorId=3&movieId=${movieId}`);
     expect(response.status).toBe(200);
-    expect(mocks.community.feed).toHaveBeenCalledWith(
-      { limit: 20, before: 40, authorId: 3, movieId },
-      expect.any(AbortSignal),
-    );
+    // No abort signal: one reader leaving must not cancel a fetch that fills a shared entry.
+    expect(mocks.community.publicFeed).toHaveBeenCalledWith({ limit: 20, before: 40, authorId: 3, movieId });
     expect((await call("community/posts?limit=101")).status).toBe(400);
     expect((await call("community/posts?movieId=42")).status).toBe(400);
+  });
+
+  it("reads the shared signed-out view only for anonymous readers", async () => {
+    mocks.community.feed.mockResolvedValue(ok({ data: [], nextCursor: null }));
+    mocks.community.post.mockResolvedValue(ok(post()));
+    expect((await call("community/posts")).status).toBe(200);
+    expect((await call("community/posts/5")).status).toBe(200);
+    // A signed-in reader's feed carries their reactions, so it is never the shared one.
+    expect(mocks.community.feed).toHaveBeenCalledTimes(1);
+    expect(mocks.community.post).toHaveBeenCalledTimes(1);
+    expect(mocks.community.publicFeed).not.toHaveBeenCalled();
+    expect(mocks.community.publicPost).not.toHaveBeenCalled();
+
+    mocks.token = undefined;
+    mocks.community.publicFeed.mockResolvedValue(ok({ data: [], nextCursor: null }));
+    mocks.community.publicPost.mockResolvedValue(ok(post()));
+    expect((await call("community/posts")).status).toBe(200);
+    expect((await call("community/posts/5")).status).toBe(200);
+    expect(mocks.community.publicFeed).toHaveBeenCalledTimes(1);
+    expect(mocks.community.publicPost).toHaveBeenCalledTimes(1);
+    expect(mocks.community.feed).toHaveBeenCalledTimes(1);
+    expect(mocks.community.post).toHaveBeenCalledTimes(1);
+    // Following and room feeds depend on the reader, so they are never shared.
+    mocks.community.following.mockResolvedValue(ok({ data: [], nextCursor: null }));
+    expect((await call("community/following")).status).toBe(401);
+    expect(mocks.community.following).not.toHaveBeenCalled();
+  });
+
+  it("expires the shared feeds when a post is created, edited, deleted or reposted", async () => {
+    mocks.community.create.mockResolvedValue(ok(post()));
+    mocks.community.update.mockResolvedValue(ok(post()));
+    mocks.community.delete.mockResolvedValue(ok({ message: "ok" }));
+    mocks.community.repost.mockResolvedValue(ok(post()));
+    mocks.community.undoRepost.mockResolvedValue(ok({ message: "ok" }));
+    await call("community/posts", "POST", { text: "Hi" });
+    await call("community/posts/5", "PATCH", { text: "Hi again" });
+    await call("community/posts/5", "DELETE");
+    await call("community/posts/5/repost", "POST");
+    await call("community/posts/5/repost", "DELETE");
+    expect(mocks.revalidateTag).toHaveBeenCalledTimes(5);
+    expect(mocks.revalidateTag).toHaveBeenCalledWith("community-posts", { expire: 0 });
+
+    // A write the backend refused changed nothing, so nothing is expired.
+    mocks.revalidateTag.mockClear();
+    mocks.community.delete.mockResolvedValue(failed(403));
+    await call("community/posts/5", "DELETE");
+    expect(mocks.revalidateTag).not.toHaveBeenCalled();
   });
 
   it("asks anonymous readers to sign in before any write", async () => {
