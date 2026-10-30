@@ -67,6 +67,13 @@ const config = {
           "0%": { opacity: "0", transform: "translateY(6px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        // A reaction icon springs in when switched on: overshoots, settles back.
+        "community-pop": {
+          "0%": { transform: "scale(0.4) rotate(-18deg)" },
+          "45%": { transform: "scale(1.18) rotate(5deg)" },
+          "72%": { transform: "scale(0.95) rotate(-2deg)" },
+          "100%": { transform: "scale(1) rotate(0)" },
+        },
         // A film's backdrop drifts slowly closer while its details are open.
         "movie-kenburns": {
           "0%": { transform: "scale(1.12) translate3d(0, 1.5%, 0)" },
@@ -102,6 +109,7 @@ const config = {
         "cinema-number": "cinema-number 4.6s step-end",
         "cinema-letter-reveal": "cinema-letter-reveal 4.6s linear",
         "community-rise": "community-rise 380ms cubic-bezier(0.2, 0.7, 0.2, 1) both",
+        "community-pop": "community-pop 420ms cubic-bezier(0.22, 1, 0.36, 1)",
         "poster-in": "poster-in 500ms cubic-bezier(0.22, 1, 0.36, 1) both",
         "person-drift": "person-drift 160s linear infinite",
       },

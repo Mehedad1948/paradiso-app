@@ -64,6 +64,27 @@ function mapPosts(client: QueryClient, map: (post: CommunityPost) => CommunityPo
   );
 }
 
+type Live = Pick<
+  CommunityPost,
+  "commentCount" | "likeCount" | "dislikeCount" | "repostCount" | "quoteCount" | "myReaction" | "reposted"
+>;
+
+/**
+ * Updates a post's counts and viewer state wherever it appears: as a post itself, and as the
+ * original inside a repost or quote. `update` must return its argument when nothing changes.
+ */
+function mapOriginal(client: QueryClient, postId: number, update: <T extends Live>(post: T) => T) {
+  mapPosts(client, (post) => {
+    let next = post.id === postId ? update(post) : post;
+    const quoted = post.quotedPost;
+    if (quoted?.id === postId) {
+      const updated = update(quoted);
+      if (updated !== quoted) next = { ...next, quotedPost: updated };
+    }
+    return next;
+  });
+}
+
 function prepend<T extends { id: number }>(client: QueryClient, queryKey: readonly unknown[], item: T) {
   client.setQueryData<Pages<T>>(queryKey, (data) => {
     if (!data?.pages.length) return data;
@@ -111,13 +132,13 @@ export const useFeedHead = (scope: FeedScope, newestId: number | undefined, enab
     select: (page) => page.data.filter((post) => post.id > (newestId ?? Infinity)).length,
   });
 
-export function usePost(id: number, placeholder?: CommunityPost, enabled = true) {
+export function usePost(id: number, placeholder?: CommunityPost) {
   const client = useQueryClient();
   return useQuery({
     placeholderData: placeholder,
     queryKey: communityKeys.post(id),
     queryFn: ({ signal }) => communityApi.post(id, signal),
-    enabled: enabled && Number.isSafeInteger(id) && id > 0,
+    enabled: Number.isSafeInteger(id) && id > 0,
     initialData: () => cachedPost(client, id),
     // Seeded data is shown at once but still revalidated.
     initialDataUpdatedAt: 0,
@@ -268,14 +289,13 @@ export function useDeletePost() {
 export function useReact() {
   const client = useQueryClient();
   const apply = (postId: number, counts: Pick<CommunityPost, "likeCount" | "dislikeCount" | "myReaction">) =>
-    mapPosts(client, (post) => (post.id === postId ? { ...post, ...counts } : post));
+    mapOriginal(client, postId, (post) => ({ ...post, ...counts }));
   return useMutation({
     mutationFn: communityApi.react,
     onMutate: ({ postId, value }) => {
       let previous: Pick<CommunityPost, "likeCount" | "dislikeCount" | "myReaction"> | undefined;
-      mapPosts(client, (post) => {
-        if (post.id !== postId) return post;
-        previous = { likeCount: post.likeCount, dislikeCount: post.dislikeCount, myReaction: post.myReaction };
+      mapOriginal(client, postId, (post) => {
+        previous ??= { likeCount: post.likeCount, dislikeCount: post.dislikeCount, myReaction: post.myReaction };
         const was = post.myReaction;
         return {
           ...post,
@@ -298,8 +318,8 @@ export function useReact() {
 export function useRepost() {
   const client = useQueryClient();
   const flip = (postId: number, on: boolean) =>
-    mapPosts(client, (post) =>
-      post.id === postId && post.reposted !== on
+    mapOriginal(client, postId, (post) =>
+      post.reposted !== on
         ? { ...post, reposted: on, repostCount: Math.max(0, post.repostCount + (on ? 1 : -1)) }
         : post,
     );
@@ -328,11 +348,7 @@ export function useRepost() {
 }
 
 const countComments = (client: QueryClient, postId: number, delta: number) =>
-  mapPosts(client, (post) =>
-    post.id === postId
-      ? { ...post, commentCount: Math.max(0, post.commentCount + delta) }
-      : post,
-  );
+  mapOriginal(client, postId, (post) => ({ ...post, commentCount: Math.max(0, post.commentCount + delta) }));
 
 export function useCreateComment() {
   const client = useQueryClient();

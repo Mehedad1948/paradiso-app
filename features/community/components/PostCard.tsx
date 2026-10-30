@@ -4,14 +4,13 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import clsx from "clsx";
-import { Tooltip } from "@heroui/tooltip";
 import { LockIcon, RepeatIcon, UsersGroupRoundedIcon } from "@solar-icons/react/linear";
 import type { CommunityPost, CommunityUser } from "@/types/community";
-import { useDeletePost, usePost } from "@/hooks/queries/useCommunityQueries";
+import { useDeletePost } from "@/hooks/queries/useCommunityQueries";
 import type { Viewer } from "../hooks/useViewer";
-import { useNearViewport } from "../hooks/useNearViewport";
 import { ago, fullDate, isEdited, postHref, profileHref } from "../format";
 import UserAvatar from "@/components/ui/UserAvatar";
+import { hoverTip } from "@/components/ui/hoverTips";
 import PostMedia from "./PostMedia";
 import PostActions from "./PostActions";
 import PromotionCard from "./PromotionCard";
@@ -31,42 +30,31 @@ type CardProps = {
   onDeleted?: () => void;
 };
 
-/** A repost carries only a snapshot of the original; this stands in until the full post loads. */
-function snapshot(repost: CommunityPost, viewer: Viewer): CommunityPost {
-  const original = repost.quotedPost!;
+/** The original post as the server sent it inside a repost, live counts and the viewer's own state included. */
+function original(repost: CommunityPost & { quotedPost: NonNullable<CommunityPost["quotedPost"]> }): CommunityPost {
   return {
-    ...original,
+    ...repost.quotedPost,
     kind: "post",
-    updatedAt: original.createdAt,
-    room: repost.room,
     quotedPostId: null,
     quotedPost: null,
     promotion: null,
-    commentCount: 0,
-    likeCount: 0,
-    dislikeCount: 0,
-    repostCount: 0,
-    quoteCount: 0,
-    myReaction: null,
-    reposted: repost.author.id === viewer.me?.id,
   };
 }
 
-/** Shows the original post, live, under a "reposted" line; likes and replies go to the original. */
-function Repost({ post, viewer, ...props }: CardProps) {
-  const stand = useMemo(() => snapshot(post, viewer), [post, viewer]);
-  // In a feed, the original is fetched only as the repost scrolls near, not for every repost on the page.
-  const [ref, near] = useNearViewport<HTMLDivElement>();
-  const original = usePost(post.quotedPost!.id, stand, near || props.variant === "detail");
-  return (
-    <div ref={ref}>
-      <PostCard {...props} post={original.data ?? stand} viewer={viewer} repostedBy={post.author} />
-    </div>
-  );
+/** Shows the original post under a "reposted" line; likes and replies go to the original. */
+function Repost({ post, ...props }: CardProps & { post: Parameters<typeof original>[0] }) {
+  const shown = useMemo(() => original(post), [post]);
+  return <PostCard {...props} post={shown} repostedBy={post.author} />;
 }
 
 function PostEntry(props: CardProps) {
-  return props.post.kind === "repost" && props.post.quotedPost ? <Repost {...props} /> : <PostCard {...props} />;
+  const { post } = props;
+  // A repost whose original was deleted or is out of reach arrives with no quotedPost; there is nothing to show.
+  return post.kind === "repost" && post.quotedPost ? (
+    <Repost {...props} post={{ ...post, quotedPost: post.quotedPost }} />
+  ) : (
+    <PostCard {...props} />
+  );
 }
 
 function PostCard({
@@ -114,7 +102,7 @@ function PostCard({
         className={clsx(
           "block px-0 py-4 sm:px-6 sm:py-5",
           !detail &&
-            "cursor-pointer transition-colors hover:bg-surface/40 motion-safe:animate-community-rise",
+            "feed-card cursor-pointer transition-colors hover:bg-surface/40 motion-safe:animate-community-rise",
         )}
       >
         {repostedBy && (
@@ -137,25 +125,13 @@ function PostCard({
                 {post.author.username}
               </span>
               <div className="flex min-w-0 items-center gap-1.5 text-sm text-muted">
-                <Tooltip
-                  content={fullDate(post.createdAt)}
-                  delay={500}
-                  closeDelay={0}
-                  size="sm"
-                >
-                  <time dateTime={post.createdAt} className="shrink-0">
-                    {ago(post.createdAt)}
-                  </time>
-                </Tooltip>
+                <time dateTime={post.createdAt} className="shrink-0" {...hoverTip(fullDate(post.createdAt))}>
+                  {ago(post.createdAt)}
+                </time>
                 {isEdited(post) && (
-                  <Tooltip
-                    content={`Edited ${fullDate(post.updatedAt)}`}
-                    delay={500}
-                    closeDelay={0}
-                    size="sm"
-                  >
-                    <span className="shrink-0">· edited</span>
-                  </Tooltip>
+                  <span className="shrink-0" {...hoverTip(`Edited ${fullDate(post.updatedAt)}`)}>
+                    · edited
+                  </span>
                 )}
               </div>
             </div>

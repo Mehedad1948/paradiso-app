@@ -1,4 +1,5 @@
 "use client";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@heroui/button";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
 import { addToast } from "@heroui/toast";
@@ -15,18 +16,63 @@ export function copyPostLink(id: number) {
     .catch(() => addToast({ title: "Couldn't copy the link", color: "danger" }));
 }
 
-export default function PostMenu({
+// Matches HeroUI's small, icon-only, light, round Button, so the swap is invisible.
+const trigger =
+  "-my-1 -mr-2 inline-flex h-8 w-8 min-w-8 items-center justify-center rounded-full text-muted transition-colors hover:bg-default/40 hover:text-ink";
+
+/**
+ * A dropdown costs a handful of hooks and listeners per card, and the reader rarely opens it.
+ * Until they reach for it this is a plain button; hovering, focusing or pressing it mounts the real menu.
+ */
+export default function PostMenu(props: Omit<Parameters<typeof Menu>[0], "open" | "onOpenChange">) {
+  const [armed, setArmed] = useState<"hover" | "focus" | "press" | null>(null);
+  const wrap = useRef<HTMLSpanElement>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    // The swap drops focus; hand it to the real trigger before the menu opens, so closing restores it.
+    if (armed === "focus" || armed === "press") wrap.current?.querySelector("button")?.focus();
+    if (armed === "press") setOpen(true);
+  }, [armed]);
+
+  if (!armed)
+    return (
+      <button
+        type="button"
+        aria-label="Post options"
+        aria-haspopup="menu"
+        className={trigger}
+        onPointerEnter={(event) => event.pointerType === "mouse" && setArmed("hover")}
+        onFocus={() => setArmed("focus")}
+        onClick={() => setArmed("press")}
+      >
+        <MenuDotsIcon size={19} />
+      </button>
+    );
+
+  return (
+    <span ref={wrap} className="inline-flex">
+      <Menu {...props} open={open} onOpenChange={setOpen} />
+    </span>
+  );
+}
+
+function Menu({
   post,
   viewer,
   onEdit,
   onDelete,
   onClosed,
+  open,
+  onOpenChange,
 }: {
   post: CommunityPost;
   viewer: Viewer;
   onEdit: () => void;
   onDelete: () => void;
   onClosed?: () => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const items = [
     ...(viewer.canEdit(post)
@@ -39,7 +85,11 @@ export default function PostMenu({
   return (
     <Dropdown
       placement="bottom-end"
-      onOpenChange={(open) => !open && onClosed?.()}
+      isOpen={open}
+      onOpenChange={(next) => {
+        onOpenChange?.(next);
+        if (!next) onClosed?.();
+      }}
       classNames={{ content: "min-w-[210px] rounded-xl border border-line bg-elevated p-1.5 shadow-[0_18px_50px_rgb(0_0_0_/_18%)]" }}
     >
       <DropdownTrigger>

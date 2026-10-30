@@ -2,28 +2,26 @@
 import Link from "next/link";
 import { useState, useSyncExternalStore, type ReactNode } from "react";
 import clsx from "clsx";
-import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { Tooltip } from "@heroui/tooltip";
 import { BookmarkCheckIcon, BookmarkPlusIcon, ChatRoundIcon, CloseIcon, DislikeIcon, LikeIcon, LinkRoundIcon, QuoteIcon, RepeatIcon, ShareIcon } from "@solar-icons/react/linear";
 import { ShareIcon as ShareOutlineIcon } from "@solar-icons/react/outline";
 import type { CommunityPost } from "@/types/community";
 import { useReact, useRepost } from "@/hooks/queries/useCommunityQueries";
 import { useInWatchlist, useToggleWatchlist } from "@/hooks/queries/useWatchlistQueries";
-import { useNearViewport } from "../hooks/useNearViewport";
 import BubbleMenu, { type BubbleItem } from "@/components/ui/BubbleMenu";
+import { hoverTip } from "@/components/ui/hoverTips";
 import { FacebookLogo, TelegramLogo, XLogo } from "@/components/ui/BrandIcons";
 import type { Viewer } from "../hooks/useViewer";
 import { postHref } from "../format";
 import { copyPostLink } from "./PostMenu";
 import { AuthGate, useAuthAction } from "@/components/auth/gate";
 
-/** Short hint for an icon-only action; the span gives the tooltip a plain element to anchor to. */
+/** Short hint for an icon-only action. A shared listener draws it, so cards mount no tooltip components. */
 function Tip({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <Tooltip content={label} delay={400} closeDelay={0} size="sm">
-      <span className="inline-flex">{children}</span>
-    </Tooltip>
+    <span className="inline-flex" {...hoverTip(label)}>
+      {children}
+    </span>
   );
 }
 
@@ -123,8 +121,6 @@ const hues = {
   },
 } as const;
 
-const POP = { type: "spring" as const, stiffness: 600, damping: 14 };
-
 /** Pops its icon when the reaction is switched on. */
 function Pop({ on, children }: { on: boolean; children: ReactNode }) {
   const [count, setCount] = useState(0);
@@ -133,16 +129,11 @@ function Pop({ on, children }: { on: boolean; children: ReactNode }) {
     setWas(on);
     if (on) setCount((c) => c + 1);
   }
+  // A new key restarts the CSS animation; nothing animates on first render.
   return (
-    <motion.span
-      key={count}
-      initial={count ? { scale: 0.4, rotate: -18 } : false}
-      animate={{ scale: 1, rotate: 0 }}
-      transition={POP}
-      className="inline-flex"
-    >
+    <span key={count} className={clsx("inline-flex", count > 0 && "motion-safe:animate-community-pop")}>
       {children}
-    </motion.span>
+    </span>
   );
 }
 
@@ -156,16 +147,14 @@ function WatchlistButton({
   viewer: Viewer;
   tone: Tone;
 }) {
-  // One status request per film, so only ask for the cards the reader is about to see.
-  const [ref, near] = useNearViewport<HTMLButtonElement>();
-  const saved = useInWatchlist(movie.id, viewer.signedIn && near).data === true;
+  // The post already says whether the film is saved, so the card asks for nothing.
+  const saved = useInWatchlist(movie.id, viewer.signedIn, movie.inWatchlist).data === true;
   const toggle = useToggleWatchlist(movie.id, movie.title);
   const toggleSaved = useAuthAction(() => toggle.mutate(!saved), { reason: "Sign in to save films to your watchlist" });
   const label = saved ? "Remove from watchlist" : "Add to watchlist";
   return (
     <Tip label={label}>
     <button
-      ref={ref}
       type="button"
       aria-pressed={saved}
       aria-label={label}

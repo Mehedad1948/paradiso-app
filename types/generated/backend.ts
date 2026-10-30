@@ -2461,6 +2461,7 @@ export interface components {
                 dbId: number | null;
                 title: string;
                 poster_path: string | null;
+                inWatchlist: boolean;
             } | null;
             room: {
                 id: number;
@@ -2481,7 +2482,22 @@ export interface components {
                     dbId: number | null;
                     title: string;
                     poster_path: string | null;
+                    inWatchlist: boolean;
                 } | null;
+                /** Format: date-time */
+                updatedAt: string;
+                room: {
+                    id: number;
+                    name: string;
+                } | null;
+                commentCount: number;
+                likeCount: number;
+                dislikeCount: number;
+                repostCount: number;
+                quoteCount: number;
+                /** @enum {integer|null} */
+                myReaction: 1 | -1 | null;
+                reposted: boolean;
             } | null;
             promotion: {
                 room: {
@@ -2543,6 +2559,7 @@ export interface components {
                 dbId: number | null;
                 title: string;
                 poster_path: string | null;
+                inWatchlist: boolean;
             } | null;
             room: {
                 id: number;
@@ -2563,7 +2580,22 @@ export interface components {
                     dbId: number | null;
                     title: string;
                     poster_path: string | null;
+                    inWatchlist: boolean;
                 } | null;
+                /** Format: date-time */
+                updatedAt: string;
+                room: {
+                    id: number;
+                    name: string;
+                } | null;
+                commentCount: number;
+                likeCount: number;
+                dislikeCount: number;
+                repostCount: number;
+                quoteCount: number;
+                /** @enum {integer|null} */
+                myReaction: 1 | -1 | null;
+                reposted: boolean;
             } | null;
             promotion: {
                 room: {

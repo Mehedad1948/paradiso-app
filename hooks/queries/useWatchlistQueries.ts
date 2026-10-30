@@ -35,13 +35,19 @@ export const useWatchlist = (enabled = true) =>
 
 const statusKey = (movieId: string) => [...panelKeys.watchlist, "has", movieId] as const;
 
-/** Whether the signed-in user already has this movie on their watchlist. */
-export const useInWatchlist = (movieId: string, enabled = true) =>
+/**
+ * Whether the signed-in user already has this movie on their watchlist.
+ * `seed` is the answer the server already gave (e.g. on a community post): with it, nothing is
+ * requested on mount, and a later toggle still refreshes the status.
+ */
+export const useInWatchlist = (movieId: string, enabled = true, seed?: boolean) =>
   useQuery({
     queryKey: statusKey(movieId),
     queryFn: ({ signal }) => panelApi.inWatchlist(movieId, signal),
     enabled,
-    staleTime: 60_000,
+    // Only `inWatchlist` is read from the answer; the version tag is the server's own bookkeeping.
+    initialData: () => (seed === undefined ? undefined : { inWatchlist: seed, apiVersion: "" }),
+    staleTime: seed === undefined ? 60_000 : Infinity,
     select: (data) => data.inWatchlist,
   });
 
