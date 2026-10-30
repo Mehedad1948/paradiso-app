@@ -2,7 +2,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import clsx from "clsx";
-import { AltArrowDownIcon, ArrowLeftIcon, CloseIcon, ShareCircleIcon, SquareArrowRightUpIcon, UserRoundedIcon } from "@solar-icons/react/linear";
+import { AltArrowDownIcon, ArrowLeftIcon, CloseIcon, SquareArrowRightUpIcon, UserRoundedIcon } from "@solar-icons/react/linear";
+import { ShareIcon as ShareOutlineIcon } from "@solar-icons/react/outline";
 import BubbleMenu from "@/components/ui/BubbleMenu";
 import PopTag from "@/components/ui/PopTag";
 import { shareItems } from "@/components/ui/shareItems";
@@ -271,7 +272,7 @@ function PersonView({ id }: { id: number }) {
               endAngle={300}
               radius={72}
             >
-              {(open) => (open ? <CloseIcon size={18} strokeWidth={1.75} aria-hidden="true" /> : <ShareCircleIcon size={17} aria-hidden="true" />)}
+              {(open) => (open ? <CloseIcon size={18} strokeWidth={1.75} aria-hidden="true" /> : <ShareOutlineIcon size={17} aria-hidden="true" />)}
             </BubbleMenu>
           </div>
         </div>

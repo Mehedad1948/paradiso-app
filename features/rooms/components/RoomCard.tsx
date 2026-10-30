@@ -31,7 +31,7 @@ export default function RoomCard({
   const canPreview = !canVisit && room.isPublic;
   const card = (
     <Card
-      className={`relative h-full overflow-hidden rounded-[10px] border border-line bg-elevated shadow-none ${canVisit || canPreview ? "transition-colors group-hover:border-muted" : ""}`}
+      className={`relative h-full overflow-hidden rounded-[10px] border border-line bg-elevated shadow-none ${canVisit || canPreview ? "transition-colors " : ""}`}
       radius="lg"
       shadow="none"
     >

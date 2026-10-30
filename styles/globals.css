@@ -353,6 +353,28 @@
   .room-hero-art img { animation: none; }
 }
 
+/* Loading skeletons: one slow diagonal band of light passes over the whole block. */
+.skeleton-sweep::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    hsl(var(--heroui-foreground) / 0.07) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  animation: skeleton-sweep 2s ease-in-out infinite;
+}
+@keyframes skeleton-sweep {
+  to { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-sweep::after { animation: none; }
+}
+
 /* Photo-less avatar: a quiet charcoal disc lit by a soft, name-tinted glow in one corner. */
 .avatar-placeholder {
   color: hsl(var(--av-hue) 45% 90%);

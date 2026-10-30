@@ -154,15 +154,17 @@ function PostCard({
               </div>
             </div>
           </Link>
-          <span className="shrink-0 pl-2">
-            <PostMenu
-              post={post}
-              viewer={viewer}
-              onEdit={() => setDialog("edit")}
-              onDelete={() => setDialog("delete")}
-              onClosed={() => (menuClosedAt.current = Date.now())}
-            />
-          </span>
+          {(viewer.canEdit(post) || viewer.canDelete(post)) && (
+            <span className="shrink-0 pl-2">
+              <PostMenu
+                post={post}
+                viewer={viewer}
+                onEdit={() => setDialog("edit")}
+                onDelete={() => setDialog("delete")}
+                onClosed={() => (menuClosedAt.current = Date.now())}
+              />
+            </span>
+          )}
         </header>
 
         <div className="mt-2 min-w-0">
@@ -199,9 +201,9 @@ function PostCard({
           {post.quotedPost && (
             <div
               data-quote-href={postHref(post.quotedPost.id)}
-              className="mt-3 rounded-2xl border border-line p-3 transition-colors hover:border-muted/60 hover:bg-surface/40"
+              className="mt-3 rounded-2xl border border-line p-3 transition-colors hover:border-primary/40 hover:bg-surface/40"
             >
-              <span className="text-sm font-semibold">{post.quotedPost.author.username}</span>
+              <span className="text-sm font-semibold text-primary">{post.quotedPost.author.username}</span>
               {post.quotedPost.text && (
                 <p className="mt-1 line-clamp-4 whitespace-pre-wrap break-words text-[15px]">
                   {post.quotedPost.text}

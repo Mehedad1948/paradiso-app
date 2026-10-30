@@ -5,7 +5,9 @@ import { useState, type ReactNode } from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { BookmarkCheckIcon, BookmarkPlusIcon, ChatRoundIcon, CloseIcon, DislikeIcon, LikeIcon, LinkRoundIcon, QuoteIcon, RepeatIcon, ShareCircleIcon, ShareIcon } from "@solar-icons/react/linear";
+import { Tooltip } from "@heroui/tooltip";
+import { BookmarkCheckIcon, BookmarkPlusIcon, ChatRoundIcon, CloseIcon, DislikeIcon, LikeIcon, LinkRoundIcon, QuoteIcon, RepeatIcon, ShareIcon } from "@solar-icons/react/linear";
+import { ShareIcon as ShareOutlineIcon } from "@solar-icons/react/outline";
 import type { CommunityPost } from "@/types/community";
 import { useReact, useRepost } from "@/hooks/queries/useCommunityQueries";
 import { useInWatchlist, useToggleWatchlist } from "@/hooks/queries/useWatchlistQueries";
@@ -15,6 +17,15 @@ import type { Viewer } from "../hooks/useViewer";
 import { postHref } from "../format";
 import { copyPostLink } from "./PostMenu";
 import { AuthGate, useAuthAction } from "@/components/auth/gate";
+
+/** Short hint for an icon-only action; the span gives the tooltip a plain element to anchor to. */
+function Tip({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <Tooltip content={label} delay={400} closeDelay={0} size="sm">
+      <span className="inline-flex">{children}</span>
+    </Tooltip>
+  );
+}
 
 const QuoteComposer = dynamic(() => import("./QuoteComposer"), { ssr: false });
 
@@ -142,11 +153,11 @@ function WatchlistButton({
   const toggleSaved = useAuthAction(() => toggle.mutate(!saved), { reason: "Sign in to save films to your watchlist" });
   const label = saved ? "Remove from watchlist" : "Add to watchlist";
   return (
+    <Tip label={label}>
     <button
       type="button"
       aria-pressed={saved}
       aria-label={label}
-      title={label}
       disabled={toggle.isPending}
       onClick={toggleSaved}
       className={clsx(button, hues.watchlist[tone].hover, saved && hues.watchlist[tone].on)}
@@ -159,6 +170,7 @@ function WatchlistButton({
         )}
       </Pop>
     </button>
+    </Tip>
   );
 }
 
@@ -214,6 +226,7 @@ export default function PostActions({
     >
       {canReact && (
         <>
+          <Tip label={liked ? "Remove like" : "Like"}>
           <button
             type="button"
             onClick={() => toggle(1)}
@@ -226,6 +239,8 @@ export default function PostActions({
             </Pop>
             {post.likeCount > 0 && <span>{post.likeCount.toLocaleString()}</span>}
           </button>
+          </Tip>
+          <Tip label={disliked ? "Remove dislike" : "Dislike"}>
           <button
             type="button"
             onClick={() => toggle(-1)}
@@ -238,9 +253,11 @@ export default function PostActions({
             </Pop>
             {post.dislikeCount > 0 && <span>{post.dislikeCount.toLocaleString()}</span>}
           </button>
+          </Tip>
           <span aria-hidden="true" className="h-1 w-1 shrink-0 rounded-full bg-current opacity-30" />
         </>
       )}
+      <Tip label="View comments">
       <Link
         href={`${postHref(post.id)}#comments`}
         scroll={!overlay}
@@ -250,8 +267,11 @@ export default function PostActions({
         <ChatRoundIcon size={18} strokeWidth={1.75} aria-hidden="true" />
         {post.commentCount > 0 && <span>{post.commentCount.toLocaleString()}</span>}
       </Link>
+      </Tip>
       {canReact &&
-        (viewer.signedIn ? (
+        (
+          <Tip label="Repost or quote">
+          {viewer.signedIn ? (
           <BubbleMenu
             label={`Repost or quote, ${post.repostCount} reposts, ${post.quoteCount} quotes`}
             items={repostItems}
@@ -267,8 +287,11 @@ export default function PostActions({
               {repostIcon}
             </button>
           </AuthGate>
-        ))}
+          )}
+          </Tip>
+        )}
       {post.movie && <WatchlistButton movie={post.movie} viewer={viewer} tone={tone} />}
+      <Tip label="Share">
       <BubbleMenu
         label="Share post"
         items={typeof window === "undefined" ? [] : shareItems(post)}
@@ -280,10 +303,11 @@ export default function PostActions({
           open ? (
             <CloseIcon size={18} strokeWidth={1.75} aria-hidden="true" />
           ) : (
-            <ShareCircleIcon size={18} strokeWidth={1.75} aria-hidden="true" />
+            <ShareOutlineIcon size={18} strokeWidth={1.75} aria-hidden="true" />
           )
         }
       </BubbleMenu>
+      </Tip>
       {quoting && <QuoteComposer post={post} onClose={() => setQuoting(false)} />}
     </div>
   );

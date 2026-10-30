@@ -2,7 +2,7 @@
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { Spinner } from "@heroui/spinner";
+import RoomRatingTableSkeleton from "./components/RoomRatingTableSkeleton";
 import { Button } from "@heroui/button";
 import { useMe } from "@/hooks/queries/useMe";
 import {
@@ -29,7 +29,8 @@ import RoomNoAccess, { isRoomAccessError } from "./components/RoomNoAccess";
 import Image from "next/image";
 import { posters } from "@/config/posters";
 import Link from "next/link";
-import { ArrowLeftIcon, ChatSquare2Icon, NotebookIcon, PenIcon } from "@solar-icons/react/linear";
+import { ArrowLeftIcon, PenIcon } from "@solar-icons/react/linear";
+import { ChatSquareUnreadIcon, CheckReadIcon } from "@solar-icons/react/outline";
 import UnreadBadge from "./chat/components/UnreadBadge";
 import { wallpaperGlow } from "./lib/wallpaper";
 const AddMovieDialog = dynamic(() => import("./dialogs/AddMovieDialog"), {
@@ -137,7 +138,7 @@ function RoomPage({ roomId }: { roomId: string }) {
       {/* The lobby's spotlight wash, fixed behind the page (below the header) and kept faint. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none fixed inset-x-0 bottom-0 top-24 -z-10"
+        className="pointer-events-none fixed inset-x-0 bottom-0 top-[88px] -z-10 max-md:top-[72px]"
         style={{ backgroundImage: wallpaperGlow(0.75) }}
       />
       <Link href="/rooms" className="mb-6 inline-flex items-center gap-2 text-[15px] text-muted hover:text-accent">
@@ -164,13 +165,12 @@ function RoomPage({ roomId }: { roomId: string }) {
         <div className="room-hero-text">
           <h1 className="mb-4 break-words text-[clamp(36px,4.8vw,68px)] tracking-[-0.06em] [&_em]:font-serif [&_em]:font-normal max-sm:text-[38px]">
             <ShinyText
-              text={room.data?.name || "Room"}
-              color="hsl(var(--heroui-foreground))"
-              shineColor="hsl(var(--heroui-primary-500))"
-              speed={3}
-              delay={1.5}
-              shineWidth={35}
-              glow={0.4}
+              text={room.data?.name || "Paradiso Room"}
+              color="hsl(var(--heroui-foreground) / 0.55)"
+              shineColor="hsl(var(--heroui-foreground))"
+              speed={2}
+              shineWidth={40}
+              softness={0.8}
             />
           </h1>
           <p className="max-w-[540px] text-base text-muted">
@@ -202,7 +202,7 @@ function RoomPage({ roomId }: { roomId: string }) {
             )}
             <Button
               className="min-h-[46px] rounded-md border border-line bg-surface/75 text-[15px] font-semibold text-ink backdrop-blur-md"
-              startContent={<NotebookIcon size={17} aria-hidden="true" />}
+              startContent={<ChatSquareUnreadIcon size={17} aria-hidden="true" />}
               onPress={() => open("discussion")}
             >
               Discussion
@@ -213,11 +213,11 @@ function RoomPage({ roomId }: { roomId: string }) {
             {isMember && (
               <Button
                 className="min-h-[46px] rounded-md bg-ink text-[15px] font-semibold text-canvas"
-                startContent={<ChatSquare2Icon size={17} aria-hidden="true" />}
+                startContent={<CheckReadIcon size={17} aria-hidden="true" />}
                 endContent={unread.data && <UnreadBadge unread={unread.data} />}
                 onPress={() => open("chat")}
               >
-                Lobby
+                Chat
               </Button>
             )}
             {canLeave && <RoomMenu onLeave={() => setLeaving(true)} />}
@@ -256,7 +256,7 @@ function RoomPage({ roomId }: { roomId: string }) {
       )}
       {me.isError && <QueryError error={me.error} retry={() => me.refetch()} />}
       {room.isPending || ratings.isPending ? (
-        <Spinner label="Loading room movies" />
+        <RoomRatingTableSkeleton />
       ) : (
         room.data &&
         ratings.data && (

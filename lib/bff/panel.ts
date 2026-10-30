@@ -1,7 +1,9 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import rooms from "@/services/rooms";
+import { publicRooms, publicRoomsTag } from "@/services/rooms/public";
 import links from "@/services/rooms/room-invite-link.service";
 import roomInvitations from "@/services/rooms/room-invitation.service";
 import users from "@/services/user";
@@ -85,6 +87,12 @@ function respond<T>(result: RequestResult<T>, cache?: "public" | "rooms") {
         ? { "Cache-Control": cache === "rooms" ? PUBLIC_ROOMS_CACHE : PUBLIC_CACHE }
         : { "Cache-Control": "private, no-store", Vary: "Cookie" },
   });
+}
+
+/** A change to a room, its members or who may join drops the shared public list on its next read. */
+function roomsChanged<T>(result: RequestResult<T>) {
+  if (result.response.ok) revalidateTag(publicRoomsTag, { expire: 0 });
+  return result;
 }
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -215,11 +223,7 @@ export async function handlePanelRequest(request: Request, path: string[]) {
     const limit = () => positiveInteger(query.get("limit"), "limit", 10, 100);
     // Public rooms can be browsed signed out, and are the same for everyone, so they are cacheable.
     if (path.length === 2 && path[0] === "rooms" && path[1] === "public" && method === "GET") {
-      const result = await rooms.getPublicRooms({
-        page: page(),
-        limit: limit(),
-        signal: request.signal,
-      });
+      const result = await publicRooms(page(), limit(), request.signal);
       return respond(
         {
           ...result,
@@ -260,7 +264,11 @@ export async function handlePanelRequest(request: Request, path: string[]) {
       data: () => body(request),
       signal: request.signal,
     });
-    if (invitation) return respond(invitation);
+    if (invitation) {
+      // Accepting an invitation or approving a join request adds a member.
+      const action = path[0] === "room-invitations" ? path[2] : undefined;
+      return respond(action === "accept" || action === "approve" ? roomsChanged(invitation) : invitation);
+    }
 
     if (resource === "me" && method === "GET")
       return respond(await users.getMe(request.signal));
@@ -345,7 +353,7 @@ export async function handlePanelRequest(request: Request, path: string[]) {
     if (resource === "room-invitations/accept" && method === "POST") {
       const data = await body(request);
       return respond(
-        await roomInvitations.accept(text(data.token, "token", 2048)),
+        roomsChanged(await roomInvitations.accept(text(data.token, "token", 2048))),
       );
     }
     if (resource === "uploads" && method === "POST") {
@@ -395,7 +403,7 @@ export async function handlePanelRequest(request: Request, path: string[]) {
     if (resource === "rooms") {
       if (method === "POST") {
         const data = await body(request);
-        const result = await rooms.createRoom({
+        const result = roomsChanged(await rooms.createRoom({
           name: text(data.name, "name", 100),
           description:
             data.description === undefined || data.description === ""
@@ -403,7 +411,7 @@ export async function handlePanelRequest(request: Request, path: string[]) {
               : text(data.description, "description", 2000),
           image: data.image == null ? null : text(data.image, "image", 1000),
           isPublic: boolean(data.isPublic, "isPublic", true),
-        });
+        }));
         return respond({
           ...result,
           result: result.result ? imageUrl(result.result) : null,
@@ -442,7 +450,7 @@ export async function handlePanelRequest(request: Request, path: string[]) {
           throw new InputError("Theme color must be a #RRGGBB hex code");
         return color;
       });
-      const result = await rooms.updateRoom(roomId, {
+      const result = roomsChanged(await rooms.updateRoom(roomId, {
         name: data.name === undefined ? undefined : text(data.name, "name", 255),
         description: nullable(data.description, (value) =>
           text(value, "description", 2000),
@@ -450,7 +458,7 @@ export async function handlePanelRequest(request: Request, path: string[]) {
         image: nullable(data.image, (value) => text(value, "image", 1000)),
         isPublic: boolean(data.isPublic, "isPublic"),
         themeColor,
-      });
+      }));
       return respond({
         ...result,
         result: result.result ? imageUrl(result.result) : null,
@@ -464,7 +472,7 @@ export async function handlePanelRequest(request: Request, path: string[]) {
             if (!me.response.ok || !me.result) return respond(me);
             // Membership identity is derived from the session, never from client input.
             return respond(
-              await rooms.joinRoom({ roomId, userId: me.result.id }),
+              roomsChanged(await rooms.joinRoom({ roomId, userId: me.result.id })),
             );
           }
           break;
@@ -472,9 +480,9 @@ export async function handlePanelRequest(request: Request, path: string[]) {
           if (method === "POST") {
             const data = await body(request);
             return respond(
-              await rooms.leaveRoom(roomId, {
+              roomsChanged(await rooms.leaveRoom(roomId, {
                 clearVotes: boolean(data.clearVotes, "clearVotes", false) ?? false,
-              }),
+              })),
             );
           }
           break;
@@ -482,10 +490,10 @@ export async function handlePanelRequest(request: Request, path: string[]) {
           if (method === "POST") {
             const data = await body(request);
             return respond(
-              await rooms.banUser(roomId, {
+              roomsChanged(await rooms.banUser(roomId, {
                 userId: positiveInteger(data.userId, "userId"),
                 ...(data.reason ? { reason: text(data.reason, "reason", 500) } : {}),
-              }),
+              })),
             );
           }
           break;
@@ -631,7 +639,7 @@ export async function handlePanelRequest(request: Request, path: string[]) {
       );
     if (path.length === 4 && path[2] === "members" && method === "DELETE")
       return respond(
-        await rooms.kickUser(roomId, positiveInteger(path[3], "userId")),
+        roomsChanged(await rooms.kickUser(roomId, positiveInteger(path[3], "userId"))),
       );
     if (path.length === 4) {
       const id = identifier(path[3]);

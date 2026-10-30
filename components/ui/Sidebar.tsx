@@ -24,6 +24,7 @@ export default function Sidebar({
   footer,
   onClose,
   busy = false,
+  lockDismiss = false,
   placement = "right",
   size = "md",
   colors,
@@ -35,6 +36,8 @@ export default function Sidebar({
   footer?: ReactNode;
   onClose: () => void;
   busy?: boolean;
+  /** Blocks outside-click and Escape dismissal, e.g. while a portaled menu is open. */
+  lockDismiss?: boolean;
   placement?: "left" | "right";
   size?: "sm" | "md" | "lg" | "xl";
   colors?: string[];
@@ -49,7 +52,7 @@ export default function Sidebar({
       size={size}
       colors={colors}
       onClose={onClose}
-      isDismissable={!busy}
+      isDismissable={!busy && !lockDismiss}
       isKeyboardDismissDisabled={busy}
     >
       <DrawerHeader className="relative flex flex-col gap-1.5 border-b border-line px-6 pb-5 pt-6 pr-14">

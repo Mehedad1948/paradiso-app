@@ -3,8 +3,8 @@ import { useEffect } from "react";
 import CreateRoomCard from "./CreateRoomCard";
 import { useMyRoomsPage, usePublicRooms } from "@/hooks/queries/useRoomQueries";
 import QueryError from "@/components/ui/QueryError";
-import { Spinner } from "@heroui/spinner";
 import RoomCard from "./RoomCard";
+import RoomCardSkeleton from "./RoomCardSkeleton";
 import ChromaGrid from "./ChromaGrid";
 import PanelPagination from "./PanelPagination";
 export default function RoomListSection({
@@ -47,7 +47,15 @@ export default function RoomListSection({
         <QueryError error={query.error} retry={() => query.refetch()} />
       )}
       {query.isPending ? (
-        <Spinner label="Loading rooms" />
+        <div
+          role="status"
+          aria-label="Loading rooms"
+          className="grid grid-cols-3 gap-6 max-lg:grid-cols-2 max-sm:grid-cols-1 max-sm:gap-5"
+        >
+          {Array.from({ length: 3 }, (_, i) => (
+            <RoomCardSkeleton key={i} />
+          ))}
+        </div>
       ) : (
         query.data && (
           <>

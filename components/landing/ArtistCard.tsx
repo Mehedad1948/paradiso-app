@@ -94,33 +94,6 @@ export default function ArtistCard({ artist, active, eager }: Props) {
         {tagline && (
           <p className="line-clamp-2 font-serif text-[16px] italic leading-snug text-white/75">{tagline}</p>
         )}
-        {knownFor.length > 0 && (
-          <div className="mt-2 flex items-center gap-3 border-t border-white/15 pt-3">
-            <ul className="flex -space-x-2">
-              {knownFor.map((film) => (
-                <li key={film.tmdbId}>
-                  <img
-                    src={imageSrc(film.poster_path, "w92") ?? ""}
-                    alt=""
-                    title={film.title}
-                    draggable={false}
-                    loading={eager ? "eager" : "lazy"}
-                    decoding="async"
-                    className="h-[46px] w-[31px] rounded-[4px] object-cover shadow-[0_4px_10px_-2px_rgba(0,0,0,0.8)] ring-1 ring-white/25 [-webkit-user-drag:none]"
-                  />
-                </li>
-              ))}
-            </ul>
-            <span className="min-w-0 text-[13px] font-medium leading-tight text-white/75">
-              {knownFor[0].title}
-              {libraryFilmCount ? (
-                <span className="block text-white/55">
-                  {libraryFilmCount} {libraryFilmCount === 1 ? "film" : "films"} on the Paradiso shelf
-                </span>
-              ) : null}
-            </span>
-          </div>
-        )}
       </div>
 
       {/* Glass: a static gloss, then the cursor-driven sheen, which only shows on hover. */}

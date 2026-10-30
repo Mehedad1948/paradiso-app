@@ -5,7 +5,7 @@ import type { CommunityPost } from "@/types/community";
 import ShowcaseCarousel, { type ShowcaseItem } from "./ShowcaseCarousel";
 
 const MIN_CARDS = 3;
-const MAX_CARDS = 8;
+const MAX_CARDS = 6;
 // Reposts carry no movie of their own, so over-fetch to find enough cards.
 const FETCH_LIMIT = 40;
 // The showcase's box, held by the fallback too so nothing shifts when the posts arrive.

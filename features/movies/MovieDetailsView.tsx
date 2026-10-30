@@ -4,7 +4,8 @@ import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import clsx from "clsx";
 import { AnimatePresence } from "framer-motion";
-import { BookmarkCheckIcon, BookmarkPlusIcon, ChatSquare2Icon, ClapperboardIcon, ClockCircleIcon, CloseIcon, PlayIcon, ShareCircleIcon, SquareArrowRightUpIcon } from "@solar-icons/react/linear";
+import { BookmarkCheckIcon, BookmarkPlusIcon, ChatSquare2Icon, ClapperboardIcon, ClockCircleIcon, CloseIcon, PlayIcon, SquareArrowRightUpIcon } from "@solar-icons/react/linear";
+import { ShareIcon as ShareOutlineIcon } from "@solar-icons/react/outline";
 import BubbleMenu from "@/components/ui/BubbleMenu";
 import { shareItems } from "@/components/ui/shareItems";
 import QueryError from "@/components/ui/QueryError";
@@ -377,7 +378,7 @@ export default function MovieDetailsView({
                   endAngle={360}
                   radius={72}
                 >
-                  {(open) => (open ? <CloseIcon size={19} strokeWidth={1.75} aria-hidden="true" /> : <ShareCircleIcon size={18} aria-hidden="true" />)}
+                  {(open) => (open ? <CloseIcon size={19} strokeWidth={1.75} aria-hidden="true" /> : <ShareOutlineIcon size={18} aria-hidden="true" />)}
                 </BubbleMenu>
                 {movie.imdbLink && movie.imdbRate == null && (
                   <a href={movie.imdbLink} target="_blank" rel="noopener noreferrer" className={quiet}>

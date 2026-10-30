@@ -1,10 +1,10 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
-import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@heroui/dropdown";
 import { addToast } from "@heroui/toast";
 import { CrownIcon, MagnifierIcon, MenuDotsVerticalIcon, SledgehammerIcon, UserMinusIcon, UserPlusIcon, UsersGroupRoundedIcon } from "@solar-icons/react/linear";
 import Sidebar, { useSidebar } from "@/components/ui/Sidebar";
@@ -48,6 +48,16 @@ export default function RoomMembersSidebar({
   const [reason, setReason] = useState("");
   // Remounts the hold button so it can be held again after a failed request.
   const [attempt, setAttempt] = useState(0);
+  // The row menu is portaled outside the drawer, so picking an item looks like an outside click
+  // and would dismiss the drawer. Keep dismissal locked while it is open and just after.
+  const [menuLocked, setMenuLocked] = useState(false);
+  const unlockTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(unlockTimer.current), []);
+  const onMenuOpenChange = (open: boolean) => {
+    clearTimeout(unlockTimer.current);
+    if (open) setMenuLocked(true);
+    else unlockTimer.current = setTimeout(() => setMenuLocked(false), 300);
+  };
 
   const done = (title: string) => () => {
     addToast({ title, color: "success" });
@@ -101,6 +111,7 @@ export default function RoomMembersSidebar({
       description={`${members.length} ${members.length === 1 ? "person" : "people"} in ${room.name}`}
       onClose={onClose}
       busy={busy}
+      lockDismiss={menuLocked}
       footer={
         <Button
           fullWidth
@@ -188,6 +199,7 @@ export default function RoomMembersSidebar({
                       {manageable && (
                         <Dropdown
                           placement="bottom-end"
+                          onOpenChange={onMenuOpenChange}
                           classNames={{
                             content:
                               "min-w-[210px] rounded-xl border border-line bg-elevated p-1.5 shadow-[0_18px_50px_rgb(0_0_0_/_18%)]",
@@ -207,6 +219,11 @@ export default function RoomMembersSidebar({
                           </DropdownTrigger>
                           <DropdownMenu
                             aria-label={`Manage ${member.username}`}
+                            itemClasses={{
+                              base: "gap-3 rounded-lg px-2.5 py-2 data-[hover=true]:bg-surface",
+                              title: "text-[15px] font-medium",
+                              description: "text-xs font-normal text-muted",
+                            }}
                             onAction={(key) => {
                               setReason("");
                               setPending({
@@ -215,22 +232,38 @@ export default function RoomMembersSidebar({
                               });
                             }}
                           >
-                            <DropdownItem
-                              key="remove"
-                              startContent={<UserMinusIcon size={17} aria-hidden="true" />}
-                              description="They can be invited back"
-                            >
-                              Remove from room
-                            </DropdownItem>
-                            <DropdownItem
-                              key="ban"
-                              color="danger"
-                              className="text-danger"
-                              startContent={<SledgehammerIcon size={17} aria-hidden="true" />}
-                              description="Blocks them from rejoining"
-                            >
-                              Ban from room
-                            </DropdownItem>
+                            <DropdownSection showDivider classNames={{ divider: "my-1 bg-line" }}>
+                              <DropdownItem
+                                key="remove"
+                                className="text-ink"
+                                startContent={
+                                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-surface text-muted">
+                                    <UserMinusIcon size={17} aria-hidden="true" />
+                                  </span>
+                                }
+                                description="They can be invited back"
+                              >
+                                Remove from room
+                              </DropdownItem>
+                            </DropdownSection>
+                            <DropdownSection>
+                              <DropdownItem
+                                key="ban"
+                                classNames={{
+                                  base: "text-danger data-[hover=true]:bg-danger/10 data-[hover=true]:text-danger",
+                                  title: "text-danger",
+                                  description: "text-danger/70",
+                                }}
+                                startContent={
+                                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-danger/10 text-danger">
+                                    <SledgehammerIcon size={17} aria-hidden="true" />
+                                  </span>
+                                }
+                                description="Blocks them from rejoining"
+                              >
+                                Ban from room
+                              </DropdownItem>
+                            </DropdownSection>
                           </DropdownMenu>
                         </Dropdown>
                       )}

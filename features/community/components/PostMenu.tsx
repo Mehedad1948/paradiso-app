@@ -29,7 +29,6 @@ export default function PostMenu({
   onClosed?: () => void;
 }) {
   const items = [
-    { key: "copy", label: "Copy link", icon: <LinkRoundIcon size={17} />, run: () => copyPostLink(post.id) },
     ...(viewer.canEdit(post)
       ? [{ key: "edit", label: "Edit post", icon: <PenIcon size={17} />, run: onEdit }]
       : []),
