@@ -9,6 +9,7 @@ import {
   LIBRARY_SEARCH_MAX,
   type CuratedMovie,
   type CurationKey,
+  type EditorsPickItemInput,
   type LandingGridItemInput,
 } from "@/types/curations";
 import { handleAdminToolsRequest } from "./admin";
@@ -52,11 +53,20 @@ function gridItems(data: Record<string, unknown>): LandingGridItemInput[] {
   });
 }
 
-function pickIds(data: Record<string, unknown>) {
-  const { movieIds } = data;
-  if (!Array.isArray(movieIds) || movieIds.length > EDITORS_PICKS_MAX)
+/** The only covers the backend accepts: the TMDb images its posters endpoint offers. */
+const TMDB_IMAGE_URL = /^https:\/\/image\.tmdb\.org\/t\/p\/[\w-]+\/[\w.-]+$/i;
+
+function pickItems(data: Record<string, unknown>): EditorsPickItemInput[] {
+  const { items } = data;
+  if (!Array.isArray(items) || items.length > EDITORS_PICKS_MAX)
     throw new InputError(`Pick at most ${EDITORS_PICKS_MAX} films`);
-  return movieIds.map(movieId);
+  return items.map((item: unknown) => {
+    if (!item || typeof item !== "object") throw new InputError("Invalid pick");
+    const pick = item as Record<string, unknown>;
+    const imageUrl = optionalText(pick.imageUrl, "cover", IMAGE_URL_MAX);
+    if (imageUrl && !TMDB_IMAGE_URL.test(imageUrl)) throw new InputError("Invalid cover");
+    return { movieId: movieId(pick.movieId), imageUrl };
+  });
 }
 
 /** The landing shows a saved list on its next render instead of serving the old one meanwhile. */
@@ -88,8 +98,11 @@ export async function handleAdminRequest({
 
   if (route === "curations/editors-picks") {
     if (method === "GET") return curationsAdmin.editorsPicks(signal);
-    if (method === "PUT") return saved("editors-picks", await curationsAdmin.saveEditorsPicks(pickIds(await data())));
+    if (method === "PUT") return saved("editors-picks", await curationsAdmin.saveEditorsPicks(pickItems(await data())));
   }
+
+  const posters = /^curations\/movies\/([^/]+)\/posters$/.exec(route);
+  if (posters && method === "GET") return curationsAdmin.moviePosters(movieId(posters[1]), signal);
 
   if (route === "library" && method === "GET") {
     const search = (query.get("search") ?? "").trim();

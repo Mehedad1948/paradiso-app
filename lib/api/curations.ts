@@ -3,7 +3,9 @@ import type {
   AdminEditorsPicks,
   AdminLandingGrid,
   CuratedMovie,
+  EditorsPickItemInput,
   LandingGridItemInput,
+  MoviePosters,
 } from "@/types/curations";
 
 const json = (body: unknown) => JSON.stringify(body);
@@ -16,8 +18,10 @@ export const curationsApi = {
     bffRequest<AdminLandingGrid>("/admin/curations/landing-grid", { method: "PUT", body: json({ items }) }),
   editorsPicks: (signal?: AbortSignal) =>
     bffRequest<AdminEditorsPicks>("/admin/curations/editors-picks", { signal }),
-  saveEditorsPicks: (movieIds: string[]) =>
-    bffRequest<AdminEditorsPicks>("/admin/curations/editors-picks", { method: "PUT", body: json({ movieIds }) }),
+  saveEditorsPicks: (items: EditorsPickItemInput[]) =>
+    bffRequest<AdminEditorsPicks>("/admin/curations/editors-picks", { method: "PUT", body: json({ items }) }),
+  moviePosters: (movieId: string, signal?: AbortSignal) =>
+    bffRequest<MoviePosters>(`/admin/curations/movies/${movieId}/posters`, { signal }),
   searchLibrary: (search: string, signal?: AbortSignal) =>
     bffRequest<CuratedMovie[]>(`/admin/library${queryString({ search })}`, { signal }),
 };

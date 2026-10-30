@@ -19,7 +19,9 @@ const texture = (path: string) => {
   return `${src}${src.includes("?") ? "&" : "?"}texture`;
 };
 
-type Film = MoviePreview & { poster_path: string };
+/** `cover` is the pick's own image; without one the film's poster is shown. */
+type Film = MoviePreview & { cover?: string | null };
+const imageOf = (film: Film) => film.cover ?? film.poster_path ?? "";
 
 /** Library posters on a bending glass shelf. The centered poster opens the film's details. */
 export default function LibraryCarousel({ films }: { films: Film[] }) {
@@ -43,7 +45,7 @@ export default function LibraryCarousel({ films }: { films: Film[] }) {
   const items = useMemo(
     () =>
       films.map((film) => ({
-        src: texture(film.poster_path),
+        src: texture(imageOf(film)),
         alt: `${film.title} poster`,
         title: film.title,
         subtitle: releaseYear(film.release_date) ?? undefined,
@@ -79,7 +81,7 @@ export default function LibraryCarousel({ films }: { films: Film[] }) {
             className="w-[clamp(140px,18vw,220px)] shrink-0 snap-center overflow-hidden rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             <img
-              src={poster(film.poster_path, "w342")}
+              src={poster(imageOf(film), "w342")}
               alt={film.title}
               loading="lazy"
               decoding="async"

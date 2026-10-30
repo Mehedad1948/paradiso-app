@@ -1,23 +1,25 @@
 "use client";
-import { memo, useId, useRef, useState, type MouseEvent } from "react";
+import { memo, useId, useMemo, useRef, useState, type MouseEvent } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import { Tooltip } from "@heroui/tooltip";
 import { LockIcon, RepeatIcon, UsersGroupRoundedIcon } from "@solar-icons/react/linear";
 import type { CommunityPost, CommunityUser } from "@/types/community";
 import { useDeletePost, usePost } from "@/hooks/queries/useCommunityQueries";
 import type { Viewer } from "../hooks/useViewer";
+import { useNearViewport } from "../hooks/useNearViewport";
 import { ago, fullDate, isEdited, postHref, profileHref } from "../format";
 import UserAvatar from "@/components/ui/UserAvatar";
 import PostMedia from "./PostMedia";
 import PostActions from "./PostActions";
 import PromotionCard from "./PromotionCard";
 import PostMenu from "./PostMenu";
-import ConfirmDialog from "./ConfirmDialog";
 
+// Only mounted when the author opens them, so they stay out of the feed's first load.
 const PostComposer = dynamic(() => import("./PostComposer"), { ssr: false });
+const ConfirmDialog = dynamic(() => import("./ConfirmDialog"), { ssr: false });
 
 const LONG_TEXT = 520;
 const interactive = "a, button, input, textarea, [role='menu']";
@@ -52,8 +54,15 @@ function snapshot(repost: CommunityPost, viewer: Viewer): CommunityPost {
 
 /** Shows the original post, live, under a "reposted" line; likes and replies go to the original. */
 function Repost({ post, viewer, ...props }: CardProps) {
-  const original = usePost(post.quotedPost!.id, snapshot(post, viewer));
-  return <PostCard {...props} post={original.data ?? snapshot(post, viewer)} viewer={viewer} repostedBy={post.author} />;
+  const stand = useMemo(() => snapshot(post, viewer), [post, viewer]);
+  // In a feed, the original is fetched only as the repost scrolls near, not for every repost on the page.
+  const [ref, near] = useNearViewport<HTMLDivElement>();
+  const original = usePost(post.quotedPost!.id, stand, near || props.variant === "detail");
+  return (
+    <div ref={ref}>
+      <PostCard {...props} post={original.data ?? stand} viewer={viewer} repostedBy={post.author} />
+    </div>
+  );
 }
 
 function PostEntry(props: CardProps) {
@@ -69,12 +78,8 @@ function PostCard({
 }: CardProps & { repostedBy?: CommunityUser }) {
   const labelId = useId();
   const router = useRouter();
-  const pathname = usePathname();
-  // Inside the community a post opens as an overlay, so the feed underneath must not scroll.
-  const overlay = pathname.startsWith("/community");
   const [dialog, setDialog] = useState<"edit" | "delete" | null>(null);
   const [expanded, setExpanded] = useState(false);
-  const remove = useDeletePost();
   // A click that dismisses the menu lands on the card; it shouldn't also open the post.
   const menuClosedAt = useRef(0);
   const detail = variant === "detail";
@@ -82,8 +87,6 @@ function PostCard({
   const long =
     !detail &&
     (post.text.length > LONG_TEXT || post.text.split("\n").length > 8);
-  const foreignRoomOwner =
-    !!post.room && viewer.owns(post.room.id) && !viewer.canEdit(post);
 
   // The whole card opens the post, except where the reader is clicking a control or selecting text.
   function open(event: MouseEvent<HTMLElement>) {
@@ -96,6 +99,9 @@ function PostCard({
       return;
     // A click on the embedded post opens that post instead.
     const to = target.closest<HTMLElement>("[data-quote-href]")?.dataset.quoteHref ?? href;
+    // Inside the community a post opens as an overlay, so the feed underneath must not scroll.
+    // Read at click time: subscribing to the pathname would re-render every card on each navigation.
+    const overlay = window.location.pathname.startsWith("/community");
     if (event.metaKey || event.ctrlKey) window.open(to, "_blank", "noopener");
     else router.push(to, { scroll: !overlay });
   }
@@ -201,11 +207,11 @@ function PostCard({
           {post.quotedPost && (
             <div
               data-quote-href={postHref(post.quotedPost.id)}
-              className="mt-3 rounded-2xl border border-line p-3 transition-colors hover:border-primary/40 hover:bg-surface/40"
+              className="post-quote"
             >
-              <span className="text-sm font-semibold text-primary">{post.quotedPost.author.username}</span>
+              <span className="post-quote__author">{post.quotedPost.author.username}</span>
               {post.quotedPost.text && (
-                <p className="mt-1 line-clamp-4 whitespace-pre-wrap break-words text-[15px]">
+                <p className="post-quote__text line-clamp-4 whitespace-pre-wrap break-words">
                   {post.quotedPost.text}
                 </p>
               )}
@@ -233,27 +239,51 @@ function PostCard({
         <PostComposer post={post} onClose={() => setDialog(null)} />
       )}
       {dialog === "delete" && (
-        <ConfirmDialog
-          title="Delete post?"
-          busy={remove.isPending}
+        <DeleteDialog
+          post={post}
+          viewer={viewer}
           onClose={() => setDialog(null)}
-          onConfirm={() =>
-            remove.mutate(post.id, {
-              onSuccess: () => {
-                setDialog(null);
-                onDeleted?.();
-              },
-            })
-          }
-        >
-          <p className="text-[15px] text-muted">
-            {foreignRoomOwner
-              ? `As the room owner you can remove ${post.author.username}'s post from ${post.room!.name}. Its comments go with it.`
-              : "The post and every comment on it will be removed. This can't be undone."}
-          </p>
-        </ConfirmDialog>
+          onDeleted={onDeleted}
+        />
       )}
     </>
+  );
+}
+
+function DeleteDialog({
+  post,
+  viewer,
+  onClose,
+  onDeleted,
+}: {
+  post: CommunityPost;
+  viewer: Viewer;
+  onClose: () => void;
+  onDeleted?: () => void;
+}) {
+  const remove = useDeletePost();
+  const foreignRoomOwner =
+    !!post.room && viewer.owns(post.room.id) && !viewer.canEdit(post);
+  return (
+    <ConfirmDialog
+      title="Delete post?"
+      busy={remove.isPending}
+      onClose={onClose}
+      onConfirm={() =>
+        remove.mutate(post.id, {
+          onSuccess: () => {
+            onClose();
+            onDeleted?.();
+          },
+        })
+      }
+    >
+      <p className="text-[15px] text-muted">
+        {foreignRoomOwner
+          ? `As the room owner you can remove ${post.author.username}'s post from ${post.room!.name}. Its comments go with it.`
+          : "The post and every comment on it will be removed. This can't be undone."}
+      </p>
+    </ConfirmDialog>
   );
 }
 

@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useState, useSyncExternalStore, type ReactNode } from "react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
@@ -11,6 +10,7 @@ import { ShareIcon as ShareOutlineIcon } from "@solar-icons/react/outline";
 import type { CommunityPost } from "@/types/community";
 import { useReact, useRepost } from "@/hooks/queries/useCommunityQueries";
 import { useInWatchlist, useToggleWatchlist } from "@/hooks/queries/useWatchlistQueries";
+import { useNearViewport } from "../hooks/useNearViewport";
 import BubbleMenu, { type BubbleItem } from "@/components/ui/BubbleMenu";
 import { FacebookLogo, TelegramLogo, XLogo } from "@/components/ui/BrandIcons";
 import type { Viewer } from "../hooks/useViewer";
@@ -28,6 +28,14 @@ function Tip({ label, children }: { label: string; children: ReactNode }) {
 }
 
 const QuoteComposer = dynamic(() => import("./QuoteComposer"), { ssr: false });
+
+const noSubscribe = () => () => {};
+/**
+ * Whether a post opens as an overlay here. Read without subscribing: usePathname would
+ * re-render every card in the feed each time a post opens or closes.
+ */
+const useInCommunity = () =>
+  useSyncExternalStore(noSubscribe, () => window.location.pathname.startsWith("/community"), () => false);
 
 function shareItems(post: CommunityPost): BubbleItem[] {
   const url = `${window.location.origin}${postHref(post.id)}`;
@@ -148,13 +156,16 @@ function WatchlistButton({
   viewer: Viewer;
   tone: Tone;
 }) {
-  const saved = useInWatchlist(movie.id, viewer.signedIn).data === true;
+  // One status request per film, so only ask for the cards the reader is about to see.
+  const [ref, near] = useNearViewport<HTMLButtonElement>();
+  const saved = useInWatchlist(movie.id, viewer.signedIn && near).data === true;
   const toggle = useToggleWatchlist(movie.id, movie.title);
   const toggleSaved = useAuthAction(() => toggle.mutate(!saved), { reason: "Sign in to save films to your watchlist" });
   const label = saved ? "Remove from watchlist" : "Add to watchlist";
   return (
     <Tip label={label}>
     <button
+      ref={ref}
       type="button"
       aria-pressed={saved}
       aria-label={label}
@@ -184,7 +195,8 @@ export default function PostActions({
   viewer: Viewer;
   tone?: Tone;
 }) {
-  const overlay = usePathname().startsWith("/community");  const react = useReact();
+  const overlay = useInCommunity();
+  const react = useReact();
   const repost = useRepost();
   const [quoting, setQuoting] = useState(false);
   // Reacting in a room needs membership; the backend enforces it, this just hides the dead end.

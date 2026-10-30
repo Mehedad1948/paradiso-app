@@ -11,10 +11,15 @@ import {
   EDITORS_PICKS_MAX,
   type AdminEditorsPicks,
   type CuratedMovie,
+  type EditorsPickItem,
 } from "@/types/curations";
+import CoverPicker from "./CoverPicker";
 import { MoviePicker, PageTitle, Panel, SaveBar, Thumb, imageSrc, useSaveShortcut, useUnsavedGuard, year } from "./shared";
 
-const ids = (films: CuratedMovie[]) => films.map((film) => film.id).join();
+/** A pick's identity for change detection: the film and its cover, in order. */
+const signature = (picks: EditorsPickItem[]) => picks.map((pick) => `${pick.movie.id}|${pick.imageUrl ?? ""}`).join();
+/** What the shelf shows for a pick: its own cover, else the film's poster. */
+const coverOf = (pick: EditorsPickItem) => pick.imageUrl ?? pick.movie.poster_path;
 
 export default function EditorsPicksEditor() {
   const query = useAdminEditorsPicks();
@@ -26,22 +31,27 @@ export default function EditorsPicksEditor() {
 }
 
 function Editor({ picks }: { picks: AdminEditorsPicks }) {
-  const initial = useMemo(() => picks.data.map((item) => item.movie), [picks]);
+  const initial = useMemo(() => picks.data, [picks]);
   const [films, setFilms] = useState(initial);
+  const [covering, setCovering] = useState<CuratedMovie | null>(null);
   const [dragging, setDragging] = useState<number | null>(null);
   const [over, setOver] = useState<number | null>(null);
   const save = useSaveEditorsPicks({
     onSuccess: () => addToast({ title: "Editors' picks saved", color: "success" }),
   });
 
-  const dirty = ids(films) !== ids(initial);
+  const dirty = signature(films) !== signature(initial);
   useUnsavedGuard(dirty);
-  const posterless = films.filter((film) => !film.poster_path);
+  const posterless = films.filter((pick) => !coverOf(pick));
+  // The whole pool is sent every time, each pick with the cover it already has.
   const submit = () =>
-    dirty && !save.isPending && !posterless.length && save.execute(films.map((film) => film.id));
+    dirty &&
+    !save.isPending &&
+    !posterless.length &&
+    save.execute(films.map((pick) => ({ movieId: pick.movie.id, imageUrl: pick.imageUrl })));
   useSaveShortcut(submit, dirty);
 
-  const picked = useMemo(() => new Set(films.map((film) => film.id)), [films]);
+  const picked = useMemo(() => new Set(films.map((pick) => pick.movie.id)), [films]);
   const move = (from: number, to: number) =>
     setFilms((current) => {
       if (to < 0 || to >= current.length || from === to) return current;
@@ -64,7 +74,10 @@ function Editor({ picks }: { picks: AdminEditorsPicks }) {
         >
           {films.length ? (
             <ol className="flex flex-col gap-2.5">
-              {films.map((film, index) => (
+              {films.map((pick, index) => {
+                const film = pick.movie;
+                const cover = coverOf(pick);
+                return (
                 <li
                   key={film.id}
                   draggable
@@ -89,14 +102,19 @@ function Editor({ picks }: { picks: AdminEditorsPicks }) {
                 >
                   <GripVerticalIcon size={16} className="shrink-0 cursor-grab text-muted" aria-hidden />
                   <span className="w-6 shrink-0 text-right text-sm tabular-nums text-muted">{index + 1}</span>
-                  <Thumb src={imageSrc(film.poster_path, "w92")} alt="" className="h-14 w-10 shrink-0 rounded" />
+                  <Thumb src={imageSrc(cover, "w92")} alt="" className="h-14 w-10 shrink-0 rounded" />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm font-medium">{film.title}</span>
-                    <span className={`block text-sm ${film.poster_path ? "text-muted" : "text-danger"}`}>
-                      {film.poster_path ? year(film.release_date) || "Unknown year" : "No poster: remove it to save"}
+                    <span className={`block text-sm ${cover ? "text-muted" : "text-danger"}`}>
+                      {cover
+                        ? `${year(film.release_date) || "Unknown year"}${pick.imageUrl ? " · Custom cover" : ""}`
+                        : "No poster or cover: choose a cover or remove it"}
                     </span>
                   </span>
-                  <span className="flex shrink-0 gap-1">
+                  <span className="flex shrink-0 items-center gap-1">
+                    <Button size="sm" variant="flat" aria-label={`Choose a cover for ${film.title}`} onPress={() => setCovering(film)}>
+                      Cover
+                    </Button>
                     <Button isIconOnly size="sm" variant="light" aria-label={`Move ${film.title} to the top`} isDisabled={index === 0} onPress={() => move(index, 0)}>
                       <DoubleAltArrowUpIcon size={15} />
                     </Button>
@@ -112,13 +130,14 @@ function Editor({ picks }: { picks: AdminEditorsPicks }) {
                       variant="light"
                       color="danger"
                       aria-label={`Remove ${film.title}`}
-                      onPress={() => setFilms((current) => current.filter((value) => value.id !== film.id))}
+                      onPress={() => setFilms((current) => current.filter((value) => value.movie.id !== film.id))}
                     >
                       <CloseIcon size={15} />
                     </Button>
                   </span>
                 </li>
-              ))}
+                );
+              })}
             </ol>
           ) : (
             <p className="py-8 text-center text-sm text-muted">The pool is empty. Search for films on the right.</p>
@@ -134,19 +153,35 @@ function Editor({ picks }: { picks: AdminEditorsPicks }) {
                 autoFocus
                 requirePoster
                 isPicked={(id) => picked.has(id)}
-                onPick={(film) => setFilms((current) => (current.length < EDITORS_PICKS_MAX ? [...current, film] : current))}
+                onPick={(film) =>
+                  setFilms((current) =>
+                    current.length < EDITORS_PICKS_MAX ? [...current, { movie: film, imageUrl: null }] : current,
+                  )
+                }
               />
             )}
           </Panel>
         </div>
       </div>
+      {covering ? (
+        <CoverPicker
+          key={covering.id}
+          film={covering}
+          current={films.find((pick) => pick.movie.id === covering.id)?.imageUrl ?? null}
+          onChoose={(imageUrl) => {
+            setFilms((current) => current.map((pick) => (pick.movie.id === covering.id ? { ...pick, imageUrl } : pick)));
+            setCovering(null);
+          }}
+          onClose={() => setCovering(null)}
+        />
+      ) : null}
       <SaveBar
         dirty={dirty}
         saving={save.isPending}
         onSave={submit}
         onDiscard={() => setFilms(initial)}
         summary={`${films.length} of ${EDITORS_PICKS_MAX} films`}
-        problem={posterless.length ? `${posterless.length} without a poster` : undefined}
+        problem={posterless.length ? `${posterless.length} without a poster or cover` : undefined}
       />
     </>
   );

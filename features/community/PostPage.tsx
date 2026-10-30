@@ -28,14 +28,15 @@ function PostPage({ postId }: { postId: number }) {
 
   return (
     <div className="mx-auto max-w-[760px]">
-      <button
-        type="button"
-        onClick={back}
-        className="mb-6 inline-flex items-center gap-2 text-[15px] text-muted hover:text-accent"
-      >
-        <ArrowLeftIcon size={18} aria-hidden="true" /> Back
-      </button>
-      <PostDetail postId={postId} onDeleted={() => router.replace("/community")} />
+      <nav className="post-page__bar" aria-label="Post navigation">
+        <button type="button" onClick={back} className="post-page__link">
+          <ArrowLeftIcon size={18} aria-hidden="true" /> Back
+        </button>
+        <Link href="/community" className="post-page__link post-page__link--pill">
+          All posts
+        </Link>
+      </nav>
+      <PostDetail postId={postId} variant="page" onDeleted={() => router.replace("/community")} />
     </div>
   );
 }
@@ -44,11 +45,14 @@ function PostPage({ postId }: { postId: number }) {
 export function PostDetail({
   postId,
   framed = true,
+  variant,
   onDeleted,
 }: {
   postId: number;
   /** Draw the card's own border; the overlay supplies its own frame. */
   framed?: boolean;
+  /** "page" drops the filled box for the standalone page; the overlay leaves it unset. */
+  variant?: "page";
   onDeleted: () => void;
 }) {
   const viewer = useViewer();
@@ -67,7 +71,7 @@ export function PostDetail({
 
   // A repost has nothing of its own; its link shows the original and that discussion.
   if (post.data?.kind === "repost" && post.data.quotedPostId)
-    return <PostDetail postId={post.data.quotedPostId} framed={framed} onDeleted={onDeleted} />;
+    return <PostDetail postId={post.data.quotedPostId} framed={framed} variant={variant} onDeleted={onDeleted} />;
 
   if (missing) {
     return (
@@ -98,7 +102,11 @@ export function PostDetail({
     );
   }
   return (
-    <div className={clsx(framed && "overflow-hidden rounded-[10px] border border-line bg-elevated")}>
+    <div
+      className={clsx(
+        framed && variant !== "page" && "overflow-hidden rounded-[10px] border border-line bg-elevated",
+      )}
+    >
       {post.data ? (
         <>
           <PostCard post={post.data} viewer={viewer} variant="detail" onDeleted={onDeleted} />

@@ -7,6 +7,10 @@ export type CuratedMovie = components["schemas"]["CuratedMovie"];
 export type LandingGridItem = components["schemas"]["LandingGridItem"];
 export type LandingGridItemInput = components["schemas"]["LandingGridItemRequest"];
 export type AdminLandingGrid = components["schemas"]["AdminLandingGridResponse"];
+export type EditorsPickItem = components["schemas"]["EditorsPickItem"];
+export type EditorsPickItemInput = components["schemas"]["EditorsPickItemRequest"];
+export type MoviePoster = components["schemas"]["MoviePoster"];
+export type MoviePosters = components["schemas"]["MoviePostersResponse"];
 export type AdminEditorsPicks = components["schemas"]["AdminEditorsPicksResponse"];
 
 /** The editors' picks pool holds at most this many films; the shelf shows `DAILY_PICKS` a day. */

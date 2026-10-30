@@ -31,6 +31,15 @@ export const useSaveLandingGrid = (options?: MutationOptions<AdminLandingGrid>) 
 export const useSaveEditorsPicks = (options?: MutationOptions<AdminEditorsPicks>) =>
   usePanelMutation(curationsApi.saveEditorsPicks, [curationKeys.editorsPicks], options);
 
+/** A film's TMDb posters for the cover picker; fetched only while the picker is open. */
+export const useMoviePosters = (movieId: string | undefined) =>
+  useQuery({
+    queryKey: curationKeys.posters(movieId ?? ""),
+    queryFn: ({ signal }) => curationsApi.moviePosters(movieId!, signal),
+    enabled: !!movieId,
+    staleTime: 5 * 60_000,
+  });
+
 /** Library films for the pickers; waits for two characters and keeps the last results while typing. */
 export const useLibrarySearch = (search: string) => {
   const term = search.trim();

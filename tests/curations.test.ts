@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
     saveLandingGrid: vi.fn(),
     editorsPicks: vi.fn(),
     saveEditorsPicks: vi.fn(),
+    moviePosters: vi.fn(),
     searchLibrary: vi.fn(),
   },
   revalidateTag: vi.fn(),
@@ -26,6 +27,8 @@ import { InputError } from "@/lib/bff/validation";
 import type { LandingGridItem } from "@/types/curations";
 
 const movieId = "3f1c2a9e-8d7b-4c6a-9e5f-0a1b2c3d4e5f";
+const otherId = "4a2d3b0f-9e8c-4d7b-8f60-1b2c3d4e5f60";
+const thirdId = "5b3e4c10-0f9d-4e8c-9071-2c3d4e5f6071";
 const ok = (result: unknown) => ({ result, response: { ok: true, status: 200, statusText: "OK" } });
 const movie = (id: string, poster: string | null = "/p.jpg") => ({
   id,
@@ -116,7 +119,7 @@ describe("admin curations BFF", () => {
       result: null,
       response: { ok: false, status: 422, statusText: "", message: "no poster" },
     });
-    const result = await request("curations/editors-picks", "PUT", { movieIds: [movieId] });
+    const result = await request("curations/editors-picks", "PUT", { items: [{ movieId }] });
     expect(result.response.status).toBe(422);
     expect(mocks.revalidateTag).not.toHaveBeenCalled();
   });
@@ -135,8 +138,38 @@ describe("admin curations BFF", () => {
 
   it("caps the picks pool", async () => {
     await expect(
-      request("curations/editors-picks", "PUT", { movieIds: Array(41).fill(movieId) }),
+      request("curations/editors-picks", "PUT", { items: Array(41).fill({ movieId }) }),
     ).rejects.toBeInstanceOf(InputError);
+  });
+
+  it("saves picks with their covers, blanks as null, and never sends movieIds", async () => {
+    const cover = "https://image.tmdb.org/t/p/w500/abc123.jpg";
+    await request("curations/editors-picks", "PUT", {
+      items: [{ movieId, imageUrl: cover }, { movieId: otherId, imageUrl: "  " }, { movieId: thirdId }],
+    });
+    expect(mocks.admin.saveEditorsPicks).toHaveBeenCalledWith([
+      { movieId, imageUrl: cover },
+      { movieId: otherId, imageUrl: null },
+      { movieId: thirdId, imageUrl: null },
+    ]);
+    expect(mocks.revalidateTag).toHaveBeenCalledWith("curation:editors-picks", { expire: 0 });
+  });
+
+  it.each([
+    [{ movieIds: [movieId] }],
+    [{ items: [{ movieId, imageUrl: "https://evil.example/t/p/w500/x.jpg" }] }],
+    [{ items: [{ movieId, imageUrl: "http://image.tmdb.org/t/p/w500/x.jpg" }] }],
+    [{ items: [{ movieId, imageUrl: "/t/p/w500/x.jpg" }] }],
+    [{ items: [{ movieId: "nope" }] }],
+  ])("rejects malformed picks before the backend: %j", async (data) => {
+    await expect(request("curations/editors-picks", "PUT", data)).rejects.toBeInstanceOf(InputError);
+    expect(mocks.admin.saveEditorsPicks).not.toHaveBeenCalled();
+  });
+
+  it("lists a film's posters by its library id", async () => {
+    await request(`curations/movies/${movieId}/posters`, "GET");
+    expect(mocks.admin.moviePosters).toHaveBeenCalledWith(movieId, expect.anything());
+    await expect(request("curations/movies/nope/posters", "GET")).rejects.toBeInstanceOf(InputError);
   });
 
   it("searches the library only for a real term and keeps the fields the pickers need", async () => {

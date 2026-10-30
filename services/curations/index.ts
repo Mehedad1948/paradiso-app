@@ -26,7 +26,7 @@ export async function landingGrid() {
   return result.data;
 }
 
-/** The whole editors' picks pool in admin order, or `null` when the backend can't be read. */
+/** The whole editors' picks pool (each film with its cover, if any) in admin order, or `null` when the backend can't be read. */
 async function editorsPicksPool() {
   "use cache";
   cacheTag(curationTag("editors-picks"));
@@ -36,7 +36,7 @@ async function editorsPicksPool() {
     return null;
   }
   cacheLife("days");
-  return result.data.map(({ movie }) => movie);
+  return result.data;
 }
 
 /**
@@ -55,7 +55,11 @@ export async function todaysPicks() {
   }
   cacheLife(untilNextFeaturedDay());
   return dailyPicks(
-    pool.flatMap((movie) => (movie.poster_path ? [{ ...movie, poster_path: movie.poster_path }] : [])),
+    pool.flatMap(({ movie, imageUrl }) => {
+      // A pick's own cover wins; a film without a poster is fine when it has one.
+      const cover = imageUrl ?? movie.poster_path;
+      return cover ? [{ id: movie.id, title: movie.title, poster_path: movie.poster_path, release_date: movie.release_date, cover }] : [];
+    }),
     utcDay(),
     DAILY_PICKS,
   );

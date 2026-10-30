@@ -566,3 +566,71 @@
     mask-composite: intersect;
   }
 }
+
+/* Community post: the quoted post, shared by the feed, the standalone page and the overlay.
+   No box: a slim accent rule and quiet type let the quote read as an aside to the post. */
+.post-quote {
+  position: relative;
+  margin-top: 0.875rem;
+  padding: 0.125rem 0 0.125rem 1rem;
+  border-radius: 0 0.5rem 0.5rem 0;
+  transition: background-color 200ms ease;
+}
+.post-quote::before {
+  content: "";
+  position: absolute;
+  inset: 0.125rem auto 0.125rem 0;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, hsl(var(--heroui-primary-500)), hsl(var(--heroui-primary-500) / 0.15));
+  transition: width 200ms ease;
+}
+.post-quote:hover {
+  background: linear-gradient(to right, hsl(var(--heroui-primary-500) / 0.06), transparent 70%);
+}
+.post-quote:hover::before {
+  width: 3px;
+}
+.post-quote__author {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: hsl(var(--heroui-primary-500));
+}
+.post-quote__text {
+  margin-top: 0.25rem;
+  font-size: 0.9375rem;
+  font-style: italic;
+  line-height: 1.65;
+  color: hsl(var(--heroui-foreground) / 0.82);
+}
+
+/* Standalone post page only: the top bar. The overlay keeps its own frame and header. */
+.post-page__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.post-page__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
+  color: hsl(var(--heroui-foreground) / 0.6);
+  transition: color 150ms ease;
+}
+.post-page__link:hover {
+  color: hsl(var(--heroui-primary-500));
+}
+.post-page__link--pill {
+  padding: 0.375rem 0.875rem;
+  border: 1px solid hsl(var(--heroui-divider));
+  border-radius: 9999px;
+  font-weight: 600;
+}
+.post-page__link--pill:hover {
+  border-color: hsl(var(--heroui-primary-500) / 0.5);
+  background: hsl(var(--heroui-primary-500) / 0.08);
+}

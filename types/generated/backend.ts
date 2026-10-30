@@ -33,58 +33,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/users/me": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** get Current User */
-        get: operations["Users_getCurrentUser"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** update Current User */
-        patch: operations["Users_updateCurrentUser"];
-        trace?: never;
-    };
-    "/users": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** create User */
-        post: operations["Users_createUser"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/users/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** update User */
-        put: operations["Users_updateUser"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/auth/{userId}": {
         parameters: {
             query?: never;
@@ -221,24 +169,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/roles": {
+    "/genres": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** find All */
+        get: operations["Genres_findAll"];
         put?: never;
         /**
-         * create Role
+         * create
          * @description Requires role: admin.
          */
-        post: operations["Roles_createRole"];
+        post: operations["Genres_create"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/genres/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** find One */
+        get: operations["Genres_findOne"];
+        put?: never;
+        post?: never;
+        /**
+         * remove
+         * @description Requires role: admin.
+         */
+        delete: operations["Genres_remove"];
+        options?: never;
+        head?: never;
+        /**
+         * update
+         * @description Requires role: admin.
+         */
+        patch: operations["Genres_update"];
         trace?: never;
     };
     "/movies": {
@@ -360,6 +334,333 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/ratings/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** add Rating */
+        post: operations["Ratings_addRating"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ratings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** get Ratings */
+        get: operations["Ratings_getRatings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ratings/movie/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** get One Rating */
+        get: operations["Ratings_getOneRating"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * create Role
+         * @description Requires role: admin.
+         */
+        post: operations["Roles_createRole"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/room-invitations/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** accept */
+        post: operations["AcceptInvitation_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rooms/{roomId}/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the invitations of a room, newest first. Owner only.
+         * @description Filter with status=awaiting_approval to list the invitations waiting for review.
+         */
+        get: operations["RoomInvitations_getRoomInvitations"];
+        put?: never;
+        /**
+         * Invite a user or an email address to the room.
+         * @description Room members only. Owners, and anyone inviting to a public room, create a pending invitation. A member inviting to a private room creates one awaiting_approval, which the owner must approve before the invited user sees it. Send exactly one of userId or email.
+         */
+        post: operations["RoomInvitations_inviteUser"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/room-invitations/{id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept a pending invitation and join the room. Invitee only. */
+        post: operations["RoomInvitationActions_accept"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/room-invitations/{id}/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decline a pending invitation. Invitee only. */
+        post: operations["RoomInvitationActions_decline"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/room-invitations/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve an invitation awaiting approval, making it pending. Room owner only. */
+        post: operations["RoomInvitationActions_approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/room-invitations/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reject an invitation awaiting approval. Room owner only. */
+        post: operations["RoomInvitationActions_reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/room-invitations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Cancel an invitation you sent. Sets its status to cancelled. */
+        delete: operations["RoomInvitationActions_cancel"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/room-invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Room invitations sent to you, newest first.
+         * @description Invitations still waiting for the owner, or rejected by them, are never listed. Filter with status.
+         */
+        get: operations["MyRoomInvitations_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/sent-room-invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Room invitations you sent, newest first.
+         * @description Every room and every status, including invitations awaiting approval or rejected by the owner. summary counts all of your sent invitations regardless of status and page. Cancel an open one with DELETE /room-invitations/{id}.
+         */
+        get: operations["MySentRoomInvitations_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{userId}/invitable-rooms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Your rooms, annotated for inviting this user from their profile.
+         * @description isMember: they are already in the room. hasPendingInvite: an open invitation exists for them. requiresApproval: your invitation would wait for the owner.
+         */
+        get: operations["UserInvitableRooms_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invite-links/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** get One By Token */
+        get: operations["PublicInviteLinks_getOneByToken"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invite-links/verify/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** verify */
+        post: operations["PublicInviteLinks_verify"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rooms/{roomId}/invite-links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** find All */
+        get: operations["RoomInviteLinks_findAll"];
+        put?: never;
+        /** create */
+        post: operations["RoomInviteLinks_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rooms/{roomId}/invite-links/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** remove */
+        delete: operations["RoomInviteLinks_remove"];
+        options?: never;
+        head?: never;
+        /** update */
+        patch: operations["RoomInviteLinks_update"];
         trace?: never;
     };
     "/rooms": {
@@ -613,191 +914,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/ratings/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** add Rating */
-        post: operations["Ratings_addRating"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/ratings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** get Ratings */
-        get: operations["Ratings_getRatings"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/ratings/movie/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** get One Rating */
-        get: operations["Ratings_getOneRating"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/genres": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** find All */
-        get: operations["Genres_findAll"];
-        put?: never;
-        /**
-         * create
-         * @description Requires role: admin.
-         */
-        post: operations["Genres_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/genres/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** find One */
-        get: operations["Genres_findOne"];
-        put?: never;
-        post?: never;
-        /**
-         * remove
-         * @description Requires role: admin.
-         */
-        delete: operations["Genres_remove"];
-        options?: never;
-        head?: never;
-        /**
-         * update
-         * @description Requires role: admin.
-         */
-        patch: operations["Genres_update"];
-        trace?: never;
-    };
-    "/notifications": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Notifications, most recently active first.
-         * @description Page with cursor=nextCursor. Grouped likes and comments move to the top when someone else joins in.
-         */
-        get: operations["Notifications_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/notifications/unread-count": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Unread notification count for the bell badge. */
-        get: operations["Notifications_unreadCount"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/notifications/read": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Mark notifications read, by ids or all at once. */
-        post: operations["Notifications_markRead"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/notifications/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** remove */
-        delete: operations["Notifications_remove"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/people/{tmdbPersonId}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** get Person */
-        get: operations["People_getPerson"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/uploads/file": {
         parameters: {
             query?: never;
@@ -818,211 +934,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/rooms/{roomId}/invitations": {
+    "/users/me": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * List the invitations of a room, newest first. Owner only.
-         * @description Filter with status=awaiting_approval to list the invitations waiting for review.
-         */
-        get: operations["RoomInvitations_getRoomInvitations"];
-        put?: never;
-        /**
-         * Invite a user or an email address to the room.
-         * @description Room members only. Owners, and anyone inviting to a public room, create a pending invitation. A member inviting to a private room creates one awaiting_approval, which the owner must approve before the invited user sees it. Send exactly one of userId or email.
-         */
-        post: operations["RoomInvitations_inviteUser"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/room-invitations/accept": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** accept */
-        post: operations["AcceptInvitation_accept"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/room-invitations/{id}/accept": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Accept a pending invitation and join the room. Invitee only. */
-        post: operations["RoomInvitationActions_accept"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/room-invitations/{id}/decline": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Decline a pending invitation. Invitee only. */
-        post: operations["RoomInvitationActions_decline"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/room-invitations/{id}/approve": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Approve an invitation awaiting approval, making it pending. Room owner only. */
-        post: operations["RoomInvitationActions_approve"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/room-invitations/{id}/reject": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Reject an invitation awaiting approval. Room owner only. */
-        post: operations["RoomInvitationActions_reject"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/room-invitations/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Cancel an invitation you sent. Sets its status to cancelled. */
-        delete: operations["RoomInvitationActions_cancel"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/me/room-invitations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Room invitations sent to you, newest first.
-         * @description Invitations still waiting for the owner, or rejected by them, are never listed. Filter with status.
-         */
-        get: operations["MyRoomInvitations_list"];
+        /** get Current User */
+        get: operations["Users_getCurrentUser"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** update Current User */
+        patch: operations["Users_updateCurrentUser"];
         trace?: never;
     };
-    "/me/sent-room-invitations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Room invitations you sent, newest first.
-         * @description Every room and every status, including invitations awaiting approval or rejected by the owner. summary counts all of your sent invitations regardless of status and page. Cancel an open one with DELETE /room-invitations/{id}.
-         */
-        get: operations["MySentRoomInvitations_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/users/{userId}/invitable-rooms": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Your rooms, annotated for inviting this user from their profile.
-         * @description isMember: they are already in the room. hasPendingInvite: an open invitation exists for them. requiresApproval: your invitation would wait for the owner.
-         */
-        get: operations["UserInvitableRooms_list"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/rooms/{roomId}/invite-links": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** find All */
-        get: operations["RoomInviteLinks_findAll"];
-        put?: never;
-        /** create */
-        post: operations["RoomInviteLinks_create"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/rooms/{roomId}/invite-links/{id}": {
+    "/users": {
         parameters: {
             query?: never;
             header?: never;
@@ -1031,33 +961,15 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post?: never;
-        /** remove */
-        delete: operations["RoomInviteLinks_remove"];
-        options?: never;
-        head?: never;
-        /** update */
-        patch: operations["RoomInviteLinks_update"];
-        trace?: never;
-    };
-    "/invite-links/{token}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** get One By Token */
-        get: operations["PublicInviteLinks_getOneByToken"];
-        put?: never;
-        post?: never;
+        /** create User */
+        post: operations["Users_createUser"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/invite-links/verify/{token}": {
+    "/users/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1065,9 +977,9 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put?: never;
-        /** verify */
-        post: operations["PublicInviteLinks_verify"];
+        /** update User */
+        put: operations["Users_updateUser"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1622,6 +1534,77 @@ export interface paths {
         patch: operations["Favorites_setNote"];
         trace?: never;
     };
+    "/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Notifications, most recently active first.
+         * @description Page with cursor=nextCursor. Grouped likes and comments move to the top when someone else joins in.
+         */
+        get: operations["Notifications_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Unread notification count for the bell badge. */
+        get: operations["Notifications_unreadCount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark notifications read, by ids or all at once. */
+        post: operations["Notifications_markRead"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** remove */
+        delete: operations["Notifications_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/movies/{movieId}/comments": {
         parameters: {
             query?: never;
@@ -1673,6 +1656,23 @@ export interface paths {
         head?: never;
         /** Edit your own comment. */
         patch: operations["MovieComments_update"];
+        trace?: never;
+    };
+    "/people/{tmdbPersonId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** get Person */
+        get: operations["People_getPerson"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/featured-artists": {
@@ -1914,10 +1914,31 @@ export interface paths {
         get: operations["AdminCurations_getEditorsPicks"];
         /**
          * Replace the whole editors' picks pool.
-         * @description Saves the list in one transaction: all of it or none. The order of movieIds becomes the display order. 400 for more than 40 ids or a repeated id. 422 when a movieId is not in the library (the message names the ids) or a movie has no poster. Returns the stored pool like GET /admin/curations/editors-picks.
+         * @description Saves the list in one transaction: all of it or none. The order of items becomes the display order, and an item's imageUrl (a TMDb image from GET /admin/curations/movies/{movieId}/posters) replaces the movie poster as that pick's cover. Send items or the deprecated movieIds (which resets every cover to the poster), not both. 400 for more than 40 picks, a repeated movie, a bad movieId or an imageUrl that is not a TMDb image URL. 422 when a movie is not in the library (the message names the ids) or has neither a poster nor an imageUrl. Returns the stored pool like GET /admin/curations/editors-picks.
          *     Requires role: admin.
          */
         put: operations["AdminCurations_putEditorsPicks"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/curations/movies/{movieId}/posters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * TMDb posters to choose a pick cover from.
+         * @description Every poster TMDb has for a library movie (English or textless), best rated first, at most 30. Each has imageUrl, ready to save as a pick's imageUrl, and a small thumbnailUrl for the picker. isDefault marks the movie's current poster. movieId is the library id (Movie.id). 404 when the movie is not in the library; an empty list for a movie that did not come from TMDb. 502/504 when TMDb is unreachable.
+         *     Requires role: admin.
+         */
+        get: operations["AdminCurations_getMoviePosters"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -1929,34 +1950,6 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        UpdateUserDto: {
-            password?: string;
-            username?: string;
-            /**
-             * Format: uri
-             * @description HTTPS URL returned by POST /uploads/file with folder=avatars. null removes the avatar; omit to leave it unchanged.
-             */
-            avatar?: string | null;
-            /** @description Genre IDs from GET /genres. Replaces the whole favorite set; [] clears it; omit to leave it unchanged. */
-            genreIds?: string[];
-            /**
-             * @description Send true to mark onboarding finished or skipped. Idempotent; it cannot be unset.
-             * @example true
-             */
-            onboarded?: boolean;
-            /**
-             * @description Who may invite you to rooms: everyone, only people you follow, or nobody. Omit to leave it unchanged.
-             * @enum {string}
-             */
-            roomInvitePolicy?: "everyone" | "following" | "nobody";
-        };
-        CreateUserDto: {
-            /** Format: email */
-            email: string;
-            password: string;
-            username: string;
-            avatar?: string | null;
-        };
         SignInDto: {
             /** Format: email */
             email: string;
@@ -1984,8 +1977,10 @@ export interface components {
             /** Format: email */
             email: string;
         };
-        CreateRoleDto: {
-            name: string;
+        UpdateGenreDto: {
+            name?: string;
+            /** Format: int32 */
+            tmdbId?: number | null;
         };
         ResolveMovieDto: {
             /** Format: int32 */
@@ -2029,6 +2024,47 @@ export interface components {
             /** Format: int32 */
             dbId: number;
             isWatchedTogether?: boolean | null;
+        };
+        AddRatingDto: {
+            rate: number;
+            /** Format: uuid */
+            movieId: string;
+        };
+        CreateRoleDto: {
+            name: string;
+        };
+        AcceptInvitationDto: {
+            token: string;
+        };
+        InviteUserToRoomDto: {
+            userId?: number;
+            /** Format: email */
+            email?: string;
+        };
+        CreateRoomInviteLinkDto: {
+            /**
+             * Format: int32
+             * @deprecated
+             * @description Ignored. The roomId path parameter is authoritative.
+             */
+            roomId?: number | null;
+            /**
+             * Format: int32
+             * @description 0 means unlimited uses.
+             */
+            maxUsage?: number | null;
+            /** Format: date-time */
+            expiresAt?: string | null;
+        };
+        UpdateRoomInviteLinkDto: {
+            isActive?: boolean | null;
+            /**
+             * Format: int32
+             * @description 0 means unlimited uses.
+             */
+            maxUsage?: number | null;
+            /** Format: date-time */
+            expiresAt?: string | null;
         };
         CreateRoomDto: {
             name: string;
@@ -2095,57 +2131,33 @@ export interface components {
             userId: number;
             reason?: string;
         };
-        AddRatingDto: {
-            rate: number;
-            /** Format: uuid */
-            movieId: string;
-        };
-        UpdateGenreDto: {
-            name?: string;
-            /** Format: int32 */
-            tmdbId?: number | null;
-        };
-        MarkNotificationsReadDto: {
-            /** @description Notifications to mark read. Send this or all, not both. */
-            ids?: string[];
+        UpdateUserDto: {
+            password?: string;
+            username?: string;
             /**
-             * @description Mark every unread notification read.
-             * @enum {number}
+             * Format: uri
+             * @description HTTPS URL returned by POST /uploads/file with folder=avatars. null removes the avatar; omit to leave it unchanged.
              */
-            all?: true;
+            avatar?: string | null;
+            /** @description Genre IDs from GET /genres. Replaces the whole favorite set; [] clears it; omit to leave it unchanged. */
+            genreIds?: string[];
+            /**
+             * @description Send true to mark onboarding finished or skipped. Idempotent; it cannot be unset.
+             * @example true
+             */
+            onboarded?: boolean;
+            /**
+             * @description Who may invite you to rooms: everyone, only people you follow, or nobody. Omit to leave it unchanged.
+             * @enum {string}
+             */
+            roomInvitePolicy?: "everyone" | "following" | "nobody";
         };
-        InviteUserToRoomDto: {
-            userId?: number;
+        CreateUserDto: {
             /** Format: email */
-            email?: string;
-        };
-        AcceptInvitationDto: {
-            token: string;
-        };
-        CreateRoomInviteLinkDto: {
-            /**
-             * Format: int32
-             * @deprecated
-             * @description Ignored. The roomId path parameter is authoritative.
-             */
-            roomId?: number | null;
-            /**
-             * Format: int32
-             * @description 0 means unlimited uses.
-             */
-            maxUsage?: number | null;
-            /** Format: date-time */
-            expiresAt?: string | null;
-        };
-        UpdateRoomInviteLinkDto: {
-            isActive?: boolean | null;
-            /**
-             * Format: int32
-             * @description 0 means unlimited uses.
-             */
-            maxUsage?: number | null;
-            /** Format: date-time */
-            expiresAt?: string | null;
+            email: string;
+            password: string;
+            username: string;
+            avatar?: string | null;
         };
         CreateCommunityPostDto: {
             /**
@@ -2251,6 +2263,15 @@ export interface components {
             /** @description Shown with the movie on the profile. null or blank clears it. */
             note: string | null;
         };
+        MarkNotificationsReadDto: {
+            /** @description Notifications to mark read. Send this or all, not both. */
+            ids?: string[];
+            /**
+             * @description Mark every unread notification read.
+             * @enum {number}
+             */
+            all?: true;
+        };
         CreateMovieCommentDto: {
             text: string;
             /**
@@ -2303,9 +2324,26 @@ export interface components {
             /** @description The whole grid. Slots left out become empty; an empty array clears the grid. Replaces the stored list in one transaction. */
             items: components["schemas"]["LandingGridItemRequest"][];
         };
+        EditorsPickItemRequest: {
+            /**
+             * Format: uuid
+             * @description Library movie id (Movie.id, not the TMDb id). Each movie can be a pick once.
+             */
+            movieId: string;
+            /**
+             * @description Cover shown for this pick instead of the movie poster: a TMDb image URL, as offered by GET /admin/curations/movies/{movieId}/posters. Omitted, null or blank: the movie poster. Any other URL is rejected with 400.
+             * @example https://image.tmdb.org/t/p/w500/abc123.jpg
+             */
+            imageUrl?: string | null;
+        };
         ReplaceEditorsPicksRequest: {
-            /** @description The whole pool of library movie ids (Movie.id) in display order. No duplicates (400); more than 40 is rejected with 400; an unknown id with 422; a movie without a poster with 422. An empty array clears the pool. Replaces the stored list in one transaction. */
-            movieIds: string[];
+            /** @description The whole pool in display order, each pick with an optional cover image. No repeated movie (400); more than 40 is rejected with 400; an unknown movie with 422; a movie with neither a poster nor an imageUrl with 422. An empty array clears the pool. Replaces the stored list in one transaction. Send this or movieIds, not both (400). */
+            items?: components["schemas"]["EditorsPickItemRequest"][];
+            /**
+             * @deprecated
+             * @description Deprecated, use items. The whole pool of library movie ids (Movie.id) in display order, every pick on its movie poster: saving this clears any cover images. Same rules as items.
+             */
+            movieIds?: string[];
         };
         CuratedMovie: {
             /**
@@ -2333,6 +2371,27 @@ export interface components {
         };
         EditorsPickItem: {
             movie: components["schemas"]["CuratedMovie"];
+            /** @description The pick's own cover, a TMDb image URL. null: show the movie poster_path. */
+            imageUrl: string | null;
+        };
+        MoviePoster: {
+            /** @description A TMDb image URL (w500), ready to send as a pick's imageUrl and to show as its cover. */
+            imageUrl: string;
+            /** @description The same image, small (w185). */
+            thumbnailUrl: string;
+            width: number;
+            height: number;
+            /** @description ISO 639-1 language of the text on the poster; null if none. */
+            language: string | null;
+            /** @description TMDb community rating of the image. */
+            voteAverage: number;
+            /** @description True for the movie's current poster_path. */
+            isDefault: boolean;
+        };
+        MoviePostersResponse: {
+            /** @description The movie's TMDb posters, best rated first; empty for a movie that did not come from TMDb. */
+            data: components["schemas"]["MoviePoster"][];
+            apiVersion: string;
         };
         CurationEditor: {
             /** @description User id. */
@@ -3828,136 +3887,6 @@ export interface operations {
             };
         };
     };
-    Users_getCurrentUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CurrentUserResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    Users_updateCurrentUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateUserDto"];
-            };
-        };
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CurrentUserResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    Users_createUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateUserDto"];
-            };
-        };
-        responses: {
-            /** @description Successful response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UserResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    Users_updateUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateUserDto"];
-            };
-        };
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CurrentUserResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
     Auth_isAuthenticated: {
         parameters: {
             query?: never;
@@ -4216,18 +4145,43 @@ export interface operations {
             };
         };
     };
-    Roles_createRole: {
+    Genres_findAll: {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateRoleDto"];
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenreListResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
             };
         };
+    };
+    Genres_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description Successful response */
             201: {
@@ -4235,7 +4189,104 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RoleResponse"];
+                    "application/json": components["schemas"]["GenreListResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    Genres_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenreResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    Genres_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmptyResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    Genres_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateGenreDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenreResponse"];
                 };
             };
             /** @description Error response */
@@ -4527,6 +4578,698 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TmdbMovieResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    Ratings_addRating: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddRatingDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AddedRatingResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    Ratings_getRatings: {
+        parameters: {
+            query?: {
+                startDate?: string | null;
+                endDate?: string | null;
+                search?: string | null;
+                isWatchTogether?: boolean | null;
+                sortBy?: "rate" | "userRate" | "controversy" | null;
+                sortOrder?: "asc" | "desc" | null;
+                sortByUserId?: number | null;
+                limit?: number | null;
+                page?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RatingsResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    Ratings_getOneRating: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RatedMovieResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    Roles_createRole: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateRoleDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AcceptInvitation_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AcceptInvitationDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationAcceptedResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    RoomInvitations_getRoomInvitations: {
+        parameters: {
+            query?: {
+                limit?: number | null;
+                page?: number | null;
+                status?: "awaiting_approval" | "pending" | "accepted" | "declined" | "rejected" | "cancelled" | "expired";
+            };
+            header?: never;
+            path: {
+                roomId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationsResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    RoomInvitations_inviteUser: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                roomId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InviteUserToRoomDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    RoomInvitationActions_accept: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    RoomInvitationActions_decline: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    RoomInvitationActions_approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    RoomInvitationActions_reject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    RoomInvitationActions_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    MyRoomInvitations_list: {
+        parameters: {
+            query?: {
+                limit?: number | null;
+                page?: number | null;
+                status?: "pending" | "accepted" | "declined" | "cancelled" | "expired";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitationsResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    MySentRoomInvitations_list: {
+        parameters: {
+            query?: {
+                limit?: number | null;
+                page?: number | null;
+                status?: "awaiting_approval" | "pending" | "accepted" | "declined" | "rejected" | "cancelled" | "expired";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SentInvitationsResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    UserInvitableRooms_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                userId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitableRoomsResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PublicInviteLinks_getOneByToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvitePreviewResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    PublicInviteLinks_verify: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InviteJoinedResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    RoomInviteLinks_findAll: {
+        parameters: {
+            query?: {
+                limit?: number | null;
+                page?: number | null;
+            };
+            header?: never;
+            path: {
+                roomId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InviteLinksResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    RoomInviteLinks_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                roomId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateRoomInviteLinkDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreatedInviteLinkResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    RoomInviteLinks_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                roomId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RemovedInviteLinkResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    RoomInviteLinks_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                roomId: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRoomInviteLinkDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UpdatedInviteLinkResponse"];
                 };
             };
             /** @description Error response */
@@ -5116,425 +5859,6 @@ export interface operations {
             };
         };
     };
-    Ratings_addRating: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AddRatingDto"];
-            };
-        };
-        responses: {
-            /** @description Successful response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AddedRatingResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    Ratings_getRatings: {
-        parameters: {
-            query?: {
-                startDate?: string | null;
-                endDate?: string | null;
-                search?: string | null;
-                isWatchTogether?: boolean | null;
-                sortBy?: "rate" | "userRate" | "controversy" | null;
-                sortOrder?: "asc" | "desc" | null;
-                sortByUserId?: number | null;
-                limit?: number | null;
-                page?: number | null;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RatingsResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    Ratings_getOneRating: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RatedMovieResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    Genres_findAll: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GenreListResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    Genres_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GenreListResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    Genres_findOne: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GenreResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    Genres_remove: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EmptyResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    Genres_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateGenreDto"];
-            };
-        };
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GenreResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    Notifications_list: {
-        parameters: {
-            query?: {
-                /** @description nextCursor from the previous page. */
-                cursor?: string;
-                limit?: number;
-                unreadOnly?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["NotificationPageResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    Notifications_unreadCount: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["NotificationUnreadCountResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    Notifications_markRead: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MarkNotificationsReadDto"];
-            };
-        };
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["NotificationsReadResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    Notifications_remove: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description No content */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    People_getPerson: {
-        parameters: {
-            query?: {
-                /** @description TMDb language for the biography and titles. An empty biography falls back to en-US. */
-                language?: string;
-            };
-            header?: never;
-            path: {
-                tmdbPersonId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PersonResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
     Uploads_uploadFile: {
         parameters: {
             query?: never;
@@ -5573,17 +5897,11 @@ export interface operations {
             };
         };
     };
-    RoomInvitations_getRoomInvitations: {
+    Users_getCurrentUser: {
         parameters: {
-            query?: {
-                limit?: number | null;
-                page?: number | null;
-                status?: "awaiting_approval" | "pending" | "accepted" | "declined" | "rejected" | "cancelled" | "expired";
-            };
+            query?: never;
             header?: never;
-            path: {
-                roomId: number;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody?: never;
@@ -5594,7 +5912,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["InvitationsResponse"];
+                    "application/json": components["schemas"]["CurrentUserResponse"];
                 };
             };
             /** @description Error response */
@@ -5608,42 +5926,7 @@ export interface operations {
             };
         };
     };
-    RoomInvitations_inviteUser: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                roomId: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["InviteUserToRoomDto"];
-            };
-        };
-        responses: {
-            /** @description Successful response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InvitationResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    AcceptInvitation_accept: {
+    Users_updateCurrentUser: {
         parameters: {
             query?: never;
             header?: never;
@@ -5652,40 +5935,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["AcceptInvitationDto"];
+                "application/json": components["schemas"]["UpdateUserDto"];
             };
         };
-        responses: {
-            /** @description Successful response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InvitationAcceptedResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    RoomInvitationActions_accept: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
         responses: {
             /** @description Successful response */
             200: {
@@ -5693,7 +5945,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["InvitationResponse"];
+                    "application/json": components["schemas"]["CurrentUserResponse"];
                 };
             };
             /** @description Error response */
@@ -5707,273 +5959,16 @@ export interface operations {
             };
         };
     };
-    RoomInvitationActions_decline: {
+    Users_createUser: {
         parameters: {
             query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InvitationResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    RoomInvitationActions_approve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InvitationResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    RoomInvitationActions_reject: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InvitationResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    RoomInvitationActions_cancel: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InvitationResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    MyRoomInvitations_list: {
-        parameters: {
-            query?: {
-                limit?: number | null;
-                page?: number | null;
-                status?: "pending" | "accepted" | "declined" | "cancelled" | "expired";
-            };
             header?: never;
             path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InvitationsResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    MySentRoomInvitations_list: {
-        parameters: {
-            query?: {
-                limit?: number | null;
-                page?: number | null;
-                status?: "awaiting_approval" | "pending" | "accepted" | "declined" | "rejected" | "cancelled" | "expired";
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SentInvitationsResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    UserInvitableRooms_list: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                userId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InvitableRoomsResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    RoomInviteLinks_findAll: {
-        parameters: {
-            query?: {
-                limit?: number | null;
-                page?: number | null;
-            };
-            header?: never;
-            path: {
-                roomId: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InviteLinksResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    RoomInviteLinks_create: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                roomId: number;
-            };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateRoomInviteLinkDto"];
+                "application/json": components["schemas"]["CreateUserDto"];
             };
         };
         responses: {
@@ -5983,7 +5978,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CreatedInviteLinkResponse"];
+                    "application/json": components["schemas"]["UserResponse"];
                 };
             };
             /** @description Error response */
@@ -5997,51 +5992,18 @@ export interface operations {
             };
         };
     };
-    RoomInviteLinks_remove: {
+    Users_updateUser: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                roomId: number;
-                id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RemovedInviteLinkResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    RoomInviteLinks_update: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                roomId: number;
                 id: number;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateRoomInviteLinkDto"];
+                "application/json": components["schemas"]["UpdateUserDto"];
             };
         };
         responses: {
@@ -6051,69 +6013,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UpdatedInviteLinkResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    PublicInviteLinks_getOneByToken: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                token: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InvitePreviewResponse"];
-                };
-            };
-            /** @description Error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    PublicInviteLinks_verify: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                token: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["InviteJoinedResponse"];
+                    "application/json": components["schemas"]["CurrentUserResponse"];
                 };
             };
             /** @description Error response */
@@ -7741,6 +7641,131 @@ export interface operations {
             };
         };
     };
+    Notifications_list: {
+        parameters: {
+            query?: {
+                /** @description nextCursor from the previous page. */
+                cursor?: string;
+                limit?: number;
+                unreadOnly?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationPageResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    Notifications_unreadCount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationUnreadCountResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    Notifications_markRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MarkNotificationsReadDto"];
+            };
+        };
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationsReadResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    Notifications_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     MovieComments_list: {
         parameters: {
             query?: {
@@ -7902,6 +7927,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MovieCommentResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    People_getPerson: {
+        parameters: {
+            query?: {
+                /** @description TMDb language for the biography and titles. An empty biography falls back to en-US. */
+                language?: string;
+            };
+            header?: never;
+            path: {
+                tmdbPersonId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PersonResponse"];
                 };
             };
             /** @description Error response */
@@ -8412,6 +8471,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminEditorsPicksResponse"];
+                };
+            };
+            /** @description Error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AdminCurations_getMoviePosters: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                movieId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MoviePostersResponse"];
                 };
             };
             /** @description Error response */

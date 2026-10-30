@@ -111,13 +111,13 @@ export const useFeedHead = (scope: FeedScope, newestId: number | undefined, enab
     select: (page) => page.data.filter((post) => post.id > (newestId ?? Infinity)).length,
   });
 
-export function usePost(id: number, placeholder?: CommunityPost) {
+export function usePost(id: number, placeholder?: CommunityPost, enabled = true) {
   const client = useQueryClient();
   return useQuery({
     placeholderData: placeholder,
     queryKey: communityKeys.post(id),
     queryFn: ({ signal }) => communityApi.post(id, signal),
-    enabled: Number.isSafeInteger(id) && id > 0,
+    enabled: enabled && Number.isSafeInteger(id) && id > 0,
     initialData: () => cachedPost(client, id),
     // Seeded data is shown at once but still revalidated.
     initialDataUpdatedAt: 0,

@@ -4,7 +4,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Spinner } from "@heroui/spinner";
 import { ArrowUpIcon, StarShineIcon } from "@solar-icons/react/linear";
 import clsx from "clsx";
-import FadeContent from "@/components/ui/FadeContent";
 import QueryError from "@/components/ui/QueryError";
 import { useFeed, useFeedHead } from "@/hooks/queries/useCommunityQueries";
 import { communityKeys } from "@/lib/query/community-keys";
@@ -74,10 +73,9 @@ export default function FeedList({
         </div>
       )}
       <div className={clsx(frame, "divide-y divide-line")}>
+        {/* Cards rise in with CSS; a GSAP scroll trigger and blur filter per card got costly in long feeds. */}
         {posts.map((post) => (
-          <FadeContent key={post.id} effect="focus" duration={0.9}>
-            <PostCard post={post} viewer={viewer} />
-          </FadeContent>
+          <PostCard key={post.id} post={post} viewer={viewer} />
         ))}
       </div>
       <div ref={sentinel} className="flex min-h-[72px] items-center justify-center py-6 text-sm text-muted">
