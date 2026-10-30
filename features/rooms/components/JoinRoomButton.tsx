@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@heroui/button";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { useJoinRoom } from "@/hooks/queries/useRoomQueries";
 import { useAuthGate } from "@/components/auth/gate";
 export default function JoinRoomButton({ roomId }: { roomId: number }) {

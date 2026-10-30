@@ -2,7 +2,7 @@
 import { memo, useState } from "react";
 import clsx from "clsx";
 import UserAvatar from "@/components/ui/UserAvatar";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { CopyIcon, ForbiddenCircleIcon, LockIcon, PenIcon, PinCircleIcon, PinIcon, ReplyIcon, TrashBinMinimalisticIcon } from "@solar-icons/react/linear";
 import { isPollClosed } from "@/lib/chat/timeline";
 import type { ChatMessage } from "@/types/chat";

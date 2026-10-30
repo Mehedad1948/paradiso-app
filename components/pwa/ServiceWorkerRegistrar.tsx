@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { addToast } from "@heroui/toast";
 
 const SW_URL = "/sw.js";
 /** Background check while the app stays open; installed PWAs can run for days without a reload. */
@@ -9,70 +8,11 @@ const POLL_INTERVAL = 30 * 60 * 1000;
 /** Minimum gap between checks triggered by refocusing the app or reconnecting. */
 const MIN_CHECK_GAP = 5 * 60 * 1000;
 
-// Set only when the user accepts an update; a first install's clients.claim() also fires
-// controllerchange, and that must not reload the page.
-let updateAccepted = false;
-let promptedFor: ServiceWorker | null = null;
-
-/** Asks a worker which release it carries (see GET_VERSION in sw/service-worker.js). */
-function workerVersion(worker: ServiceWorker) {
-  return new Promise<string | null>((resolve) => {
-    const channel = new MessageChannel();
-    const timer = window.setTimeout(() => resolve(null), 1000);
-    channel.port1.onmessage = ({ data }) => {
-      window.clearTimeout(timer);
-      resolve(typeof data?.version === "string" ? data.version : null);
-    };
-    worker.postMessage({ type: "GET_VERSION" }, [channel.port2]);
-  });
-}
-
-/** True when running as an installed app (home-screen / desktop PWA) rather than a browser tab. */
-function isInstalledApp() {
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    window.matchMedia("(display-mode: window-controls-overlay)").matches ||
-    (navigator as Navigator & { standalone?: boolean }).standalone === true
-  );
-}
-
-async function promptReload(worker: ServiceWorker) {
-  // Browser tabs pick the new worker up on their own next visit; only installed apps, which can
-  // stay open for days, need a prompt.
-  if (!isInstalledApp()) return;
-  if (promptedFor === worker) return;
-  promptedFor = worker;
-  const [version, current] = await Promise.all([
-    workerVersion(worker),
-    navigator.serviceWorker.controller ? workerVersion(navigator.serviceWorker.controller) : null,
-  ]);
-  // Only prompt when the waiting build really differs from the one running.
-  if (version && current && version === current) return;
-  addToast({
-    title: "A new version of Paradiso is ready",
-    description: version
-      ? `Reload to update to ${version.split("+")[0]}. It only takes a second.`
-      : "Reload to get the latest updates. It only takes a second.",
-    timeout: 0,
-    endContent: (
-      <button
-        type="button"
-        className="shrink-0 rounded-full bg-accent px-3 py-1.5 text-sm font-semibold text-on-accent"
-        onClick={() => {
-          updateAccepted = true;
-          worker.postMessage({ type: "SKIP_WAITING" });
-        }}
-      >
-        Reload
-      </button>
-    ),
-  });
-}
-
 /**
- * Registers the service worker in production and delivers releases with one tap:
- * each deploy ships a newly stamped sw.js, the browser installs it in the background, and the
- * user gets a "Reload" toast instead of having the running tab swapped out from under them.
+ * Registers the service worker in production and keeps it current silently.
+ * The worker only caches content-addressed build output, images and the offline page, and pages
+ * always come from the network, so a new worker never changes what the user sees. It activates
+ * on its own (see sw/service-worker.js) and no "new version" prompt is needed.
  */
 export default function ServiceWorkerRegistrar() {
   useEffect(() => {
@@ -99,11 +39,6 @@ export default function ServiceWorkerRegistrar() {
       lastCheck = Date.now();
       void registration.update().catch(() => undefined);
     };
-    const onControllerChange = () => {
-      if (!updateAccepted) return;
-      updateAccepted = false;
-      window.location.reload();
-    };
     const onVisible = () => {
       if (document.visibilityState === "visible") checkForUpdate();
     };
@@ -114,19 +49,11 @@ export default function ServiceWorkerRegistrar() {
 
     async function register() {
       try {
-        registration = await sw.register(SW_URL, { scope: "/", updateViaCache: "none" });
+        const next = await sw.register(SW_URL, { scope: "/", updateViaCache: "none" });
+        if (!cancelled) registration = next;
       } catch {
-        return; // Private mode or blocked storage: the app works without it.
+        // Private mode or blocked storage: the app works without it.
       }
-      if (cancelled) return;
-      // Only an *update* needs a prompt; the first install has no controller yet.
-      if (registration.waiting && sw.controller) void promptReload(registration.waiting);
-      registration.addEventListener("updatefound", () => {
-        const incoming = registration?.installing;
-        incoming?.addEventListener("statechange", () => {
-          if (incoming.state === "installed" && sw.controller) void promptReload(incoming);
-        });
-      });
     }
 
     // Stay off the critical path: wait for load, then for an idle moment.
@@ -139,7 +66,6 @@ export default function ServiceWorkerRegistrar() {
     if (document.readyState === "complete") schedule();
     else window.addEventListener("load", schedule, { once: true });
 
-    sw.addEventListener("controllerchange", onControllerChange);
     document.addEventListener("visibilitychange", onVisible);
     window.addEventListener("online", onOnline);
     return () => {
@@ -147,7 +73,6 @@ export default function ServiceWorkerRegistrar() {
       window.clearInterval(poll);
       window.removeEventListener("load", schedule);
       window.removeEventListener("online", onOnline);
-      sw.removeEventListener("controllerchange", onControllerChange);
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);

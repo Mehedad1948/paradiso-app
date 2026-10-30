@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { CheckIcon, GlobalIcon, LockIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import { useMyRooms } from "@/hooks/queries/useCommunityQueries";

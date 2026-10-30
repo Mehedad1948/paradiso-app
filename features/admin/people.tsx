@@ -5,7 +5,7 @@ import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
 import { Switch } from "@heroui/switch";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { MagnifierIcon } from "@solar-icons/react/linear";
 import { useDebounce } from "use-debounce";
 import { usePeopleSearch, usePersonPreview, useSaveCandidate } from "@/hooks/queries/useAdminQueries";

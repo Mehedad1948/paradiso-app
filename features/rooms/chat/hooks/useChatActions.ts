@@ -1,6 +1,6 @@
 "use client";
 import { useCallback, useMemo } from "react";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { chatApi } from "@/lib/api/chat";
 import { BffError } from "@/lib/api/client";
 import { applyVote, toggleReaction } from "@/lib/chat/timeline";

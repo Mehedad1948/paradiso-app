@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { AddIcon, TrashBinMinimalisticIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import { useAdminLandingGrid, useSaveLandingGrid } from "@/hooks/queries/useCurationQueries";

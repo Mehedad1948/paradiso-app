@@ -7,7 +7,7 @@ import {
   type InfiniteData,
   type QueryClient,
 } from "@tanstack/react-query";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { notificationsApi } from "@/lib/api/notifications";
 import { panelApi } from "@/lib/api/panel";
 import { BffError } from "@/lib/api/client";

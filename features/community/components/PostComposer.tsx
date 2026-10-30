@@ -7,7 +7,7 @@ import { Textarea } from "@heroui/input";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Spinner } from "@heroui/spinner";
 import { Switch } from "@heroui/switch";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { ClapperboardIcon, CloseIcon, GalleryAddIcon, GlobalIcon, LockIcon, RefreshIcon, StarIcon, VolumeLoudIcon } from "@solar-icons/react/linear";
 import {
   useCreatePost,

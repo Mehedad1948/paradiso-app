@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { AvatarGroup } from "@heroui/avatar";
 import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { ArrowDownIcon, ChecklistMinimalisticIcon, ClapperboardIcon, CloseIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import { useChatPinned, useChatUnread } from "@/hooks/queries/useChatQueries";

@@ -1,7 +1,7 @@
 "use client";
 
 import { DownloadMinimalisticIcon } from "@solar-icons/react/linear";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import clsx from "clsx";
 
 import { useInstallPrompt } from "@/lib/pwa/install-prompt";

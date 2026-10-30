@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Button } from "@heroui/button";
 import { Input, Textarea } from "@heroui/input";
 import { Switch } from "@heroui/switch";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { GallerySendIcon, TrashBinMinimalisticIcon } from "@solar-icons/react/linear";
 import Sidebar, { useSidebar } from "@/components/ui/Sidebar";
 import { layerColors } from "@/components/ui/StaggeredDrawer";

@@ -1,7 +1,7 @@
 "use client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef } from "react";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 
 export type MutationOptions<T> = {
   onSuccess?: (data: T) => void;

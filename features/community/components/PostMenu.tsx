@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@heroui/button";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/dropdown";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { LinkRoundIcon, MenuDotsIcon, PenIcon, TrashBinMinimalisticIcon } from "@solar-icons/react/linear";
 import type { CommunityPost } from "@/types/community";
 import type { Viewer } from "../hooks/useViewer";

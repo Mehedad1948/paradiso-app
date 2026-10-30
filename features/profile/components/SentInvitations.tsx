@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { formatDistanceToNowStrict } from "date-fns";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Button } from "@heroui/button";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { CloseIcon, LetterIcon, SendSquareIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import UserAvatar from "@/components/ui/UserAvatar";

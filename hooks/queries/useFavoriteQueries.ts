@@ -1,6 +1,6 @@
 "use client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { communityApi } from "@/lib/api/community";
 import { communityKeys } from "@/lib/query/community-keys";
 import type { FavoriteMovie } from "@/types/community";

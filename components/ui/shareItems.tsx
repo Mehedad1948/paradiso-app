@@ -1,4 +1,4 @@
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { LinkRoundIcon, ShareIcon } from "@solar-icons/react/linear";
 import type { BubbleItem } from "./BubbleMenu";
 import { FacebookLogo, TelegramLogo, XLogo } from "./BrandIcons";

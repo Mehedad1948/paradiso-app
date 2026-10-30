@@ -11,7 +11,7 @@ import {
   useVote,
 } from "@/hooks/queries/useRoomQueries";
 import { useDebouncedSearch } from "@/features/rooms/hooks/useDebouncedSearch";
-vi.mock("@heroui/toast", () => ({ addToast: vi.fn() }));
+vi.mock("@/components/ui/toast",() => ({ addToast: vi.fn() }));
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();

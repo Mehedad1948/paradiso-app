@@ -8,7 +8,7 @@ import {
   DropdownTrigger,
 } from "@heroui/dropdown";
 import { Input } from "@heroui/input";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { format } from "date-fns";
 import { PenIcon, TrashBinMinimalisticIcon } from "@solar-icons/react/linear";
 import { Key, useState } from "react";

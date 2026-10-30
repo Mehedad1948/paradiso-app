@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CheckIcon, ClockCircleIcon, GlobalIcon, LockIcon, Login2Icon, MagnifierIcon, ShieldCheckIcon } from "@solar-icons/react/linear";
 import { Spinner } from "@heroui/spinner";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { BffError } from "@/lib/api/client";
 import {
   invitationErrorMessage,

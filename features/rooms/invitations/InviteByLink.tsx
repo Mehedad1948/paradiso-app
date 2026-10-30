@@ -3,7 +3,7 @@ import { Accordion, AccordionItem } from "@heroui/accordion";
 import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
 import PanelPagination from "../components/PanelPagination";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { CopyIcon, LinkIcon } from "@solar-icons/react/linear";
 import InviteLinkItem from "./InviteLinkItem";
 import CopierButton from "@/components/utils/CopierButton";

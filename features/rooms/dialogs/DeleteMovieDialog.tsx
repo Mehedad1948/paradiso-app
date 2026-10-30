@@ -10,7 +10,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/modal";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { useRemoveMovie } from "@/hooks/queries/useRoomQueries";
 import MoviePoster from "../components/MoviePoster";
 

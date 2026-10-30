@@ -126,7 +126,7 @@ function SignInView({ flow }: { flow: Flow }) {
   const busy = form.isPending || flow.syncing;
   return (
     <>
-      <Heading title="Welcome back">{flow.notice ?? "Sign in to pick up where you left off."}</Heading>
+      <Heading title="Take your seat">{flow.notice ?? "Sign in to Paradiso."}</Heading>
       <form
         ref={form.formRef}
         className={FORM}

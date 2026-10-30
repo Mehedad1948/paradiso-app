@@ -4,7 +4,7 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CheckIcon, CloseIcon, ShieldCheckIcon } from "@solar-icons/react/linear";
 import { Spinner } from "@heroui/spinner";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import UserAvatar from "@/components/ui/UserAvatar";
 import { ago, fullDate, profileHref } from "@/features/community/format";
 import {

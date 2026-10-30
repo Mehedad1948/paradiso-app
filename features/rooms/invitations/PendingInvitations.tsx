@@ -6,7 +6,7 @@ import { differenceInHours, formatDistanceToNowStrict } from "date-fns";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { CheckIcon, GlobalIcon, LetterIcon, LockIcon } from "@solar-icons/react/linear";
 import { Spinner } from "@heroui/spinner";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import UserAvatar from "@/components/ui/UserAvatar";
 import {
   invitationErrorMessage,

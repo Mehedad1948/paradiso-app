@@ -4,7 +4,7 @@ import { useState } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { makeQueryClient } from "@/lib/query/client";
 import { HeroUIProvider } from "@heroui/system";
-import { ToastProvider } from "@heroui/toast";
+import ToastViewport from "@/components/ui/toast/ToastViewport";
 import { ThemeProvider } from "next-themes";
 import NavigationProgress from "@/components/ui/NavigationProgress";
 import ServiceWorkerRegistrar from "@/components/pwa/ServiceWorkerRegistrar";
@@ -22,7 +22,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     >
       <QueryClientProvider client={queryClient}>
         <HeroUIProvider>
-          <ToastProvider />
+          <ToastViewport />
           <NavigationProgress />
           <ServiceWorkerRegistrar />
           <OfflineBanner />

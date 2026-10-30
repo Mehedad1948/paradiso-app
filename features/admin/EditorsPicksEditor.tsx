@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import { Button } from "@heroui/button";
 import { Spinner } from "@heroui/spinner";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { ArrowDownIcon, ArrowUpIcon, CloseIcon, DoubleAltArrowUpIcon, GripVerticalIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import { useAdminEditorsPicks, useSaveEditorsPicks } from "@/hooks/queries/useCurationQueries";

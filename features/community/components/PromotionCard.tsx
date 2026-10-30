@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@heroui/button";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { ArrowRightUpIcon, Login2Icon } from "@solar-icons/react/linear";
 import { panelApi } from "@/lib/api/panel";
 import { panelKeys } from "@/lib/query/panel-keys";

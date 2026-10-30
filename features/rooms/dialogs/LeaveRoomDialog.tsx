@@ -11,7 +11,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/modal";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { InfoCircleIcon, Logout2Icon, TrashBinMinimalisticIcon } from "@solar-icons/react/linear";
 import HoldButton from "@/components/ui/HoldButton";
 import { BffError } from "@/lib/api/client";

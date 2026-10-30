@@ -6,7 +6,7 @@ import {
   useQueryClient,
   type InfiniteData,
 } from "@tanstack/react-query";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { panelApi } from "@/lib/api/panel";
 import { panelKeys } from "@/lib/query/panel-keys";
 import { patchAccountStats, refreshAccountStats } from "./useMe";

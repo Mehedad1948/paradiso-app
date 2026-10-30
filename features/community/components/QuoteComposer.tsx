@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { Button } from "@heroui/button";
 import { Textarea } from "@heroui/input";
 import { Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { useCreatePost } from "@/hooks/queries/useCommunityQueries";
 import { postTextError } from "@/lib/community/validation";
 import { COMMUNITY_LIMITS, type CommunityPost } from "@/types/community";

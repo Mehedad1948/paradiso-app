@@ -5,7 +5,7 @@ import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
 import { Pagination } from "@heroui/pagination";
 import { Spinner } from "@heroui/spinner";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import QueryError from "@/components/ui/QueryError";
 import { useCandidates, useRemoveCandidate, useSaveCandidate } from "@/hooks/queries/useAdminQueries";
 import type { AdminCandidate, CandidateFilter } from "@/lib/api/admin";

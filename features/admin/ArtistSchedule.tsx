@@ -5,7 +5,7 @@ import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
 import { ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/modal";
 import { Spinner } from "@heroui/spinner";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import QueryError from "@/components/ui/QueryError";
 import ResponsiveDialog from "@/components/ui/ResponsiveDialog";
 import { useFeaturedDays, useRemoveFeaturedDay, useSetFeaturedDay } from "@/hooks/queries/useAdminQueries";

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Input } from "@heroui/input";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { LockIcon, MentionCircleIcon } from "@solar-icons/react/linear";
 import { useUpdateMe } from "@/hooks/queries/useMe";
 import type { CurrentUser, UpdateMeInputs } from "@/types/user";

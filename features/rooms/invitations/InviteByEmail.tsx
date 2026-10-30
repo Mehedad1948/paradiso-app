@@ -3,7 +3,7 @@ import { useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { Chip } from "@heroui/chip";
 import { Spinner } from "@heroui/spinner";
 import { CloseIcon, LetterIcon, SendSquareIcon } from "@solar-icons/react/linear";

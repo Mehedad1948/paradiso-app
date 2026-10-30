@@ -11,7 +11,7 @@ import {
   ModalHeader,
 } from "@heroui/modal";
 import { Switch } from "@heroui/switch";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { useState } from "react";
 import { useUpdateMovie } from "@/hooks/queries/useRoomQueries";
 import { CUSTOM_MOVIE_LIMITS } from "@/lib/movies/custom-movie";

@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/input";
 import { Dropdown, DropdownItem, DropdownMenu, DropdownSection, DropdownTrigger } from "@heroui/dropdown";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { CrownIcon, MagnifierIcon, MenuDotsVerticalIcon, SledgehammerIcon, UserMinusIcon, UserPlusIcon, UsersGroupRoundedIcon } from "@solar-icons/react/linear";
 import Sidebar, { useSidebar } from "@/components/ui/Sidebar";
 import { layerColors } from "@/components/ui/StaggeredDrawer";

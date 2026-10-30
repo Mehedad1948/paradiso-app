@@ -3,7 +3,7 @@
 import { Modal, ModalContent, ModalBody, ModalFooter } from "@heroui/modal";
 import { Button } from "@heroui/button";
 import Image from "next/image";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { Input, Textarea } from "@heroui/input";
 import { Switch } from "@heroui/switch";
 

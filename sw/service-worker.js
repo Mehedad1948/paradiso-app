@@ -30,8 +30,9 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(SHELL_CACHE).then((cache) => cache.addAll(SHELL_ASSETS.map((url) => new Request(url, { cache: "reload" })))),
   );
-  // No skipWaiting here: an update waits until the page asks for it (see SKIP_WAITING), so a
-  // running tab never mixes old chunks with a new worker mid-session.
+  // Activate immediately: the worker only caches content-addressed chunks and images and never
+  // serves documents, so swapping it mid-session is safe and needs no user prompt.
+  self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
@@ -51,7 +52,6 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("message", (event) => {
   const type = event.data && event.data.type;
-  if (type === "SKIP_WAITING") self.skipWaiting();
   if (type === "GET_VERSION" && event.ports[0]) event.ports[0].postMessage({ version: APP_VERSION });
 });
 

@@ -4,7 +4,7 @@ import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { Input } from "@heroui/input";
 import { Spinner } from "@heroui/spinner";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { RefreshIcon } from "@solar-icons/react/linear";
 import QueryError from "@/components/ui/QueryError";
 import { useGenres } from "@/hooks/queries/useMe";

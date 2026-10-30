@@ -3,7 +3,7 @@ import { useState } from "react";
 import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import { Button } from "@heroui/button";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { Logout2Icon } from "@solar-icons/react/linear";
 import PasswordInput from "@/components/auth/PasswordInput";
 import { useAuthForm } from "@/hooks/auth/useAuthForm";

@@ -8,7 +8,7 @@ import {
   type InfiniteData,
   type QueryClient,
 } from "@tanstack/react-query";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { communityApi } from "@/lib/api/community";
 import { panelApi, type PanelRoomListItem } from "@/lib/api/panel";
 import { communityKeys } from "@/lib/query/community-keys";

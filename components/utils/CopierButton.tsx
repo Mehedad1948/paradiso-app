@@ -1,6 +1,6 @@
 "use client";
 
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { ButtonHTMLAttributes } from "react";
 
 interface BackProps extends ButtonHTMLAttributes<HTMLButtonElement> {

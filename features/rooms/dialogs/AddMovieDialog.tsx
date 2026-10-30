@@ -12,7 +12,7 @@ import {
   ModalHeader,
 } from "@heroui/modal";
 import { Switch } from "@heroui/switch";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { ArrowLeftIcon, MagnifierIcon, PenNewSquareIcon } from "@solar-icons/react/linear";
 import { useState } from "react";
 import { useDebounce } from "use-debounce";

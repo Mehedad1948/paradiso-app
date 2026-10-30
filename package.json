@@ -47,7 +47,6 @@
     "@heroui/table": "2.2.19",
     "@heroui/tabs": "2.2.23",
     "@heroui/theme": "2.4.17",
-    "@heroui/toast": "2.0.9",
     "@heroui/tooltip": "2.2.16",
     "@react-aria/i18n": "^3.12.12",
     "@react-aria/ssr": "3.9.8",

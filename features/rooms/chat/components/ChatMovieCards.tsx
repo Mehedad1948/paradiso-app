@@ -2,7 +2,7 @@
 import { useState } from "react";
 import clsx from "clsx";
 import { Button } from "@heroui/button";
-import { addToast } from "@heroui/toast";
+import { addToast } from "@/components/ui/toast";
 import { AddIcon, CheckIcon, TicketIcon } from "@solar-icons/react/linear";
 import { useAddMovie } from "@/hooks/queries/useRoomQueries";
 import { BffError } from "@/lib/api/client";
