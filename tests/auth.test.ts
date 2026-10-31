@@ -9,6 +9,7 @@ const mocks = vi.hoisted(() => ({
   register: vi.fn(),
   forgotPassword: vi.fn(),
   resetPassword: vi.fn(),
+  resendVerification: vi.fn(),
   refreshToken: vi.fn(),
 }));
 vi.mock("server-only", () => ({}));
@@ -19,6 +20,7 @@ vi.mock("@/services/auth/authServices", () => ({ default: mocks }));
 vi.mock("@/services/user", () => ({ default: mocks }));
 import { handleAuthRequest } from "@/lib/bff/auth";
 import { tokenLifetime } from "@/lib/auth/session";
+import { visitorIp } from "@/lib/bff/client-ip";
 import { authHref, safeRedirectPath } from "@/lib/auth/redirect";
 
 const ok = (result: unknown = null) => ({
@@ -91,10 +93,10 @@ describe("auth BFF", () => {
       "sign-in",
     );
     expect(response.status).toBe(200);
-    expect(mocks.signIn).toHaveBeenCalledWith({
-      email: "user@example.test",
-      password: "  keep spaces  ",
-    });
+    expect(mocks.signIn).toHaveBeenCalledWith(
+      { email: "user@example.test", password: "  keep spaces  " },
+      undefined,
+    );
     expect(mocks.set).toHaveBeenCalledWith(
       "token",
       pair.accessToken,
@@ -257,6 +259,99 @@ describe("auth BFF", () => {
     );
     expect(response.status).toBe(502);
     expect(JSON.stringify(await response.json())).not.toContain("private-host");
+  });
+});
+describe("auth rate limits", () => {
+  const limited = {
+    result: null,
+    response: {
+      ok: false,
+      status: 429,
+      statusText: "",
+      message: "Too many attempts. Try again in 42 seconds.",
+      retryAfter: 42,
+    },
+  };
+  it("passes a 429 through with its wait time, not as a wrong password", async () => {
+    mocks.signIn.mockResolvedValue(limited);
+    const response = await handleAuthRequest(
+      request("sign-in", { email: "user@example.test", password: "secret" }),
+      "sign-in",
+    );
+    expect(response.status).toBe(429);
+    expect(response.headers.get("retry-after")).toBe("42");
+    const body = await response.json();
+    expect(body.response).toMatchObject({
+      status: 429,
+      message: "Too many attempts. Try again in 42 seconds.",
+      retryAfter: 42,
+    });
+    expect(JSON.stringify(body)).not.toContain("incorrect");
+  });
+  it("falls back to a generic message when the 429 has none", async () => {
+    mocks.forgotPassword.mockResolvedValue({
+      ...limited,
+      response: { ok: false, status: 429, statusText: "" },
+    });
+    const response = await handleAuthRequest(
+      request("forgot-password", { email: "user@example.test" }),
+      "forgot-password",
+    );
+    expect(response.status).toBe(429);
+    expect(response.headers.get("retry-after")).toBeNull();
+    expect((await response.json()).response.message).toBe(
+      "Too many attempts. Try again later.",
+    );
+  });
+  it("resends a verification code for a validated email", async () => {
+    mocks.resendVerification.mockResolvedValue(ok({ message: "sent" }));
+    const response = await handleAuthRequest(
+      request("resend-verification", { email: " user@example.test " }),
+      "resend-verification",
+    );
+    expect(response.status).toBe(200);
+    expect(mocks.resendVerification).toHaveBeenCalledWith(
+      { email: "user@example.test" },
+      undefined,
+    );
+    const bad = await handleAuthRequest(
+      request("resend-verification", { email: "nope" }),
+      "resend-verification",
+    );
+    expect(bad.status).toBe(400);
+    expect(mocks.resendVerification).toHaveBeenCalledTimes(1);
+  });
+  it("forwards the visitor IP from Vercel's header to every limited route", async () => {
+    vi.stubEnv("VERCEL", "1");
+    mocks.forgotPassword.mockResolvedValue(ok());
+    mocks.resendVerification.mockResolvedValue(ok());
+    const withIp = (operation: string, body: unknown) =>
+      new Request(`http://localhost/api/auth/${operation}`, {
+        method: "POST",
+        headers: { origin: "http://localhost", "x-forwarded-for": "203.0.113.7, 10.0.0.1" },
+        body: JSON.stringify(body),
+      });
+    await handleAuthRequest(withIp("forgot-password", { email: "a@example.test" }), "forgot-password");
+    await handleAuthRequest(withIp("resend-verification", { email: "a@example.test" }), "resend-verification");
+    expect(mocks.forgotPassword).toHaveBeenCalledWith({ email: "a@example.test" }, "203.0.113.7");
+    expect(mocks.resendVerification).toHaveBeenCalledWith({ email: "a@example.test" }, "203.0.113.7");
+  });
+});
+describe("visitor IP", () => {
+  const req = (headers: Record<string, string>) => new Request("http://localhost", { headers });
+  it("trusts the first x-forwarded-for entry only on Vercel", () => {
+    vi.stubEnv("VERCEL", "1");
+    expect(visitorIp(req({ "x-forwarded-for": " 203.0.113.7 , 10.0.0.1" }))).toBe("203.0.113.7");
+    expect(visitorIp(req({ "x-real-ip": "2001:db8::1" }))).toBe("2001:db8::1");
+    vi.stubEnv("VERCEL", "");
+    expect(visitorIp(req({ "x-forwarded-for": "203.0.113.7" }))).toBeUndefined();
+  });
+  it("ignores cf-connecting-ip and values that are not a single IP", () => {
+    vi.stubEnv("VERCEL", "1");
+    expect(visitorIp(req({ "cf-connecting-ip": "203.0.113.9" }))).toBeUndefined();
+    expect(visitorIp(req({ "x-forwarded-for": "not-an-ip" }))).toBeUndefined();
+    expect(visitorIp(req({ "x-forwarded-for": "1.2.3.4:80" }))).toBeUndefined();
+    expect(visitorIp(req({}))).toBeUndefined();
   });
 });
 describe("return destinations", () => {

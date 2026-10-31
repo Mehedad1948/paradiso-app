@@ -19,7 +19,20 @@ type RequestOptions<
   body?: BackendRequestBody<Path, Method> | (Path extends "/uploads/file" ? FormData : never);
   signal?: AbortSignal;
   withAuth?: boolean;
+  /** The visitor's IP, for calls the backend rate-limits per client. Sent as X-Forwarded-For. */
+  clientIp?: string;
 };
+
+const MAX_RETRY_AFTER = 3600;
+
+/** Seconds to wait, from Retry-After or, failing that, the "N seconds" in a 429 message. */
+export function retryAfterSeconds(header: string | null, message?: string): number | undefined {
+  for (const raw of [header?.trim(), message?.match(/(\d+)\s*seconds?/i)?.[1]]) {
+    if (!raw || !/^\d+$/.test(raw)) continue;
+    const seconds = Number(raw);
+    if (seconds >= 1) return Math.min(seconds, MAX_RETRY_AFTER);
+  }
+}
 
 function messageFrom(value: unknown): string | undefined {
   if (!value || typeof value !== "object" || !("message" in value)) return;
@@ -38,7 +51,7 @@ export async function backendRequest<
   method: Method,
   options: RequestOptions<Path, Method> = {},
 ): Promise<RequestResult<BackendResponse<Path, Method>>> {
-  const { pathParams, query, body, signal, withAuth = true } = options;
+  const { pathParams, query, body, signal, withAuth = true, clientIp } = options;
   try {
     const baseUrl = process.env.BASE_API_URL;
     if (!baseUrl) throw new Error("BASE_API_URL is not configured");
@@ -61,6 +74,7 @@ export async function backendRequest<
     }
     if (body !== undefined && !(body instanceof FormData))
       headers.set("Content-Type", "application/json");
+    if (clientIp) headers.set("X-Forwarded-For", clientIp);
 
     const response = await fetch(url, {
       method: String(method).toUpperCase(),
@@ -81,6 +95,10 @@ export async function backendRequest<
       Array.isArray(parsed.message)
         ? parsed.message.filter((item): item is string => typeof item === "string")
         : undefined;
+    const retryAfter =
+      response.status === 429
+        ? retryAfterSeconds(response.headers.get("retry-after"), message)
+        : undefined;
     return {
       result: response.ok ? (parsed as BackendResponse<Path, Method>) : null,
       response: {
@@ -89,6 +107,7 @@ export async function backendRequest<
         statusText: response.statusText,
         ...(message ? { message } : {}),
         ...(!response.ok && messages?.length ? { messages } : {}),
+        ...(retryAfter ? { retryAfter } : {}),
       },
       error: response.ok ? undefined : message || `HTTP ${response.status}: ${response.statusText}`,
     };

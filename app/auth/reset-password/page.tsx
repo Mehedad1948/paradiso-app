@@ -11,13 +11,15 @@ import PasswordInput from "@/components/auth/PasswordInput";
 import AuthOtpInput from "@/components/auth/AuthOtpInput";
 import { useEffect, useState } from "react";
 import { confirmPassword, emailInput } from "@/lib/auth/validation";
-import { useResendCooldown } from "@/hooks/auth/useResendCooldown";
+import { RESEND_WAIT_SECONDS } from "@/hooks/auth/useCooldown";
+import { useAuthLimit } from "@/hooks/auth/useAuthLimit";
 export default function ResetPasswordPage() {
   const router = useRouter();
   const location = useAuthLocation();
   const form = useAuthForm(authApi.resetPassword, true);
   const resend = useAuthForm(authApi.forgotPassword);
-  const cooldown = useResendCooldown(location.email);
+  const limit = useAuthLimit(form, "reset-password", location.email);
+  const resendLimit = useAuthLimit(resend, "reset-code", location.email);
   const initialCode = location.params.get("code") || "";
   const [code, setCode] = useState(
     /^\d{4}$/.test(initialCode) ? initialCode : "",
@@ -33,7 +35,7 @@ export default function ResetPasswordPage() {
   );
   const pending = form.isPending || resend.isPending;
   function requestCode() {
-    if (pending || cooldown.secondsLeft > 0) return;
+    if (pending || resendLimit.locked) return;
     form.clearError();
     try {
       emailInput(location.email);
@@ -42,7 +44,7 @@ export default function ResetPasswordPage() {
       return;
     }
     void resend.submit({ email: location.email }, (result) => {
-      cooldown.start();
+      resendLimit.start(RESEND_WAIT_SECONDS);
       setCode("");
       setMessage(result.message);
     });
@@ -58,6 +60,7 @@ export default function ResetPasswordPage() {
         className="flex mt-8 flex-col gap-4"
         onSubmit={(event) => {
           event.preventDefault();
+          if (limit.locked) return;
           resend.clearError();
           const fields = new FormData(event.currentTarget);
           const password = String(fields.get("password") || "");
@@ -112,10 +115,10 @@ export default function ResetPasswordPage() {
           color="primary"
           onPress={requestCode}
           isLoading={resend.isPending}
-          isDisabled={pending || cooldown.secondsLeft > 0}
+          isDisabled={pending || resendLimit.locked}
         >
-          {cooldown.secondsLeft > 0
-            ? "Resend code in " + cooldown.secondsLeft + "s"
+          {resendLimit.locked
+            ? "Resend code in " + resendLimit.secondsLeft + "s"
             : "Send another code"}
         </Button>
         <PasswordInput
@@ -140,14 +143,14 @@ export default function ResetPasswordPage() {
           isDisabled={pending}
           onValueChange={() => form.clearError()}
         />
-        <AuthFeedback error={form.error || resend.error} message={message} />
+        <AuthFeedback error={limit.error || resendLimit.error} message={message} />
         <Button
           type="submit"
           color="secondary"
           isLoading={form.isPending}
-          isDisabled={pending}
+          isDisabled={pending || limit.locked}
         >
-          Reset password
+          {limit.locked ? `Try again in ${limit.secondsLeft}s` : "Reset password"}
         </Button>
         <Link
           href={location.href("sign-in")}

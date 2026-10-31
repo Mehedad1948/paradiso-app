@@ -6,6 +6,7 @@ import usersServices from "@/services/user";
 import type { AuthOperation, AuthResult } from "@/types/auth";
 import type { RequestResult } from "@/types/request";
 import { InputError, assertSameOrigin } from "./validation";
+import { visitorIp } from "./client-ip";
 import {
   emailInput,
   passwordInput,
@@ -18,6 +19,7 @@ const operations = new Set<AuthOperation>([
   "sign-in",
   "register",
   "verify",
+  "resend-verification",
   "forgot-password",
   "reset-password",
   "refresh-token",
@@ -32,16 +34,27 @@ function success(message: string, authenticated?: boolean) {
     response: { ok: true, status: 200, statusText: "OK" },
   });
 }
-function failure(status: number, message: string) {
+function failure(status: number, message: string, retryAfter?: number) {
   return respond({
     result: null,
-    response: { ok: false, status, statusText: "", message },
+    response: {
+      ok: false,
+      status,
+      statusText: "",
+      message,
+      ...(retryAfter ? { retryAfter } : {}),
+    },
   });
 }
 function respond(result: RequestResult<AuthResult>) {
+  const { retryAfter } = result.response;
   return NextResponse.json(result, {
     status: result.response.status,
-    headers: { "Cache-Control": "private, no-store", Vary: "Cookie" },
+    headers: {
+      "Cache-Control": "private, no-store",
+      Vary: "Cookie",
+      ...(retryAfter ? { "Retry-After": String(retryAfter) } : {}),
+    },
   });
 }
 function upstreamFailure(
@@ -57,6 +70,12 @@ function upstreamFailure(
   let message =
     result.response.message ||
     "The request could not be completed. Please try again.";
+  if (status === 429)
+    return failure(
+      status,
+      result.response.message || "Too many attempts. Try again later.",
+      result.response.retryAfter,
+    );
   if (status >= 500)
     message = "The service is temporarily unavailable. Please try again.";
   else if (operation === "sign-in" && status === 401)
@@ -111,17 +130,18 @@ export async function handleAuthRequest(request: Request, operation: string) {
       throw new InputError("Invalid authentication request.");
     }
     const email = emailInput(data.email);
+    const ip = visitorIp(request);
     if (action === "sign-in" || action === "verify") {
       const result =
         action === "sign-in"
-          ? await authServices.signIn({
-              email,
-              password: passwordInput(data.password),
-            })
-          : await authServices.verifyEmail({
-              email,
-              code: codeInput(data.code),
-            });
+          ? await authServices.signIn(
+              { email, password: passwordInput(data.password) },
+              ip,
+            )
+          : await authServices.verifyEmail(
+              { email, code: codeInput(data.code) },
+              ip,
+            );
       if (!result.response.ok) return upstreamFailure(result, action);
       if (hasTokenPair(result.result)) {
         if (!(await setSession(result.result)))
@@ -155,28 +175,40 @@ export async function handleAuthRequest(request: Request, operation: string) {
       );
     }
     if (action === "register") {
-      const result = await usersServices.register({
-        email,
-        password: passwordInput(data.password, true),
-        username: usernameInput(data.username),
-      });
+      const result = await usersServices.register(
+        {
+          email,
+          password: passwordInput(data.password, true),
+          username: usernameInput(data.username),
+        },
+        ip,
+      );
       return result.response.ok
         ? success(
             "Account created. Check your email for the verification code.",
           )
         : upstreamFailure(result, action);
     }
+    if (action === "resend-verification") {
+      const result = await authServices.resendVerification({ email }, ip);
+      return result.response.ok
+        ? success("We sent a new verification code. Check your email.")
+        : upstreamFailure(result, action);
+    }
     if (action === "forgot-password") {
-      const result = await authServices.forgotPassword({ email });
+      const result = await authServices.forgotPassword({ email }, ip);
       return result.response.ok
         ? success("Check your email for the password reset code.")
         : upstreamFailure(result, action);
     }
-    const result = await authServices.resetPassword({
-      email,
-      code: codeInput(data.code),
-      password: passwordInput(data.password, true),
-    });
+    const result = await authServices.resetPassword(
+      {
+        email,
+        code: codeInput(data.code),
+        password: passwordInput(data.password, true),
+      },
+      ip,
+    );
     if (!result.response.ok) return upstreamFailure(result, action);
     await clearSession();
     return success(

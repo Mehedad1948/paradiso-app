@@ -4,10 +4,8 @@ import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { Activity, createElement, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAuthForm } from "@/hooks/auth/useAuthForm";
-import {
-  startResetCooldown,
-  useResendCooldown,
-} from "@/hooks/auth/useResendCooldown";
+import { startCooldown, useCooldown } from "@/hooks/auth/useCooldown";
+import { useAuthLimit } from "@/hooks/auth/useAuthLimit";
 import { BffError } from "@/lib/api/client";
 import type { AuthResult } from "@/types/auth";
 
@@ -183,27 +181,79 @@ describe("reset-code cooldown", () => {
   it("restores the same deadline after navigation and expires without restarting", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
-    startResetCooldown("User@example.test");
-    const first = renderHook(() => useResendCooldown("user@example.test"));
+    startCooldown("reset-code", "User@example.test", 120);
+    const first = renderHook(() => useCooldown("reset-code", "user@example.test"));
     expect(first.result.current.secondsLeft).toBe(120);
     act(() => vi.advanceTimersByTime(45_000));
     expect(first.result.current.secondsLeft).toBe(75);
     first.unmount();
-    const second = renderHook(() => useResendCooldown("user@example.test"));
+    const second = renderHook(() => useCooldown("reset-code", "user@example.test"));
     expect(second.result.current.secondsLeft).toBe(75);
     act(() => vi.advanceTimersByTime(80_000));
     expect(second.result.current.secondsLeft).toBe(0);
   });
   it("does not apply another email's cooldown and starts only after a successful request", () => {
     vi.useFakeTimers();
-    startResetCooldown("first@example.test");
-    const hook = renderHook(({ email }) => useResendCooldown(email), {
+    startCooldown("reset-code", "first@example.test", 120);
+    const hook = renderHook(({ email }) => useCooldown("reset-code", email), {
       initialProps: { email: "first@example.test" },
     });
     expect(hook.result.current.secondsLeft).toBe(120);
     hook.rerender({ email: "second@example.test" });
     expect(hook.result.current.secondsLeft).toBe(0);
-    act(() => hook.result.current.start());
+    act(() => hook.result.current.start(120));
     expect(hook.result.current.secondsLeft).toBe(120);
+  });
+});
+describe("rate-limit lockout", () => {
+  const clock = (iso: string) => vi.useFakeTimers({ toFake: ["Date"] }) && vi.setSystemTime(new Date(iso));
+  const elapse = (ms: number) => {
+    vi.setSystemTime(Date.now() + ms);
+    act(() => void window.dispatchEvent(new Event("focus")));
+  };
+  function limited(operation: () => Promise<AuthResult>, email = "user@example.test") {
+    return renderHook(
+      () => {
+        const form = useAuthForm(operation);
+        return { form, limit: useAuthLimit(form, "sign-in", email) };
+      },
+      { wrapper: wrapper(client()) },
+    );
+  }
+  it("locks the form for Retry-After seconds, shows its own countdown, and never retries", async () => {
+    clock("2026-01-01T00:00:00Z");
+    const operation = vi
+      .fn<() => Promise<AuthResult>>()
+      .mockRejectedValue(new BffError("Too many attempts. Try again in 30 seconds.", 429, undefined, 30));
+    const hook = limited(operation);
+    await act(() => hook.result.current.form.submit(undefined, () => {}));
+    await waitFor(() => expect(hook.result.current.limit.locked).toBe(true));
+    expect(operation).toHaveBeenCalledTimes(1);
+    expect(hook.result.current.limit.error).toBe("Too many attempts. Try again in 30s.");
+    elapse(10_000);
+    expect(hook.result.current.limit.error).toBe("Too many attempts. Try again in 20s.");
+    elapse(21_000);
+    expect(hook.result.current.limit.locked).toBe(false);
+    expect(hook.result.current.limit.error).toBeUndefined();
+    expect(operation).toHaveBeenCalledTimes(1);
+  });
+  it("keeps the lock across a reload and falls back to 60s without Retry-After", async () => {
+    clock("2026-01-01T00:00:00Z");
+    const hook = limited(() => Promise.reject(new BffError("Slow down.", 429)));
+    await act(() => hook.result.current.form.submit(undefined, () => {}));
+    await waitFor(() => expect(hook.result.current.limit.secondsLeft).toBe(60));
+    hook.unmount();
+    const reloaded = limited(async () => ({ message: "ok" }));
+    expect(reloaded.result.current.limit.locked).toBe(true);
+    const other = limited(async () => ({ message: "ok" }), "someone@else.test");
+    expect(other.result.current.limit.locked).toBe(false);
+  });
+  it("does not treat a wrong password as a rate limit", async () => {
+    const hook = limited(() => Promise.reject(new BffError("Your email or password is incorrect.", 401)));
+    await act(() => hook.result.current.form.submit(undefined, () => {}));
+    await waitFor(() =>
+      expect(hook.result.current.limit.error).toBe("Your email or password is incorrect."),
+    );
+    expect(hook.result.current.limit.locked).toBe(false);
   });
 });

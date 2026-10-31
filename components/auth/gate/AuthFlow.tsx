@@ -8,7 +8,8 @@ import { Input } from "@heroui/input";
 import { LockIcon } from "@solar-icons/react/linear";
 import { authApi } from "@/lib/api/auth";
 import { useAuthForm } from "@/hooks/auth/useAuthForm";
-import { startResetCooldown, useResendCooldown } from "@/hooks/auth/useResendCooldown";
+import { RESEND_WAIT_SECONDS, startCooldown } from "@/hooks/auth/useCooldown";
+import { useAuthLimit } from "@/hooks/auth/useAuthLimit";
 import { confirmPassword } from "@/lib/auth/validation";
 import { syncSession } from "@/lib/auth/sync-session";
 import { panelKeys } from "@/lib/query/panel-keys";
@@ -123,6 +124,7 @@ function EmailField({ flow, disabled, onChange }: { flow: Flow; disabled: boolea
 
 function SignInView({ flow }: { flow: Flow }) {
   const form = useAuthForm(authApi.signIn);
+  const limit = useAuthLimit(form, "sign-in", flow.email);
   const busy = form.isPending || flow.syncing;
   return (
     <>
@@ -132,6 +134,7 @@ function SignInView({ flow }: { flow: Flow }) {
         className={FORM}
         onSubmit={(event) => {
           event.preventDefault();
+          if (limit.locked) return;
           const fields = new FormData(event.currentTarget);
           void form.submit({ email: flow.email, password: String(fields.get("password") || "") }, () => void flow.done());
         }}
@@ -150,9 +153,9 @@ function SignInView({ flow }: { flow: Flow }) {
         <button type="button" className={`${LINK} self-start`} disabled={busy} onClick={() => flow.go("forgot")}>
           Forgot your password?
         </button>
-        <AuthFeedback error={form.error || flow.failure} />
-        <Button type="submit" color="secondary" isLoading={busy} isDisabled={busy}>
-          Sign in
+        <AuthFeedback error={limit.error || flow.failure} />
+        <Button type="submit" color="secondary" isLoading={busy} isDisabled={busy || limit.locked}>
+          {limit.locked ? `Try again in ${limit.secondsLeft}s` : "Sign in"}
         </Button>
         <p className="text-center text-sm text-muted">
           New to Paradiso?{" "}
@@ -167,6 +170,7 @@ function SignInView({ flow }: { flow: Flow }) {
 
 function RegisterView({ flow }: { flow: Flow }) {
   const form = useAuthForm(authApi.register);
+  const limit = useAuthLimit(form, "register", flow.email);
   return (
     <>
       <Heading title="Join Paradiso">Good films. Better company.</Heading>
@@ -175,6 +179,7 @@ function RegisterView({ flow }: { flow: Flow }) {
         className={FORM}
         onSubmit={(event) => {
           event.preventDefault();
+          if (limit.locked) return;
           const fields = new FormData(event.currentTarget);
           const password = String(fields.get("password") || "");
           try {
@@ -183,9 +188,11 @@ function RegisterView({ flow }: { flow: Flow }) {
             form.setError((error as Error).message);
             return;
           }
-          void form.submit({ email: flow.email, password, username: String(fields.get("username") || "") }, () =>
-            flow.go("verify", "Account created. Enter the four-digit code we emailed you."),
-          );
+          void form.submit({ email: flow.email, password, username: String(fields.get("username") || "") }, () => {
+            // The backend already emailed a code, so "send another" starts on cooldown.
+            startCooldown("verify-resend", flow.email, RESEND_WAIT_SECONDS);
+            flow.go("verify", "Account created. Enter the four-digit code we emailed you.");
+          });
         }}
       >
         <Input
@@ -222,9 +229,9 @@ function RegisterView({ flow }: { flow: Flow }) {
           isDisabled={form.isPending}
           onValueChange={() => form.clearError()}
         />
-        <AuthFeedback error={form.error} />
-        <Button type="submit" color="secondary" isLoading={form.isPending} isDisabled={form.isPending}>
-          Create account
+        <AuthFeedback error={limit.error} />
+        <Button type="submit" color="secondary" isLoading={form.isPending} isDisabled={form.isPending || limit.locked}>
+          {limit.locked ? `Try again in ${limit.secondsLeft}s` : "Create account"}
         </Button>
         <p className="text-center text-sm text-muted">
           Already a member?{" "}
@@ -239,8 +246,12 @@ function RegisterView({ flow }: { flow: Flow }) {
 
 function VerifyView({ flow }: { flow: Flow }) {
   const form = useAuthForm(authApi.verify);
+  const resend = useAuthForm(authApi.resendVerification);
+  const limit = useAuthLimit(form, "verify-email", flow.email);
+  const resendLimit = useAuthLimit(resend, "verify-resend", flow.email);
   const [code, setCode] = useState("");
-  const busy = form.isPending || flow.syncing;
+  const [message, setMessage] = useState<string | null>(null);
+  const busy = form.isPending || resend.isPending || flow.syncing;
   return (
     <>
       <Heading title="Verify your email">{flow.notice ?? "Enter the four-digit code sent to your email."}</Heading>
@@ -249,13 +260,23 @@ function VerifyView({ flow }: { flow: Flow }) {
         className={FORM}
         onSubmit={(event) => {
           event.preventDefault();
+          if (limit.locked) return;
+          resend.clearError();
           void form.submit({ email: flow.email, code }, (result) => {
             if (result.authenticated) void flow.done();
             else flow.go("sign-in", "Your email is verified. Sign in to continue.");
           });
         }}
       >
-        <EmailField flow={flow} disabled={busy} onChange={form.clearError} />
+        <EmailField
+          flow={flow}
+          disabled={busy}
+          onChange={() => {
+            form.clearError();
+            resend.clearError();
+            setMessage(null);
+          }}
+        />
         <AuthOtpInput
           name="code"
           aria-label="Email verification code"
@@ -268,9 +289,27 @@ function VerifyView({ flow }: { flow: Flow }) {
             form.clearError();
           }}
         />
-        <AuthFeedback error={form.error || flow.failure} />
-        <Button type="submit" color="secondary" isLoading={busy} isDisabled={busy}>
-          Verify email
+        <Button
+          type="button"
+          variant="light"
+          color="primary"
+          isLoading={resend.isPending}
+          isDisabled={busy || resendLimit.locked}
+          onPress={() => {
+            if (resendLimit.locked) return;
+            form.clearError();
+            void resend.submit({ email: flow.email }, (result) => {
+              resendLimit.start(RESEND_WAIT_SECONDS);
+              setCode("");
+              setMessage(result.message);
+            });
+          }}
+        >
+          {resendLimit.locked ? `Resend code in ${resendLimit.secondsLeft}s` : "Send another code"}
+        </Button>
+        <AuthFeedback error={limit.error || resendLimit.error || flow.failure} message={message} />
+        <Button type="submit" color="secondary" isLoading={form.isPending || flow.syncing} isDisabled={busy || limit.locked}>
+          {limit.locked ? `Try again in ${limit.secondsLeft}s` : "Verify email"}
         </Button>
         <button type="button" className={LINK} disabled={busy} onClick={() => flow.go("sign-in")}>
           Back to sign in
@@ -282,6 +321,7 @@ function VerifyView({ flow }: { flow: Flow }) {
 
 function ForgotView({ flow }: { flow: Flow }) {
   const form = useAuthForm(authApi.forgotPassword);
+  const limit = useAuthLimit(form, "reset-code", flow.email);
   return (
     <>
       <Heading title="Forgot password">Enter your email and we will send you a reset code.</Heading>
@@ -290,17 +330,23 @@ function ForgotView({ flow }: { flow: Flow }) {
         className={FORM}
         onSubmit={(event) => {
           event.preventDefault();
+          if (limit.locked) return;
           void form.submit({ email: flow.email }, () => {
-            startResetCooldown(flow.email);
+            startCooldown("reset-code", flow.email, RESEND_WAIT_SECONDS);
             flow.go("reset", "Check your email for the password reset code.");
           });
         }}
       >
         <EmailField flow={flow} disabled={form.isPending} onChange={form.clearError} />
-        <AuthFeedback error={form.error} />
-        <Button type="submit" color="secondary" isLoading={form.isPending} isDisabled={form.isPending}>
-          Send reset code
+        <AuthFeedback error={limit.error} />
+        <Button type="submit" color="secondary" isLoading={form.isPending} isDisabled={form.isPending || limit.locked}>
+          {limit.locked ? `Send again in ${limit.secondsLeft}s` : "Send reset code"}
         </Button>
+        {limit.locked && (
+          <button type="button" className={LINK} disabled={form.isPending} onClick={() => flow.go("reset")}>
+            I already have a code
+          </button>
+        )}
         <button type="button" className={LINK} disabled={form.isPending} onClick={() => flow.go("sign-in")}>
           Back to sign in
         </button>
@@ -312,7 +358,8 @@ function ForgotView({ flow }: { flow: Flow }) {
 function ResetView({ flow }: { flow: Flow }) {
   const form = useAuthForm(authApi.resetPassword);
   const resend = useAuthForm(authApi.forgotPassword);
-  const cooldown = useResendCooldown(flow.email);
+  const limit = useAuthLimit(form, "reset-password", flow.email);
+  const resendLimit = useAuthLimit(resend, "reset-code", flow.email);
   const [code, setCode] = useState("");
   const [message, setMessage] = useState(flow.notice);
   const busy = form.isPending || resend.isPending;
@@ -324,6 +371,7 @@ function ResetView({ flow }: { flow: Flow }) {
         className={FORM}
         onSubmit={(event) => {
           event.preventDefault();
+          if (limit.locked) return;
           resend.clearError();
           const fields = new FormData(event.currentTarget);
           const password = String(fields.get("password") || "");
@@ -364,17 +412,18 @@ function ResetView({ flow }: { flow: Flow }) {
           variant="light"
           color="primary"
           isLoading={resend.isPending}
-          isDisabled={busy || cooldown.secondsLeft > 0}
+          isDisabled={busy || resendLimit.locked}
           onPress={() => {
+            if (resendLimit.locked) return;
             form.clearError();
             void resend.submit({ email: flow.email }, (result) => {
-              cooldown.start();
+              resendLimit.start(RESEND_WAIT_SECONDS);
               setCode("");
               setMessage(result.message);
             });
           }}
         >
-          {cooldown.secondsLeft > 0 ? `Resend code in ${cooldown.secondsLeft}s` : "Send another code"}
+          {resendLimit.locked ? `Resend code in ${resendLimit.secondsLeft}s` : "Send another code"}
         </Button>
         <PasswordInput
           name="password"
@@ -398,9 +447,9 @@ function ResetView({ flow }: { flow: Flow }) {
           isDisabled={busy}
           onValueChange={() => form.clearError()}
         />
-        <AuthFeedback error={form.error || resend.error} message={message} />
-        <Button type="submit" color="secondary" isLoading={form.isPending} isDisabled={busy}>
-          Reset password
+        <AuthFeedback error={limit.error || resendLimit.error} message={message} />
+        <Button type="submit" color="secondary" isLoading={form.isPending} isDisabled={busy || limit.locked}>
+          {limit.locked ? `Try again in ${limit.secondsLeft}s` : "Reset password"}
         </Button>
         <button type="button" className={LINK} disabled={busy} onClick={() => flow.go("sign-in")}>
           Back to sign in

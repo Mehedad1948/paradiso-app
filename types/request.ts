@@ -8,6 +8,8 @@ export type RequestResult<T> = {
     /** Every message of a validation failure, before they are joined. */
     messages?: string[];
     fieldErrors?: Record<string, string>;
+    /** Seconds to wait before retrying, from a 429's Retry-After header. */
+    retryAfter?: number;
   };
   error?: string;
 };

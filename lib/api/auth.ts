@@ -4,6 +4,7 @@ import type {
   SignInInputs,
   RegisterInputs,
   VerifyEmailInputs,
+  ResendVerificationInputs,
   ForgotPasswordInputs,
   ResetPasswordInputs,
 } from "@/types/auth";
@@ -16,6 +17,7 @@ export const authApi = {
   signIn: (data: SignInInputs) => post("sign-in", data),
   register: (data: RegisterInputs) => post("register", data),
   verify: (data: VerifyEmailInputs) => post("verify", data),
+  resendVerification: (data: ResendVerificationInputs) => post("resend-verification", data),
   forgotPassword: (data: ForgotPasswordInputs) => post("forgot-password", data),
   resetPassword: (data: ResetPasswordInputs) => post("reset-password", data),
   refresh: () => post("refresh-token"),

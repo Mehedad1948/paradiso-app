@@ -8,7 +8,7 @@ vi.mock("next/headers", () => ({
   }),
 }));
 
-import { backendRequest } from "@/services/backend";
+import { backendRequest, retryAfterSeconds } from "@/services/backend";
 
 beforeEach(() => {
   process.env.BASE_API_URL = "https://backend.example.test/api";
@@ -75,6 +75,41 @@ describe("backend service transport", () => {
         messages: ["Invalid room", "Try again"],
       },
     });
+  });
+
+  it("sends X-Forwarded-For only when a client IP is given", async () => {
+    const fetcher = vi.fn().mockImplementation(async () => new Response("{}", {
+      status: 200, headers: { "content-type": "application/json" },
+    }));
+    vi.stubGlobal("fetch", fetcher);
+    const body = { email: "a@example.test" };
+    await backendRequest("/auth/resend-verification", "post", { body, withAuth: false, clientIp: "203.0.113.7" });
+    await backendRequest("/auth/resend-verification", "post", { body, withAuth: false });
+    const sent = (call: number) => new Headers((fetcher.mock.calls[call] as [URL, RequestInit])[1].headers);
+    expect(sent(0).get("x-forwarded-for")).toBe("203.0.113.7");
+    expect(sent(1).has("x-forwarded-for")).toBe(false);
+  });
+
+  it("surfaces Retry-After on a 429", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response(
+      JSON.stringify({ statusCode: 429, message: "Too many attempts. Try again in 30 seconds." }),
+      { status: 429, headers: { "content-type": "application/json", "retry-after": "30" } },
+    )));
+    const result = await backendRequest("/auth/sign-in", "post", {
+      body: { email: "a@example.test", password: "x" },
+      withAuth: false,
+    });
+    expect(result.response).toMatchObject({ ok: false, status: 429, retryAfter: 30 });
+  });
+
+  it("parses wait times defensively", () => {
+    expect(retryAfterSeconds("30")).toBe(30);
+    expect(retryAfterSeconds(null, "Too many attempts. Try again in 12 seconds.")).toBe(12);
+    expect(retryAfterSeconds("Wed, 21 Oct 2026 07:28:00 GMT", "Try again in 9 seconds")).toBe(9);
+    expect(retryAfterSeconds("999999")).toBe(3600);
+    expect(retryAfterSeconds("0")).toBeUndefined();
+    expect(retryAfterSeconds("-5")).toBeUndefined();
+    expect(retryAfterSeconds(null, "nothing useful")).toBeUndefined();
   });
 
   it("keeps multipart uploads as FormData without a JSON content type", async () => {

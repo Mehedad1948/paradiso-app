@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authApi } from "@/lib/api/auth";
 import { useAuthForm } from "@/hooks/auth/useAuthForm";
+import { useAuthLimit } from "@/hooks/auth/useAuthLimit";
 import { useAuthLocation } from "@/hooks/auth/useAuthLocation";
 import AuthFeedback from "@/components/auth/AuthFeedback";
 import PasswordInput from "@/components/auth/PasswordInput";
@@ -14,6 +15,7 @@ export default function SignInPage() {
   const location = useAuthLocation();
   const form = useAuthForm(authApi.signIn, true);
   const refresh = useAuthForm(authApi.refresh, true);
+  const limit = useAuthLimit(form, "sign-in", location.email);
   const attempted = useRef(false);
   const wantsRefresh = location.params.get("refresh") === "true";
   const { submit: refreshSession } = refresh;
@@ -46,7 +48,7 @@ export default function SignInPage() {
     <div className="h-full flex flex-col justify-center">
       <h1 className="text-3xl font-semibold">Sign in</h1>
       <AuthFeedback
-        error={form.error || refresh.error}
+        error={limit.error || refresh.error}
         message={
           refresh.isPending
             ? "Renewing your session…"
@@ -58,6 +60,7 @@ export default function SignInPage() {
         className="flex mt-8 flex-col gap-4"
         onSubmit={(event) => {
           event.preventDefault();
+          if (limit.locked) return;
           const fields = new FormData(event.currentTarget);
           void form.submit(
             {
@@ -105,9 +108,9 @@ export default function SignInPage() {
           type="submit"
           color="secondary"
           isLoading={pending}
-          isDisabled={pending}
+          isDisabled={pending || limit.locked}
         >
-          Sign in
+          {limit.locked ? `Try again in ${limit.secondsLeft}s` : "Sign in"}
         </Button>
         <Link
           href={location.href("register")}

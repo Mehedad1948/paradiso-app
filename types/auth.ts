@@ -3,6 +3,7 @@ import type { BackendRequestBody } from "./backend";
 export type SignInInputs = BackendRequestBody<"/auth/sign-in", "post">;
 export type RegisterInputs = BackendRequestBody<"/users", "post">;
 export type VerifyEmailInputs = BackendRequestBody<"/auth/verify-email", "post">;
+export type ResendVerificationInputs = BackendRequestBody<"/auth/resend-verification", "post">;
 export type ForgotPasswordInputs = BackendRequestBody<"/auth/forget-password", "post">;
 export type ResetPasswordInputs = BackendRequestBody<"/auth/reset-password", "post">;
 export type RefreshTokenInputs = BackendRequestBody<"/auth/refresh-tokens", "post">;
@@ -18,6 +19,7 @@ export type AuthOperation =
   | "sign-in"
   | "register"
   | "verify"
+  | "resend-verification"
   | "forgot-password"
   | "reset-password"
   | "refresh-token"

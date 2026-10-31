@@ -1,7 +1,11 @@
 "use client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { BffError } from "@/lib/api/client";
 import type { AuthResult } from "@/types/auth";
+
+/** Used when a 429 arrives without a usable Retry-After. */
+const DEFAULT_RETRY_AFTER = 60;
 
 export function useAuthForm<T>(
   operation: (data: T) => Promise<AuthResult>,
@@ -57,12 +61,19 @@ export function useAuthForm<T>(
     setValidationError(null);
     if (!busy.current) reset();
   }, [reset]);
+  const failure = mutation.error;
+  // A rate limit is not a wrong password or code, so callers get it apart from `error`.
+  const retryAfter =
+    failure instanceof BffError && failure.status === 429
+      ? failure.retryAfter || DEFAULT_RETRY_AFTER
+      : undefined;
   return {
     formRef,
     submit,
     clearError,
     setError: setValidationError,
-    error: validationError || mutation.error?.message,
+    error: validationError || failure?.message,
+    retryAfter,
     isPending: mutation.isPending,
     isSuccess: mutation.isSuccess,
   };

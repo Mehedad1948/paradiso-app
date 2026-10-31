@@ -5,6 +5,8 @@ export class BffError extends Error {
     message: string,
     public readonly status: number,
     public readonly fieldErrors?: Record<string, string>,
+    /** Seconds to wait before retrying; set on a 429. */
+    public readonly retryAfter?: number,
   ) {
     super(message);
     this.name = "BffError";
@@ -43,6 +45,14 @@ export async function apiRequest<T>(
   try {
     payload = await response.json();
   } catch {
+    // A platform-level limiter answers 429 without our JSON envelope.
+    if (response.status === 429)
+      throw new BffError(
+        "Too many attempts. Try again later.",
+        429,
+        undefined,
+        Number(response.headers.get("retry-after")) || undefined,
+      );
     throw new BffError(
       "The service returned an unexpected response. Please try again.",
       response.status || 502,
@@ -58,6 +68,7 @@ export async function apiRequest<T>(
       payload.response.message || payload.error || "Request failed",
       response.status,
       payload.response.fieldErrors,
+      payload.response.retryAfter,
     );
   }
   return payload.result as T;

@@ -1,21 +1,25 @@
 import type {
   ForgotPasswordInputs,
   RefreshTokenInputs,
+  ResendVerificationInputs,
   ResetPasswordInputs,
   SignInInputs,
   VerifyEmailInputs,
 } from "@/types/auth";
 import { backendRequest } from "../backend";
 
+// The backend rate-limits these public routes per client IP, so each takes the visitor's IP.
 const authServices = {
-  signIn: (body: SignInInputs) =>
-    backendRequest("/auth/sign-in", "post", { body, withAuth: false }),
-  verifyEmail: (body: VerifyEmailInputs) =>
-    backendRequest("/auth/verify-email", "post", { body, withAuth: false }),
-  forgotPassword: (body: ForgotPasswordInputs) =>
-    backendRequest("/auth/forget-password", "post", { body, withAuth: false }),
-  resetPassword: (body: ResetPasswordInputs) =>
-    backendRequest("/auth/reset-password", "post", { body, withAuth: false }),
+  signIn: (body: SignInInputs, clientIp?: string) =>
+    backendRequest("/auth/sign-in", "post", { body, withAuth: false, clientIp }),
+  verifyEmail: (body: VerifyEmailInputs, clientIp?: string) =>
+    backendRequest("/auth/verify-email", "post", { body, withAuth: false, clientIp }),
+  resendVerification: (body: ResendVerificationInputs, clientIp?: string) =>
+    backendRequest("/auth/resend-verification", "post", { body, withAuth: false, clientIp }),
+  forgotPassword: (body: ForgotPasswordInputs, clientIp?: string) =>
+    backendRequest("/auth/forget-password", "post", { body, withAuth: false, clientIp }),
+  resetPassword: (body: ResetPasswordInputs, clientIp?: string) =>
+    backendRequest("/auth/reset-password", "post", { body, withAuth: false, clientIp }),
   refreshToken: (body: RefreshTokenInputs) =>
     backendRequest("/auth/refresh-tokens", "post", { body, withAuth: false }),
 };

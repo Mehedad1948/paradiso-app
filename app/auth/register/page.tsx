@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authApi } from "@/lib/api/auth";
 import { useAuthForm } from "@/hooks/auth/useAuthForm";
+import { useAuthLimit } from "@/hooks/auth/useAuthLimit";
+import { RESEND_WAIT_SECONDS, startCooldown } from "@/hooks/auth/useCooldown";
 import { useAuthLocation } from "@/hooks/auth/useAuthLocation";
 import AuthFeedback from "@/components/auth/AuthFeedback";
 import PasswordInput from "@/components/auth/PasswordInput";
@@ -13,6 +15,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const location = useAuthLocation();
   const form = useAuthForm(authApi.register);
+  const limit = useAuthLimit(form, "register", location.email);
   return (
     <div className="h-full flex flex-col justify-center">
       <h1 className="text-3xl font-semibold">Create an account</h1>
@@ -21,6 +24,7 @@ export default function RegisterPage() {
         className="flex mt-8 flex-col gap-4"
         onSubmit={(event) => {
           event.preventDefault();
+          if (limit.locked) return;
           const fields = new FormData(event.currentTarget);
           const password = String(fields.get("password") || "");
           try {
@@ -38,13 +42,16 @@ export default function RegisterPage() {
               password,
               username: String(fields.get("username") || ""),
             },
-            () =>
+            () => {
+              // The backend already emailed a code, so "send another" starts on cooldown.
+              startCooldown("verify-resend", location.email, RESEND_WAIT_SECONDS);
               router.replace(
                 location.href("verify", {
                   status: "registered",
                   email: location.email.trim(),
                 }),
-              ),
+              );
+            },
           );
         }}
       >
@@ -96,14 +103,14 @@ export default function RegisterPage() {
           isDisabled={form.isPending}
           onValueChange={() => form.clearError()}
         />
-        <AuthFeedback error={form.error} />
+        <AuthFeedback error={limit.error} />
         <Button
           type="submit"
           color="secondary"
           isLoading={form.isPending}
-          isDisabled={form.isPending}
+          isDisabled={form.isPending || limit.locked}
         >
-          Create account
+          {limit.locked ? `Try again in ${limit.secondsLeft}s` : "Create account"}
         </Button>
         <Link
           href={location.href("sign-in")}

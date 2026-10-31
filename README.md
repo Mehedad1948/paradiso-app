@@ -35,7 +35,9 @@ Commit the snapshot and generated file together after a refresh. `api:refresh` r
 
 ## Authentication
 
-Auth pages use `hooks/auth/useAuthForm.ts` and `lib/api/auth.ts` to call the same-origin `POST /api/auth/[operation]` BFF. The BFF validates inputs, calls server-only services, and returns messages rather than tokens. Registration posts to backend `/users`; other backend routes are `/auth/sign-in`, `/auth/verify-email`, `/auth/forget-password`, `/auth/reset-password`, and `/auth/refresh-tokens`.
+Auth pages use `hooks/auth/useAuthForm.ts` and `lib/api/auth.ts` to call the same-origin `POST /api/auth/[operation]` BFF. The BFF validates inputs, calls server-only services, and returns messages rather than tokens. Registration posts to backend `/users`; other backend routes are `/auth/sign-in`, `/auth/verify-email`, `/auth/resend-verification`, `/auth/forget-password`, `/auth/reset-password`, and `/auth/refresh-tokens`.
+
+The backend rate-limits the public auth routes (429 with `Retry-After`). Because the BFF makes those calls, it forwards the visitor's IP as `X-Forwarded-For` (`lib/bff/client-ip.ts`, trusted on Vercel only). A 429 is surfaced as `retryAfter` and handled by `hooks/auth/useAuthLimit.ts`: the submit button stays disabled for that long, the deadline survives reloads, and nothing is retried automatically.
 
 Protected navigation preserves the requested path and query string. Expired access tokens trigger one refresh attempt from the sign-in page using the HttpOnly refresh cookie; the backend validates refresh tokens and rotates both cookies. Invalid refresh credentials clear the session; transient failures leave the form usable. The legacy refresh GET route only navigates to sign-in; session changes require POST. Return URLs reject external destinations and auth/API loops.
 

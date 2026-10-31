@@ -9,8 +9,8 @@ const usersServices = {
     backendRequest("/users/me", "patch", { body }),
   genres: (signal?: AbortSignal) =>
     backendRequest("/genres", "get", { signal }),
-  register: (body: RegisterInputs) =>
-    backendRequest("/users", "post", { body, withAuth: false }),
+  register: (body: RegisterInputs, clientIp?: string) =>
+    backendRequest("/users", "post", { body, withAuth: false, clientIp }),
 };
 
 export default usersServices;
