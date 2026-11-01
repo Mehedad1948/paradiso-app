@@ -243,6 +243,52 @@
   filter: drop-shadow(0 0 1.5px rgb(192 132 252 / 45%));
 }
 
+/* Room table: ratings on films I have not rated stay masked until revealed.
+   Pure CSS on the wrapper's data-reveal, so toggling never re-renders cells.
+   Masked cells carry only data-rate; the digits are painted via ::before. */
+.rate-mask::before { content: attr(data-rate); }
+.rating-table[data-reveal="false"] .rating-row[data-masked="true"] { background: none; }
+.rating-table[data-reveal="false"] .rating-row[data-masked="true"] > td:first-child { box-shadow: none; }
+.rating-table[data-reveal="false"] .rate-veil {
+  display: inline-block;
+  filter: blur(6px);
+  opacity: 0.5;
+  pointer-events: none;
+  user-select: none;
+}
+/* Specificity ties with the light-mode gold pill rules above; this block wins by coming later. */
+:root .rating-table[data-reveal="false"] .rate-mask[data-rate] {
+  position: relative;
+  display: inline-flex;
+  min-width: 3rem;
+  justify-content: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px dashed color-mix(in srgb, currentColor 40%, transparent);
+  color: hsl(var(--heroui-default-500));
+  box-shadow: none;
+  font-weight: 700;
+  background: repeating-linear-gradient(
+    135deg,
+    color-mix(in srgb, currentColor 16%, transparent) 0 6px,
+    transparent 6px 12px
+  );
+  background-size: 200% 100%;
+  user-select: none;
+}
+:root .rating-table[data-reveal="false"] .rate-mask[data-rate]::before { content: "?"; }
+.rating-table[data-reveal="false"] .rate-mask .rating-pill-sparkles { display: none; }
+/* Idle cost is zero: the barber-pole sweep only runs while hovering a mask. */
+.rating-table[data-reveal="false"] .rate-mask[data-rate]:hover {
+  animation: rate-mask-sweep 0.9s linear infinite;
+}
+@keyframes rate-mask-sweep {
+  to { background-position: 100% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rating-table[data-reveal="false"] .rate-mask[data-rate]:hover { animation: none; }
+}
+
 /* Room nudge: a soft accent wash from the left edge, eased in once. */
 .unrated-banner {
   background-image: linear-gradient(

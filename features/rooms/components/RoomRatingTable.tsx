@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, type CSSProperties } from "react";
+import { memo, useMemo, useState, type CSSProperties } from "react";
 import type { MovieWithRatings } from "@/types";
 import type { User } from "@/types/user";
 import type { Room, RoomRatingFilters } from "@/types/rooms";
@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@heroui/table";
-import { PenNewSquareIcon, SortFromBottomToTopIcon, SortFromTopToBottomIcon, SortVerticalIcon, StarIcon, TrashBinMinimalisticIcon, UsersGroupTwoRoundedIcon } from "@solar-icons/react/linear";
+import { EyeClosedIcon, EyeIcon, PenNewSquareIcon, SortFromBottomToTopIcon, SortFromTopToBottomIcon, SortVerticalIcon, StarIcon, TrashBinMinimalisticIcon, UsersGroupTwoRoundedIcon } from "@solar-icons/react/linear";
 import UserAvatar from "@/components/ui/UserAvatar";
 import MoviePoster from "./MoviePoster";
 import MovieLink from "@/features/movies/MovieLink";
@@ -22,12 +22,14 @@ import ControversyCell from "./ControversyCell";
 // Positions and timing live in CSS (nth-child); this only sets the count.
 const PILL_SPARKLES = Array.from({ length: 6 });
 /** Row tint keyed to the average: red through green, gold for 9 and up. */
-function ratingTint(average: number | null) {
+function ratingTint(average: number | null, masked: boolean) {
   if (average == null) return {};
   const rate = Number(average);
   return {
     className: "rating-row",
     "data-tier": rate >= 9 ? "gold" : undefined,
+    // The tint would give the average away, so CSS drops it until revealed.
+    "data-masked": masked ? "true" : undefined,
     style: { "--row-hue": ratingHue(rate) } as CSSProperties,
   };
 }
@@ -96,20 +98,14 @@ function SortButton({
     </Button>
   );
 }
-export default function RoomRatingTable({
-  result,
-  room,
-  user,
-  isMember,
-  filters,
-  disabled,
-  onSort,
-  onSortAverage,
-  onSortControversy,
-  onVote,
-  onDelete,
-  onEdit,
-}: {
+/** A roommate's rating. Masked, only a placeholder is painted; CSS swaps in the number on reveal. */
+function RateValue({ rate, masked }: { rate?: number; masked: boolean }) {
+  if (rate === undefined) return "Not Voted";
+  if (!masked) return rate;
+  return <span className="rate-mask" data-rate={rate} />;
+}
+
+type RoomRatingTableProps = {
   result: PaginatedResponse<MovieWithRatings>;
   room: Room;
   user?: User;
@@ -123,7 +119,59 @@ export default function RoomRatingTable({
   onVote: (movieId: string) => void;
   onDelete: (movieId: string) => void;
   onEdit: (movieId: string) => void;
-}) {
+};
+
+/**
+ * Ratings on films the member has not rated yet stay masked (no spoilers) until
+ * they flip the toggle. The mask is pure CSS keyed on `data-reveal`, so the
+ * toggle re-renders only this wrapper; the memoised grid and its cells are
+ * untouched.
+ */
+export default function RoomRatingTable(props: RoomRatingTableProps) {
+  const [revealed, setRevealed] = useState(false);
+  const { result, isMember } = props;
+  const hasMasked = useMemo(
+    () => isMember && result.data.some((movie) => movie.isWatchedTogether && !movie.hasVoted && movie.ratings.length > 0),
+    [result.data, isMember],
+  );
+  return (
+    <div className="rating-table" data-reveal={revealed}>
+      {hasMasked && (
+        <div className="mb-2 flex justify-end">
+          <button
+            type="button"
+            aria-pressed={revealed}
+            onClick={() => setRevealed((value) => !value)}
+            className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-line bg-surface px-3 text-xs font-semibold text-muted transition-colors hover:border-ink/30 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
+          >
+            {revealed ? (
+              <EyeIcon size={14} aria-hidden="true" />
+            ) : (
+              <EyeClosedIcon size={14} aria-hidden="true" />
+            )}
+            {revealed ? "Hide unrated ratings" : "Show unrated ratings"}
+          </button>
+        </div>
+      )}
+      <RatingGrid {...props} />
+    </div>
+  );
+}
+
+const RatingGrid = memo(function RatingGrid({
+  result,
+  room,
+  user,
+  isMember,
+  filters,
+  disabled,
+  onSort,
+  onSortAverage,
+  onSortControversy,
+  onVote,
+  onDelete,
+  onEdit,
+}: RoomRatingTableProps) {
   const columns = useMemo(
     () => [
       {
@@ -166,6 +214,8 @@ export default function RoomRatingTable({
           movie.ratings.map((rating) => [String(rating.user.id), rating.rate]),
         ),
         awaitingMe: isMember && movie.isWatchedTogether && !movie.hasVoted,
+        // Watched together, someone else rated it and I have not: hide until revealed.
+        masked: isMember && movie.isWatchedTogether && !movie.hasVoted && movie.ratings.length > 0,
       })),
     [result.data, isMember],
   );
@@ -231,7 +281,7 @@ export default function RoomRatingTable({
         }
       >
         {(movie) => (
-          <TableRow key={movie.id} {...ratingTint(movie.averageRate)}>
+          <TableRow key={movie.id} {...ratingTint(movie.averageRate, movie.masked)}>
             {(columnKey) => (
               <TableCell>
                 {columnKey === "title" ? (
@@ -278,8 +328,11 @@ export default function RoomRatingTable({
                   </div>
                 ) : columnKey === "average" ? (
                   movie.averageRate != null ? (
-                    <span className="rating-pill">
-                      {Number(movie.averageRate).toFixed(1)}
+                    <span
+                      className={`rating-pill${movie.masked ? " rate-mask" : ""}`}
+                      data-rate={movie.masked ? Number(movie.averageRate).toFixed(1) : undefined}
+                    >
+                      {!movie.masked && Number(movie.averageRate).toFixed(1)}
                       {Number(movie.averageRate) >= 9 && (
                         <span className="rating-pill-sparkles" aria-hidden="true">
                           {PILL_SPARKLES.map((_, index) => (
@@ -292,7 +345,9 @@ export default function RoomRatingTable({
                     "-"
                   )
                 ) : columnKey === "controversy" ? (
-                  <ControversyCell variance={movie.rateVariance ?? null} />
+                  <span className={movie.masked ? "rate-veil" : undefined}>
+                    <ControversyCell variance={movie.rateVariance ?? null} />
+                  </span>
                 ) : columnKey === "action" ? (
                   <div className="flex items-center gap-3">
                     <Button
@@ -347,7 +402,7 @@ export default function RoomRatingTable({
                       )}
                   </div>
                 ) : (
-                  (movie.rates.get(String(columnKey)) ?? "Not Voted")
+                  <RateValue rate={movie.rates.get(String(columnKey))} masked={movie.masked} />
                 )}
               </TableCell>
             )}
@@ -356,4 +411,4 @@ export default function RoomRatingTable({
       </TableBody>
     </Table>
   );
-}
+});
