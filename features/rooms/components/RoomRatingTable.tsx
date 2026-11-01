@@ -99,8 +99,8 @@ function SortButton({
   );
 }
 /** A roommate's rating. Masked, only a placeholder is painted; CSS swaps in the number on reveal. */
-function RateValue({ rate, masked }: { rate?: number; masked: boolean }) {
-  if (rate === undefined) return "Not Voted";
+function RateValue({ rate, masked }: { rate?: number | null; masked: boolean }) {
+  if (rate == null) return "Not Voted";
   if (!masked) return rate;
   return <span className="rate-mask" data-rate={rate} />;
 }
