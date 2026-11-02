@@ -1,5 +1,5 @@
 "use client";
-import { memo, useMemo, useState, type CSSProperties } from "react";
+import { memo, useMemo, type CSSProperties } from "react";
 import type { MovieWithRatings } from "@/types";
 import type { User } from "@/types/user";
 import type { Room, RoomRatingFilters } from "@/types/rooms";
@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@heroui/table";
-import { EyeClosedIcon, EyeIcon, PenNewSquareIcon, SortFromBottomToTopIcon, SortFromTopToBottomIcon, SortVerticalIcon, StarIcon, TrashBinMinimalisticIcon, UsersGroupTwoRoundedIcon } from "@solar-icons/react/linear";
+import { PenNewSquareIcon, SortFromBottomToTopIcon, SortFromTopToBottomIcon, SortVerticalIcon, StarIcon, TrashBinMinimalisticIcon, UsersGroupTwoRoundedIcon } from "@solar-icons/react/linear";
 import UserAvatar from "@/components/ui/UserAvatar";
 import MoviePoster from "./MoviePoster";
 import MovieLink from "@/features/movies/MovieLink";
@@ -121,44 +121,7 @@ type RoomRatingTableProps = {
   onEdit: (movieId: string) => void;
 };
 
-/**
- * Ratings on films the member has not rated yet stay masked (no spoilers) until
- * they flip the toggle. The mask is pure CSS keyed on `data-reveal`, so the
- * toggle re-renders only this wrapper; the memoised grid and its cells are
- * untouched.
- */
-export default function RoomRatingTable(props: RoomRatingTableProps) {
-  const [revealed, setRevealed] = useState(false);
-  const { result, isMember } = props;
-  const hasMasked = useMemo(
-    () => isMember && result.data.some((movie) => movie.isWatchedTogether && !movie.hasVoted && movie.ratings.length > 0),
-    [result.data, isMember],
-  );
-  return (
-    <div className="rating-table" data-reveal={revealed}>
-      {hasMasked && (
-        <div className="mb-2 flex justify-end">
-          <button
-            type="button"
-            aria-pressed={revealed}
-            onClick={() => setRevealed((value) => !value)}
-            className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-line bg-surface px-3 text-xs font-semibold text-muted transition-colors hover:border-ink/30 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
-          >
-            {revealed ? (
-              <EyeIcon size={14} aria-hidden="true" />
-            ) : (
-              <EyeClosedIcon size={14} aria-hidden="true" />
-            )}
-            {revealed ? "Hide unrated ratings" : "Show unrated ratings"}
-          </button>
-        </div>
-      )}
-      <RatingGrid {...props} />
-    </div>
-  );
-}
-
-const RatingGrid = memo(function RatingGrid({
+export default memo(function RoomRatingTable({
   result,
   room,
   user,

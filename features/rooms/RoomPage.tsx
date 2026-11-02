@@ -1,7 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import RoomRatingTableSkeleton from "./components/RoomRatingTableSkeleton";
 import { Button } from "@heroui/button";
 import { useMe } from "@/hooks/queries/useMe";
@@ -19,6 +19,7 @@ import { useRoomDialog } from "./hooks/useRoomDialog";
 import RoomToolbar from "./components/RoomToolbar";
 import RoomRatingTable from "./components/RoomRatingTable";
 import RoomQuickFilters from "./components/RoomQuickFilters";
+import { RatingRevealScope } from "./components/RatingReveal";
 import UnratedBanner from "./components/UnratedBanner";
 import RoomMembers from "./components/RoomMembers";
 import RoomMenu from "./components/RoomMenu";
@@ -86,6 +87,7 @@ function RoomPage({ roomId }: { roomId: string }) {
     sortByUser,
     sortByAverage,
     sortByControversy,
+    sortByAdded,
     setQuickFilters,
   } = useRoomUrl();
   const { dialog, open, close } = useRoomDialog();
@@ -120,6 +122,15 @@ function RoomPage({ roomId }: { roomId: string }) {
   const chatOpen = isMember && dialog === "chat";
   const unread = useChatUnread(roomId, { enabled: isMember, live: chatOpen });
   const summary = useRoomRatingSummary(roomId, isMember);
+  // Watched-together films that others rated and I have not stay masked; the toggle is only worth showing then.
+  const hasMasked = useMemo(
+    () =>
+      isMember &&
+      !!ratings.data?.data.some(
+        (movie) => movie.isWatchedTogether && !movie.hasVoted && movie.ratings.length > 0,
+      ),
+    [ratings.data, isMember],
+  );
   const watchedTogether = filters.isWatchTogether === true;
   const unrated = filters.hasVoted === false;
   const showInWatchlist = useCallback(
@@ -238,12 +249,19 @@ function RoomPage({ roomId }: { roomId: string }) {
         onAddMovie={() => open("add-movie")}
         disabled={disabled}
       />
+      <RatingRevealScope>
       {room.data && (
         <RoomQuickFilters
           watchedTogether={watchedTogether}
           unrated={unrated}
           unratedCount={summary.data?.unrated}
           showUnrated={isMember}
+          showReveal={hasMasked}
+          addedSort={{
+            active: filters.sortBy === "addedAt",
+            ascending: filters.sortOrder === "asc",
+          }}
+          onSortAdded={sortByAdded}
           disabled={disabled}
           onChange={setQuickFilters}
         />
@@ -285,6 +303,7 @@ function RoomPage({ roomId }: { roomId: string }) {
             />          </>
         )
       )}
+      </RatingRevealScope>
       {room.data && chatOpen && me.data && (
         <ChatSidebar
           room={room.data}

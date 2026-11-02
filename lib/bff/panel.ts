@@ -505,7 +505,8 @@ export async function handlePanelRequest(request: Request, path: string[]) {
               sortBy &&
               sortBy !== "rate" &&
               sortBy !== "userRate" &&
-              sortBy !== "controversy"
+              sortBy !== "controversy" &&
+              sortBy !== "addedAt"
             )
               throw new InputError("Invalid sortBy");
             if (sortOrder && sortOrder !== "asc" && sortOrder !== "desc")
@@ -526,7 +527,8 @@ export async function handlePanelRequest(request: Request, path: string[]) {
                   sortBy:
                     sortBy === "rate" ||
                     sortBy === "userRate" ||
-                    sortBy === "controversy"
+                    sortBy === "controversy" ||
+                    sortBy === "addedAt"
                       ? sortBy
                       : undefined,
                   sortOrder:

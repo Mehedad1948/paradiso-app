@@ -73,6 +73,20 @@ export function useRoomUrl() {
       }),
     [update, filters.sortBy, filters.sortOrder],
   );
+  // Newest first on the first press, then it flips like the other sorts.
+  const sortByAdded = useCallback(
+    () =>
+      update({
+        sortBy: "addedAt",
+        sortByUserId: null,
+        page: null,
+        sortOrder:
+          filters.sortBy === "addedAt" && filters.sortOrder !== "asc"
+            ? "asc"
+            : "desc",
+      }),
+    [update, filters.sortBy, filters.sortOrder],
+  );
   // Both are on/off: "off" drops the param rather than asking for the opposite set.
   const setQuickFilters = useCallback(
     (patch: { watchedTogether?: boolean; unrated?: boolean }) =>
@@ -96,6 +110,7 @@ export function useRoomUrl() {
     sortByUser,
     sortByAverage,
     sortByControversy,
+    sortByAdded,
     setQuickFilters,
   };
 }
