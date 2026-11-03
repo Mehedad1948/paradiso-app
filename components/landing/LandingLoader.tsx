@@ -10,14 +10,14 @@ import { fontIntertitle, fontLogo } from "@/config/fonts";
 import styles from "./LandingLoader.module.css";
 
 // If the scenes never report in (slow network, no WebGL), carry on anyway.
-const MAX_WAIT = 4000;
+const MAX_WAIT = 8000;
 // Even when everything is instant, show the reel long enough to be read.
-const MIN_SHOW = 800;
+const MIN_SHOW = 1400;
 // "Showtime" holds before the screen dissolves.
-const HOLD = 450;
+const HOLD = 1000;
 // The page starts its entrance while the screen is still dissolving.
 const REVEAL_LEAD = 200;
-const CLEAR = 600;
+const CLEAR = 1000;
 
 type Phase = "loading" | "showtime" | "open" | "gone";
 

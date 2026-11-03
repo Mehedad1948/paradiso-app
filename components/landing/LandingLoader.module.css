@@ -12,7 +12,7 @@
   place-items: center;
   background: #0c0b0a;
   color: var(--paper);
-  transition: opacity 0.55s ease;
+  transition: opacity 0.9s ease;
   /* Without JS the screen still gets out of the way. */
   animation: failsafe 0.01s linear 14s forwards;
 }
@@ -40,7 +40,7 @@
   padding: 0 7vw;
   text-align: center;
   font-family: var(--font-intertitle), Georgia, "Times New Roman", serif;
-  transition: opacity 0.4s ease, transform 0.55s ease;
+  transition: opacity 0.5s ease, transform 0.8s ease;
   animation: flicker 5s steps(1) infinite;
 }
 
@@ -121,14 +121,14 @@
 }
 .captions > span {
   grid-area: 1 / 1;
-  transition: opacity 0.35s ease, transform 0.35s ease;
+  transition: opacity 0.9s ease, transform 0.9s ease;
 }
 .wait { color: var(--paper-soft); }
 .show { opacity: 0; transform: translateY(6px); }
 
 /* Showtime: the rule completes, the caption turns over and holds. */
 .showtime .rule::before,
-.showtime .rule::after { animation: none; transform: scaleX(1); transition: transform 0.4s ease; }
+.showtime .rule::after { animation: none; transform: scaleX(1); transition: transform 0.9s ease; }
 .showtime .wait { opacity: 0; transform: translateY(-6px); }
 .showtime .show { opacity: 1; transform: none; }
 
