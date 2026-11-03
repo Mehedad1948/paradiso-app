@@ -416,6 +416,9 @@ const CircularCarousel = ({
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const wakeRef = useRef<() => void>(() => {});
   const measureRef = useRef<() => void>(() => {});
+  // Set once the ResizeObserver has delivered the first size; measuring any
+  // earlier (during mount or hydration) forces a synchronous layout.
+  const sizedRef = useRef(false);
   const activeRef = useRef(0);
   const [active, setActive] = useState(0);
   const [ready, setReady] = useState(false);
@@ -788,7 +791,10 @@ const CircularCarousel = ({
       } else wake();
     };
 
+    // Fires after layout and before the first paint, so the stage is fitted
+    // without forcing a layout of its own.
     const resize = new ResizeObserver(() => {
+      sizedRef.current = true;
       measure();
       wake();
     });
@@ -826,9 +832,7 @@ const CircularCarousel = ({
     root.addEventListener('wheel', onWheel, { passive: false });
     document.addEventListener('visibilitychange', onVisibility);
 
-    measure();
     render(settingsRef.current, performance.now());
-    wake();
 
     return () => {
       cancelAnimationFrame(raf);
@@ -841,6 +845,7 @@ const CircularCarousel = ({
   }, []);
 
   useLayoutEffect(() => {
+    if (!sizedRef.current) return;
     measureRef.current();
     wakeRef.current();
   }, [radius, cardW, cardH, tiltValue, perspective, preset, captions, count]);

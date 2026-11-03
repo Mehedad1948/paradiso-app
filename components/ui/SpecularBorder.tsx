@@ -312,6 +312,12 @@ export default function SpecularBorder({
     let raf = 0;
     let last = 0;
     let visible = true;
+    // Colors are read lazily: during mount the styles are dirty, so reading
+    // them would force a style recalc in the middle of hydration.
+    let colorsStale = true;
+    // Nothing draws before the first ResizeObserver size, so the first frame
+    // never reads layout or styles mid-hydration either.
+    let sized = false;
 
     const toRgb = (value: string): number[] => {
       const cached = cache.get(value);
@@ -332,6 +338,7 @@ export default function SpecularBorder({
     // Colors are resolved through the DOM so CSS variables (and theme
     // switches) work; canvas fillStyle alone cannot read var().
     const readColors = () => {
+      colorsStale = false;
       if (lineRef.current) colors.line = toRgb(getComputedStyle(lineRef.current).color);
       if (baseRef.current) colors.base = toRgb(getComputedStyle(baseRef.current).color);
     };
@@ -395,6 +402,7 @@ export default function SpecularBorder({
       raf = 0;
       if (!visible) return;
       const s = settingsRef.current;
+      if (colorsStale) readColors();
       const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60;
       last = now;
       const target = aim(s);
@@ -425,10 +433,14 @@ export default function SpecularBorder({
     };
 
     const wake = () => {
-      if (!raf && visible) raf = requestAnimationFrame(frame);
+      if (!raf && visible && sized) raf = requestAnimationFrame(frame);
     };
 
+    // Runs from the ResizeObserver, after layout, so reading sizes and
+    // computed colors here is free.
     const measure = (entry?: ResizeObserverEntry) => {
+      sized = true;
+      if (colorsStale) readColors();
       const box = entry?.borderBoxSize?.[0];
       view.width = Math.max(1, box ? box.inlineSize : root.offsetWidth);
       view.height = Math.max(1, box ? box.blockSize : root.offsetHeight);
@@ -470,7 +482,7 @@ export default function SpecularBorder({
       wake();
     };
 
-    readColors();
+    // The observer's first callback delivers the initial size.
     const resizeObserver = new ResizeObserver((entries) => measure(entries[entries.length - 1]));
     resizeObserver.observe(root);
     const intersection = new IntersectionObserver((entries) => {
@@ -492,9 +504,8 @@ export default function SpecularBorder({
     window.addEventListener("pointercancel", onPointerEnd, { passive: true });
     document.documentElement.addEventListener("pointerleave", onPointerLeave);
     root.addEventListener("pointerdown", onPointerDown);
-    measure();
     wakeRef.current = () => {
-      readColors();
+      colorsStale = true;
       wake();
     };
 

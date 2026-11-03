@@ -245,12 +245,26 @@ const halftoneFragment = /* glsl */ `
   }
 `;
 
-function loadImage(src: string) {
-  const img = new window.Image();
-  img.decoding = "async";
-  img.src = src;
-  return img.decode().then(() => img);
+// Canvas ignores `img.decode()` and decodes again, synchronously, on first
+// draw. A bitmap made from the raw bytes is decoded off the main thread and
+// draws as a plain blit.
+async function loadImage(src: string) {
+  const response = await fetch(src);
+  if (!response.ok) throw new Error(`Failed to load ${src}`);
+  return createImageBitmap(await response.blob());
 }
+
+type Pause = () => Promise<void>;
+const OVERTAKEN = Symbol("overtaken");
+
+// Hands the main thread back between paint steps so the first paint is a run
+// of short tasks rather than one long one.
+const yieldToMain: Pause = () => {
+  const scheduler = (globalThis as { scheduler?: { yield?: () => Promise<void> } }).scheduler;
+  return scheduler?.yield
+    ? scheduler.yield()
+    : new Promise((resolve) => setTimeout(resolve, 0));
+};
 
 function canvasTexture(canvas: HTMLCanvasElement) {
   const texture = new THREE.CanvasTexture(canvas);
@@ -328,15 +342,14 @@ function fillGlyph(ctx: CanvasRenderingContext2D, glyph: Glyph, stroke = 0) {
 
 function drawCover(
   ctx: CanvasRenderingContext2D,
-  img: HTMLImageElement,
+  img: ImageBitmap,
   rect: DOMRect,
   originX: number,
   originY: number,
 ) {
-  const scale =
-    Math.max(rect.width / img.naturalWidth, rect.height / img.naturalHeight) * POSTER_ZOOM;
-  const width = img.naturalWidth * scale;
-  const height = img.naturalHeight * scale;
+  const scale = Math.max(rect.width / img.width, rect.height / img.height) * POSTER_ZOOM;
+  const width = img.width * scale;
+  const height = img.height * scale;
   ctx.drawImage(
     img,
     rect.x + (rect.width - width) * originX,
@@ -362,6 +375,7 @@ export async function createWordmarkScene(
   // A canvas has a single WebGL context. If the caller gave up while assets
   // loaded (React runs effects twice in development), stop before a second
   // renderer can share that context with the one that replaces it.
+  if (signal.aborted) images.forEach((image) => image.close());
   signal.throwIfAborted();
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true });
@@ -451,7 +465,7 @@ export async function createWordmarkScene(
 
   // Letters are painted from the live DOM glyphs, so the canvas inherits the
   // real layout, fonts, tilt and theme colours (including the accent "I").
-  const paintInk = (glyphs: Glyph[]) => {
+  const paintInk = async (glyphs: Glyph[], pause?: Pause) => {
     const mask = context(maskCanvas);
     mask.setTransform(1, 0, 0, 1, 0, 0);
     mask.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
@@ -460,6 +474,7 @@ export async function createWordmarkScene(
       mask.fillStyle = glyph.color;
       fillGlyph(mask, glyph);
     }
+    if (pause) await pause();
 
     const goo = context(gooCanvas);
     goo.setTransform(1, 0, 0, 1, 0, 0);
@@ -472,24 +487,63 @@ export async function createWordmarkScene(
     textures[1].needsUpdate = true;
   };
 
+  // A glyph's footprint in canvas pixels: its box and cell, padded for the
+  // fattening stroke and italic overhang, then tilted and clamped.
+  const canvasBounds = (glyph: Glyph) => {
+    const { box, cell } = glyph;
+    const pad = glyph.fontSize * 0.5;
+    const left = Math.min(box.left, cell.left) - pad;
+    const top = Math.min(box.top, cell.top) - pad;
+    const right = Math.max(box.right, cell.right) + pad;
+    const bottom = Math.max(box.bottom, cell.bottom) + pad;
+    const matrix = toCanvas(glyph);
+    const corners = [
+      [left, top],
+      [right, top],
+      [left, bottom],
+      [right, bottom],
+    ].map(([x, y]) => matrix.transformPoint(new DOMPoint(x, y)));
+    const xs = corners.map((point) => point.x);
+    const ys = corners.map((point) => point.y);
+    const x = Math.max(0, Math.floor(Math.min(...xs)));
+    const y = Math.max(0, Math.floor(Math.min(...ys)));
+    return {
+      x,
+      y,
+      width: Math.max(0, Math.min(scratchCanvas.width, Math.ceil(Math.max(...xs))) - x),
+      height: Math.max(0, Math.min(scratchCanvas.height, Math.ceil(Math.max(...ys))) - y),
+    };
+  };
+
   // Each poster is cut to a fattened copy of its own letter, so overlapping
   // letters keep their own film and melted ink still has art beneath it.
-  const paintArt = (glyphs: Glyph[]) => {
+  // `source-in` is unbounded (it touches the whole canvas), so every letter is
+  // clipped to its own footprint and only that region is copied across.
+  const paintArt = async (glyphs: Glyph[], pause?: Pause) => {
     const art = context(artCanvas);
     const scratch = context(scratchCanvas);
     art.setTransform(1, 0, 0, 1, 0, 0);
     art.clearRect(0, 0, artCanvas.width, artCanvas.height);
-    glyphs.forEach((glyph, index) => {
+    for (let index = 0; index < glyphs.length; index++) {
+      const glyph = glyphs[index];
+      if (pause) await pause();
+      const { x, y, width, height } = canvasBounds(glyph);
+      if (!width || !height) continue;
+      scratch.save();
       scratch.setTransform(1, 0, 0, 1, 0, 0);
       scratch.globalCompositeOperation = "source-over";
-      scratch.clearRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+      scratch.clearRect(x, y, width, height);
+      scratch.beginPath();
+      scratch.rect(x, y, width, height);
+      scratch.clip();
       scratch.setTransform(toCanvas(glyph));
       scratch.fillStyle = scratch.strokeStyle = "#000";
       fillGlyph(scratch, glyph, glyph.fontSize * 0.5);
       scratch.globalCompositeOperation = "source-in";
       drawCover(scratch, images[index], glyph.cell, parseFloat(letters[index].position) / 100, POSTER_Y);
-      art.drawImage(scratchCanvas, 0, 0);
-    });
+      scratch.restore();
+      art.drawImage(scratchCanvas, x, y, width, height, x, y, width, height);
+    }
     textures[2].needsUpdate = true;
   };
 
@@ -530,6 +584,7 @@ export async function createWordmarkScene(
   let lastActive = startTime;
   let lastTime = startTime;
   let visible = false;
+  let painted = false;
   let frame = 0;
 
   // A stamp: each letter drops in oversized and turned, presses slightly
@@ -598,24 +653,47 @@ export async function createWordmarkScene(
 
   const wake = () => {
     lastActive = performance.now();
-    if (!frame && visible) {
+    if (!frame && visible && painted) {
       lastTime = performance.now();
       frame = requestAnimationFrame(tick);
     }
   };
 
-  const repaint = () => {
-    const glyphs = glyphElements.map(measureGlyph);
-    paintInk(glyphs);
-    paintArt(glyphs);
-    paintIds(glyphs);
-    render(performance.now());
+  // With `pause`, every step yields first and the paint gives up once a
+  // newer one (a resize mid-way) or disposal has overtaken it. Without it the
+  // paint finishes within the current task.
+  let paintGeneration = 0;
+  const repaint = async (pause?: Pause) => {
+    const generation = ++paintGeneration;
+    const step =
+      pause &&
+      (async () => {
+        await pause();
+        if (generation !== paintGeneration || signal.aborted) throw OVERTAKEN;
+      });
+    try {
+      const glyphs = glyphElements.map(measureGlyph);
+      await paintInk(glyphs, step);
+      await paintArt(glyphs, step);
+      await step?.();
+      paintIds(glyphs);
+      render(performance.now());
+    } catch (error) {
+      if (error !== OVERTAKEN) throw error;
+    }
   };
+  const repaintNow = () => void repaint();
 
-  const resize = () => {
+  // The observer's first callback repeats the initial resize; skip it, since
+  // a repaint rebuilds every layer and texture.
+  let measured = "";
+  const resize = async (pause?: Pause) => {
     const { clientWidth, clientHeight } = container;
     if (!clientWidth || !clientHeight) return;
     const dpr = Math.min(window.devicePixelRatio, 2);
+    const key = `${clientWidth}x${clientHeight}@${dpr}`;
+    if (key === measured) return;
+    measured = key;
     const bleed = Math.round(Math.min(clientHeight * 0.12, 72));
     const width = clientWidth + bleed * 2;
     const height = clientHeight + bleed * 2;
@@ -646,7 +724,7 @@ export async function createWordmarkScene(
     uniforms.uCell.value = Math.min(Math.max(clientWidth / 120, 4.5), 9);
     uniforms.uLens.value = clientHeight * 0.24;
     trailMaterial.uniforms.uAspect.value = width / height;
-    repaint();
+    await repaint(pause);
   };
 
   const toUv = (event: PointerEvent) => {
@@ -680,7 +758,7 @@ export async function createWordmarkScene(
     wake();
   }
 
-  const resizeObserver = new ResizeObserver(resize);
+  const resizeObserver = new ResizeObserver(() => void resize());
   resizeObserver.observe(container);
 
   const intersectionObserver = new IntersectionObserver(([entry]) => {
@@ -701,12 +779,24 @@ export async function createWordmarkScene(
   };
 
   // Theme switches and late font swaps change only how the letters paint.
-  const themeObserver = new MutationObserver(repaint);
+  // The loading screen also toggles `overflow` on <html>; that is not a theme
+  // change, so only repaint when the theme's own markers move.
+  const themeKey = () => {
+    const root = document.documentElement;
+    return `${root.className}|${root.dataset.theme ?? ""}|${root.style.colorScheme}`;
+  };
+  let theme = themeKey();
+  const themeObserver = new MutationObserver(() => {
+    const next = themeKey();
+    if (next === theme) return;
+    theme = next;
+    repaintNow();
+  });
   themeObserver.observe(document.documentElement, {
     attributes: true,
     attributeFilter: ["class", "style", "data-theme"],
   });
-  document.fonts.addEventListener("loadingdone", repaint);
+  document.fonts.addEventListener("loadingdone", repaintNow);
 
   container.addEventListener("pointerenter", onMove);
   container.addEventListener("pointermove", onMove);
@@ -714,7 +804,11 @@ export async function createWordmarkScene(
   container.addEventListener("pointercancel", onLeave);
   container.addEventListener("pointerdown", onDown);
 
-  resize();
+  // The first paint is the heavy one; it runs in short slices so the page
+  // stays responsive, and the scene only starts drawing once it is complete.
+  await resize(yieldToMain);
+  painted = true;
+  wake();
   const stopWaitingForReveal = onLandingRevealed(beginEntrance);
 
   return {
@@ -725,7 +819,7 @@ export async function createWordmarkScene(
       stopWaitingForReveal();
       intersectionObserver.disconnect();
       themeObserver.disconnect();
-      document.fonts.removeEventListener("loadingdone", repaint);
+      document.fonts.removeEventListener("loadingdone", repaintNow);
       container.removeEventListener("pointerenter", onMove);
       container.removeEventListener("pointermove", onMove);
       container.removeEventListener("pointerleave", onLeave);
@@ -738,6 +832,7 @@ export async function createWordmarkScene(
       material.dispose();
       geometry.dispose();
       renderer.dispose();
+      images.forEach((image) => image.close());
     },
   };
 }
