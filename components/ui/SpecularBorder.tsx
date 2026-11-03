@@ -280,7 +280,9 @@ export default function SpecularBorder({
     const canvas = document.createElement("canvas");
     canvas.className = CANVAS;
     canvas.setAttribute("aria-hidden", "true");
+    // Without a GPU the plain border stays; a CPU-drawn shine isn't worth it.
     const gl = canvas.getContext("webgl2", {
+      failIfMajorPerformanceCaveat: true,
       alpha: true,
       premultipliedAlpha: true,
       antialias: false,

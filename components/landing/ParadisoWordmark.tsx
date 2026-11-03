@@ -5,6 +5,7 @@ import type { CSSProperties, MouseEvent, SyntheticEvent } from "react";
 import { fontDisplay } from "@/config/fonts";
 import { gridPosters } from "@/config/posters";
 import { markLandingReady } from "./landing-ready";
+import { hasHardwareWebGL } from "./webgl";
 import type { WordmarkScene } from "./wordmark-scene";
 
 type Letter = {
@@ -75,7 +76,7 @@ export default function ParadisoWordmark() {
     const container = containerRef.current;
     const canvas = canvasRef.current;
     if (!container || !canvas) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !hasHardwareWebGL()) {
       markLandingReady();
       return;
     }

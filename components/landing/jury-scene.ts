@@ -184,7 +184,13 @@ export function startJuryReveal(
   topImg: HTMLImageElement,
   bottomImg: HTMLImageElement,
 ) {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false });
+  // Refuse software WebGL; the CSS crossfade covers it.
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: false,
+    alpha: false,
+    failIfMajorPerformanceCaveat: true,
+  });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.setClearColor(0x000000, 1);
 

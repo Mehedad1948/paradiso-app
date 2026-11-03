@@ -378,7 +378,13 @@ export async function createWordmarkScene(
   if (signal.aborted) images.forEach((image) => image.close());
   signal.throwIfAborted();
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true });
+  // Refuse software WebGL; the CSS reveal is far cheaper than a CPU-drawn scene.
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: false,
+    alpha: true,
+    failIfMajorPerformanceCaveat: true,
+  });
   renderer.setClearColor(0x000000, 0);
 
   const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);

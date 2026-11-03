@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import { hasHardwareWebGL } from "./webgl";
 
 const SIZES = "(max-width: 700px) 100vw, 70vw";
 
@@ -18,7 +19,7 @@ export default function JuryReveal() {
     const topImg = topRef.current;
     const bottomImg = bottomRef.current;
     if (!container || !canvas || !topImg || !bottomImg) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !hasHardwareWebGL()) return;
 
     let cleanup: (() => void) | undefined;
     let cancelled = false;

@@ -40,6 +40,14 @@ const SPLASHES = 12;
 const SPLASH_HOLD = 0.9;
 const SPLASH_FADE = 1.2;
 const SPLASH_LIFE = SPLASH_HOLD + SPLASH_FADE;
+// The film is soft and faint, so it renders below CSS resolution and the
+// browser scales it up; nearly half the pixels for no visible loss.
+const RENDER_SCALE = 0.75;
+// While nothing moves it but its own slow roll, the backdrop draws at half
+// rate; scrolling, the pointer and colour splashes bring back every frame.
+const IDLE_FRAME_MS = 1000 / 30;
+// Long enough for the last splash to finish fading at full rate.
+const ACTIVE_FOR_MS = (SPLASH_LIFE + 0.3) * 1000;
 
 type Wave = [amplitude: number, frequency: number, speed: number, phase: number];
 
@@ -311,7 +319,14 @@ export async function createFilmNegativesScene(
   signal.throwIfAborted();
   const themeSource = canvas.parentElement ?? document.body;
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true });
+  // Refuse software WebGL: without a GPU a full-screen backdrop would keep
+  // the CPU busy every frame. The page reads fine without it.
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: false,
+    alpha: true,
+    failIfMajorPerformanceCaveat: true,
+  });
   renderer.setClearColor(0x000000, 0);
 
   const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, 60);
@@ -487,6 +502,8 @@ export async function createFilmNegativesScene(
   let scrollEased = scroll;
   let rush = 0;
   let lastTime = startTime;
+  let lastRender = 0;
+  let activeUntil = 0;
   let frame = 0;
 
   // Find the frame under the pointer by casting into the ribbons as last
@@ -563,13 +580,17 @@ export async function createFilmNegativesScene(
   };
 
   const tick = (now: number) => {
-    render(now);
     frame = requestAnimationFrame(tick);
+    if (window.scrollY !== scroll || rush > 0.01) activeUntil = now + ACTIVE_FOR_MS;
+    // A little slack so a 60 Hz display reliably lands on every other frame.
+    if (now >= activeUntil && now - lastRender < IDLE_FRAME_MS - 4) return;
+    lastRender = now;
+    render(now);
   };
 
   const resize = () => {
     const { innerWidth, innerHeight } = window;
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_DPR));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_DPR) * RENDER_SCALE);
     renderer.setSize(innerWidth, innerHeight, false);
     camera.aspect = innerWidth / innerHeight;
     camera.updateProjectionMatrix();
@@ -582,6 +603,7 @@ export async function createFilmNegativesScene(
       1 - (event.clientY / window.innerHeight) * 2,
     );
     pointerActive = true;
+    activeUntil = performance.now() + ACTIVE_FOR_MS;
     splashHoveredFrame((performance.now() - startTime) / 1000);
   };
   const onPointerEnd = (event: PointerEvent) => {

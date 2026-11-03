@@ -549,6 +549,13 @@
 .nav-progress[data-phase="idle"] .nav-progress-film {
   transition: none;
 }
+/* Hidden while idle, so stop the loops too: otherwise they repaint and
+   re-layer every frame on every page, for a bar nobody can see. */
+.nav-progress[data-phase="idle"] .nav-progress-sheen::before,
+.nav-progress[data-phase="idle"] .nav-progress-head,
+.nav-progress[data-phase="idle"] .nav-progress-film {
+  animation: none;
+}
 @keyframes nav-sheen {
   from { transform: translateX(-120%); }
   to { transform: translateX(380%); }

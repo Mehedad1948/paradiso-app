@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { onLandingRevealed } from "./landing-ready";
+import { hasHardwareWebGL } from "./webgl";
 import type { FilmNegativesScene, FilmScene } from "./film-negatives-scene";
 
 // Sixteen near-consecutive frames per scene, pre-graded and packed 4x4.
@@ -49,7 +50,7 @@ export default function FilmNegatives() {
   // and for the browser to go idle; the wordmark gets the network and GPU first.
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !hasHardwareWebGL()) return;
     let scene: FilmNegativesScene | undefined;
     const controller = new AbortController();
     scenesRef.current ??= pickScenes();
